@@ -1,12 +1,15 @@
 package io.github.sinri.keel.facade;
 
 import io.github.sinri.keel.facade.cluster.KeelClusterKit;
+import io.github.sinri.keel.facade.configuration.KeelConfigElement;
 import io.github.sinri.keel.helper.KeelHelpersInterface;
 import io.github.sinri.keel.logger.KeelLogLevel;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.vertx.core.*;
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
 import io.vertx.core.spi.cluster.ClusterManager;
 
 import javax.annotation.Nonnull;
@@ -19,7 +22,10 @@ import java.util.Objects;
 public class KeelInstance implements KeelHelpersInterface, KeelClusterKit {
     public static KeelInstance Keel = new KeelInstance();
 
-    private final @Nonnull KeelConfiguration configuration;
+    /**
+     * @since 3.2.3
+     */
+    private final @Nonnull KeelConfigElement configuration;
     private @Nullable Vertx vertx;
     private @Nullable ClusterManager clusterManager;
     /**
@@ -29,19 +35,23 @@ public class KeelInstance implements KeelHelpersInterface, KeelClusterKit {
     private KeelEventLogger eventLogger;
 
     private KeelInstance() {
-        this.configuration = KeelConfiguration.createFromJsonObject(new JsonObject());
+        this.configuration = new KeelConfigElement("");
         this.eventLogger = KeelIssueRecordCenter.outputCenter().generateEventLogger("Keel");
         this.eventLogger.setVisibleLevel(KeelLogLevel.WARNING);
     }
 
     @Nonnull
-    public KeelConfiguration getConfiguration() {
+    public KeelConfigElement getConfiguration() {
         return configuration;
     }
 
     public @Nullable String config(@Nonnull String dotJoinedKeyChain) {
         String[] split = dotJoinedKeyChain.split("\\.");
-        return getConfiguration().readString(split);
+        KeelConfigElement keelConfigElement = this.configuration.extract(split);
+        if (keelConfigElement == null) {
+            return null;
+        }
+        return keelConfigElement.getValueAsString();
     }
 
     public @Nonnull Vertx getVertx() {
@@ -123,7 +133,7 @@ public class KeelInstance implements KeelHelpersInterface, KeelClusterKit {
         return this;
     }
 
-    public Future<Void> gracefullyClose(@Nonnull Handler<Promise<Void>> promiseHandler) {
+    public Future<Void> gracefullyClose(@Nonnull io.vertx.core.Handler<Promise<Void>> promiseHandler) {
         Promise<Void> promise = Promise.promise();
         promiseHandler.handle(promise);
         return promise.future().compose(v -> getVertx().close());

@@ -1,9 +1,10 @@
 package io.github.sinri.keel.elasticsearch;
 
-import io.github.sinri.keel.facade.KeelConfiguration;
+import io.github.sinri.keel.facade.configuration.KeelConfigElement;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Objects;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
@@ -11,9 +12,9 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 /**
  * @since 3.0.7
  */
-public class ElasticSearchConfig extends KeelConfiguration {
+public class ElasticSearchConfig extends KeelConfigElement {
 
-    public ElasticSearchConfig(KeelConfiguration configuration) {
+    public ElasticSearchConfig(KeelConfigElement configuration) {
         super(configuration);
     }
 
@@ -34,25 +35,23 @@ public class ElasticSearchConfig extends KeelConfiguration {
      */
 
     public String username() {
-        return readString("username");
+        return readString("username", null);
     }
 
     public String password() {
-        return readString("password");
+        return readString("password", null);
     }
 
     public @Nonnull String clusterHost() {
-        return Objects.requireNonNull(readString("cluster", "host"));
+        return Objects.requireNonNull(readString(List.of("cluster", "host"), null));
     }
 
     public int clusterPort() {
-        String s = readString("cluster", "port");
-        return Integer.parseInt(Objects.requireNonNullElse(s, "9200"));
+        return readInteger(List.of("cluster", "port"), 9200);
     }
 
     public @Nonnull String clusterScheme() {
-        String s = readString("cluster", "scheme");
-        return Objects.requireNonNullElse(s, "http");
+        return Objects.requireNonNull(readString(List.of("cluster", "scheme"), "http"));
     }
 
     public @Nonnull String clusterApiUrl(@Nonnull String endpoint) {
@@ -60,6 +59,6 @@ public class ElasticSearchConfig extends KeelConfiguration {
     }
 
     public @Nullable String opaqueId() {
-        return readString("opaqueId");
+        return readString("opaqueId", null);
     }
 }

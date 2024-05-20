@@ -8,6 +8,7 @@ import java.util.Calendar;
 
 /**
  * @since 3.2.4
+ * @since 3.2.5 Used in KeelSundial
  */
 public class KeelSundialVerticle extends KeelVerticleImplPure {
     private final KeelSundialPlan sundialPlan;
@@ -19,7 +20,7 @@ public class KeelSundialVerticle extends KeelVerticleImplPure {
     }
 
     @Override
-    public void start() throws Exception {
+    protected void startAsPureKeelVerticle() {
         Future.succeededFuture()
                 .compose(v -> {
                     return sundialPlan.execute(now);

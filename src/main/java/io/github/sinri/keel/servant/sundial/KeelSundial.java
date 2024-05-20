@@ -5,7 +5,9 @@ import io.github.sinri.keel.facade.async.KeelAsyncKit;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.verticles.KeelVerticleImplWithEventLogger;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.ThreadingModel;
 import io.vertx.core.json.JsonObject;
 
 import java.util.*;
@@ -30,8 +32,7 @@ public abstract class KeelSundial extends KeelVerticleImplWithEventLogger {
     }
 
     @Override
-
-    public void start() throws Exception {
+    protected void startAsKeelVerticle() {
         int delaySeconds = 61 - KeelCronExpression.parseCalenderToElements(Calendar.getInstance()).second;
         this.timerID = Keel.getVertx().setPeriodic(delaySeconds * 1000L, 60_000L, timerID -> {
             handleEveryMinute(Calendar.getInstance());
@@ -48,7 +49,11 @@ public abstract class KeelSundial extends KeelVerticleImplWithEventLogger {
                         .put("plan_cron", plan.cronExpression())
                         .put("now", parsedCalenderElements.toString())
                 );
-                plan.execute(now);
+
+                // since 3.2.5
+                new KeelSundialVerticle(plan, now).deployMe(new DeploymentOptions()
+                        .setThreadingModel(ThreadingModel.WORKER)
+                );
             } else {
                 getLogger().debug("Sundial Plan Not Match", new JsonObject()
                         .put("plan_key", plan.key())

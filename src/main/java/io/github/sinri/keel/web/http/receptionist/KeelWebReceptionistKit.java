@@ -4,14 +4,16 @@ import io.github.sinri.keel.web.http.ApiMeta;
 import io.github.sinri.keel.web.http.prehandler.KeelPlatformHandler;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.*;
-import org.reflections.Reflections;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -20,9 +22,12 @@ import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
 
 /**
  * @param <R> class of a subclass of KeelWebReceptionist
+ * @see io.github.sinri.keel.web.http.receptionist.KeelWebReceptionistLoader
  * @since 2.9.2
  * @since 3.0.0 TEST PASSED
+ * @deprecated since 3.2.13, use `KeelWebReceptionistLoader` instead.
  */
+@Deprecated(since = "3.2.13")
 public class KeelWebReceptionistKit<R extends KeelWebReceptionist> {
     private final Router router;
     private final Class<R> classOfReceptionist;
@@ -53,10 +58,15 @@ public class KeelWebReceptionistKit<R extends KeelWebReceptionist> {
         this.router = router;
     }
 
+    /**
+     * Note: MAIN and TEST scopes are seperated.
+     *
+     * @param packageName the name of the package where the classes extending `R` are.
+     * @since 3.2.11 Removed org.reflections:reflections, now self-implemented.
+     */
     public void loadPackage(String packageName) {
-        Reflections reflections = new Reflections(packageName);
-        Set<Class<? extends R>> allClasses = reflections.getSubTypesOf(classOfReceptionist);
-
+        Set<Class<? extends R>> allClasses = Keel.reflectionHelper()
+                .seekClassDescendantsInPackage(packageName, classOfReceptionist);
         try {
             allClasses.forEach(this::loadClass);
         } catch (Exception e) {
@@ -65,10 +75,29 @@ public class KeelWebReceptionistKit<R extends KeelWebReceptionist> {
     }
 
     public void loadClass(Class<? extends R> c) {
-        ApiMeta apiMeta = KeelHelpers.reflectionHelper().getAnnotationOfClass(c, ApiMeta.class);
-        if (apiMeta == null) return;
+        ApiMeta[] apiMetaArray = KeelHelpers.reflectionHelper().getAnnotationsOfClass(c, ApiMeta.class);
+        for (var apiMeta : apiMetaArray) {
+            loadClass(c, apiMeta);
+        }
+    }
 
-        Keel.getLogger().debug(r -> r.classification(getClass().getName(), "loadClass").message("Loading " + c.getName()));
+    private void loadClass(Class<? extends R> c, @Nonnull ApiMeta apiMeta) {
+        Keel.getLogger().info(r -> r
+                .classification(getClass().getName(), "loadClass")
+                .message("Loading " + c.getName())
+                .context(j -> {
+                    JsonArray methods = new JsonArray();
+                    Arrays.stream(apiMeta.allowMethods()).forEach(methods::add);
+                    j.put("allowMethods", methods);
+                    j.put("routePath", apiMeta.routePath());
+                    if (apiMeta.isDeprecated()) {
+                        j.put("isDeprecated", true);
+                    }
+                    if (apiMeta.remark() != null && !apiMeta.remark().isEmpty()) {
+                        j.put("remark", apiMeta.remark());
+                    }
+                })
+        );
 
         Constructor<? extends R> receptionistConstructor;
         try {

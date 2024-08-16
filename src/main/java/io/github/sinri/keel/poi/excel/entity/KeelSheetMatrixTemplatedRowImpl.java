@@ -35,9 +35,12 @@ public class KeelSheetMatrixTemplatedRowImpl implements KeelSheetMatrixTemplated
         return this.rawRow.get(Objects.requireNonNull(columnIndex));
     }
 
+    /**
+     * @since 3.2.16 Fix bug
+     */
     @Override
     public List<String> getRawRow() {
-        return getRawRow();
+        return rawRow;
     }
 
     @Override

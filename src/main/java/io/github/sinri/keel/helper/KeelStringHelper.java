@@ -5,6 +5,9 @@ import io.vertx.core.buffer.Buffer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
@@ -376,5 +379,43 @@ public class KeelStringHelper {
             x.set(x.get().replace(k, v));
         });
         return x.get();
+    }
+
+    /**
+     * @see <a href="https://github.com/sinri/NyaCode/blob/master/javascript/NyaCode.js">NyaCode JS Impl</a>
+     * @since 3.2.14
+     */
+    private static final String NyaCodeDict = "-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz.";
+    /**
+     * @since 3.2.15 PR from yhzdys
+     */
+    private static final char[] NyaCodeDictChars = NyaCodeDict.toCharArray();
+
+    /**
+     * @since 3.2.14
+     * @since 3.2.15 PR from yhzdys
+     */
+    public String encodeToNyaCode(@Nonnull String raw) {
+        String encoded = URLEncoder.encode(raw, StandardCharsets.UTF_8);
+        int i = 0;
+        char[] chars = encoded.toCharArray(), buffer = new char[chars.length << 1];
+        for (char c : chars) {
+            buffer[i++] = NyaCodeDictChars[(c & 0B11000000) >> 6];
+            buffer[i++] = NyaCodeDictChars[c & 0B00111111];
+        }
+        return new String(buffer);
+    }
+
+    /**
+     * @since 3.2.14
+     * @since 3.2.15 PR from yhzdys
+     */
+    public String decodeFromNyaCode(@Nonnull String code) {
+        int idx = 0;
+        char[] chars = code.toCharArray(), buffer = new char[chars.length >> 1];
+        for (int i = 0; i < chars.length; ) {
+            buffer[idx++] = (char) (NyaCodeDict.indexOf(chars[i++]) << 6 | NyaCodeDict.indexOf(chars[i++]));
+        }
+        return URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8);
     }
 }

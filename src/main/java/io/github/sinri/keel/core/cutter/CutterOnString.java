@@ -42,7 +42,7 @@ public class CutterOnString implements Cutter<String> {
      * @since 3.2.15
      */
     @Override
-    public Future<Void> end() {
+    public final Future<Void> end() {
         if (!buffer.isEmpty()) {
             List<String> list = new ArrayList<>();
             if (buffer.contains("\n\n")) {

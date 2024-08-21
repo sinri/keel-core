@@ -22,6 +22,23 @@ public class UnmodifiableJsonifiableEntityImpl implements UnmodifiableJsonifiabl
     }
 
     /**
+     * @since 3.2.17
+     */
+    @Override
+    public String toString() {
+        return jsonObject.toString();
+    }
+
+    /**
+     * @since 3.2.17
+     */
+    @Nonnull
+    @Override
+    public JsonObject cloneAsJsonObject() {
+        return new JsonObject(toString());
+    }
+
+    /**
      * @since 2.7
      * @since 2.8 If java.lang.ClassCastException occurred, return null instead.
      * @since 3.1.10 make it abstract.

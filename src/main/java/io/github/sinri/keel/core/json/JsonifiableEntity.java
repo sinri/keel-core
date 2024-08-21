@@ -26,6 +26,9 @@ public interface JsonifiableEntity<E> extends UnmodifiableJsonifiableEntity, Clu
     @Nonnull
     E reloadDataFromJsonObject(@Nonnull JsonObject jsonObject);
 
+    @Override
+    String toString();
+
     /**
      * @since 2.7
      * @since 2.8 If java.lang.ClassCastException occurred, return null instead.

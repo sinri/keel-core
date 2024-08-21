@@ -73,4 +73,10 @@ abstract public class JsonValueScheme<T> implements JsonElementScheme<T> {
     public T getDigested() {
         return digested;
     }
+
+
+    @Override
+    public String toString() {
+        return toJsonObject().toString();
+    }
 }

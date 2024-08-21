@@ -38,6 +38,15 @@ public class SimpleJsonifiableEntity implements JsonifiableEntity<SimpleJsonifia
     }
 
     /**
+     * @since 3.2.17
+     */
+    @Nonnull
+    @Override
+    public JsonObject cloneAsJsonObject() {
+        return new JsonObject(toString());
+    }
+
+    /**
      * @since 2.8
      */
     @Override

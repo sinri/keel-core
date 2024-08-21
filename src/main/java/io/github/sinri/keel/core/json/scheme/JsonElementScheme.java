@@ -3,6 +3,8 @@ package io.github.sinri.keel.core.json.scheme;
 import io.github.sinri.keel.core.json.JsonifiableEntity;
 import io.vertx.core.json.JsonObject;
 
+import javax.annotation.Nonnull;
+
 /**
  * @since 2.7
  */
@@ -38,6 +40,15 @@ public interface JsonElementScheme<T> extends JsonifiableEntity<JsonElementSchem
     void digest(T object) throws JsonSchemeMismatchException;
 
     T getDigested();
+
+    /**
+     * @since 3.2.17
+     */
+    @Nonnull
+    @Override
+    default JsonObject cloneAsJsonObject() {
+        return new JsonObject(toString());
+    }
 
     enum JsonElementSchemeType {
         JsonObject,

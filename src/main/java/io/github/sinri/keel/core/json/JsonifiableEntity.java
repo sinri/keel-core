@@ -127,4 +127,12 @@ public interface JsonifiableEntity<E> extends UnmodifiableJsonifiableEntity, Clu
     static SimpleJsonifiableEntity wrap(@Nonnull JsonObject jsonObject) {
         return new SimpleJsonifiableEntity(jsonObject);
     }
+
+    /**
+     * @since 4.0.0
+     */
+    @Override
+    default SimpleJsonifiableEntity copy() {
+        return new SimpleJsonifiableEntity(new JsonObject(toString()));
+    }
 }

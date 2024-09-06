@@ -52,4 +52,11 @@ public class RedisKit implements RedisApiMixin, RedisScalarMixin, RedisListMixin
             return Future.succeededFuture(RedisAPI.api(redisConnectionRef.get()));
         }
     }
+
+    /**
+     * @since 3.2.18
+     */
+    public void close() {
+        this.client.close();
+    }
 }

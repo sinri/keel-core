@@ -104,6 +104,9 @@ public interface ESApiMixin {
 //                                );
 //                    });
                     return Future.succeededFuture(resp);
+                })
+                .andThen(ar -> {
+                    webClient.close();
                 });
     }
 

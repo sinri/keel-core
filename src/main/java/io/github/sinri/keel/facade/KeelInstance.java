@@ -11,10 +11,12 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.core.spi.cluster.ClusterManager;
+import io.vertx.ext.web.client.WebClient;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * @since 3.1.0
@@ -33,6 +35,8 @@ public class KeelInstance implements KeelHelpersInterface, KeelClusterKit {
      */
     @Nonnull
     private KeelEventLogger eventLogger;
+
+    private WebClient webClient;
 
     private KeelInstance() {
         this.configuration = new KeelConfigElement("");
@@ -133,10 +137,31 @@ public class KeelInstance implements KeelHelpersInterface, KeelClusterKit {
         return this;
     }
 
+    /**
+     * @since 3.2.18
+     */
+    public <T> Future<T> useWebClient(Function<WebClient, Future<T>> usage) {
+        return Future.succeededFuture()
+                .compose(v -> {
+                    if (webClient == null) {
+                        synchronized (this) {
+                            webClient = WebClient.create(getVertx());
+                        }
+                    }
+                    return usage.apply(webClient);
+                });
+    }
+
     public Future<Void> gracefullyClose(@Nonnull io.vertx.core.Handler<Promise<Void>> promiseHandler) {
         Promise<Void> promise = Promise.promise();
         promiseHandler.handle(promise);
-        return promise.future().compose(v -> getVertx().close());
+        return promise.future()
+                .andThen(ar -> {
+                    if (webClient != null) {
+                        webClient.close();
+                    }
+                })
+                .compose(v -> getVertx().close());
     }
 
     public Future<Void> close() {

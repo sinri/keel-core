@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Supplier;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
@@ -42,34 +41,33 @@ public class CutterOnString implements Cutter<String> {
      * @since 3.2.15
      */
     @Override
-    public final Future<Void> end() {
-        if (!buffer.isEmpty()) {
-            List<String> list = new ArrayList<>();
-            if (buffer.contains("\n\n")) {
-                String[] split = buffer.split("\n\n");
-                Collections.addAll(list, split);
-            } else {
-                list.add(buffer);
-            }
-            return KeelAsyncKit.iterativelyCall(list, s -> {
-                if (componentHandler != null && s != null) {
-                    componentHandler.handle(s);
+    public Future<Void> end() {
+        return KeelAsyncKit.exclusivelyCall(this.cutterId, () -> {
+            if (!buffer.isEmpty()) {
+                List<String> list = new ArrayList<>();
+                if (buffer.contains("\n\n")) {
+                    String[] split = buffer.split("\n\n");
+                    Collections.addAll(list, split);
+                } else {
+                    list.add(buffer);
                 }
+                return KeelAsyncKit.iterativelyCall(list, s -> {
+                    if (componentHandler != null && s != null) {
+                        componentHandler.handle(s);
+                    }
+                    return Future.succeededFuture();
+                });
+            } else {
                 return Future.succeededFuture();
-            });
-        } else {
-            return Future.succeededFuture();
-        }
+            }
+        });
     }
 
     @Override
     public void handle(Buffer piece) {
-        KeelAsyncKit.exclusivelyCall(this.cutterId, (Supplier<Future<Void>>) () -> {
+        KeelAsyncKit.exclusivelyCall(this.cutterId, () -> {
                     buffer += piece.toString(StandardCharsets.UTF_8);
-                    return Future.succeededFuture();
-                })
-                .onSuccess(v -> {
-                    cut();
+                    return cutOnceFromBuffer();
                 })
                 .onFailure(throwable -> {
                     Keel.getLogger().exception(throwable, "Cutter::handle ERROR");
@@ -78,10 +76,13 @@ public class CutterOnString implements Cutter<String> {
 
     /**
      * If there are double NewLine chars, cut from head to the DNL and send to componentHandler, and the left part left.
+     *
+     * @since 3.2.18 This method should be wrapped in lock
      */
-    private Future<Void> cut() {
+    private Future<Void> cutOnceFromBuffer() {
         AtomicReference<String> component = new AtomicReference<>();
-        return KeelAsyncKit.exclusivelyCall(this.cutterId, (Supplier<Future<Void>>) () -> {
+        return Future.succeededFuture()
+                .compose(v -> {
                     if (buffer.length() > ptr) {
                         var rest = buffer.substring(ptr);
                         int delimiterIndex = rest.indexOf("\n\n");

@@ -19,14 +19,15 @@ import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
 
 /**
  * @since 3.2.13
+ * @since 3.2.18 from class to interface.
  */
-public class KeelWebReceptionistLoader {
+public interface KeelWebReceptionistLoader {
     /**
      * Note: MAIN and TEST scopes are seperated.
      *
      * @param packageName the name of the package where the classes extending `R` are.
      */
-    public static <R extends KeelWebReceptionist> void loadPackage(Router router, String packageName, Class<R> classOfReceptionist) {
+    static <R extends KeelWebReceptionist> void loadPackage(Router router, String packageName, Class<R> classOfReceptionist) {
         Set<Class<? extends R>> allClasses = Keel.reflectionHelper()
                 .seekClassDescendantsInPackage(packageName, classOfReceptionist);
 
@@ -37,7 +38,7 @@ public class KeelWebReceptionistLoader {
         }
     }
 
-    public static <R extends KeelWebReceptionist> void loadClass(Router router, Class<? extends R> c) {
+    static <R extends KeelWebReceptionist> void loadClass(Router router, Class<? extends R> c) {
         ApiMeta[] apiMetaArray = KeelHelpers.reflectionHelper().getAnnotationsOfClass(c, ApiMeta.class);
         for (var apiMeta : apiMetaArray) {
             loadClass(router, c, apiMeta);

@@ -7,9 +7,7 @@ import io.vertx.core.buffer.Buffer;
 
 import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -20,8 +18,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * @since 3.2.18
  */
 public class CutterOnStringBasedOnBytes implements Cutter<String> {
-    final Queue<Byte> writeBuffer = new LinkedList<>();
-    final List<Byte> readBuffer = new LinkedList<>();
+    final Queue<Buffer> writeBuffer = new LinkedList<>();
+    //final List<Byte> readBuffer = new LinkedList<>();
+    private Buffer readBuffer = Buffer.buffer();
     private final ReentrantReadWriteLock lock;
     private Handler<String> componentHandler;
     private int retainRepeat = 5;
@@ -56,7 +55,7 @@ public class CutterOnStringBasedOnBytes implements Cutter<String> {
         lock.readLock().lock();
         try {
             v.handle(null);
-        } catch (Throwable e) {
+        } finally {
             lock.readLock().unlock();
             //e.printStackTrace();
         }
@@ -66,7 +65,7 @@ public class CutterOnStringBasedOnBytes implements Cutter<String> {
         lock.writeLock().lock();
         try {
             v.handle(null);
-        } catch (Throwable e) {
+        } finally {
             lock.writeLock().unlock();
             //e.printStackTrace();
         }
@@ -127,12 +126,10 @@ public class CutterOnStringBasedOnBytes implements Cutter<String> {
 
         AtomicBoolean containsDelimiter = new AtomicBoolean(false);
         doWriteExclusively(v -> {
-            byte[] bytes = piece.getBytes();
-            for (byte b : bytes) {
-                writeBuffer.add(b);
-            }
+            writeBuffer.add(piece);
 
-            boolean contains = new String(bytes, StandardCharsets.UTF_8).contains(getDelimiter());
+            String string = piece.toString(StandardCharsets.UTF_8);
+            boolean contains = string.contains(getDelimiter());
             containsDelimiter.set(contains);
         });
 
@@ -163,21 +160,27 @@ public class CutterOnStringBasedOnBytes implements Cutter<String> {
     private String cutWithDelimiter(boolean asTail) {
         if (!writeBuffer.isEmpty()) {
             while (true) {
-                Byte b = writeBuffer.poll();
-                if (b == null) break;
-                readBuffer.add(b);
+                Buffer buffer = writeBuffer.poll();
+                if (buffer == null) break;
+//                byte[] bytes = buffer.getBytes();
+//                for (byte b : bytes) {
+//                    readBuffer.add(b);
+//                }
+                readBuffer.appendBuffer(buffer);
             }
         }
 
-        if (readBuffer.isEmpty()) {
+        if (readBuffer.length() == 0) {
             return null;
         }
 
-        byte[] bytes = new byte[readBuffer.size()];
-        for (int i = 0; i < readBuffer.size(); i++) {
-            bytes[i] = readBuffer.get(i);
-        }
-        var s = new String(bytes, StandardCharsets.UTF_8);
+//        byte[] bytes = new byte[readBuffer.size()];
+//        for (int i = 0; i < readBuffer.size(); i++) {
+//            bytes[i] = readBuffer.get(i);
+//        }
+//        var s = new String(bytes, StandardCharsets.UTF_8);
+
+        var s = readBuffer.toString(StandardCharsets.UTF_8);
 
         int place = s.indexOf(getDelimiter());
         if (place == -1) {
@@ -187,14 +190,20 @@ public class CutterOnStringBasedOnBytes implements Cutter<String> {
 
         String head = s.substring(0, place);
 
-        List<Byte> subList = readBuffer.subList(
+//        List<Byte> subList = readBuffer.subList(
+//                head.getBytes(StandardCharsets.UTF_8).length
+//                        + getDelimiter().getBytes(StandardCharsets.UTF_8).length,
+//                readBuffer.size()
+//        );
+//        var tempList = new ArrayList<>(subList);
+//        readBuffer.clear();
+//        readBuffer.addAll(tempList);
+
+        readBuffer = readBuffer.getBuffer(
                 head.getBytes(StandardCharsets.UTF_8).length
                         + getDelimiter().getBytes(StandardCharsets.UTF_8).length,
-                readBuffer.size()
+                readBuffer.length()
         );
-        var tempList = new ArrayList<>(subList);
-        readBuffer.clear();
-        readBuffer.addAll(tempList);
 
         return head;
     }

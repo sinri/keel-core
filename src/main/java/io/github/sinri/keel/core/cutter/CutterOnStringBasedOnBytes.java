@@ -81,23 +81,30 @@ public class CutterOnStringBasedOnBytes implements Cutter<String> {
         return KeelAsyncKit.repeatedlyCall(routineResult -> {
                     return KeelAsyncKit.sleep(this.retainTime)
                             .compose(v -> {
-                                doReadExclusively(vv -> {
-                                    var s = cutWithDelimiter(false);
-                                    chunkRef.set(s);
-                                });
-                                var s = chunkRef.get();
-                                if (s != null) {
-                                    if (!s.isEmpty() && !s.isBlank()) {
-                                        handleComponent(s);
-                                    }
-                                }
-                                if (writeBuffer.isEmpty()) {
-                                    counter.decrementAndGet();
-                                    if (counter.get() <= 0) {
-                                        routineResult.stop();
-                                    }
-                                }
-                                return Future.succeededFuture();
+                                return KeelAsyncKit.repeatedlyCall(routineResultForRead -> {
+                                            doReadExclusively(vv -> {
+                                                var s = cutWithDelimiter(false);
+                                                chunkRef.set(s);
+                                            });
+                                            var s = chunkRef.get();
+                                            if (s != null) {
+                                                if (!s.isEmpty() && !s.isBlank()) {
+                                                    handleComponent(s);
+                                                }
+                                            } else {
+                                                routineResultForRead.stop();
+                                            }
+                                            return Future.succeededFuture();
+                                        })
+                                        .compose(vv -> {
+                                            if (writeBuffer.isEmpty()) {
+                                                counter.decrementAndGet();
+                                                if (counter.get() <= 0) {
+                                                    routineResult.stop();
+                                                }
+                                            }
+                                            return Future.succeededFuture();
+                                        });
                             });
                 })
                 .compose(v -> {

@@ -1,34 +1,44 @@
 package io.github.sinri.keel.core.cutter;
 
-import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.facade.async.KeelAsyncKit;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 
+import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
- * @since 3.0.19
+ * @since 3.2.18 greatly changed.
  */
-@TechnicalPreview(since = "3.0.19")
 public class CutterOnString implements Cutter<String> {
-    private final String cutterId;
-    private String buffer;
-    private int ptr = 0;
-
+    final Queue<Buffer> writeBuffer = new LinkedList<>();
+    private final ReentrantReadWriteLock lock;
+    private Buffer readBuffer = Buffer.buffer();
     private Handler<String> componentHandler;
+    private int retainRepeat = 5;
+    private long retainTime = 100L;
 
     public CutterOnString() {
-        this.cutterId = "Cutter::" + UUID.randomUUID();
-        this.buffer = "";
+        lock = new ReentrantReadWriteLock(true);
+    }
+
+    @Override
+    public CutterOnString setRetainRepeat(int retainRepeat) {
+        this.retainRepeat = retainRepeat;
+        return this;
+    }
+
+    @Override
+    public CutterOnString setRetainTime(long retainTime) {
+        this.retainTime = retainTime;
+        return this;
     }
 
     @Override
@@ -37,76 +47,144 @@ public class CutterOnString implements Cutter<String> {
         return this;
     }
 
-    /**
-     * @since 3.2.15
-     */
+    private void handleComponent(String s) {
+        //Keel.getLogger().info("CutterOnStringBasedOnBytes.handleComponent: \n$$$" + s + "$$$\n");
+        componentHandler.handle(s);
+    }
+
+    private void doReadExclusively(Handler<Void> v) {
+        lock.readLock().lock();
+        try {
+            v.handle(null);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    private void doWriteExclusively(Handler<Void> v) {
+        lock.writeLock().lock();
+        try {
+            v.handle(null);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
     @Override
     public Future<Void> end() {
-        return KeelAsyncKit.exclusivelyCall(this.cutterId, () -> {
-            if (!buffer.isEmpty()) {
-                List<String> list = new ArrayList<>();
-                if (buffer.contains("\n\n")) {
-                    String[] split = buffer.split("\n\n");
-                    Collections.addAll(list, split);
-                } else {
-                    list.add(buffer);
-                }
-                return KeelAsyncKit.iterativelyCall(list, s -> {
-                    if (componentHandler != null && s != null) {
-                        componentHandler.handle(s);
+        //Keel.getLogger().info("into io.github.sinri.keel.core.cutter.CutterOnStringBasedOnBytes.end");
+
+        AtomicReference<String> chunkRef = new AtomicReference<>();
+        AtomicInteger counter = new AtomicInteger(this.retainRepeat);
+        return KeelAsyncKit.repeatedlyCall(routineResult -> {
+                    return KeelAsyncKit.sleep(this.retainTime)
+                            .compose(v -> {
+                                return KeelAsyncKit.repeatedlyCall(routineResultForRead -> {
+                                            doReadExclusively(vv -> {
+                                                var s = cutWithDelimiter(false);
+                                                chunkRef.set(s);
+                                            });
+                                            var s = chunkRef.get();
+                                            if (s != null) {
+                                                if (!s.isEmpty() && !s.isBlank()) {
+                                                    handleComponent(s);
+                                                }
+                                            } else {
+                                                routineResultForRead.stop();
+                                            }
+                                            return Future.succeededFuture();
+                                        })
+                                        .compose(vv -> {
+                                            if (writeBuffer.isEmpty()) {
+                                                counter.decrementAndGet();
+                                                if (counter.get() <= 0) {
+                                                    routineResult.stop();
+                                                }
+                                            }
+                                            return Future.succeededFuture();
+                                        });
+                            });
+                })
+                .compose(v -> {
+                    doReadExclusively(vv -> {
+                        var s = cutWithDelimiter(true);
+                        chunkRef.set(s);
+                    });
+                    var s = chunkRef.get();
+                    if (s != null && !s.isEmpty() && !s.isBlank()) {
+                        handleComponent(s);
                     }
+                    //Keel.getLogger().info("finish io.github.sinri.keel.core.cutter.CutterOnStringBasedOnBytes.end");
                     return Future.succeededFuture();
                 });
-            } else {
-                return Future.succeededFuture();
-            }
-        });
     }
 
     @Override
     public void handle(Buffer piece) {
-        KeelAsyncKit.exclusivelyCall(this.cutterId, () -> {
-                    buffer += piece.toString(StandardCharsets.UTF_8);
-                    return cutOnceFromBuffer();
-                })
-                .onFailure(throwable -> {
-                    Keel.getLogger().exception(throwable, "Cutter::handle ERROR");
-                });
+        //Keel.getLogger().info("into io.github.sinri.keel.core.cutter.CutterOnStringBasedOnBytes.handle");
+
+        AtomicBoolean containsDelimiter = new AtomicBoolean(false);
+        doWriteExclusively(v -> {
+            writeBuffer.add(piece);
+
+            String string = piece.toString(StandardCharsets.UTF_8);
+            boolean contains = string.contains(getDelimiter());
+            containsDelimiter.set(contains);
+        });
+
+        AtomicReference<String> chunkRef = new AtomicReference<>();
+        doReadExclusively(v -> {
+            if (containsDelimiter.get()) {
+                String chunk = cutWithDelimiter(false);
+                chunkRef.set(chunk);
+            }
+        });
+
+        var s = chunkRef.get();
+        if (s != null && !s.isEmpty() && !s.isBlank()) {
+            handleComponent(s);
+        }
+
+        //Keel.getLogger().info("stop io.github.sinri.keel.core.cutter.CutterOnStringBasedOnBytes.handle");
+    }
+
+    public String getDelimiter() {
+        return "\n\n";
     }
 
     /**
-     * If there are double NewLine chars, cut from head to the DNL and send to componentHandler, and the left part left.
-     *
-     * @since 3.2.18 This method should be wrapped in lock
+     * This method is run in synchronized(buffer) block.
      */
-    private Future<Void> cutOnceFromBuffer() {
-        AtomicReference<String> component = new AtomicReference<>();
-        return Future.succeededFuture()
-                .compose(v -> {
-                    if (buffer.length() > ptr) {
-                        var rest = buffer.substring(ptr);
-                        int delimiterIndex = rest.indexOf("\n\n");
-                        if (delimiterIndex >= 0) {
-                            component.set(rest.substring(0, delimiterIndex));
-                            ptr += delimiterIndex + 2;
+    @Nullable
+    private String cutWithDelimiter(boolean asTail) {
+        if (!writeBuffer.isEmpty()) {
+            while (true) {
+                Buffer buffer = writeBuffer.poll();
+                if (buffer == null) break;
+                readBuffer.appendBuffer(buffer);
+            }
+        }
 
-                            buffer = buffer.substring(ptr);
-                            ptr = 0;
-                        }
-                    }
-                    return Future.succeededFuture();
-                })
-                .compose(done -> {
-                    if (componentHandler != null && component.get() != null) {
-                        componentHandler.handle(component.get());
-                    }
-                    return Future.succeededFuture();
-                })
-                .onFailure(throwable -> {
-                    Keel.getLogger().exception(throwable, "Cutter::cut ERROR");
-                })
-                .compose(v -> {
-                    return Future.succeededFuture();
-                });
+        if (readBuffer.length() == 0) {
+            return null;
+        }
+
+        var s = readBuffer.toString(StandardCharsets.UTF_8);
+
+        int place = s.indexOf(getDelimiter());
+        if (place == -1) {
+            if (asTail) return s;
+            else return null;
+        }
+
+        String head = s.substring(0, place);
+
+        readBuffer = readBuffer.getBuffer(
+                head.getBytes(StandardCharsets.UTF_8).length
+                        + getDelimiter().getBytes(StandardCharsets.UTF_8).length,
+                readBuffer.length()
+        );
+
+        return head;
     }
 }

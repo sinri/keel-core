@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.cutter;
 
-import io.github.sinri.keel.core.TechnicalPreview;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
@@ -11,8 +10,8 @@ import io.vertx.core.buffer.Buffer;
  *
  * @param <T> The type of the cut entity as component of a stream holds.
  * @since 3.0.19
+ * @since 3.2.18 Add retain functions.
  */
-@TechnicalPreview(since = "3.0.19")
 public interface Cutter<T> {
     /**
      * Set the handler for the cut and parsed component.
@@ -33,4 +32,14 @@ public interface Cutter<T> {
      * @param piece the stream recently incoming buffer.
      */
     void handle(Buffer piece);
+
+    /**
+     * @since 3.2.18
+     */
+    CutterOnString setRetainRepeat(int retainRepeat);
+
+    /**
+     * @since 3.2.18
+     */
+    CutterOnString setRetainTime(long retainTime);
 }

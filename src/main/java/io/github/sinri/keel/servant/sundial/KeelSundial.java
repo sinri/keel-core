@@ -7,6 +7,7 @@ import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.verticles.KeelVerticleImplWithEventLogger;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.ThreadingModel;
 import io.vertx.core.json.JsonObject;
 
@@ -32,12 +33,13 @@ public abstract class KeelSundial extends KeelVerticleImplWithEventLogger {
     }
 
     @Override
-    protected void startAsKeelVerticle() {
+    protected void startAsKeelVerticle(Promise<Void> startPromise) {
         int delaySeconds = 61 - KeelCronExpression.parseCalenderToElements(Calendar.getInstance()).second;
         this.timerID = Keel.getVertx().setPeriodic(delaySeconds * 1000L, 60_000L, timerID -> {
             handleEveryMinute(Calendar.getInstance());
             refreshPlans();
         });
+        startPromise.complete();
     }
 
     private void handleEveryMinute(Calendar now) {
@@ -99,11 +101,11 @@ public abstract class KeelSundial extends KeelVerticleImplWithEventLogger {
     abstract protected Future<Collection<KeelSundialPlan>> fetchPlans();
 
     @Override
-    public void stop() throws Exception {
-        super.stop();
+    protected void stopAsKeelVerticle(Promise<Void> stopPromise) {
         if (this.timerID != null) {
             Keel.getVertx().cancelTimer(this.timerID);
         }
+        stopPromise.complete();
     }
 
 }

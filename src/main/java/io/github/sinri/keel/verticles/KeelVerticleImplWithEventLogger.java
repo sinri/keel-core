@@ -30,6 +30,9 @@ abstract public class KeelVerticleImplWithEventLogger extends AbstractVerticle i
         startAsKeelVerticle(startPromise);
     }
 
+    /**
+     * Just do one thing: build event logger.
+     */
     @Override
     public final void start() {
         this.logger = buildEventLogger();
@@ -41,5 +44,28 @@ abstract public class KeelVerticleImplWithEventLogger extends AbstractVerticle i
         startPromise.complete();
     }
 
-    abstract protected void startAsKeelVerticle();
+    @Deprecated(since = "3.2.19")
+    protected void startAsKeelVerticle() {
+        // do nothing
+    }
+
+    /**
+     * Just do nothing.
+     */
+    @Override
+    public final void stop() {
+    }
+
+    @Override
+    public final void stop(Promise<Void> stopPromise) throws Exception {
+        stop();
+        stopAsKeelVerticle(stopPromise);
+    }
+
+    /**
+     * @since 3.2.19
+     */
+    protected void stopAsKeelVerticle(Promise<Void> stopPromise) {
+        stopPromise.complete();
+    }
 }

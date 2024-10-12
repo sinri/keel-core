@@ -48,7 +48,7 @@ abstract public class KeelIntravenousBase<T> extends KeelVerticleImplWithEventLo
     }
 
     @Override
-    protected void startAsKeelVerticle() {
+    protected void startAsKeelVerticle(Promise<Void> startPromise) {
         queueAcceptTask = true;
 
         int configuredBatchSize = getBatchSize();
@@ -93,6 +93,7 @@ abstract public class KeelIntravenousBase<T> extends KeelVerticleImplWithEventLo
                                 });
                     });
         });
+        startPromise.complete();
     }
 
     protected int getBatchSize() {

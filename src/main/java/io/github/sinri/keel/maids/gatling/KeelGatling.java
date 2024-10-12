@@ -42,12 +42,14 @@ public class KeelGatling extends KeelVerticleImplWithEventLogger {
     }
 
     @Override
-    protected void startAsKeelVerticle() {
+    protected void startAsKeelVerticle(Promise<Void> startPromise) {
         barrelUsed.set(0);
         KeelAsyncKit.repeatedlyCall(routineResult -> {
-            return fireOnce();
-        });
-        //Keel.callFutureUntil(() -> fireOnce().compose(v -> Future.succeededFuture(false)));
+                    return fireOnce();
+                })
+                .andThen(ar -> {
+                    super.startAsKeelVerticle(startPromise);
+                });
     }
 
     private Future<Void> fireOnce() {

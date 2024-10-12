@@ -2,6 +2,7 @@ package io.github.sinri.keel.maids.watchman;
 
 import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.verticles.KeelVerticleImplWithEventLogger;
+import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.shareddata.Lock;
@@ -29,7 +30,7 @@ abstract class KeelWatchmanImpl extends KeelVerticleImplWithEventLogger implemen
     }
 
     @Override
-    protected void startAsKeelVerticle() {
+    protected void startAsKeelVerticle(Promise<Void> startPromise) {
         this.consumer = Keel.getVertx().eventBus().consumer(eventBusAddress());
         this.consumer.handler(this::consumeHandleMassage);
         this.consumer.exceptionHandler(throwable -> getLogger()
@@ -48,6 +49,7 @@ abstract class KeelWatchmanImpl extends KeelVerticleImplWithEventLogger implemen
                 interval(),
                 timerID -> Keel.getVertx().eventBus()
                         .send(eventBusAddress(), System.currentTimeMillis()));
+        startPromise.complete();
     }
 
     protected void consumeHandleMassage(Message<Long> message) {
@@ -71,8 +73,8 @@ abstract class KeelWatchmanImpl extends KeelVerticleImplWithEventLogger implemen
     }
 
     @Override
-    public void stop() throws Exception {
-        super.stop();
+    protected void stopAsKeelVerticle(Promise<Void> stopPromise) {
         consumer.unregister();
+        stopPromise.complete();
     }
 }

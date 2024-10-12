@@ -66,6 +66,15 @@ public interface AnyStatement {
         return writeIntoStatement;
     }
 
+    /**
+     * @since 3.2.19
+     */
+    static CallStatement call(@Nonnull Handler<CallStatement> statementHandler) {
+        CallStatement callStatement = new CallStatement();
+        statementHandler.handle(callStatement);
+        return callStatement;
+    }
+
     static TemplatedReadStatement templatedRead(@Nonnull String path, @Nonnull Handler<TemplateArgumentMapping> templatedReadStatementHandler) {
         TemplatedReadStatement readStatement = TemplatedStatement.loadTemplateToRead(path);
         TemplateArgumentMapping arguments = readStatement.getArguments();

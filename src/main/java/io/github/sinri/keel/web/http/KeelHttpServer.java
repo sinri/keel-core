@@ -38,7 +38,7 @@ abstract public class KeelHttpServer extends KeelVerticleImplWithEventLogger {
     protected abstract void configureRoutes(Router router);
 
     @Override
-    protected void startAsKeelVerticle() {
+    protected void startAsKeelVerticle(Promise<Void> startPromise) {
         this.server = Keel.getVertx().createHttpServer(getHttpServerOptions());
 
         Router router = Router.router(Keel.getVertx());
@@ -61,6 +61,7 @@ abstract public class KeelHttpServer extends KeelVerticleImplWithEventLogger {
                         }
                     }
                 });
+        startPromise.complete();
     }
 
 

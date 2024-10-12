@@ -58,7 +58,7 @@ public class KeelFunnel extends KeelVerticleImplWithEventLogger {
     }
 
     @Override
-    protected void startAsKeelVerticle() {
+    protected void startAsKeelVerticle(Promise<Void> startPromise) {
         KeelAsyncKit.endless(promise -> {
             this.interruptRef.set(null);
             //System.out.println("ENDLESS "+System.currentTimeMillis());
@@ -93,6 +93,7 @@ public class KeelFunnel extends KeelVerticleImplWithEventLogger {
                                 });
                     });
         });
+        startPromise.complete();
     }
 
 

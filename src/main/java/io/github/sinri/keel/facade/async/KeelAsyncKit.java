@@ -226,4 +226,32 @@ public interface KeelAsyncKit {
         return verticle.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER))
                 .compose(deploymentId -> promise.future());
     }
+
+    /**
+     * @since 3.2.19
+     */
+    static <T> CompletableFuture<T> createPseudoAwaitCompletableFuture(Handler<Promise<T>> blockingCodeHandler) {
+        CompletableFuture<T> completableFuture = new CompletableFuture<>();
+        executeBlocking(blockingCodeHandler)
+                .andThen(ar -> {
+                    if (ar.succeeded()) {
+                        completableFuture.complete(ar.result());
+                    } else {
+                        completableFuture.completeExceptionally(ar.cause());
+                    }
+                });
+        return completableFuture;
+    }
+
+    /**
+     * @since 3.2.19
+     */
+    static <T> T pseudoAwait(Handler<Promise<T>> blockingCodeHandler) {
+        CompletableFuture<T> completableFuture = createPseudoAwaitCompletableFuture(blockingCodeHandler);
+        try {
+            return completableFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

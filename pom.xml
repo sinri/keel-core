@@ -6,8 +6,8 @@
 
     <groupId>io.github.sinri</groupId>
     <artifactId>Keel</artifactId>
-    <!--    <version>3.2.18-SNAPSHOT</version>-->
-    <version>3.2.18</version>
+    <version>3.2.19-SNAPSHOT</version>
+    <!--    <version>3.2.18</version>-->
 
     <name>Keel</name>
     <description>
@@ -198,6 +198,16 @@
                     </execution>
                 </executions>
                 <version>3.2.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <includes>
+                        <include>io/github/sinri/keel/test/unittest/**/*Test.java</include>
+                    </includes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

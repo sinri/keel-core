@@ -1,5 +1,6 @@
 package io.github.sinri.keel.maids.pleiades;
 
+import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.verticles.KeelVerticleImplWithEventLogger;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.DeliveryOptions;
@@ -15,6 +16,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  *
  * @since 3.2.19
  */
+@TechnicalPreview(since = "3.2.19")
 public abstract class Pleiades<T> extends KeelVerticleImplWithEventLogger {
     private MessageConsumer<T> consumer;
 

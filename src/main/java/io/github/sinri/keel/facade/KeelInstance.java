@@ -36,8 +36,6 @@ public class KeelInstance implements KeelHelpersInterface, KeelClusterKit {
     @Nonnull
     private KeelEventLogger eventLogger;
 
-    private WebClient webClient;
-
     private KeelInstance() {
         this.configuration = new KeelConfigElement("");
         this.eventLogger = KeelIssueRecordCenter.outputCenter().generateEventLogger("Keel");
@@ -139,28 +137,19 @@ public class KeelInstance implements KeelHelpersInterface, KeelClusterKit {
 
     /**
      * @since 3.2.18
+     * @since 3.2.19 Fix to avoid cross-verticle loss.
      */
     public <T> Future<T> useWebClient(Function<WebClient, Future<T>> usage) {
+        WebClient webClient = WebClient.create(getVertx());
         return Future.succeededFuture()
-                .compose(v -> {
-                    if (webClient == null) {
-                        synchronized (this) {
-                            webClient = WebClient.create(getVertx());
-                        }
-                    }
-                    return usage.apply(webClient);
-                });
+                .compose(v -> usage.apply(webClient))
+                .onComplete(ar -> webClient.close());
     }
 
     public Future<Void> gracefullyClose(@Nonnull io.vertx.core.Handler<Promise<Void>> promiseHandler) {
         Promise<Void> promise = Promise.promise();
         promiseHandler.handle(promise);
         return promise.future()
-                .andThen(ar -> {
-                    if (webClient != null) {
-                        webClient.close();
-                    }
-                })
                 .compose(v -> getVertx().close());
     }
 

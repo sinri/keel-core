@@ -253,8 +253,9 @@ public class SelectStatement extends AbstractReadStatement {
 
     /**
      * @since 3.2.3
+     * @since 3.2.20 Public
      */
-    Future<PaginationResult> queryForPagination(
+    public Future<PaginationResult> queryForPagination(
             NamedMySQLConnection sqlConnection,
             long pageNo,
             long pageSize
@@ -268,8 +269,9 @@ public class SelectStatement extends AbstractReadStatement {
      * @param pageNo   since 1.
      * @param pageSize a number
      * @since 3.2.3
+     * @since 3.2.20 Public
      */
-    Future<PaginationResult> queryForPagination(
+    public Future<PaginationResult> queryForPagination(
             SqlConnection sqlConnection,
             long pageNo,
             long pageSize

@@ -4,6 +4,7 @@ import io.github.sinri.keel.facade.configuration.KeelConfigElement;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,5 +61,20 @@ public class ElasticSearchConfig extends KeelConfigElement {
 
     public @Nullable String opaqueId() {
         return readString("opaqueId", null);
+    }
+
+    /**
+     * @return Version Components in List
+     * @since 3.2.20
+     */
+    public @Nullable List<Integer> version() {
+        var x = readString(List.of("version"));
+        if (x == null) return null;
+        List<Integer> l = new ArrayList<>();
+        for (var c : x.split("[.]")) {
+            int i = Integer.parseInt(c.trim());
+            l.add(i);
+        }
+        return l;
     }
 }

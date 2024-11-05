@@ -12,6 +12,7 @@ import io.vertx.ext.web.client.WebClient;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
@@ -25,6 +26,21 @@ public interface ESApiMixin {
     ElasticSearchConfig getEsConfig();
 
     /**
+     * @since 3.2.20
+     * By default, For ES 8.9.
+     */
+    default void handleHeaders(HttpRequest<Buffer> bufferHttpRequest) {
+        List<Integer> version = getEsConfig().version();
+        if (version != null && !version.isEmpty() && version.get(0) != null && version.get(0) < 8) {
+            bufferHttpRequest.putHeader("Accept", "application/json");
+            bufferHttpRequest.putHeader("Content-Type", "application/json");
+        } else {
+            bufferHttpRequest.putHeader("Accept", "application/vnd.elasticsearch+json");
+            bufferHttpRequest.putHeader("Content-Type", "application/vnd.elasticsearch+json");
+        }
+    }
+
+    /**
      * @since 3.1.10
      * For Bulk API, of which the body is not a json object.
      */
@@ -34,8 +50,7 @@ public interface ESApiMixin {
         HttpRequest<Buffer> bufferHttpRequest = webClient.requestAbs(httpMethod, url);
 
         bufferHttpRequest.basicAuthentication(getEsConfig().username(), getEsConfig().password());
-        bufferHttpRequest.putHeader("Accept", "application/vnd.elasticsearch+json");
-        bufferHttpRequest.putHeader("Content-Type", "application/vnd.elasticsearch+json");
+        handleHeaders(bufferHttpRequest);
 
         String opaqueId = this.getEsConfig().opaqueId();
         if (opaqueId != null) {

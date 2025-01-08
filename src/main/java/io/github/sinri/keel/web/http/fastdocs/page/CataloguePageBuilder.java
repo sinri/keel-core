@@ -97,6 +97,13 @@ public class CataloguePageBuilder implements FastDocsContentResponder {
                 "            line-height: 30px;\n" +
                 "            " + (isFromDoc() ? "display: none;" : "") + "\n" +
                 "        }\n" +
+                "        div.dir_box_body_item {\n" +
+                "            white-space: nowrap;\n" +
+                "        }\n" +
+                "        div.dir_box_body_item > * {\n" +
+                "            display: inline-block;\n" +
+                "            max-width: inherit;\n" +
+                "        }\n" +
                 "    </style>\n" +
                 "</head>\n" +
                 "<body>\n" +

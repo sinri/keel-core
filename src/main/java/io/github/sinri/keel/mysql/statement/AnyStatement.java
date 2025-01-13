@@ -30,37 +30,55 @@ public interface AnyStatement {
         };
     }
 
-    static SelectStatement select(@Nonnull Handler<SelectStatement> statementHandler) {
+    /**
+     * @since 3.2.21 return AbstractReadStatement
+     */
+    static AbstractReadStatement select(@Nonnull Handler<SelectStatement> statementHandler) {
         SelectStatement selectStatement = new SelectStatement();
         statementHandler.handle(selectStatement);
         return selectStatement;
     }
 
-    static UnionStatement union(@Nonnull Handler<UnionStatement> unionStatementHandler) {
+    /**
+     * @since 3.2.21 return AbstractReadStatement
+     */
+    static AbstractReadStatement union(@Nonnull Handler<UnionStatement> unionStatementHandler) {
         UnionStatement unionStatement = new UnionStatement();
         unionStatementHandler.handle(unionStatement);
         return unionStatement;
     }
 
-    static UpdateStatement update(@Nonnull Handler<UpdateStatement> updateStatementHandler) {
+    /**
+     * @since 3.2.21 return AbstractModifyStatement
+     */
+    static AbstractModifyStatement update(@Nonnull Handler<UpdateStatement> updateStatementHandler) {
         UpdateStatement updateStatement = new UpdateStatement();
         updateStatementHandler.handle(updateStatement);
         return updateStatement;
     }
 
-    static DeleteStatement delete(@Nonnull Handler<DeleteStatement> deleteStatementHandler) {
+    /**
+     * @since 3.2.21 return AbstractModifyStatement
+     */
+    static AbstractModifyStatement delete(@Nonnull Handler<DeleteStatement> deleteStatementHandler) {
         DeleteStatement deleteStatement = new DeleteStatement();
         deleteStatementHandler.handle(deleteStatement);
         return deleteStatement;
     }
 
-    static WriteIntoStatement insert(Handler<WriteIntoStatement> statementHandler) {
+    /**
+     * @since 3.2.21 return AbstractWriteIntoStatement
+     */
+    static AbstractWriteIntoStatement insert(Handler<WriteIntoStatement> statementHandler) {
         WriteIntoStatement writeIntoStatement = new WriteIntoStatement(WriteIntoStatement.INSERT);
         statementHandler.handle(writeIntoStatement);
         return writeIntoStatement;
     }
 
-    static WriteIntoStatement replace(@Nonnull Handler<WriteIntoStatement> statementHandler) {
+    /**
+     * @since 3.2.21 return AbstractModifyStatement
+     */
+    static AbstractModifyStatement replace(@Nonnull Handler<WriteIntoStatement> statementHandler) {
         WriteIntoStatement writeIntoStatement = new WriteIntoStatement(WriteIntoStatement.REPLACE);
         statementHandler.handle(writeIntoStatement);
         return writeIntoStatement;
@@ -68,21 +86,28 @@ public interface AnyStatement {
 
     /**
      * @since 3.2.19
+     * @since 3.2.21 return AbstractStatement
      */
-    static CallStatement call(@Nonnull Handler<CallStatement> statementHandler) {
+    static AbstractStatement call(@Nonnull Handler<CallStatement> statementHandler) {
         CallStatement callStatement = new CallStatement();
         statementHandler.handle(callStatement);
         return callStatement;
     }
 
-    static TemplatedReadStatement templatedRead(@Nonnull String path, @Nonnull Handler<TemplateArgumentMapping> templatedReadStatementHandler) {
+    /**
+     * @since 3.2.21 return AbstractReadStatement
+     */
+    static AbstractReadStatement templatedRead(@Nonnull String path, @Nonnull Handler<TemplateArgumentMapping> templatedReadStatementHandler) {
         TemplatedReadStatement readStatement = TemplatedStatement.loadTemplateToRead(path);
         TemplateArgumentMapping arguments = readStatement.getArguments();
         templatedReadStatementHandler.handle(arguments);
         return readStatement;
     }
 
-    static TemplatedModifyStatement templatedModify(@Nonnull String path, @Nonnull Handler<TemplateArgumentMapping> templatedModifyStatementHandler) {
+    /**
+     * @since 3.2.21 return AbstractModifyStatement
+     */
+    static AbstractModifyStatement templatedModify(@Nonnull String path, @Nonnull Handler<TemplateArgumentMapping> templatedModifyStatementHandler) {
         TemplatedModifyStatement templatedModifyStatement = TemplatedStatement.loadTemplateToModify(path);
         TemplateArgumentMapping arguments = templatedModifyStatement.getArguments();
         templatedModifyStatementHandler.handle(arguments);

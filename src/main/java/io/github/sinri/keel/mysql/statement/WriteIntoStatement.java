@@ -1,12 +1,9 @@
 package io.github.sinri.keel.mysql.statement;
 
-import io.github.sinri.keel.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.mysql.Quoter;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.sqlclient.SqlConnection;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -15,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
 
-public class WriteIntoStatement extends AbstractModifyStatement {
+public class WriteIntoStatement extends AbstractWriteIntoStatement {
     /**
      * insert [ignore] into schema.table (column...) values (value...),... ON DUPLICATE KEY UPDATE assignment_list
      * insert [ignore] into schema.table (column...) [select ...| table ...] ON DUPLICATE KEY UPDATE assignment_list
@@ -249,24 +246,7 @@ public class WriteIntoStatement extends AbstractModifyStatement {
         return sql;
     }
 
-    /**
-     * @param sqlConnection get from pool
-     * @return future with last inserted id; if any error occurs, failed future returned instead.
-     * @since 1.7
-     * @since 1.10, removed the recover block
-     */
-    public Future<Long> executeForLastInsertedID(@Nonnull SqlConnection sqlConnection) {
-        return execute(sqlConnection)
-                .compose(resultMatrix -> Future.succeededFuture(resultMatrix.getLastInsertedID()));
-    }
 
-    /**
-     * @since 3.0.11
-     * @since 3.0.18 Finished Technical Preview.
-     */
-    public Future<Long> executeForLastInsertedID(@Nonnull NamedMySQLConnection namedMySQLConnection) {
-        return executeForLastInsertedID(namedMySQLConnection.getSqlConnection());
-    }
 
     /**
      * 按照最大块尺寸分裂！
@@ -299,30 +279,6 @@ public class WriteIntoStatement extends AbstractModifyStatement {
 
     public static class RowToWrite {
         final Map<String, String> map = new ConcurrentHashMap<>();
-
-        /**
-         * @since 3.0.1
-         */
-        public RowToWrite putNow(@Nonnull String columnName) {
-            return this.putExpression(columnName, "now()");
-        }
-
-        public RowToWrite putExpression(@Nonnull String columnName, @Nonnull String expression) {
-            map.put(columnName, expression);
-            return this;
-        }
-
-        /**
-         * @since 3.1.0
-         */
-        public RowToWrite put(@Nonnull String columnName, @Nullable Object value) {
-            if (value == null) return this.putExpression(columnName, "NULL");
-            else if (value instanceof Number) {
-                return putExpression(columnName, String.valueOf(value));
-            } else {
-                return putExpression(columnName, new Quoter(value.toString()).toString());
-            }
-        }
 
         /**
          * @param jsonObject One row as a JsonObject
@@ -365,6 +321,30 @@ public class WriteIntoStatement extends AbstractModifyStatement {
                 rows.add(fromJsonObject(item));
             });
             return rows;
+        }
+
+        /**
+         * @since 3.0.1
+         */
+        public RowToWrite putNow(@Nonnull String columnName) {
+            return this.putExpression(columnName, "now()");
+        }
+
+        public RowToWrite putExpression(@Nonnull String columnName, @Nonnull String expression) {
+            map.put(columnName, expression);
+            return this;
+        }
+
+        /**
+         * @since 3.1.0
+         */
+        public RowToWrite put(@Nonnull String columnName, @Nullable Object value) {
+            if (value == null) return this.putExpression(columnName, "NULL");
+            else if (value instanceof Number) {
+                return putExpression(columnName, String.valueOf(value));
+            } else {
+                return putExpression(columnName, new Quoter(value.toString()).toString());
+            }
         }
     }
 }

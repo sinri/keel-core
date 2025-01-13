@@ -9,6 +9,9 @@ import javax.annotation.Nonnull;
  * @since 3.1.10
  */
 public interface SelfInterface<T> {
+    /**
+     * @return the implementation instance, such as `this` in implemented class.
+     */
     @Nonnull
     T getImplementation();
 }

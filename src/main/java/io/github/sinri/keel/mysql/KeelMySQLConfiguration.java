@@ -1,17 +1,19 @@
 package io.github.sinri.keel.mysql;
 
 import io.github.sinri.keel.core.TechnicalPreview;
+import io.github.sinri.keel.facade.async.KeelAsyncKit;
 import io.github.sinri.keel.facade.configuration.KeelConfigElement;
 import io.github.sinri.keel.mysql.matrix.ResultMatrix;
 import io.vertx.core.Future;
 import io.vertx.mysqlclient.MySQLBuilder;
 import io.vertx.mysqlclient.MySQLConnectOptions;
-import io.vertx.sqlclient.PoolOptions;
+import io.vertx.sqlclient.*;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
@@ -190,5 +192,48 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
                             return Future.succeededFuture(ResultMatrix.create(rows));
                         }))
                 .andThen(ar -> sqlClient.close());
+    }
+
+    /**
+     * Handle every batch of rows read, or throw any exceptions in rows handler to stop the process.
+     * All dynamic resources would be closed inside this function.
+     *
+     * @param sql                a sql to be executed and read its result in stream.
+     * @param readWindowSize     how many rows read once
+     * @param readWindowFunction the async handler of the read rows
+     * @since 3.2.21
+     */
+    @TechnicalPreview(since = "3.2.21")
+    public Future<Void> instantQueryForStream(String sql, int readWindowSize, Function<RowSet<Row>, Future<Void>> readWindowFunction) {
+        return Future.succeededFuture()
+                .compose(v -> {
+                    Pool pool = MySQLBuilder.pool()
+                            .with(this.getPoolOptions())
+                            .connectingTo(this.getConnectOptions())
+                            .using(Keel.getVertx())
+                            .build();
+                    return Future.succeededFuture(pool);
+                })
+                .compose(pool -> {
+                    return pool.getConnection()
+                            .compose(sqlConnection -> {
+                                return sqlConnection.prepare(sql)
+                                        .compose(preparedStatement -> {
+                                            Cursor cursor = preparedStatement.cursor();
+
+                                            return KeelAsyncKit.repeatedlyCall(routineResult -> {
+                                                        if (!cursor.hasMore()) {
+                                                            routineResult.stop();
+                                                            return Future.succeededFuture();
+                                                        }
+
+                                                        return cursor.read(readWindowSize).compose(readWindowFunction::apply);
+                                                    })
+                                                    .eventually(() -> cursor.close());
+                                        })
+                                        .eventually(() -> sqlConnection.close());
+                            })
+                            .eventually(() -> pool.close());
+                });
     }
 }

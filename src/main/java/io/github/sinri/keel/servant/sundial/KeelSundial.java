@@ -23,9 +23,8 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  */
 public abstract class KeelSundial extends KeelVerticleImplWithEventLogger {
     private final Map<String, KeelSundialPlan> planMap = new ConcurrentHashMap<>();
-    private Long timerID;
     private final AtomicInteger planFetchingSemaphore = new AtomicInteger(0);
-
+    private Long timerID;
 
     @Override
     protected KeelEventLogger buildEventLogger() {
@@ -53,9 +52,11 @@ public abstract class KeelSundial extends KeelVerticleImplWithEventLogger {
                 );
 
                 // since 3.2.5
-                new KeelSundialVerticle(plan, now).deployMe(new DeploymentOptions()
-                        .setThreadingModel(ThreadingModel.WORKER)
-                );
+                var deploymentOptions = new DeploymentOptions();
+                if (plan.isWorkerThreadRequired()) {
+                    deploymentOptions.setThreadingModel(ThreadingModel.WORKER);
+                }
+                new KeelSundialVerticle(plan, now).deployMe(deploymentOptions);
             } else {
                 getLogger().debug("Sundial Plan Not Match", new JsonObject()
                         .put("plan_key", plan.key())

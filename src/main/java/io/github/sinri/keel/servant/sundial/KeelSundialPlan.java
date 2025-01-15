@@ -15,4 +15,14 @@ public interface KeelSundialPlan {
     KeelCronExpression cronExpression();
 
     Future<Void> execute(Calendar now);
+
+    /**
+     * For some easy work, run with event pool might be an open choice.
+     *
+     * @return whether this sundial plan should be executed in Worker Thread. By default, it returns true.
+     * @since 3.2.21
+     */
+    default boolean isWorkerThreadRequired() {
+        return true;
+    }
 }

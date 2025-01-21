@@ -1,7 +1,7 @@
 package io.github.sinri.keel.test.lab.redis;
 
-import io.github.sinri.keel.facade.async.KeelAsyncKit;
-import io.github.sinri.keel.redis.RedisKit;
+import io.github.sinri.keel.core.async.KeelAsyncKit;
+import io.github.sinri.keel.integration.redis.RedisKit;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.VertxOptions;

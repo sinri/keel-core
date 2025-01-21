@@ -4,7 +4,7 @@ package io.github.sinri.keel.core.json.scheme;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
 
 @Deprecated(since = "3.2.4")
 public class JsonSchemeMismatchException extends Exception {

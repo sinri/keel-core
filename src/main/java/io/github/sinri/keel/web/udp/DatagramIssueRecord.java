@@ -6,7 +6,7 @@ import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
 
-import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
 
 /**
  * @since 3.2.0

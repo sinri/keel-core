@@ -15,7 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.jar.JarEntry;
 
-import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
 
 public class CataloguePageBuilder implements FastDocsContentResponder {
     private static String catalogueDivContentCache = null;

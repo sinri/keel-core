@@ -8,8 +8,8 @@ import io.vertx.ext.web.handler.PlatformHandler;
 import java.util.Random;
 import java.util.UUID;
 
+import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
-import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
 
 /**
  * @since 2.9.2

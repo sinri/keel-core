@@ -1,6 +1,6 @@
 package io.github.sinri.keel.test.lab.smtp;
 
-import io.github.sinri.keel.email.smtp.KeelSmtpKit;
+import io.github.sinri.keel.integration.email.smtp.KeelSmtpKit;
 import io.vertx.core.VertxOptions;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;

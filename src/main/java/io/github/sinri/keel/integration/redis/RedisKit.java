@@ -1,0 +1,62 @@
+package io.github.sinri.keel.integration.redis;
+
+import io.github.sinri.keel.integration.redis.mixin.*;
+import io.vertx.core.Future;
+import io.vertx.redis.client.Redis;
+import io.vertx.redis.client.RedisAPI;
+import io.vertx.redis.client.RedisConnection;
+import io.vertx.redis.client.RedisOptions;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
+
+/**
+ * @since 3.0.5
+ */
+public class RedisKit implements RedisApiMixin, RedisScalarMixin, RedisListMixin, RedisBitMixin, RedisHashMixin, RedisSetMixin, RedisOrderedSetMixin {
+    private final Redis client;
+    private final AtomicReference<RedisConnection> redisConnectionRef = new AtomicReference<>();
+
+    public RedisKit(String redisInstanceKey) {
+        /*
+         * URL should be redis://[:password@]host[:port][/db-number]
+         */
+        String url = Keel.getConfiguration().readString(List.of("redis", redisInstanceKey, "url"), null);
+        Objects.requireNonNull(url);
+        this.client = Redis.createClient(Keel.getVertx(), new RedisOptions()
+                .setConnectionString(url)
+                .setMaxPoolSize(16)
+                .setMaxWaitingHandlers(32)
+                .setMaxPoolWaiting(24)
+                .setPoolCleanerInterval(5000)
+        );
+    }
+
+    public Redis getClient() {
+        return client;
+    }
+
+    @Override
+    public Future<RedisAPI> api() {
+        // since 20230901, try to resolve pool max over issue
+        if (redisConnectionRef.get() == null) {
+            return getClient().connect()
+                    .compose(redisConnection -> {
+                        redisConnectionRef.set(redisConnection);
+                        return Future.succeededFuture(RedisAPI.api(redisConnectionRef.get()));
+                    });
+        } else {
+            return Future.succeededFuture(RedisAPI.api(redisConnectionRef.get()));
+        }
+    }
+
+    /**
+     * @since 3.2.18
+     */
+    public void close() {
+        this.client.close();
+    }
+}

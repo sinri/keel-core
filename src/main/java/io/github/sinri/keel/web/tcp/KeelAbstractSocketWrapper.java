@@ -1,8 +1,8 @@
 package io.github.sinri.keel.web.tcp;
 
+import io.github.sinri.keel.core.servant.funnel.KeelFunnel;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
-import io.github.sinri.keel.servant.funnel.KeelFunnel;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;

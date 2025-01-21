@@ -13,7 +13,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
 
 /**
  * @since 2.9.2

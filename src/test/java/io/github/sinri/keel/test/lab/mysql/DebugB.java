@@ -1,12 +1,12 @@
 package io.github.sinri.keel.test.lab.mysql;
 
-import io.github.sinri.keel.mysql.DynamicNamedMySQLConnection;
-import io.github.sinri.keel.mysql.KeelMySQLDataSourceProvider;
-import io.github.sinri.keel.mysql.NamedMySQLDataSource;
-import io.github.sinri.keel.mysql.exception.KeelSQLResultRowIndexError;
-import io.github.sinri.keel.mysql.statement.AnyStatement;
-import io.github.sinri.keel.tesuto.KeelTest;
-import io.github.sinri.keel.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.KeelTest;
+import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.integration.mysql.DynamicNamedMySQLConnection;
+import io.github.sinri.keel.integration.mysql.KeelMySQLDataSourceProvider;
+import io.github.sinri.keel.integration.mysql.NamedMySQLDataSource;
+import io.github.sinri.keel.integration.mysql.exception.KeelSQLResultRowIndexError;
+import io.github.sinri.keel.integration.mysql.statement.AnyStatement;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

@@ -1,7 +1,7 @@
 package io.github.sinri.keel.logger.issue.recorder.render;
 
 import io.github.sinri.keel.core.TechnicalPreview;
-import io.github.sinri.keel.helper.KeelRuntimeHelper;
+import io.github.sinri.keel.core.helper.KeelRuntimeHelper;
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.vertx.core.json.JsonObject;
 

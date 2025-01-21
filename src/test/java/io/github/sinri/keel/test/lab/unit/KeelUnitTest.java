@@ -1,10 +1,10 @@
 package io.github.sinri.keel.test.lab.unit;
 
 
-import io.github.sinri.keel.facade.async.KeelAsyncKit;
-import io.github.sinri.keel.tesuto.KeelTest;
-import io.github.sinri.keel.tesuto.TestUnit;
-import io.github.sinri.keel.tesuto.TestUnitResult;
+import io.github.sinri.keel.core.async.KeelAsyncKit;
+import io.github.sinri.keel.facade.tesuto.KeelTest;
+import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.TestUnitResult;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;

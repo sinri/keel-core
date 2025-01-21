@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.cutter;
 
-import io.github.sinri.keel.facade.async.KeelAsyncKit;
+import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;

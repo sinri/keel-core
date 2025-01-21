@@ -1,10 +1,10 @@
 package io.github.sinri.keel.test.lab.excel;
 
-import io.github.sinri.keel.poi.excel.KeelSheet;
-import io.github.sinri.keel.poi.excel.KeelSheets;
-import io.github.sinri.keel.tesuto.KeelTest;
-import io.github.sinri.keel.tesuto.TestUnit;
-import io.github.sinri.keel.tesuto.TestUnitResult;
+import io.github.sinri.keel.facade.tesuto.KeelTest;
+import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.TestUnitResult;
+import io.github.sinri.keel.integration.poi.excel.KeelSheet;
+import io.github.sinri.keel.integration.poi.excel.KeelSheets;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;

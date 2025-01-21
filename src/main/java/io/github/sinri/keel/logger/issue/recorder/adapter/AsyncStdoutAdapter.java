@@ -1,10 +1,10 @@
 package io.github.sinri.keel.logger.issue.recorder.adapter;
 
 import io.github.sinri.keel.core.TechnicalPreview;
-import io.github.sinri.keel.facade.async.KeelAsyncKit;
+import io.github.sinri.keel.core.async.KeelAsyncKit;
+import io.github.sinri.keel.core.servant.intravenous.KeelIntravenous;
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.github.sinri.keel.logger.issue.recorder.render.KeelIssueRecordRender;
-import io.github.sinri.keel.servant.intravenous.KeelIntravenous;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 

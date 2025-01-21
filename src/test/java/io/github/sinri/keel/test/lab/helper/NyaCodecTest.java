@@ -1,6 +1,6 @@
 package io.github.sinri.keel.test.lab.helper;
 
-import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
 
 public class NyaCodecTest {
 

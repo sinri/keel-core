@@ -1,8 +1,8 @@
 package io.github.sinri.keel.web.http;
 
+import io.github.sinri.keel.core.verticles.KeelVerticleImplWithEventLogger;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.github.sinri.keel.verticles.KeelVerticleImplWithEventLogger;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;

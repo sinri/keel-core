@@ -1,7 +1,7 @@
 package io.github.sinri.keel.test.lab.queue;
 
-import io.github.sinri.keel.servant.queue.KeelQueueNextTaskSeeker;
-import io.github.sinri.keel.servant.queue.KeelQueueTask;
+import io.github.sinri.keel.core.servant.queue.KeelQueueNextTaskSeeker;
+import io.github.sinri.keel.core.servant.queue.KeelQueueTask;
 import io.vertx.core.Future;
 
 import java.util.UUID;

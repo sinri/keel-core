@@ -1,7 +1,7 @@
 package io.github.sinri.keel.test.unittest.tesuto;
 
-import io.github.sinri.keel.facade.async.KeelAsyncKit;
-import io.github.sinri.keel.tesuto.KeelUnitTest;
+import io.github.sinri.keel.core.async.KeelAsyncKit;
+import io.github.sinri.keel.facade.tesuto.KeelUnitTest;
 
 public class FirstUnitTest extends KeelUnitTest {
     @Override

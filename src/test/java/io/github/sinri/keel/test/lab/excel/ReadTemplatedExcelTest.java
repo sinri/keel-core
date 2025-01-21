@@ -1,13 +1,13 @@
 package io.github.sinri.keel.test.lab.excel;
 
-import io.github.sinri.keel.poi.excel.KeelSheet;
-import io.github.sinri.keel.poi.excel.KeelSheets;
-import io.github.sinri.keel.poi.excel.entity.KeelSheetMatrix;
-import io.github.sinri.keel.poi.excel.entity.KeelSheetMatrixRow;
-import io.github.sinri.keel.poi.excel.entity.KeelSheetTemplatedMatrix;
-import io.github.sinri.keel.tesuto.KeelTest;
-import io.github.sinri.keel.tesuto.TestUnit;
-import io.github.sinri.keel.tesuto.TestUnitResult;
+import io.github.sinri.keel.facade.tesuto.KeelTest;
+import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.TestUnitResult;
+import io.github.sinri.keel.integration.poi.excel.KeelSheet;
+import io.github.sinri.keel.integration.poi.excel.KeelSheets;
+import io.github.sinri.keel.integration.poi.excel.entity.KeelSheetMatrix;
+import io.github.sinri.keel.integration.poi.excel.entity.KeelSheetMatrixRow;
+import io.github.sinri.keel.integration.poi.excel.entity.KeelSheetTemplatedMatrix;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
@@ -16,7 +16,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.List;
 
-import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
 
 public class ReadTemplatedExcelTest extends KeelTest {
     private static final String file = "/Users/leqee/code/Keel/src/test/resources/excel/excel_1.xlsx";

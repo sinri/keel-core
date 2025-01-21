@@ -14,8 +14,8 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
-import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
 
 /**
  * @since 3.2.13

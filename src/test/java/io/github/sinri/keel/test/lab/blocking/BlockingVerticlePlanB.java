@@ -1,10 +1,10 @@
 package io.github.sinri.keel.test.lab.blocking;
 
+import io.github.sinri.keel.core.verticles.KeelVerticleImplWithIssueRecorder;
 import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
-import io.github.sinri.keel.verticles.KeelVerticleImplWithIssueRecorder;
 import io.vertx.core.*;
 
 import javax.annotation.Nonnull;

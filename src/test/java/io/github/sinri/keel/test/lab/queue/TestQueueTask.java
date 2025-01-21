@@ -1,10 +1,10 @@
 package io.github.sinri.keel.test.lab.queue;
 
-import io.github.sinri.keel.facade.async.KeelAsyncKit;
+import io.github.sinri.keel.core.async.KeelAsyncKit;
+import io.github.sinri.keel.core.servant.queue.KeelQueueTask;
+import io.github.sinri.keel.core.servant.queue.QueueTaskIssueRecord;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
-import io.github.sinri.keel.servant.queue.KeelQueueTask;
-import io.github.sinri.keel.servant.queue.QueueTaskIssueRecord;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;

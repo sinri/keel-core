@@ -1,11 +1,11 @@
 package io.github.sinri.keel.test.lab.helper;
 
-import io.github.sinri.keel.helper.authenticator.googleauth.GoogleAuthenticatorKey;
-import io.github.sinri.keel.helper.authenticator.googleauth.GoogleAuthenticatorQRGenerator;
-import io.github.sinri.keel.helper.authenticator.googleauth.async.AsyncGoogleAuthenticator;
-import io.github.sinri.keel.helper.authenticator.googleauth.async.AsyncICredentialRepository;
-import io.github.sinri.keel.tesuto.KeelTest;
-import io.github.sinri.keel.tesuto.TestUnit;
+import io.github.sinri.keel.core.helper.authenticator.googleauth.GoogleAuthenticatorKey;
+import io.github.sinri.keel.core.helper.authenticator.googleauth.GoogleAuthenticatorQRGenerator;
+import io.github.sinri.keel.core.helper.authenticator.googleauth.async.AsyncGoogleAuthenticator;
+import io.github.sinri.keel.core.helper.authenticator.googleauth.async.AsyncICredentialRepository;
+import io.github.sinri.keel.facade.tesuto.KeelTest;
+import io.github.sinri.keel.facade.tesuto.TestUnit;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

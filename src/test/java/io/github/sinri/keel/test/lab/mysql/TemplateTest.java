@@ -1,6 +1,6 @@
 package io.github.sinri.keel.test.lab.mysql;
 
-import io.github.sinri.keel.mysql.statement.templated.TemplatedStatement;
+import io.github.sinri.keel.integration.mysql.statement.templated.TemplatedStatement;
 
 import java.util.List;
 

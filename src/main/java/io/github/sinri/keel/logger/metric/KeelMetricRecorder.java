@@ -1,7 +1,7 @@
 package io.github.sinri.keel.logger.metric;
 
 import io.github.sinri.keel.core.TechnicalPreview;
-import io.github.sinri.keel.facade.async.KeelAsyncKit;
+import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.vertx.core.Future;
 
 import java.util.*;

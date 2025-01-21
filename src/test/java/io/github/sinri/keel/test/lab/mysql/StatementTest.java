@@ -1,12 +1,12 @@
 package io.github.sinri.keel.test.lab.mysql;
 
-import io.github.sinri.keel.mysql.statement.UpdateStatement;
-import io.github.sinri.keel.mysql.statement.component.CaseOperator;
-import io.github.sinri.keel.mysql.statement.component.CaseOperatorPair;
-import io.github.sinri.keel.mysql.statement.component.UpdateSetAssignmentComponent;
-import io.github.sinri.keel.tesuto.KeelTest;
-import io.github.sinri.keel.tesuto.TestUnit;
-import io.github.sinri.keel.tesuto.TestUnitResult;
+import io.github.sinri.keel.facade.tesuto.KeelTest;
+import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.TestUnitResult;
+import io.github.sinri.keel.integration.mysql.statement.UpdateStatement;
+import io.github.sinri.keel.integration.mysql.statement.component.CaseOperator;
+import io.github.sinri.keel.integration.mysql.statement.component.CaseOperatorPair;
+import io.github.sinri.keel.integration.mysql.statement.component.UpdateSetAssignmentComponent;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;

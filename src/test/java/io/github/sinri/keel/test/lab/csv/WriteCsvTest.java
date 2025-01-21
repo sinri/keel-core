@@ -1,9 +1,9 @@
 package io.github.sinri.keel.test.lab.csv;
 
-import io.github.sinri.keel.facade.async.KeelAsyncKit;
-import io.github.sinri.keel.poi.csv.KeelCsvWriter;
-import io.github.sinri.keel.tesuto.KeelTest;
-import io.github.sinri.keel.tesuto.TestUnit;
+import io.github.sinri.keel.core.async.KeelAsyncKit;
+import io.github.sinri.keel.facade.tesuto.KeelTest;
+import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.integration.poi.csv.KeelCsvWriter;
 import io.vertx.core.Future;
 
 import java.util.ArrayList;

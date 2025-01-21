@@ -1,8 +1,8 @@
 package io.github.sinri.keel.test.lab.blocking;
 
+import io.github.sinri.keel.core.verticles.KeelVerticleImplWithEventLogger;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.github.sinri.keel.verticles.KeelVerticleImplWithEventLogger;
 import io.vertx.core.*;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;

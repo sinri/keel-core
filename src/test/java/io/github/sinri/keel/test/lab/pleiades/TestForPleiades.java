@@ -1,11 +1,11 @@
 package io.github.sinri.keel.test.lab.pleiades;
 
-import io.github.sinri.keel.facade.async.KeelAsyncKit;
+import io.github.sinri.keel.core.async.KeelAsyncKit;
+import io.github.sinri.keel.core.maids.pleiades.Pleiades;
+import io.github.sinri.keel.facade.tesuto.KeelTest;
+import io.github.sinri.keel.facade.tesuto.TestUnit;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.github.sinri.keel.maids.pleiades.Pleiades;
-import io.github.sinri.keel.tesuto.KeelTest;
-import io.github.sinri.keel.tesuto.TestUnit;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;

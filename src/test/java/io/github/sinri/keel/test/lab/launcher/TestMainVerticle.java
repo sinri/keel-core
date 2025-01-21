@@ -1,9 +1,9 @@
 package io.github.sinri.keel.test.lab.launcher;
 
-import io.github.sinri.keel.facade.async.KeelAsyncKit;
+import io.github.sinri.keel.core.async.KeelAsyncKit;
+import io.github.sinri.keel.core.verticles.KeelVerticleImplWithEventLogger;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.github.sinri.keel.verticles.KeelVerticleImplWithEventLogger;
 import io.vertx.core.Future;
 
 public class TestMainVerticle extends KeelVerticleImplWithEventLogger {

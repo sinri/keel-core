@@ -1,8 +1,8 @@
 package io.github.sinri.keel.facade;
 
+import io.github.sinri.keel.core.helper.KeelHelpersInterface;
 import io.github.sinri.keel.facade.cluster.KeelClusterKit;
 import io.github.sinri.keel.facade.configuration.KeelConfigElement;
-import io.github.sinri.keel.helper.KeelHelpersInterface;
 import io.github.sinri.keel.logger.KeelLogLevel;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;

@@ -1,9 +1,9 @@
 package io.github.sinri.keel.test.lab.elasticsearch;
 
-import io.github.sinri.keel.elasticsearch.ESApiMixin;
-import io.github.sinri.keel.elasticsearch.ElasticSearchKit;
-import io.github.sinri.keel.tesuto.KeelTest;
-import io.github.sinri.keel.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.KeelTest;
+import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.integration.elasticsearch.ESApiMixin;
+import io.github.sinri.keel.integration.elasticsearch.ElasticSearchKit;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpMethod;
 

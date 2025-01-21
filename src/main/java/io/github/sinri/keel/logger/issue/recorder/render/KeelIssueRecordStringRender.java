@@ -1,12 +1,12 @@
 package io.github.sinri.keel.logger.issue.recorder.render;
 
 import io.github.sinri.keel.core.TechnicalPreview;
-import io.github.sinri.keel.helper.KeelDateTimeHelper;
+import io.github.sinri.keel.core.helper.KeelDateTimeHelper;
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 
 import javax.annotation.Nonnull;
 
-import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
 
 /**
  * @since 3.1.10

@@ -17,8 +17,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
-import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
 
 /**
  * @param <R> class of a subclass of KeelWebReceptionist

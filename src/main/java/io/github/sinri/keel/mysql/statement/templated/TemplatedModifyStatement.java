@@ -1,6 +1,7 @@
 package io.github.sinri.keel.mysql.statement.templated;
 
-import io.github.sinri.keel.mysql.statement.AbstractModifyStatement;
+import io.github.sinri.keel.mysql.statement.AbstractStatement;
+import io.github.sinri.keel.mysql.statement.mixin.ModifyStatementMixin;
 import io.vertx.core.Handler;
 
 import javax.annotation.Nonnull;
@@ -8,7 +9,7 @@ import javax.annotation.Nonnull;
 /**
  * @since 3.0.8
  */
-public class TemplatedModifyStatement extends AbstractModifyStatement implements TemplatedStatement {
+public class TemplatedModifyStatement extends AbstractStatement implements ModifyStatementMixin, TemplatedStatement {
     private final String templateSql;
     private final TemplateArgumentMapping argumentMapping;
 

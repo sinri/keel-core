@@ -1,6 +1,7 @@
 package io.github.sinri.keel.mysql.statement.templated;
 
-import io.github.sinri.keel.mysql.statement.AbstractReadStatement;
+import io.github.sinri.keel.mysql.statement.AbstractStatement;
+import io.github.sinri.keel.mysql.statement.mixin.ReadStatementMixin;
 import io.vertx.core.Handler;
 
 import javax.annotation.Nonnull;
@@ -8,7 +9,7 @@ import javax.annotation.Nonnull;
 /**
  * @since 3.0.8
  */
-public class TemplatedReadStatement extends AbstractReadStatement implements TemplatedStatement {
+public class TemplatedReadStatement extends AbstractStatement implements ReadStatementMixin, TemplatedStatement {
 
     private final String templateSql;
     private final TemplateArgumentMapping argumentMapping;

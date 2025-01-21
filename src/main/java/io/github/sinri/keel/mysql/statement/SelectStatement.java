@@ -7,6 +7,7 @@ import io.github.sinri.keel.mysql.condition.RawCondition;
 import io.github.sinri.keel.mysql.exception.KeelSQLGenerateError;
 import io.github.sinri.keel.mysql.exception.KeelSQLResultRowIndexError;
 import io.github.sinri.keel.mysql.matrix.ResultMatrix;
+import io.github.sinri.keel.mysql.statement.mixin.ReadStatementMixin;
 import io.github.sinri.keel.mysql.statement.mixin.SelectStatementMixin;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.SqlConnection;
@@ -20,7 +21,7 @@ import java.util.function.Function;
 
 import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
 
-public class SelectStatement extends AbstractReadStatement implements SelectStatementMixin {
+public class SelectStatement extends AbstractStatement implements SelectStatementMixin {
     final ConditionsComponent whereConditionsComponent;
     final ConditionsComponent havingConditionsComponent;
     private final List<String> tables;
@@ -90,7 +91,7 @@ public class SelectStatement extends AbstractReadStatement implements SelectStat
     /**
      * @since 2.8
      */
-    public SelectStatement from(@Nonnull AbstractReadStatement subQuery, @Nonnull String alias) {
+    public SelectStatement from(@Nonnull ReadStatementMixin subQuery, @Nonnull String alias) {
         if (alias.isBlank()) {
             throw new KeelSQLGenerateError("Sub Query without alias");
         }

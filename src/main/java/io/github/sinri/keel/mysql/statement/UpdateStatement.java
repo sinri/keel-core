@@ -2,6 +2,7 @@ package io.github.sinri.keel.mysql.statement;
 
 import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.mysql.statement.component.UpdateSetAssignmentComponent;
+import io.github.sinri.keel.mysql.statement.mixin.ModifyStatementMixin;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -13,7 +14,7 @@ import java.util.function.Function;
 
 import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
 
-public class UpdateStatement extends AbstractModifyStatement {
+public class UpdateStatement extends AbstractStatement implements ModifyStatementMixin {
     /**
      * @since 3.0.19 changed to use UpdateSetAssignmentComponent as item
      */
@@ -28,9 +29,12 @@ public class UpdateStatement extends AbstractModifyStatement {
      * [LIMIT row_count]
      */
 
-    @Nonnull String ignoreMark = "";
-    @Nullable String schema;
-    @Nonnull String table="TABLE-NOT-SET";
+    @Nonnull
+    String ignoreMark = "";
+    @Nullable
+    String schema;
+    @Nonnull
+    String table = "TABLE-NOT-SET";
     long limit = 0;
 
     public UpdateStatement() {

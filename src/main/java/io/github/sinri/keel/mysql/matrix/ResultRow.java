@@ -3,7 +3,7 @@ package io.github.sinri.keel.mysql.matrix;
 import io.github.sinri.keel.core.json.JsonifiableEntity;
 import io.github.sinri.keel.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.mysql.exception.KeelSQLResultRowIndexError;
-import io.github.sinri.keel.mysql.statement.AbstractReadStatement;
+import io.github.sinri.keel.mysql.statement.mixin.ReadStatementMixin;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -26,7 +26,7 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
      */
     static <K, T extends ResultRow> Future<Map<K, List<T>>> fetchResultRowsToCategorizedMap(
             @Nonnull NamedMySQLConnection namedSqlConnection,
-            @Nonnull AbstractReadStatement readStatement,
+            @Nonnull ReadStatementMixin readStatement,
             @Nonnull Class<T> classOfTableRow,
             @Nonnull Function<T, K> categoryGenerator
     ) {
@@ -39,7 +39,7 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
      */
     static <K, T extends ResultRow> Future<Map<K, T>> fetchResultRowsToUniqueKeyBoundMap(
             @Nonnull NamedMySQLConnection namedMySQLConnection,
-            @Nonnull AbstractReadStatement readStatement,
+            @Nonnull ReadStatementMixin readStatement,
             @Nonnull Class<T> classOfTableRow,
             @Nonnull Function<T, K> uniqueKeyGenerator
     ) {
@@ -52,7 +52,7 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
      */
     static <T extends ResultRow> Future<List<T>> fetchResultRows(
             @Nonnull NamedMySQLConnection namedMySQLConnection,
-            @Nonnull AbstractReadStatement readStatement,
+            @Nonnull ReadStatementMixin readStatement,
             @Nonnull Class<T> classOfTableRow
     ) {
         return fetchResultRows(namedMySQLConnection.getSqlConnection(), readStatement, classOfTableRow);
@@ -64,7 +64,7 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
      */
     static <T extends ResultRow> Future<T> fetchResultRow(
             @Nonnull NamedMySQLConnection namedMySQLConnection,
-            @Nonnull AbstractReadStatement readStatement,
+            @Nonnull ReadStatementMixin readStatement,
             @Nonnull Class<T> classOfTableRow
     ) {
         return fetchResultRow(namedMySQLConnection.getSqlConnection(), readStatement, classOfTableRow);
@@ -76,7 +76,7 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
      */
     static <K, T extends ResultRow> Future<Map<K, List<T>>> fetchResultRowsToCategorizedMap(
             @Nonnull SqlConnection sqlConnection,
-            @Nonnull AbstractReadStatement readStatement,
+            @Nonnull ReadStatementMixin readStatement,
             @Nonnull Class<T> classOfTableRow,
             @Nonnull Function<T, K> categoryGenerator
     ) {
@@ -96,7 +96,7 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
      */
     static <K, T extends ResultRow> Future<Map<K, T>> fetchResultRowsToUniqueKeyBoundMap(
             @Nonnull SqlConnection sqlConnection,
-            @Nonnull AbstractReadStatement readStatement,
+            @Nonnull ReadStatementMixin readStatement,
             @Nonnull Class<T> classOfTableRow,
             @Nonnull Function<T, K> uniqueKeyGenerator
     ) {
@@ -118,7 +118,7 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
      */
     static <T extends ResultRow> Future<List<T>> fetchResultRows(
             @Nonnull SqlConnection sqlConnection,
-            @Nonnull AbstractReadStatement readStatement,
+            @Nonnull ReadStatementMixin readStatement,
             @Nonnull Class<T> classOfTableRow
     ) {
         return readStatement.execute(sqlConnection)
@@ -136,7 +136,7 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
      */
     static <T extends ResultRow> Future<T> fetchResultRow(
             @Nonnull SqlConnection sqlConnection,
-            @Nonnull AbstractReadStatement readStatement,
+            @Nonnull ReadStatementMixin readStatement,
             @Nonnull Class<T> classOfTableRow
     ) {
         return readStatement.execute(sqlConnection)

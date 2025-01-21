@@ -2,6 +2,10 @@ package io.github.sinri.keel.mysql.statement;
 
 import io.github.sinri.keel.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.mysql.matrix.ResultMatrix;
+import io.github.sinri.keel.mysql.statement.mixin.ModifyStatementMixin;
+import io.github.sinri.keel.mysql.statement.mixin.ReadStatementMixin;
+import io.github.sinri.keel.mysql.statement.mixin.SelectStatementMixin;
+import io.github.sinri.keel.mysql.statement.mixin.WriteIntoStatementMixin;
 import io.github.sinri.keel.mysql.statement.templated.TemplateArgumentMapping;
 import io.github.sinri.keel.mysql.statement.templated.TemplatedModifyStatement;
 import io.github.sinri.keel.mysql.statement.templated.TemplatedReadStatement;
@@ -33,7 +37,7 @@ public interface AnyStatement {
     /**
      * @since 3.2.21 return AbstractReadStatement
      */
-    static AbstractReadStatement select(@Nonnull Handler<SelectStatement> statementHandler) {
+    static SelectStatementMixin select(@Nonnull Handler<SelectStatement> statementHandler) {
         SelectStatement selectStatement = new SelectStatement();
         statementHandler.handle(selectStatement);
         return selectStatement;
@@ -42,7 +46,7 @@ public interface AnyStatement {
     /**
      * @since 3.2.21 return AbstractReadStatement
      */
-    static AbstractReadStatement union(@Nonnull Handler<UnionStatement> unionStatementHandler) {
+    static ReadStatementMixin union(@Nonnull Handler<UnionStatement> unionStatementHandler) {
         UnionStatement unionStatement = new UnionStatement();
         unionStatementHandler.handle(unionStatement);
         return unionStatement;
@@ -51,7 +55,7 @@ public interface AnyStatement {
     /**
      * @since 3.2.21 return AbstractModifyStatement
      */
-    static AbstractModifyStatement update(@Nonnull Handler<UpdateStatement> updateStatementHandler) {
+    static ModifyStatementMixin update(@Nonnull Handler<UpdateStatement> updateStatementHandler) {
         UpdateStatement updateStatement = new UpdateStatement();
         updateStatementHandler.handle(updateStatement);
         return updateStatement;
@@ -60,7 +64,7 @@ public interface AnyStatement {
     /**
      * @since 3.2.21 return AbstractModifyStatement
      */
-    static AbstractModifyStatement delete(@Nonnull Handler<DeleteStatement> deleteStatementHandler) {
+    static ModifyStatementMixin delete(@Nonnull Handler<DeleteStatement> deleteStatementHandler) {
         DeleteStatement deleteStatement = new DeleteStatement();
         deleteStatementHandler.handle(deleteStatement);
         return deleteStatement;
@@ -69,7 +73,7 @@ public interface AnyStatement {
     /**
      * @since 3.2.21 return AbstractWriteIntoStatement
      */
-    static AbstractWriteIntoStatement insert(Handler<WriteIntoStatement> statementHandler) {
+    static WriteIntoStatementMixin insert(Handler<WriteIntoStatement> statementHandler) {
         WriteIntoStatement writeIntoStatement = new WriteIntoStatement(WriteIntoStatement.INSERT);
         statementHandler.handle(writeIntoStatement);
         return writeIntoStatement;
@@ -78,7 +82,7 @@ public interface AnyStatement {
     /**
      * @since 3.2.21 return AbstractModifyStatement
      */
-    static AbstractModifyStatement replace(@Nonnull Handler<WriteIntoStatement> statementHandler) {
+    static WriteIntoStatementMixin replace(@Nonnull Handler<WriteIntoStatement> statementHandler) {
         WriteIntoStatement writeIntoStatement = new WriteIntoStatement(WriteIntoStatement.REPLACE);
         statementHandler.handle(writeIntoStatement);
         return writeIntoStatement;
@@ -97,7 +101,7 @@ public interface AnyStatement {
     /**
      * @since 3.2.21 return AbstractReadStatement
      */
-    static AbstractReadStatement templatedRead(@Nonnull String path, @Nonnull Handler<TemplateArgumentMapping> templatedReadStatementHandler) {
+    static ReadStatementMixin templatedRead(@Nonnull String path, @Nonnull Handler<TemplateArgumentMapping> templatedReadStatementHandler) {
         TemplatedReadStatement readStatement = TemplatedStatement.loadTemplateToRead(path);
         TemplateArgumentMapping arguments = readStatement.getArguments();
         templatedReadStatementHandler.handle(arguments);
@@ -107,7 +111,7 @@ public interface AnyStatement {
     /**
      * @since 3.2.21 return AbstractModifyStatement
      */
-    static AbstractModifyStatement templatedModify(@Nonnull String path, @Nonnull Handler<TemplateArgumentMapping> templatedModifyStatementHandler) {
+    static ModifyStatementMixin templatedModify(@Nonnull String path, @Nonnull Handler<TemplateArgumentMapping> templatedModifyStatementHandler) {
         TemplatedModifyStatement templatedModifyStatement = TemplatedStatement.loadTemplateToModify(path);
         TemplateArgumentMapping arguments = templatedModifyStatement.getArguments();
         templatedModifyStatementHandler.handle(arguments);

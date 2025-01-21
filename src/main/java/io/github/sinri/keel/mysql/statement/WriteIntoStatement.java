@@ -1,6 +1,7 @@
 package io.github.sinri.keel.mysql.statement;
 
 import io.github.sinri.keel.mysql.Quoter;
+import io.github.sinri.keel.mysql.statement.mixin.WriteIntoStatementMixin;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -12,7 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
 
-public class WriteIntoStatement extends AbstractWriteIntoStatement {
+public class WriteIntoStatement extends AbstractStatement implements WriteIntoStatementMixin {
     /**
      * insert [ignore] into schema.table (column...) values (value...),... ON DUPLICATE KEY UPDATE assignment_list
      * insert [ignore] into schema.table (column...) [select ...| table ...] ON DUPLICATE KEY UPDATE assignment_list
@@ -246,21 +247,20 @@ public class WriteIntoStatement extends AbstractWriteIntoStatement {
         return sql;
     }
 
-
-
     /**
      * 按照最大块尺寸分裂！
      *
      * @param chunkSize an integer
      * @return a list of WriteIntoStatement
      * @since 2.3
+     * @since 3.2.21 changed signature
      */
-    public List<WriteIntoStatement> divide(int chunkSize) {
+    public List<WriteIntoStatementMixin> divide(int chunkSize) {
         if (sourceTableName != null || sourceSelectSQL != null) {
             return List.of(this);
         }
 
-        List<WriteIntoStatement> list = new ArrayList<>();
+        List<WriteIntoStatementMixin> list = new ArrayList<>();
         int size = this.batchValues.size();
         for (int chunkStartIndex = 0; chunkStartIndex < size; chunkStartIndex += chunkSize) {
             WriteIntoStatement chunkWIS = new WriteIntoStatement(this.writeType);

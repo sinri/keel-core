@@ -54,15 +54,6 @@ abstract public class AbstractStatement implements AnyStatement {
     }
 
     /**
-     * @since 3.0.0
-     * @since 3.0.9 Moved to AnyStatement
-     */
-    @Deprecated(since = "3.0.9")
-    public static AbstractStatement buildWithRawSQL(String sql) {
-        return AnyStatement.raw(sql);
-    }
-
-    /**
      * 在给定的SqlConnection上执行SQL，异步返回ResultMatrix，或异步报错。
      * （如果SQL审计日志记录器可用）将为审计记录执行的SQL和执行结果，以及任何异常。
      *

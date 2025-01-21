@@ -1,6 +1,8 @@
 package io.github.sinri.keel.mysql.statement;
 
 
+import io.github.sinri.keel.mysql.statement.mixin.ModifyStatementMixin;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -9,8 +11,7 @@ import java.util.function.Function;
 
 import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
 
-public class DeleteStatement extends AbstractModifyStatement {
-    // final List<KeelMySQLCondition> whereConditions = new ArrayList<>();
+public class DeleteStatement extends AbstractStatement implements ModifyStatementMixin {
     final ConditionsComponent whereConditionsComponent = new ConditionsComponent();
     final List<String> sortRules = new ArrayList<>();
     /**

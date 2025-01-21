@@ -1,6 +1,5 @@
 package io.github.sinri.keel.mysql.statement;
 
-import io.github.sinri.keel.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.mysql.condition.CompareCondition;
 import io.github.sinri.keel.mysql.condition.GroupCondition;
 import io.github.sinri.keel.mysql.condition.MySQLCondition;
@@ -8,6 +7,7 @@ import io.github.sinri.keel.mysql.condition.RawCondition;
 import io.github.sinri.keel.mysql.exception.KeelSQLGenerateError;
 import io.github.sinri.keel.mysql.exception.KeelSQLResultRowIndexError;
 import io.github.sinri.keel.mysql.matrix.ResultMatrix;
+import io.github.sinri.keel.mysql.statement.mixin.SelectStatementMixin;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.SqlConnection;
 
@@ -20,7 +20,7 @@ import java.util.function.Function;
 
 import static io.github.sinri.keel.helper.KeelHelpersInterface.KeelHelpers;
 
-public class SelectStatement extends AbstractReadStatement {
+public class SelectStatement extends AbstractReadStatement implements SelectStatementMixin {
     final ConditionsComponent whereConditionsComponent;
     final ConditionsComponent havingConditionsComponent;
     private final List<String> tables;
@@ -251,17 +251,6 @@ public class SelectStatement extends AbstractReadStatement {
         return String.valueOf(sql);
     }
 
-    /**
-     * @since 3.2.3
-     * @since 3.2.20 Public
-     */
-    public Future<PaginationResult> queryForPagination(
-            NamedMySQLConnection sqlConnection,
-            long pageNo,
-            long pageSize
-    ) {
-        return this.queryForPagination(sqlConnection.getSqlConnection(), pageNo, pageSize);
-    }
 
     /**
      * Call from this instance, as the original query as Select Statement for all rows in certain order.
@@ -271,6 +260,7 @@ public class SelectStatement extends AbstractReadStatement {
      * @since 3.2.3
      * @since 3.2.20 Public
      */
+    @Override
     public Future<PaginationResult> queryForPagination(
             SqlConnection sqlConnection,
             long pageNo,
@@ -406,24 +396,6 @@ public class SelectStatement extends AbstractReadStatement {
                 column.append(" AS `").append(alias).append("`");
             }
             return String.valueOf(column);
-        }
-    }
-
-    public static class PaginationResult {
-        private final long total;
-        private final ResultMatrix resultMatrix;
-
-        public PaginationResult(long total, ResultMatrix resultMatrix) {
-            this.total = total;
-            this.resultMatrix = resultMatrix;
-        }
-
-        public long getTotal() {
-            return total;
-        }
-
-        public ResultMatrix getResultMatrix() {
-            return resultMatrix;
         }
     }
 }

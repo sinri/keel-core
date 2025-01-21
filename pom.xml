@@ -38,11 +38,13 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vertxVersion>4.5.8</vertxVersion>
+        <vertxVersion>4.5.11</vertxVersion>
         <commonmarkVersion>0.21.0</commonmarkVersion>
         <jacksonVersion>2.16.1</jacksonVersion>
-        <poiVersion>5.2.5</poiVersion>
-        <excelStreamingReader>4.3.1</excelStreamingReader>
+        <!--        <poiVersion>5.2.5</poiVersion>-->
+        <!--        <excelStreamingReader>4.3.1</excelStreamingReader>-->
+        <poiVersion>5.4.0</poiVersion>
+        <excelStreamingReader>5.0.3</excelStreamingReader>
         <oshiCoreVersion>6.4.9</oshiCoreVersion>
     </properties>
 

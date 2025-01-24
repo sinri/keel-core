@@ -1,16 +1,16 @@
-package io.github.sinri.keel.facade.tesuto;
+package io.github.sinri.keel.facade.tesuto.instant;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * @see KeelTest
+ * @see KeelInstantRunner
  * @since 3.0.10
  * Annotation used on the public methods (which should return {@code Future<Void>}) of the implement class of KeelTest.
  * @since 3.0.14 add skip.
  */
 @Retention(RetentionPolicy.RUNTIME)
-public @interface TestUnit {
+public @interface InstantRunUnit {
     /**
      * If it is set to true, the test method would be skipped.
      *

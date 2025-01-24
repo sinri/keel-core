@@ -1,8 +1,8 @@
 package io.github.sinri.keel.test.lab.pleiades;
 
 import io.github.sinri.keel.core.maids.pleiades.Pleiades;
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.vertx.core.DeploymentOptions;
@@ -17,8 +17,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
-public class TestForPleiades extends KeelTest {
-    @TestUnit
+public class TestForPleiades extends KeelInstantRunner {
+    @InstantRunUnit
     public Future<Void> run() {
         AtomicReference<String> deploymentIdRef = new AtomicReference<>();
         return Keel.getVertx().deployVerticle(

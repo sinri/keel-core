@@ -1,8 +1,8 @@
 package io.github.sinri.keel.test.lab.mysql;
 
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
-import io.github.sinri.keel.facade.tesuto.TestUnitResult;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunnerResult;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.mysql.statement.UpdateStatement;
 import io.github.sinri.keel.integration.mysql.statement.component.CaseOperator;
 import io.github.sinri.keel.integration.mysql.statement.component.CaseOperatorPair;
@@ -12,7 +12,7 @@ import io.vertx.core.Future;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public class StatementTest extends KeelTest {
+public class StatementTest extends KeelInstantRunner {
     @Nonnull
     @Override
     protected Future<Void> starting() {
@@ -21,11 +21,11 @@ public class StatementTest extends KeelTest {
 
     @Nonnull
     @Override
-    protected Future<Void> ending(List<TestUnitResult> testUnitResults) {
+    protected Future<Void> ending(List<InstantRunnerResult> testUnitResults) {
         return Future.succeededFuture();
     }
 
-    @TestUnit
+    @InstantRunUnit
     public Future<Void> testUpdateStatement() {
         var sql = new UpdateStatement()
                 .setWithValue("a1", "b'c")

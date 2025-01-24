@@ -2,14 +2,14 @@ package io.github.sinri.keel.test.lab.json;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.vertx.core.Future;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 
-public class JsonTest2 extends KeelTest {
-    @TestUnit
+public class JsonTest2 extends KeelInstantRunner {
+    @InstantRunUnit
     public Future<Void> test() {
         var j = new JsonObject()
                 .put("name", "asdf")

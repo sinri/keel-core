@@ -1,7 +1,7 @@
 package io.github.sinri.keel.test.lab.helper;
 
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
@@ -16,10 +16,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
-public class MemTest extends KeelTest {
+public class MemTest extends KeelInstantRunner {
     private final MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
 
-    @TestUnit(skip = true)
+    @InstantRunUnit(skip = true)
     public Future<Void> test1() {
         List<MemoryBlock> list = new ArrayList<>();
         return Keel.asyncCallStepwise(100, i -> {
@@ -32,7 +32,7 @@ public class MemTest extends KeelTest {
         });
     }
 
-    @TestUnit(skip = true)
+    @InstantRunUnit(skip = true)
     public Future<Void> test2() {
         double a = 1.3;
         double b = a * 2;
@@ -71,7 +71,7 @@ public class MemTest extends KeelTest {
         );
     }
 
-    @TestUnit
+    @InstantRunUnit
     public Future<Void> test3() {
         getLogger().info(r -> r.message("point 1"));
         AtomicInteger iRef = new AtomicInteger(2);

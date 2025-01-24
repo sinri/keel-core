@@ -1,7 +1,7 @@
 package io.github.sinri.keel.test.lab.csv;
 
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.poi.csv.KeelCsvReader;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
@@ -11,8 +11,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
-public class ReadCsvTest extends KeelTest {
-    @TestUnit
+public class ReadCsvTest extends KeelInstantRunner {
+    @InstantRunUnit
     public Future<Void> test() {
         String file = "/Users/leqee/code/Keel/src/test/resources/runtime/csv/write_test.csv";
 

@@ -1,4 +1,4 @@
-package io.github.sinri.keel.facade.tesuto;
+package io.github.sinri.keel.facade.tesuto.instant;
 
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
@@ -18,8 +18,9 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 /**
  * @since 3.0.10
  * Used for universal testing scenario, which could be run in IDE(A).
+ * @since 3.3.0 renamed from KeelTest
  */
-abstract public class KeelTest {
+abstract public class KeelInstantRunner {
     /**
      * @since 3.2.0
      */
@@ -47,17 +48,17 @@ abstract public class KeelTest {
 
         Method[] methods = aClass.getMethods();
 
-        List<TestUnitWrapper> testUnits = new ArrayList<>();
+        List<InstantRunUnitWrapper> testUnits = new ArrayList<>();
 
         for (Method method : methods) {
-            TestUnit annotation = method.getAnnotation(TestUnit.class);
+            InstantRunUnit annotation = method.getAnnotation(InstantRunUnit.class);
             if (annotation == null) {
                 continue;
             }
             if (!method.getReturnType().isAssignableFrom(Future.class)) {
                 continue;
             }
-            testUnits.add(new TestUnitWrapper(method, annotation));
+            testUnits.add(new InstantRunUnitWrapper(method, annotation));
         }
 
         if (testUnits.isEmpty()) {
@@ -65,16 +66,16 @@ abstract public class KeelTest {
             System.exit(1);
         }
 
-        VertxOptions vertxOptions = ((KeelTest) testInstance).buildVertxOptions();
+        VertxOptions vertxOptions = ((KeelInstantRunner) testInstance).buildVertxOptions();
         Keel.initializeVertxStandalone(vertxOptions);
 
         AtomicInteger totalPassedRef = new AtomicInteger();
-        List<TestUnitResult> testUnitResults = new ArrayList<>();
+        List<InstantRunnerResult> testUnitResults = new ArrayList<>();
 
         Future.succeededFuture()
                 .compose(v -> {
                     eventLogger.info(r -> r.message("STARTING..."));
-                    return ((KeelTest) testInstance).starting();
+                    return ((KeelInstantRunner) testInstance).starting();
                 })
                 .compose(v -> {
                     eventLogger.info(r -> r.message("RUNNING TEST UNITS..."));
@@ -83,7 +84,7 @@ abstract public class KeelTest {
                                 eventLogger.setDynamicEventLogFormatter(eventLogger -> {
                                     eventLogger.classification(testUnit.getName());
                                 });
-                                return testUnit.runTest((KeelTest) testInstance)
+                                return testUnit.runTest((KeelInstantRunner) testInstance)
                                         .compose(testUnitResult -> {
                                             testUnitResults.add(testUnitResult);
                                             return Future.succeededFuture();
@@ -115,7 +116,7 @@ abstract public class KeelTest {
                     eventLogger.exception(throwable, r -> r.message("ERROR OCCURRED DURING TESTING"));
                 })
                 .eventually(() -> {
-                    return ((KeelTest) testInstance).ending(testUnitResults);
+                    return ((KeelInstantRunner) testInstance).ending(testUnitResults);
                 })
                 .eventually(() -> {
                     return Keel.getVertx().close();
@@ -138,7 +139,7 @@ abstract public class KeelTest {
      * @since 3.2.0
      */
     protected void setLogger(@Nonnull KeelEventLogger eventLogger) {
-        KeelTest.eventLogger = eventLogger;
+        KeelInstantRunner.eventLogger = eventLogger;
     }
 
     @Deprecated(since = "3.2.0")
@@ -151,7 +152,7 @@ abstract public class KeelTest {
         return Future.succeededFuture();
     }
 
-    protected @Nonnull Future<Void> ending(List<TestUnitResult> testUnitResults) {
+    protected @Nonnull Future<Void> ending(List<InstantRunnerResult> testUnitResults) {
         return Future.succeededFuture();
     }
 

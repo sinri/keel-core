@@ -1,18 +1,18 @@
-package io.github.sinri.keel.facade.tesuto;
+package io.github.sinri.keel.facade.tesuto.instant;
 
 import javax.annotation.Nonnull;
 
 /**
  * @since 3.0.14 add skip.
  */
-public class TestUnitResult {
+public class InstantRunnerResult {
     private final @Nonnull String testName;
     private Long spentTime;
     private Boolean done;
     private Throwable cause;
     private Boolean skipped;
 
-    public TestUnitResult(@Nonnull String name) {
+    public InstantRunnerResult(@Nonnull String name) {
         this.testName = name;
     }
 
@@ -39,7 +39,7 @@ public class TestUnitResult {
         return spentTime;
     }
 
-    public TestUnitResult setSpentTime(Long spentTime) {
+    public InstantRunnerResult setSpentTime(Long spentTime) {
         this.spentTime = spentTime;
         return this;
     }

@@ -1,8 +1,8 @@
 package io.github.sinri.keel.test.lab.excel;
 
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
-import io.github.sinri.keel.facade.tesuto.TestUnitResult;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunnerResult;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.poi.excel.KeelSheet;
 import io.github.sinri.keel.integration.poi.excel.KeelSheets;
 import io.vertx.core.Future;
@@ -13,7 +13,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
-public class XlsIssueTest extends KeelTest {
+public class XlsIssueTest extends KeelInstantRunner {
     @Nonnull
     @Override
     protected Future<Void> starting() {
@@ -22,11 +22,11 @@ public class XlsIssueTest extends KeelTest {
 
     @Nonnull
     @Override
-    protected Future<Void> ending(List<TestUnitResult> testUnitResults) {
+    protected Future<Void> ending(List<InstantRunnerResult> testUnitResults) {
         return Future.succeededFuture();
     }
 
-    @TestUnit
+    @InstantRunUnit
     public Future<Void> giveMeFive() {
         try {
             var path = "/Users/leqee/code/Keel/src/test/resources/excel/excel_5.xls";

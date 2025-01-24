@@ -1,7 +1,5 @@
-package io.github.sinri.keel.web.http;
+package io.github.sinri.keel.web.http.prehandler;
 
-
-import io.github.sinri.keel.web.http.prehandler.PreHandlerChain;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

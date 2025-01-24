@@ -1,4 +1,4 @@
-package io.github.sinri.keel.facade.tesuto;
+package io.github.sinri.keel.facade.tesuto.instant;
 
 import io.vertx.core.Future;
 
@@ -7,19 +7,19 @@ import java.lang.reflect.Method;
 /**
  * @since 3.0.10
  */
-class TestUnitWrapper {
+class InstantRunUnitWrapper {
     private final Method method;
-    private final TestUnit annotation;
-    private final TestUnitResult testUnitResult;
+    private final InstantRunUnit annotation;
+    private final InstantRunnerResult testUnitResult;
 
 
-    public TestUnitWrapper(Method method, TestUnit annotation) {
+    public InstantRunUnitWrapper(Method method, InstantRunUnit annotation) {
         this.method = method;
         this.annotation = annotation;
-        this.testUnitResult = new TestUnitResult(method.getName());
+        this.testUnitResult = new InstantRunnerResult(method.getName());
     }
 
-    public Future<TestUnitResult> runTest(KeelTest testInstance) {
+    public Future<InstantRunnerResult> runTest(KeelInstantRunner testInstance) {
         long startTime = System.currentTimeMillis();
 
         return Future.succeededFuture(annotation.skip())

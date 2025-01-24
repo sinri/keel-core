@@ -1,6 +1,6 @@
 package io.github.sinri.keel.web.http.prehandler;
 
-import io.github.sinri.keel.web.http.ApiMeta;
+import io.github.sinri.keel.web.http.receptionist.ApiMeta;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.RoutingContext;

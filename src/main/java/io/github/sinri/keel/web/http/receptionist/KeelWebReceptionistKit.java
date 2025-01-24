@@ -1,6 +1,5 @@
 package io.github.sinri.keel.web.http.receptionist;
 
-import io.github.sinri.keel.web.http.ApiMeta;
 import io.github.sinri.keel.web.http.prehandler.KeelPlatformHandler;
 import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
@@ -26,7 +25,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 3.0.0 TEST PASSED
  * @deprecated since 3.2.13, use `KeelWebReceptionistLoader` instead.
  */
-@Deprecated(since = "3.2.13")
+@Deprecated(since = "3.2.13", forRemoval = true)
 public class KeelWebReceptionistKit<R extends KeelWebReceptionist> {
     private final Router router;
     private final Class<R> classOfReceptionist;

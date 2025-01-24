@@ -1,13 +1,13 @@
 package io.github.sinri.keel.test.lab.unit;
 
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.vertx.core.Future;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
-public class HikaruTest extends KeelTest {
-    @TestUnit
+public class HikaruTest extends KeelInstantRunner {
+    @InstantRunUnit
     public Future<Void> testHikaruForPikas() {
         Pikas all = Keel.reflectionHelper().getAnnotationOfClass(Hikaru.class, Pikas.class);
         for (Pika pika : all.value()) {
@@ -16,7 +16,7 @@ public class HikaruTest extends KeelTest {
         return Future.succeededFuture();
     }
 
-    @TestUnit
+    @InstantRunUnit
     public Future<Void> testHikaruForPika() {
         Pika[] annotationsOfClass = Keel.reflectionHelper().getAnnotationsOfClass(Hikaru.class, Pika.class);
         for (Pika pika : annotationsOfClass) {

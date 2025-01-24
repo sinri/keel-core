@@ -1,8 +1,8 @@
 package io.github.sinri.keel.test.lab.excel;
 
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
-import io.github.sinri.keel.facade.tesuto.TestUnitResult;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunnerResult;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.poi.excel.KeelSheet;
 import io.github.sinri.keel.integration.poi.excel.KeelSheets;
 import io.vertx.core.Future;
@@ -13,7 +13,7 @@ import java.util.List;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
-public class WriteHugeExcelTest extends KeelTest {
+public class WriteHugeExcelTest extends KeelInstantRunner {
     private static final String file = "/Users/sinri/code/keel/src/test/resources/runtime/huge.xlsx";
 
 
@@ -25,7 +25,7 @@ public class WriteHugeExcelTest extends KeelTest {
 
     @Nonnull
     @Override
-    protected Future<Void> ending(List<TestUnitResult> testUnitResults) {
+    protected Future<Void> ending(List<InstantRunnerResult> testUnitResults) {
         return Future.succeededFuture();
     }
 
@@ -44,7 +44,7 @@ public class WriteHugeExcelTest extends KeelTest {
         return Future.succeededFuture();
     }
 
-    @TestUnit(skip = true)
+    @InstantRunUnit(skip = true)
     public Future<Void> testWriteNotStream() {
         KeelSheets sheets = new KeelSheets();
         KeelSheet sheet = sheets.generateWriterForSheet("Huge");
@@ -57,7 +57,7 @@ public class WriteHugeExcelTest extends KeelTest {
                 });
     }
 
-    @TestUnit
+    @InstantRunUnit
     public Future<Void> testWriteStream() {
         KeelSheets sheets = new KeelSheets();
         sheets.useStreamWrite();

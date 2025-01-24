@@ -1,7 +1,7 @@
 package io.github.sinri.keel.test.lab.excel;
 
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.poi.excel.KeelSheet;
 import io.github.sinri.keel.integration.poi.excel.KeelSheets;
 import io.github.sinri.keel.integration.poi.excel.entity.KeelSheetMatrixRow;
@@ -11,11 +11,11 @@ import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 
-public class ReadWriteExcelTest extends KeelTest {
+public class ReadWriteExcelTest extends KeelInstantRunner {
     private static final String file = "/Users/leqee/code/Keel/src/test/resources/runtime/excel/excel_6.xlsx";
 
 
-    @TestUnit(skip = true)
+    @InstantRunUnit(skip = true)
     public Future<Void> write() {
         KeelSheets keelSheets = KeelSheets.autoGenerateXLSX();
         KeelSheet keelSheet = keelSheets.generateWriterForSheet("First Sheet");
@@ -36,7 +36,7 @@ public class ReadWriteExcelTest extends KeelTest {
         return Future.succeededFuture();
     }
 
-    @TestUnit(skip = false)
+    @InstantRunUnit(skip = false)
     public Future<Void> read() {
         KeelSheets keelSheets = KeelSheets.factory(file);
         KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);

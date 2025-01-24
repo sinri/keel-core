@@ -1,7 +1,7 @@
 package io.github.sinri.keel.test.lab.mysql;
 
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.mysql.KeelMySQLConfiguration;
 import io.vertx.core.Future;
 
@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
-public class DebugA extends KeelTest {
+public class DebugA extends KeelInstantRunner {
 
     @Nonnull
     @Override
@@ -18,7 +18,7 @@ public class DebugA extends KeelTest {
         return Future.succeededFuture();
     }
 
-    @TestUnit
+    @InstantRunUnit
     public Future<Void> test1() {
         KeelMySQLConfiguration pioneerConfig = KeelMySQLConfiguration.loadConfigurationForDataSource(Keel.getConfiguration(), "pioneer");
         return pioneerConfig.instantQuery(

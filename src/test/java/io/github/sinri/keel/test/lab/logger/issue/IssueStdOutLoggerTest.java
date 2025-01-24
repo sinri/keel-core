@@ -1,7 +1,7 @@
 package io.github.sinri.keel.test.lab.logger.issue;
 
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenterAsSync;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.github.sinri.keel.logger.issue.recorder.adapter.SyncStdoutAdapter;
@@ -10,7 +10,7 @@ import io.vertx.core.Future;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public class IssueStdOutLoggerTest extends KeelTest {
+public class IssueStdOutLoggerTest extends KeelInstantRunner {
     private KeelIssueRecordCenterAsSync center;
 
     @Nonnull
@@ -21,7 +21,7 @@ public class IssueStdOutLoggerTest extends KeelTest {
         return Future.succeededFuture();
     }
 
-    @TestUnit
+    @InstantRunUnit
     public Future<Void> testForStdOutSyncAlef() {
         KeelIssueRecorder<AlefIssueRecord> recorder = center.generateIssueRecorder("StandoutOutputSync", AlefIssueRecord::new);
         recorder.record(issue -> {
@@ -30,7 +30,7 @@ public class IssueStdOutLoggerTest extends KeelTest {
         return Future.succeededFuture();
     }
 
-    @TestUnit
+    @InstantRunUnit
     public Future<Void> testForStdOutSyncBet() {
         KeelIssueRecorder<BetIssueRecord> recorder = center.generateIssueRecorder("StandoutOutputSync", () -> {
             return new BetIssueRecord("testForStdOutSyncBet");

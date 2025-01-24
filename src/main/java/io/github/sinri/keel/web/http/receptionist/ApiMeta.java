@@ -1,4 +1,4 @@
-package io.github.sinri.keel.web.http;
+package io.github.sinri.keel.web.http.receptionist;
 
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;

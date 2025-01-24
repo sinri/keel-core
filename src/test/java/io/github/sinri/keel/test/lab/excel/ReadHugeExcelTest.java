@@ -1,8 +1,8 @@
 package io.github.sinri.keel.test.lab.excel;
 
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
-import io.github.sinri.keel.facade.tesuto.TestUnitResult;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunnerResult;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.poi.excel.KeelSheet;
 import io.github.sinri.keel.integration.poi.excel.KeelSheets;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-public class ReadHugeExcelTest extends KeelTest {
+public class ReadHugeExcelTest extends KeelInstantRunner {
     private static final String file = "/Users/leqee/code/Keel/src/test/resources/excel/excel_0.xlsx";
 
     @Nonnull
@@ -32,7 +32,7 @@ public class ReadHugeExcelTest extends KeelTest {
 
     @Nonnull
     @Override
-    protected Future<Void> ending(List<TestUnitResult> testUnitResults) {
+    protected Future<Void> ending(List<InstantRunnerResult> testUnitResults) {
 //        try {
 //            this.excelStreamReader.close();
 //        } catch (IOException e) {
@@ -45,7 +45,7 @@ public class ReadHugeExcelTest extends KeelTest {
      * Read 20w rows, SYNC.
      * Test Result: UNIT [test1] PASSED. Spent 10093 ms;
      */
-    @TestUnit
+    @InstantRunUnit
     public Future<Void> test1() {
         var excelStreamReader = KeelSheets.factory(file);
         KeelSheet excelSheetReader = excelStreamReader.generateReaderForSheet(0);
@@ -67,7 +67,7 @@ public class ReadHugeExcelTest extends KeelTest {
      *
      * @return
      */
-    @TestUnit
+    @InstantRunUnit
     public Future<Void> test2() {
         var excelStreamReader = KeelSheets.factory(file);
         KeelSheet excelSheetReader = excelStreamReader.generateReaderForSheet(0);

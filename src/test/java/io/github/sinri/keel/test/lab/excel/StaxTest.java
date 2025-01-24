@@ -1,8 +1,8 @@
 package io.github.sinri.keel.test.lab.excel;
 
 import com.github.pjfanning.xlsx.StreamingReader;
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.poi.excel.FileAccessOptions;
 import io.github.sinri.keel.integration.poi.excel.KeelSheet;
 import io.github.sinri.keel.integration.poi.excel.KeelSheets;
@@ -14,8 +14,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
-public class StaxTest extends KeelTest {
-    @TestUnit(skip = true)
+public class StaxTest extends KeelInstantRunner {
+    @InstantRunUnit(skip = true)
     public Future<Void> test1() {
         FileInputStream in = null;
         try {
@@ -45,7 +45,7 @@ public class StaxTest extends KeelTest {
         return Future.succeededFuture();
     }
 
-    @TestUnit
+    @InstantRunUnit
     public Future<Void> test2() {
         KeelSheets keelSheets = KeelSheets.openFile(new FileAccessOptions()
                         .setStreamingReaderBuilder(builder -> {

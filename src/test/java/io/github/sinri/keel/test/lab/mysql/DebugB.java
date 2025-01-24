@@ -1,7 +1,7 @@
 package io.github.sinri.keel.test.lab.mysql;
 
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.mysql.DynamicNamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.KeelMySQLDataSourceProvider;
 import io.github.sinri.keel.integration.mysql.NamedMySQLDataSource;
@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
-public class DebugB extends KeelTest {
+public class DebugB extends KeelInstantRunner {
     private NamedMySQLDataSource<DynamicNamedMySQLConnection> dataSource;
 
     @Nonnull
@@ -29,7 +29,7 @@ public class DebugB extends KeelTest {
                 });
     }
 
-    @TestUnit
+    @InstantRunUnit
     public Future<Void> insertIt() {
         return dataSource.withConnection(dynamicNamedMySQLConnection -> {
                     return AnyStatement.insert(w -> {
@@ -60,7 +60,7 @@ public class DebugB extends KeelTest {
                 });
     }
 
-    @TestUnit
+    @InstantRunUnit
     public Future<Void> readIt() {
         return dataSource.withConnection(dynamicNamedMySQLConnection -> {
                     return AnyStatement.select(s -> s.from("cornerstone.lab_1")

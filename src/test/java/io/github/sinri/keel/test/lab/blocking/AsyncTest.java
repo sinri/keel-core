@@ -1,7 +1,7 @@
 package io.github.sinri.keel.test.lab.blocking;
 
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.vertx.core.Future;
 
 import java.util.ArrayList;
@@ -11,9 +11,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
-public class AsyncTest extends KeelTest {
+public class AsyncTest extends KeelInstantRunner {
 
-    @TestUnit
+    @InstantRunUnit
     public Future<Void> foreachBreakableTest() {
         List<Integer> list = new ArrayList<>();
         for (int i = 0; i < 10; i++) {

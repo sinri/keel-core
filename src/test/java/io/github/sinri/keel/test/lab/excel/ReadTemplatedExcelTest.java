@@ -1,8 +1,8 @@
 package io.github.sinri.keel.test.lab.excel;
 
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
-import io.github.sinri.keel.facade.tesuto.TestUnitResult;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunnerResult;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.poi.excel.KeelSheet;
 import io.github.sinri.keel.integration.poi.excel.KeelSheets;
 import io.github.sinri.keel.integration.poi.excel.entity.KeelSheetMatrix;
@@ -18,7 +18,7 @@ import java.util.List;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
-public class ReadTemplatedExcelTest extends KeelTest {
+public class ReadTemplatedExcelTest extends KeelInstantRunner {
     private static final String file = "/Users/leqee/code/Keel/src/test/resources/excel/excel_1.xlsx";
     private static final String fileXls = "/Users/leqee/code/Keel/src/test/resources/excel/excel_4.xls";
 
@@ -31,11 +31,11 @@ public class ReadTemplatedExcelTest extends KeelTest {
 
     @Nonnull
     @Override
-    protected Future<Void> ending(List<TestUnitResult> testUnitResults) {
+    protected Future<Void> ending(List<InstantRunnerResult> testUnitResults) {
         return Future.succeededFuture();
     }
 
-    @TestUnit(skip = true)
+    @InstantRunUnit(skip = true)
     public Future<Void> test1() {
         try (KeelSheets keelSheets = KeelSheets.factory(file)) {
             KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
@@ -57,7 +57,7 @@ public class ReadTemplatedExcelTest extends KeelTest {
         return Future.succeededFuture();
     }
 
-    @TestUnit(skip = false)
+    @InstantRunUnit(skip = false)
     public Future<Void> test2() {
         KeelSheets keelSheets = KeelSheets.factory(file);
         KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
@@ -76,7 +76,7 @@ public class ReadTemplatedExcelTest extends KeelTest {
                 });
     }
 
-    @TestUnit(skip = true)
+    @InstantRunUnit(skip = true)
     public Future<Void> test3() {
         try (KeelSheets keelSheets = KeelSheets.factory(file)) {
             KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
@@ -88,7 +88,7 @@ public class ReadTemplatedExcelTest extends KeelTest {
         return Future.succeededFuture();
     }
 
-    @TestUnit(skip = true)
+    @InstantRunUnit(skip = true)
     public Future<Void> test4() {
         KeelSheets keelSheets = KeelSheets.factory(file);
         KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
@@ -109,7 +109,7 @@ public class ReadTemplatedExcelTest extends KeelTest {
 
     }
 
-    @TestUnit(skip = true)
+    @InstantRunUnit(skip = true)
     public Future<Void> test5() {
         FileInputStream fileInputStream;
         try {

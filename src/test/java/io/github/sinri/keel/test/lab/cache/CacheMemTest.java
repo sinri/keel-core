@@ -2,8 +2,8 @@ package io.github.sinri.keel.test.lab.cache;
 
 import io.github.sinri.keel.core.cache.KeelCacheInterface;
 import io.github.sinri.keel.core.helper.runtime.KeelRuntimeMonitor;
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
@@ -12,7 +12,7 @@ import javax.annotation.Nonnull;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
-public class CacheMemTest extends KeelTest {
+public class CacheMemTest extends KeelInstantRunner {
     @Nonnull
     @Override
     protected Future<Void> starting() {
@@ -28,7 +28,7 @@ public class CacheMemTest extends KeelTest {
         return super.starting();
     }
 
-    @TestUnit
+    @InstantRunUnit
     public Future<Void> test1() {
         KeelCacheInterface<String, JsonObject> cache = KeelCacheInterface.createDefaultInstance();
 

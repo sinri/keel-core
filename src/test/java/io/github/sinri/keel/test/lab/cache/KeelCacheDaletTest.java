@@ -1,8 +1,8 @@
 package io.github.sinri.keel.test.lab.cache;
 
 import io.github.sinri.keel.core.cache.impl.KeelCacheDalet;
-import io.github.sinri.keel.facade.tesuto.KeelTest;
-import io.github.sinri.keel.facade.tesuto.TestUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.logger.KeelLogLevel;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -13,7 +13,7 @@ import java.util.Date;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
-public class KeelCacheDaletTest extends KeelTest {
+public class KeelCacheDaletTest extends KeelInstantRunner {
 
     @Nonnull
     @Override
@@ -22,7 +22,7 @@ public class KeelCacheDaletTest extends KeelTest {
         return super.starting();
     }
 
-    @TestUnit
+    @InstantRunUnit
     public Future<Void> test1() {
         Dalet dalet = new Dalet();
         return dalet.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER))

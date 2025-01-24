@@ -1,7 +1,7 @@
 package io.github.sinri.keel.test.dysonsphere.receptionist;
 
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.github.sinri.keel.web.http.ApiMeta;
+import io.github.sinri.keel.web.http.receptionist.ApiMeta;
 import io.github.sinri.keel.web.http.receptionist.KeelWebFutureReceptionist;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;

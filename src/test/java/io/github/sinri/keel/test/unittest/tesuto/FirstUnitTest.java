@@ -1,6 +1,6 @@
 package io.github.sinri.keel.test.unittest.tesuto;
 
-import io.github.sinri.keel.facade.tesuto.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 

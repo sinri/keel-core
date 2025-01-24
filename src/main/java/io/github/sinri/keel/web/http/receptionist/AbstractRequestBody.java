@@ -1,4 +1,4 @@
-package io.github.sinri.keel.web.http;
+package io.github.sinri.keel.web.http.receptionist;
 
 import io.github.sinri.keel.core.json.SimpleJsonifiableEntity;
 import io.vertx.core.json.JsonObject;

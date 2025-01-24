@@ -1,8 +1,7 @@
 package io.github.sinri.keel.web.http.receptionist;
 
-import io.github.sinri.keel.web.http.ApiMeta;
-import io.github.sinri.keel.web.http.PreHandlerChainMeta;
 import io.github.sinri.keel.web.http.prehandler.PreHandlerChain;
+import io.github.sinri.keel.web.http.prehandler.PreHandlerChainMeta;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.ext.web.Route;

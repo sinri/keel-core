@@ -1,6 +1,5 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
@@ -146,7 +145,7 @@ public class TableRowClassSourceCodeGenerator {
 
     private Future<Void> generateForTables(String packageName, String packagePath, Collection<String> tables) {
         Map<String, String> writeMap = new HashMap<>();
-        return KeelAsyncKit.iterativelyCall(
+        return Keel.asyncCallIteratively(
                         tables,
                         table -> {
                             String className = KeelHelpers.stringHelper().fromUnderScoreCaseToCamelCase(table) + "TableRow";
@@ -158,7 +157,7 @@ public class TableRowClassSourceCodeGenerator {
                                     });
                         })
                 .compose(v -> {
-                    return KeelAsyncKit.iterativelyCall(writeMap.entrySet(), entry -> {
+                    return Keel.asyncCallIteratively(writeMap.entrySet(), entry -> {
                         var classFile = entry.getKey();
                         var code = entry.getValue();
                         return Keel.getVertx().fileSystem().writeFile(classFile, Buffer.buffer(code));

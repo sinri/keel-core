@@ -1,6 +1,5 @@
 package io.github.sinri.keel.test.lab.excel;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.facade.tesuto.KeelTest;
 import io.github.sinri.keel.facade.tesuto.TestUnit;
 import io.github.sinri.keel.facade.tesuto.TestUnitResult;
@@ -11,6 +10,8 @@ import io.vertx.core.Future;
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class WriteHugeExcelTest extends KeelTest {
     private static final String file = "/Users/sinri/code/keel/src/test/resources/runtime/huge.xlsx";
@@ -79,7 +80,7 @@ public class WriteHugeExcelTest extends KeelTest {
         headerRow.add("SPENT");
         sheet.blockWriteAllRows(List.of(headerRow));
 
-        return KeelAsyncKit.stepwiseCall(200, ii -> {
+        return Keel.asyncCallStepwise(200, ii -> {
             List<List<String>> buffer = new ArrayList<>();
             for (int i = 0; i < 1000; i++) {
                 List<String> row = new ArrayList<>();
@@ -87,7 +88,7 @@ public class WriteHugeExcelTest extends KeelTest {
                 row.add(String.valueOf((System.currentTimeMillis() - startTime) / 1000.0));
                 buffer.add(row);
             }
-            sheet.blockWriteAllRows(buffer, ii * 1000, 0);
+            sheet.blockWriteAllRows(buffer, Math.toIntExact(ii * 1000), 0);
             return Future.succeededFuture();
         });
     }

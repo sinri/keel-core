@@ -1,6 +1,5 @@
 package io.github.sinri.keel.test.lab.redis;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.integration.redis.RedisKit;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -60,12 +59,12 @@ public class RedisTest {
         return kit.setScalarToKeyForSeconds(key, new Date().toString(), 5)
                 .compose(written -> {
                     System.out.println("written");
-                    return KeelAsyncKit.sleep(2000L);
+                    return Keel.asyncSleep(2000L);
                 })
                 .compose(slept -> {
                     return kit.getString(key).compose(value -> {
                         System.out.println("after 2s, value: " + value);
-                        return KeelAsyncKit.sleep(2000L);
+                        return Keel.asyncSleep(2000L);
                     });
                 })
                 .compose(slept -> {
@@ -78,7 +77,7 @@ public class RedisTest {
                     System.out.println("deletion: " + deleted);
                     return kit.getString(key).compose(value -> {
                         System.out.println("after deletion, value: " + value);
-                        return KeelAsyncKit.sleep(2000L);
+                        return Keel.asyncSleep(2000L);
                     });
                 });
     }

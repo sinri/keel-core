@@ -1,6 +1,5 @@
 package io.github.sinri.keel.test.lab.pleiades;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.core.maids.pleiades.Pleiades;
 import io.github.sinri.keel.facade.tesuto.KeelTest;
 import io.github.sinri.keel.facade.tesuto.TestUnit;
@@ -37,18 +36,18 @@ public class TestForPleiades extends KeelTest {
                             new DeliveryOptions()
                                     .setSendTimeout(100L));
 
-                    return KeelAsyncKit.stepwiseCall(5, integer -> {
+                    return Keel.asyncCallStepwise(5, integer -> {
                                 PleiadesSample.sendMessage("A[" + integer + "]");
-                                return KeelAsyncKit.sleep(500L);
+                                return Keel.asyncSleep(500L);
                             })
                             .compose(v -> {
-                                return KeelAsyncKit.stepwiseCall(5000, integer -> {
+                                return Keel.asyncCallStepwise(5000, integer -> {
                                     sender.write("B[" + integer + "]");
-                                    return KeelAsyncKit.sleep(500L);
+                                    return Keel.asyncSleep(500L);
                                 });
                             })
                             .compose(v -> {
-                                return KeelAsyncKit.sleep(60_000L)
+                                return Keel.asyncSleep(60_000L)
                                         .compose(vv -> {
                                             return Keel.getVertx().undeploy(deploymentIdRef.get())
                                                     .compose(x -> {
@@ -63,7 +62,7 @@ public class TestForPleiades extends KeelTest {
                             });
                 })
                 .compose(v -> {
-                    return KeelAsyncKit.sleep(60_000L);
+                    return Keel.asyncSleep(60_000L);
                 });
     }
 
@@ -95,7 +94,7 @@ public class TestForPleiades extends KeelTest {
         @Override
         protected void handleMessage(Message<String> message) {
             getLogger().info("start with " + message.body());
-            KeelAsyncKit.sleep(2_000L)
+            Keel.asyncSleep(2_000L)
                     .andThen(slept -> {
                         getLogger().info("end with " + message.body());
                     });

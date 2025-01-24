@@ -1,6 +1,5 @@
 package io.github.sinri.keel.test.lab.queue;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.core.servant.queue.KeelQueueTask;
 import io.github.sinri.keel.core.servant.queue.QueueTaskIssueRecord;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
@@ -8,6 +7,8 @@ import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class TestQueueTask extends KeelQueueTask {
     String id;
@@ -33,7 +34,7 @@ public class TestQueueTask extends KeelQueueTask {
     @Override
     protected Future<Void> run() {
         getIssueRecorder().info(r -> r.message("START"));
-        return KeelAsyncKit.sleep(this.life * 1000L)
+        return Keel.asyncSleep(this.life * 1000L)
                 .eventually(() -> {
                     getIssueRecorder().info(r -> r.message("END"));
                     return Future.succeededFuture();

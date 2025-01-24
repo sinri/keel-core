@@ -1,7 +1,6 @@
 package io.github.sinri.keel.integration.mysql;
 
 import io.github.sinri.keel.core.TechnicalPreview;
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.facade.configuration.KeelConfigElement;
 import io.github.sinri.keel.integration.mysql.matrix.ResultMatrix;
 import io.vertx.core.Future;
@@ -221,13 +220,13 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
                                         .compose(preparedStatement -> {
                                             Cursor cursor = preparedStatement.cursor();
 
-                                            return KeelAsyncKit.repeatedlyCall(routineResult -> {
+                                            return Keel.asyncCallRepeatedly(routineResult -> {
                                                         if (!cursor.hasMore()) {
                                                             routineResult.stop();
                                                             return Future.succeededFuture();
                                                         }
 
-                                                        return cursor.read(readWindowSize).compose(readWindowFunction::apply);
+                                                        return cursor.read(readWindowSize).compose(readWindowFunction);
                                                     })
                                                     .eventually(() -> cursor.close());
                                         })

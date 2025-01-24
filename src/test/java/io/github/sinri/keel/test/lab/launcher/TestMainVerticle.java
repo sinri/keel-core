@@ -1,17 +1,18 @@
 package io.github.sinri.keel.test.lab.launcher;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.core.verticles.KeelVerticleImplWithEventLogger;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.vertx.core.Future;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class TestMainVerticle extends KeelVerticleImplWithEventLogger {
 
 
     @Override
     protected void startAsKeelVerticle() {
-        KeelAsyncKit.endless(() -> {
+        Keel.asyncCallEndlessly(() -> {
             getLogger().info(r -> r.message("X"));
             return Future.succeededFuture();
         });

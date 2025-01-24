@@ -1,6 +1,5 @@
 package io.github.sinri.keel.test.lab.cache;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.core.cache.impl.KeelCacheDalet;
 import io.github.sinri.keel.facade.tesuto.KeelTest;
 import io.github.sinri.keel.facade.tesuto.TestUnit;
@@ -35,9 +34,9 @@ public class KeelCacheDaletTest extends KeelTest {
                     return Future.failedFuture(throwable);
                 })
                 .compose(v -> {
-                    return KeelAsyncKit.stepwiseCall(10, i -> {
+                    return Keel.asyncCallStepwise(10, i -> {
                         getLogger().info("[" + i + "] " + dalet.read("last_cache_time"));
-                        return KeelAsyncKit.sleep(1000L);
+                        return Keel.asyncSleep(1000L);
                     });
                 })
                 .compose(v -> {
@@ -51,9 +50,9 @@ public class KeelCacheDaletTest extends KeelTest {
                             });
                 })
                 .compose(v -> {
-                    return KeelAsyncKit.stepwiseCall(10, i -> {
+                    return Keel.asyncCallStepwise(10, i -> {
                         getLogger().info("[" + i + "] " + dalet.read("last_cache_time"));
-                        return KeelAsyncKit.sleep(1000L);
+                        return Keel.asyncSleep(1000L);
                     });
                 });
     }

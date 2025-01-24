@@ -1,4 +1,4 @@
-package io.github.sinri.keel.core.async;
+package io.github.sinri.keel.facade.async.legacy;
 
 import io.vertx.core.Future;
 
@@ -12,6 +12,7 @@ import java.util.function.Function;
  * @param <T> Type of elements in the source collection
  * @since 1.13
  */
+@Deprecated(forRemoval = true, since = "3.3.0")
 public class FutureForEach<T> {
     private final Function<T, Future<Void>> asyncItemProcessFunction;
 

@@ -1,6 +1,5 @@
 package io.github.sinri.keel.test.lab.csv;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.facade.tesuto.KeelTest;
 import io.github.sinri.keel.facade.tesuto.TestUnit;
 import io.github.sinri.keel.integration.poi.csv.KeelCsvReader;
@@ -10,6 +9,8 @@ import io.vertx.core.json.JsonArray;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
+
 public class ReadCsvTest extends KeelTest {
     @TestUnit
     public Future<Void> test() {
@@ -18,7 +19,7 @@ public class ReadCsvTest extends KeelTest {
         return KeelCsvReader.create(file, StandardCharsets.UTF_8)
                 .compose(keelCsvReader -> {
                     AtomicInteger indexRef = new AtomicInteger(0);
-                    return KeelAsyncKit.repeatedlyCall(routineResult -> {
+                    return Keel.asyncCallRepeatedly(routineResult -> {
                                 return keelCsvReader.readRow()
                                         .compose(csvRow -> {
                                             if (csvRow == null) {
@@ -31,8 +32,8 @@ public class ReadCsvTest extends KeelTest {
                                                 }
                                                 getLogger().info(log -> log.message("ROW")
                                                         .context(c -> c
-                                                        .put("i", indexRef.get())
-                                                        .put("cell", array)
+                                                                .put("i", indexRef.get())
+                                                                .put("cell", array)
                                                         )
                                                 );
                                                 indexRef.incrementAndGet();

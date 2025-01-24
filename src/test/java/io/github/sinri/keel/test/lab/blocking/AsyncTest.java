@@ -1,6 +1,5 @@
 package io.github.sinri.keel.test.lab.blocking;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.facade.tesuto.KeelTest;
 import io.github.sinri.keel.facade.tesuto.TestUnit;
 import io.vertx.core.Future;
@@ -9,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class AsyncTest extends KeelTest {
 
@@ -50,7 +51,7 @@ public class AsyncTest extends KeelTest {
 
         public Future<Void> start() {
             Iterator<T> iterator = iterable.iterator();
-            return KeelAsyncKit.repeatedlyCall(routineResult -> {
+            return Keel.asyncCallRepeatedly(routineResult -> {
                 if (iterator.hasNext()) {
                     T next = iterator.next();
                     return handleItem(next, breakRef)

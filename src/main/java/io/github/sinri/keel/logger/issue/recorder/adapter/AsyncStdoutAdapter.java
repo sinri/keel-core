@@ -1,7 +1,6 @@
 package io.github.sinri.keel.logger.issue.recorder.adapter;
 
 import io.github.sinri.keel.core.TechnicalPreview;
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.core.servant.intravenous.KeelIntravenous;
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.github.sinri.keel.logger.issue.recorder.render.KeelIssueRecordRender;
@@ -10,6 +9,8 @@ import io.vertx.core.Promise;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.1.10
@@ -22,7 +23,7 @@ public class AsyncStdoutAdapter implements KeelIssueRecorderAdapter {
     private volatile boolean closed = true;
 
     private AsyncStdoutAdapter() {
-        this.intravenous = new KeelIntravenous<>(keelIssueRecords -> KeelAsyncKit.iterativelyCall(keelIssueRecords, this::writeOneIssueRecord));
+        this.intravenous = new KeelIntravenous<>(keelIssueRecords -> Keel.asyncCallIteratively(keelIssueRecords, this::writeOneIssueRecord));
         this.intravenous.start();
         closed = false;
     }

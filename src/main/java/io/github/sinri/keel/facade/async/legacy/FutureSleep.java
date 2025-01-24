@@ -1,4 +1,4 @@
-package io.github.sinri.keel.core.async;
+package io.github.sinri.keel.facade.async.legacy;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -13,6 +13,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  *
  * @since 2.9
  */
+@Deprecated(forRemoval = true, since = "3.3.0")
 public class FutureSleep {
     static Future<Void> call(long time) {
         return call(time, null);

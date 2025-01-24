@@ -1,4 +1,4 @@
-package io.github.sinri.keel.core.async;
+package io.github.sinri.keel.facade.async.legacy;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -7,6 +7,7 @@ import java.util.List;
 /**
  * @since 2.9.4
  */
+@Deprecated(forRemoval = true, since = "3.3.0")
 public class FailedInParallel extends Exception {
     private final @Nonnull List<Throwable> causes;
 

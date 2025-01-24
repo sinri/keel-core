@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.servant.intravenous;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.core.verticles.KeelVerticleImplWithEventLogger;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
@@ -12,6 +11,8 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @param <T>
@@ -52,10 +53,11 @@ abstract public class KeelIntravenousBase<T> extends KeelVerticleImplWithEventLo
         queueAcceptTask = true;
 
         int configuredBatchSize = getBatchSize();
-        KeelAsyncKit.endless(promise -> {
+
+        Keel.asyncCallRepeatedly(repeatedlyCallTask -> {
             this.interruptRef.set(null);
 
-            KeelAsyncKit.repeatedlyCall(routineResult -> {
+            return Keel.asyncCallRepeatedly(routineResult -> {
                         List<T> buffer = new ArrayList<>();
                         while (true) {
                             T t = queue.poll();
@@ -87,12 +89,13 @@ abstract public class KeelIntravenousBase<T> extends KeelVerticleImplWithEventLo
                     .andThen(ar -> {
                         this.interruptRef.set(Promise.promise());
 
-                        KeelAsyncKit.sleep(sleptTime(), getCurrentInterrupt())
+                        Keel.asyncSleep(sleptTime(), getCurrentInterrupt())
                                 .andThen(slept -> {
-                                    promise.complete();
+                                    repeatedlyCallTask.stop();
                                 });
                     });
         });
+
         startPromise.complete();
     }
 
@@ -119,12 +122,12 @@ abstract public class KeelIntravenousBase<T> extends KeelVerticleImplWithEventLo
     public Future<Void> shutdown() {
         declareShutdown();
         // waiting for the queue clear
-        return KeelAsyncKit.repeatedlyCall(routineResult -> {
+        return Keel.asyncCallRepeatedly(routineResult -> {
                     if (this.queue.isEmpty()) {
                         routineResult.stop();
                         return Future.succeededFuture();
                     } else {
-                        return KeelAsyncKit.sleep(100L);
+                        return Keel.asyncSleep(100L);
                     }
                 })
                 .compose(allTasksInQueueIsConsumed -> {

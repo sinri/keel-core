@@ -1,6 +1,5 @@
 package io.github.sinri.keel.facade.tesuto;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.vertx.core.Future;
@@ -85,11 +84,11 @@ public class KeelUnitTest {
     }
 
     protected void async(Handler<Promise<Void>> testHandler) {
-        KeelAsyncKit.pseudoAwait(testHandler);
+        Keel.pseudoAwait(testHandler);
     }
 
     protected void async(Supplier<Future<Void>> testSupplier) {
-        KeelAsyncKit.pseudoAwait(p -> {
+        Keel.pseudoAwait(p -> {
             testSupplier.get().andThen(ar -> {
                 if (ar.succeeded()) {
                     p.complete();

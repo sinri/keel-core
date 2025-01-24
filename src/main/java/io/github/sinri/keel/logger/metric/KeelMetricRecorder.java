@@ -1,12 +1,13 @@
 package io.github.sinri.keel.logger.metric;
 
 import io.github.sinri.keel.core.TechnicalPreview;
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.vertx.core.Future;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.1.9 Technical Preview
@@ -25,7 +26,7 @@ abstract public class KeelMetricRecorder {
     }
 
     public void start() {
-        KeelAsyncKit.repeatedlyCall(routineResult -> {
+        Keel.asyncCallRepeatedly(routineResult -> {
             return Future.succeededFuture()
                     .compose(v -> {
                         List<KeelMetricRecord> buffer = new ArrayList<>();
@@ -43,10 +44,10 @@ abstract public class KeelMetricRecorder {
                                 routineResult.stop();
                                 return Future.succeededFuture();
                             }
-                            return KeelAsyncKit.sleep(1000L);
+                            return Keel.asyncSleep(1000L);
                         } else {
                             Map<String, List<KeelMetricRecord>> map = groupByTopic(buffer);
-                            return KeelAsyncKit.iterativelyCall(map.keySet(), topic -> {
+                            return Keel.asyncCallIteratively(map.keySet(), topic -> {
                                 return handleForTopic(topic, map.get(topic));
                             });
                         }

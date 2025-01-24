@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.cutter;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
@@ -13,6 +12,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.2.18 greatly changed.
@@ -76,17 +77,17 @@ public class CutterOnString implements Cutter<String> {
 
         AtomicReference<String> chunkRef = new AtomicReference<>();
         AtomicInteger counter = new AtomicInteger(this.retainRepeat);
-        return KeelAsyncKit.repeatedlyCall(routineResult -> {
-                    return KeelAsyncKit.sleep(this.retainTime)
+        return Keel.asyncCallRepeatedly(routineResult -> {
+                    return Keel.asyncSleep(this.retainTime)
                             .compose(v -> {
-                                return KeelAsyncKit.repeatedlyCall(routineResultForRead -> {
+                                return Keel.asyncCallRepeatedly(routineResultForRead -> {
                                             doReadExclusively(vv -> {
                                                 var s = cutWithDelimiter(false);
                                                 chunkRef.set(s);
                                             });
                                             var s = chunkRef.get();
                                             if (s != null) {
-                                                if (!s.isEmpty() && !s.isBlank()) {
+                                                if (!s.isBlank()) {
                                                     handleComponent(s);
                                                 }
                                             } else {

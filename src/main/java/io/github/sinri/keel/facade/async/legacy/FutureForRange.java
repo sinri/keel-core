@@ -1,4 +1,4 @@
-package io.github.sinri.keel.core.async;
+package io.github.sinri.keel.facade.async.legacy;
 
 import io.vertx.core.Future;
 
@@ -11,6 +11,7 @@ import java.util.function.Function;
  *
  * @since 1.13
  */
+@Deprecated(forRemoval = true, since = "3.3.0")
 public class FutureForRange {
     private final Options options;
 

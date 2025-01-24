@@ -1,4 +1,4 @@
-package io.github.sinri.keel.core.async;
+package io.github.sinri.keel.facade.async.legacy;
 
 import io.vertx.core.Future;
 
@@ -9,6 +9,7 @@ import java.util.function.BiFunction;
 /**
  * @since 3.2.3
  */
+@Deprecated(forRemoval = true, since = "3.3.0")
 public class FutureForEachBreakable<T> {
 
     @Nonnull

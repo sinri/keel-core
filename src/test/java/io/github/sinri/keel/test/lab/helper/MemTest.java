@@ -1,6 +1,5 @@
 package io.github.sinri.keel.test.lab.helper;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.facade.tesuto.KeelTest;
 import io.github.sinri.keel.facade.tesuto.TestUnit;
 import io.vertx.core.Future;
@@ -23,10 +22,10 @@ public class MemTest extends KeelTest {
     @TestUnit(skip = true)
     public Future<Void> test1() {
         List<MemoryBlock> list = new ArrayList<>();
-        return KeelAsyncKit.stepwiseCall(100, i -> {
+        return Keel.asyncCallStepwise(100, i -> {
             list.add(new MemoryBlock());
             printMemoryUsage();
-            return KeelAsyncKit.sleep(10L)
+            return Keel.asyncSleep(10L)
                     .compose(v -> {
                         return Future.succeededFuture();
                     });
@@ -72,14 +71,6 @@ public class MemTest extends KeelTest {
         );
     }
 
-    private static class MemoryBlock {
-        private final byte[] data = new byte[100 * 1024 * 1024];
-
-        public byte[] getData() {
-            return data;
-        }
-    }
-
     @TestUnit
     public Future<Void> test3() {
         getLogger().info(r -> r.message("point 1"));
@@ -96,5 +87,13 @@ public class MemTest extends KeelTest {
             }
         });
         return promise.future();
+    }
+
+    private static class MemoryBlock {
+        private final byte[] data = new byte[100 * 1024 * 1024];
+
+        public byte[] getData() {
+            return data;
+        }
     }
 }

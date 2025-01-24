@@ -1,6 +1,5 @@
 package io.github.sinri.keel.test.lab.csv;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.facade.tesuto.KeelTest;
 import io.github.sinri.keel.facade.tesuto.TestUnit;
 import io.github.sinri.keel.integration.poi.csv.KeelCsvWriter;
@@ -8,6 +7,8 @@ import io.vertx.core.Future;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class WriteCsvTest extends KeelTest {
     @TestUnit
@@ -23,7 +24,7 @@ public class WriteCsvTest extends KeelTest {
 
         return KeelCsvWriter.create(file)
                 .compose(keelCsvWriter -> {
-                    return KeelAsyncKit.iterativelyCall(rows, keelCsvWriter::writeRow)
+                    return Keel.asyncCallIteratively(rows, keelCsvWriter::writeRow)
                             .compose(v -> {
                                 return keelCsvWriter.close();
                             });

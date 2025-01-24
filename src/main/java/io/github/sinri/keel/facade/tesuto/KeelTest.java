@@ -1,6 +1,5 @@
 package io.github.sinri.keel.facade.tesuto;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.vertx.core.Future;
@@ -80,7 +79,7 @@ abstract public class KeelTest {
                 .compose(v -> {
                     eventLogger.info(r -> r.message("RUNNING TEST UNITS..."));
 
-                    return KeelAsyncKit.iterativelyCall(testUnits, testUnit -> {
+                    return Keel.asyncCallIteratively(testUnits.iterator(), testUnit -> {
                                 eventLogger.setDynamicEventLogFormatter(eventLogger -> {
                                     eventLogger.classification(testUnit.getName());
                                 });

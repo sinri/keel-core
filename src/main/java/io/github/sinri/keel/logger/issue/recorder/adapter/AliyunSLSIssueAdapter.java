@@ -1,7 +1,6 @@
 package io.github.sinri.keel.logger.issue.recorder.adapter;
 
 import io.github.sinri.keel.core.TechnicalPreview;
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.github.sinri.keel.logger.issue.recorder.render.KeelIssueRecordRender;
 import io.vertx.core.Future;
@@ -41,7 +40,7 @@ abstract public class AliyunSLSIssueAdapter implements KeelIssueRecorderAdapter 
     }
 
     public final void start() {
-        KeelAsyncKit.repeatedlyCall(routineResult -> {
+        Keel.asyncCallRepeatedly(routineResult -> {
                     if (isStopped()) {
                         Keel.getLogger().warning("AliyunSLSIssueAdapter routine to stop");
                         routineResult.stop();
@@ -50,18 +49,18 @@ abstract public class AliyunSLSIssueAdapter implements KeelIssueRecorderAdapter 
 
                     Set<String> topics = Collections.unmodifiableSet(this.issueRecordQueueMap.keySet());
                     //Keel.getLogger().warning("AliyunSLSIssueAdapter routine unmodifiableSet of topics got");
-                    return KeelAsyncKit.iterativelyCall(topics, this::handleForTopic)
+                    return Keel.asyncCallIteratively(topics, this::handleForTopic)
                             .compose(v -> {
                                 //Keel.getLogger().warning("AliyunSLSIssueAdapter routine unmodifiableSet of topics all handled");
                                 AtomicLong total = new AtomicLong(0);
-                                return KeelAsyncKit.iterativelyCall(topics, topic -> {
+                                return Keel.asyncCallIteratively(topics, topic -> {
                                             total.addAndGet(this.issueRecordQueueMap.get(topic).size());
                                             return Future.succeededFuture();
                                         })
                                         .compose(vv -> {
                                             //Keel.getLogger().warning("AliyunSLSIssueAdapter routine counted");
                                             if (total.get() == 0) {
-                                                return KeelAsyncKit.sleep(500L);
+                                                return Keel.asyncSleep(500L);
                                             } else {
                                                 return Future.succeededFuture();
                                             }

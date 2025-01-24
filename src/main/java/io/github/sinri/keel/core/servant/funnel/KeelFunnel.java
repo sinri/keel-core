@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.servant.funnel;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.core.verticles.KeelVerticleImplWithEventLogger;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
@@ -12,6 +11,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.0.0
@@ -59,11 +60,10 @@ public class KeelFunnel extends KeelVerticleImplWithEventLogger {
 
     @Override
     protected void startAsKeelVerticle(Promise<Void> startPromise) {
-        KeelAsyncKit.endless(promise -> {
+        Keel.asyncCallRepeatedly(repeatedlyCallTask -> {
             this.interruptRef.set(null);
-            //System.out.println("ENDLESS "+System.currentTimeMillis());
 
-            KeelAsyncKit.repeatedlyCall(routineResult -> {
+            return Keel.asyncCallRepeatedly(routineResult -> {
                         Supplier<Future<Void>> supplier = queue.poll();
                         if (supplier == null) {
                             // no job to do
@@ -87,35 +87,12 @@ public class KeelFunnel extends KeelVerticleImplWithEventLogger {
                     .andThen(ar -> {
                         this.interruptRef.set(Promise.promise());
 
-                        KeelAsyncKit.sleep(this.sleepTimeRef.get(), getCurrentInterrupt())
+                        Keel.asyncSleep(this.sleepTimeRef.get(), getCurrentInterrupt())
                                 .andThen(slept -> {
-                                    promise.complete();
+                                    repeatedlyCallTask.stop();
                                 });
                     });
         });
         startPromise.complete();
     }
-
-
-//    @Deprecated
-//    public static void main(String[] args) {
-//        Keel.initializeVertxStandalone(new VertxOptions());
-//        KeelFunnel funnel = new KeelFunnel();
-//        funnel.setLogger(KeelOutputEventLogCenter.getInstance().createLogger("FunnelMainTest"));
-//        funnel.deployMe(new DeploymentOptions().setWorker(true)).compose(deploymentID -> {
-//                    funnel.add(new Supplier<Future<Void>>() {
-//                        @Override
-//                        public Future<Void> get() {
-//                            System.out.println("!!!");
-//                            return Future.succeededFuture();
-//                        }
-//                    });
-//                    return Future.succeededFuture();
-//                }).compose(v -> {
-//                    return KeelAsyncKit.sleep(3000L);
-//                })
-//                .eventually(v -> {
-//                    return Keel.getVertx().close();
-//                });
-//    }
 }

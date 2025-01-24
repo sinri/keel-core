@@ -1,12 +1,13 @@
 package io.github.sinri.keel.core.cache;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.core.cache.impl.KeelCacheBet;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @param <K>
@@ -98,9 +99,9 @@ public interface KeelAsyncCacheInterface<K, V> {
      * @since 3.0.4
      */
     default void startEndlessCleanUp(long sleepTime) {
-        KeelAsyncKit.endless(() -> {
+        Keel.asyncCallEndlessly(() -> {
             return cleanUp().compose(cleaned -> {
-                return KeelAsyncKit.sleep(sleepTime);
+                return Keel.asyncSleep(sleepTime);
             });
         });
     }

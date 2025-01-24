@@ -1,4 +1,4 @@
-package io.github.sinri.keel.core.async;
+package io.github.sinri.keel.facade.async.legacy;
 
 import io.github.sinri.keel.core.verticles.KeelVerticle;
 import io.github.sinri.keel.core.verticles.KeelVerticleImplPure;
@@ -21,8 +21,12 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 3.0.0
  * @since 3.0.8 changed a lot.
  */
+@Deprecated(forRemoval = true, since = "3.3.0")
 public interface KeelAsyncKit {
     /**
+     * Call the provided routine function repeatedly.
+     * Inside the routine function, may stop repeating by execute stop with the routine argument.
+     *
      * @since 2.9.3 callFutureRepeat
      * @since 3.0.0 repeatedlyCall
      */
@@ -31,6 +35,8 @@ public interface KeelAsyncKit {
     }
 
     /**
+     * Call the item processor for each item in the provided collection, one by one.
+     *
      * @since 2.9 callFutureForEach
      * @since 3.0.0 iterativelyCall
      */
@@ -39,6 +45,8 @@ public interface KeelAsyncKit {
     }
 
     /**
+     * Call the item processor for each item with the provided iterator, one by one.
+     *
      * @since 3.0.13
      */
     static <T> Future<Void> iterativelyCall(@Nonnull Iterator<T> iterator, @Nonnull Function<T, Future<Void>> itemProcessor) {

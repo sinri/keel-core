@@ -2,7 +2,6 @@ package io.github.sinri.keel.integration.poi.excel;
 
 import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.core.ValueBox;
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.integration.poi.excel.entity.*;
 import io.vertx.core.Future;
 import org.apache.poi.ss.usermodel.*;
@@ -17,6 +16,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.0.13
@@ -322,14 +323,18 @@ public class KeelSheet {
      * Process row by row is not effective enough.
      */
     public final Future<Void> readAllRows(@Nonnull Function<Row, Future<Void>> rowFunc) {
-        return KeelAsyncKit.iterativelyCall(getRowIterator(), rowFunc);
+        return Keel.asyncCallIteratively(getRowIterator(), rowFunc);
     }
 
     /**
      * Consider calling this method in worker context.
      */
     public final Future<Void> readAllRows(@Nonnull Function<List<Row>, Future<Void>> rowsFunc, int batchSize) {
-        return KeelAsyncKit.iterativelyBatchCall(getRowIterator(), rowsFunc, batchSize);
+        return Keel.asyncCallIteratively(
+                getRowIterator(),
+                rowsFunc,
+                batchSize
+        );
     }
 
     /**
@@ -483,7 +488,7 @@ public class KeelSheet {
             rowIndexRef.incrementAndGet();
         }
 
-        return KeelAsyncKit.iterativelyBatchCall(matrix.getRawRowList().iterator(), rawRows -> {
+        return Keel.asyncCallIteratively(matrix.getRawRowList().iterator(), rawRows -> {
             blockWriteAllRows(matrix.getRawRowList(), rowIndexRef.get(), 0);
             rowIndexRef.addAndGet(rawRows.size());
             return Future.succeededFuture();
@@ -504,7 +509,7 @@ public class KeelSheet {
         blockWriteAllRows(List.of(templatedMatrix.getTemplate().getColumnNames()), 0, 0);
         rowIndexRef.incrementAndGet();
 
-        return KeelAsyncKit.iterativelyBatchCall(templatedMatrix.getRawRows().iterator(), rawRows -> {
+        return Keel.asyncCallIteratively(templatedMatrix.getRawRows().iterator(), rawRows -> {
             blockWriteAllRows(rawRows, rowIndexRef.get(), 0);
             rowIndexRef.addAndGet(rawRows.size());
             return Future.succeededFuture();

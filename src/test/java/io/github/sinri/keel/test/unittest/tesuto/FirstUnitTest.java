@@ -1,7 +1,8 @@
 package io.github.sinri.keel.test.unittest.tesuto;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.facade.tesuto.KeelUnitTest;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class FirstUnitTest extends KeelUnitTest {
     @Override
@@ -39,7 +40,7 @@ public class FirstUnitTest extends KeelUnitTest {
 //                    });
 //        });
         async(() -> {
-            return KeelAsyncKit.sleep(1000L);
+            return Keel.asyncSleep(1000L);
         });
         getLogger().info("io.github.sinri.keel.test.unittest.tesuto.FirstUnitTest.test2 end");
     }

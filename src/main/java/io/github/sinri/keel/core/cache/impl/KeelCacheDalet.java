@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.cache.impl;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.core.cache.KeelEverlastingCacheInterface;
 import io.github.sinri.keel.core.verticles.KeelVerticleImplPure;
 import io.vertx.core.Future;
@@ -12,6 +11,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * This implement is to provide:
@@ -104,11 +105,11 @@ abstract public class KeelCacheDalet extends KeelVerticleImplPure implements Kee
         fullyUpdate()
                 .onSuccess(updated -> {
                     if (regularUpdatePeriod() >= 0) {
-                        KeelAsyncKit.endless(() -> {
+                        Keel.asyncCallEndlessly(() -> {
                             return Future.succeededFuture()
                                     .compose(v -> {
                                         if (regularUpdatePeriod() == 0) return Future.succeededFuture();
-                                        else return KeelAsyncKit.sleep(regularUpdatePeriod());
+                                        else return Keel.asyncSleep(regularUpdatePeriod());
                                     })
                                     .compose(v -> {
                                         return fullyUpdate();

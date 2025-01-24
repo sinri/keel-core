@@ -1,4 +1,4 @@
-package io.github.sinri.keel.core.async;
+package io.github.sinri.keel.facade.async.legacy;
 
 import io.vertx.core.Future;
 
@@ -15,6 +15,7 @@ import java.util.function.Function;
  * @since 2.9.4
  * @since 3.0.8 Replace `CompositeFuture.XXX` with `Future.XXX`.
  */
+@Deprecated(forRemoval = true, since = "3.3.0")
 public class FutureForEachParallel {
     private FutureForEachParallel() {
 

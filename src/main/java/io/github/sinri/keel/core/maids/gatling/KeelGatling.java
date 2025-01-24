@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.maids.gatling;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.core.verticles.KeelVerticleImplWithEventLogger;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.vertx.core.*;
@@ -38,13 +37,13 @@ public class KeelGatling extends KeelVerticleImplWithEventLogger {
         int actualRestInterval = new Random().nextInt(
                 Math.toIntExact(options.getAverageRestInterval() / 2)
         ) + options.getAverageRestInterval();
-        return KeelAsyncKit.sleep(actualRestInterval);
+        return Keel.asyncSleep(actualRestInterval);
     }
 
     @Override
     protected void startAsKeelVerticle(Promise<Void> startPromise) {
         barrelUsed.set(0);
-        KeelAsyncKit.repeatedlyCall(routineResult -> {
+        Keel.asyncCallRepeatedly(routineResult -> {
                     return fireOnce();
                 })
                 .andThen(ar -> {
@@ -75,7 +74,7 @@ public class KeelGatling extends KeelVerticleImplWithEventLogger {
                         barrelUsed.decrementAndGet();
                     });
 
-                    return KeelAsyncKit.sleep(10L);
+                    return Keel.asyncSleep(10L);
                 })
                 .recover(throwable -> {
                     getLogger().exception(throwable, r -> r.message("FAILED TO LOAD BULLET"));
@@ -97,9 +96,9 @@ public class KeelGatling extends KeelVerticleImplWithEventLogger {
     protected Future<Void> requireExclusiveLocksOfBullet(Bullet bullet) {
         if (bullet.exclusiveLockSet() != null && !bullet.exclusiveLockSet().isEmpty()) {
             AtomicBoolean blocked = new AtomicBoolean(false);
-            return KeelAsyncKit.iterativelyCall(
+            return Keel.asyncCallIteratively(
                             bullet.exclusiveLockSet(),
-                            exclusiveLock -> {
+                            (exclusiveLock, task) -> {
                                 String exclusiveLockName = "KeelGatling-Bullet-Exclusive-Lock-" + exclusiveLock;
                                 return Keel.getVertx().sharedData()
                                         .getCounter(exclusiveLockName)
@@ -125,7 +124,7 @@ public class KeelGatling extends KeelVerticleImplWithEventLogger {
 
     protected Future<Void> releaseExclusiveLocksOfBullet(Bullet bullet) {
         if (bullet.exclusiveLockSet() != null && !bullet.exclusiveLockSet().isEmpty()) {
-            return KeelAsyncKit.iterativelyCall(bullet.exclusiveLockSet(), exclusiveLock -> {
+            return Keel.asyncCallIteratively(bullet.exclusiveLockSet(), (exclusiveLock, task) -> {
                 String exclusiveLockName = "KeelGatling-Bullet-Exclusive-Lock-" + exclusiveLock;
                 return Keel.getVertx().sharedData().getCounter(exclusiveLockName)
                         .compose(counter -> counter.decrementAndGet()

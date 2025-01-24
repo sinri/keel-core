@@ -1,7 +1,6 @@
 package io.github.sinri.keel.core.servant.sundial;
 
 import io.github.sinri.keel.core.KeelCronExpression;
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.core.verticles.KeelVerticleImplWithEventLogger;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
@@ -71,7 +70,7 @@ public abstract class KeelSundial extends KeelVerticleImplWithEventLogger {
      * @since 3.2.4
      */
     private void refreshPlans() {
-        KeelAsyncKit.exclusivelyCall(
+        Keel.asyncCallExclusively(
                 "io.github.sinri.keel.servant.sundial.KeelSundial.refreshPlans",
                 1000L,
                 () -> {

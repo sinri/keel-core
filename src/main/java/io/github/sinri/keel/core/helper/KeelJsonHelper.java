@@ -23,30 +23,6 @@ public class KeelJsonHelper {
         return instance;
     }
 
-    public static void main(String[] args) {
-        KeelJsonHelper keelJsonHelper = new KeelJsonHelper();
-        var x1 = keelJsonHelper.renderJsonToStringBlock("x1", new JsonObject()
-                .put("a", "A")
-                .put("b", new JsonObject()
-                        .put("c", "d")
-                        .put("e", new JsonArray()
-                                .add("f")
-                                .add("g")
-                                .add(new JsonObject()
-                                        .put("h", "i")
-                                        .put("j", "k")
-                                )
-                                .add(new JsonArray()
-                                        .add("l")
-                                        .add("m")))
-                )
-                .put("n", new JsonArray()
-                        .add("o")
-                        .add(null))
-        );
-        System.out.println(x1);
-    }
-
     public JsonObject writeIntoJsonObject(@Nonnull JsonObject jsonObject, @Nonnull String key, @Nullable Object value) {
         jsonObject.put(key, value);
         return jsonObject;

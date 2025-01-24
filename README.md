@@ -10,13 +10,13 @@ A Java framework with VERT.X eco, for projects for web, job and more.
 <dependency>
     <groupId>io.github.sinri</groupId>
     <artifactId>Keel</artifactId>
-  <version>3.2.15</version>
+  <version>3.3.0</version>
 </dependency>
 ```
 
 ## Third Party Integration
 
-* [Vert.x](https://vertx.io) 4.5.8
+* [Vert.x](https://vertx.io) 4.5.11
 * [org.commonmark:commonmark](https://github.com/commonmark/commonmark-java) ![GitHub](https://img.shields.io/github/license/commonmark/commonmark-java)
   0.21.0
 * [<del>org.reflections:reflections</del>](https://github.com/ronmamo/reflections) ![GitHub](https://img.shields.io/github/license/ronmamo/reflections)
@@ -25,9 +25,9 @@ A Java framework with VERT.X eco, for projects for web, job and more.
 * [com.github.oshi:oshi-core](https://github.com/oshi/oshi) ![GitHub](https://img.shields.io/github/license/oshi/oshi)
   6.4.9
 * [org.apache.poi:poi](https://github.com/apache/poi) ![GitHub](https://img.shields.io/github/license/apache/poi)
-  5.2.5
+  5.4.0
 * [com.github.pjfanning:excel-streaming-reader](https://github.com/pjfanning/excel-streaming-reader) ![GitHub](https://img.shields.io/github/license/pjfanning/excel-streaming-reader)
-  4.3.1
+  5.0.3
 
 ## Dry Dock of Keel
 
@@ -42,6 +42,11 @@ Keel: https://github.com/sinri/DryDockLession :)
 * p3: the latest released version of Keel 3.x.
 
 ## Migration
+
+### From 3.2.x to 3.3.x
+
+* Packages are shrunk.
+* Object `Keel` as fully facade being.
 
 ### From 3.1.x to 3.2.x
 

@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.servant.queue;
 
-import io.github.sinri.keel.core.async.KeelAsyncKit;
 import io.github.sinri.keel.core.verticles.KeelVerticleImplWithIssueRecorder;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -113,9 +112,9 @@ public abstract class KeelQueue extends KeelVerticleImplWithIssueRecorder<QueueM
     private Future<Void> whenSignalRunCame(KeelQueueNextTaskSeeker nextTaskSeeker) {
         this.queueStatus = QueueStatus.RUNNING;
 
-        return KeelAsyncKit.repeatedlyCall(routineResult -> {
+        return Keel.asyncCallRepeatedly(routineResult -> {
                     if (this.queueWorkerPoolManager.isBusy()) {
-                        return KeelAsyncKit.sleep(1_000L);
+                        return Keel.asyncSleep(1_000L);
                     }
 
                     return Future.succeededFuture()

@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.1.1 Technical Preview
@@ -62,7 +62,7 @@ public class KeelCsvWriter {
         list.forEach(item -> {
             components.add(quote(item));
         });
-        var line = KeelHelpers.stringHelper().joinStringArray(components, separator) + "\n";
+        var line = Keel.stringHelper().joinStringArray(components, separator) + "\n";
         //System.out.println(line);
         outputStream.write(line.getBytes(charset));
     }

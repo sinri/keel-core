@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class SelectStatement extends AbstractStatement implements SelectStatementMixin {
     final ConditionsComponent whereConditionsComponent;
@@ -223,22 +223,22 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
         if (columns.isEmpty()) {
             sql.append("*");
         } else {
-            sql.append(KeelHelpers.stringHelper().joinStringArray(columns, ","));
+            sql.append(Keel.stringHelper().joinStringArray(columns, ","));
         }
         if (!tables.isEmpty()) {
-            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("FROM ").append(KeelHelpers.stringHelper().joinStringArray(tables, AbstractStatement.SQL_COMPONENT_SEPARATOR));
+            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("FROM ").append(Keel.stringHelper().joinStringArray(tables, AbstractStatement.SQL_COMPONENT_SEPARATOR));
         }
         if (!whereConditionsComponent.isEmpty()) {
             sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("WHERE ").append(whereConditionsComponent);
         }
         if (!categories.isEmpty()) {
-            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("GROUP BY ").append(KeelHelpers.stringHelper().joinStringArray(categories, ","));
+            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("GROUP BY ").append(Keel.stringHelper().joinStringArray(categories, ","));
         }
         if (!havingConditionsComponent.isEmpty()) {
             sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("HAVING ").append(havingConditionsComponent);
         }
         if (!sortRules.isEmpty()) {
-            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("ORDER BY ").append(KeelHelpers.stringHelper().joinStringArray(sortRules, ","));
+            sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("ORDER BY ").append(Keel.stringHelper().joinStringArray(sortRules, ","));
         }
         if (limit > 0) {
             sql.append(AbstractStatement.SQL_COMPONENT_SEPARATOR).append("LIMIT ").append(limit).append(" OFFSET ").append(offset);
@@ -344,7 +344,7 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
             }
             if (!onConditions.isEmpty()) {
                 s += " ON ";
-                s += KeelHelpers.stringHelper().joinStringArray(onConditions, " AND ");
+                s += Keel.stringHelper().joinStringArray(onConditions, " AND ");
             }
             return s;
         }

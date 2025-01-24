@@ -3,7 +3,7 @@ package io.github.sinri.keel.test.lab.helper;
 
 import java.net.UnknownHostException;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class IpTest {
     public static void main(String[] args) throws UnknownHostException {
@@ -12,7 +12,7 @@ public class IpTest {
 
         try {
             var s = "for dp&bi, when value < 3 and age >4 阿嚏&#64;！！！@飞飞飞";
-            System.out.println(KeelHelpers.stringHelper().escapeForHttpEntity(s));
+            System.out.println(Keel.stringHelper().escapeForHttpEntity(s));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

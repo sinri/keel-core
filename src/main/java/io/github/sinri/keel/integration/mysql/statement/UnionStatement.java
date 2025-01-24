@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class UnionStatement extends AbstractStatement implements ReadStatementMixin {
     final List<String> selections = new ArrayList<>();
@@ -53,7 +53,7 @@ public class UnionStatement extends AbstractStatement implements ReadStatementMi
     }
 
     public String toString() {
-        return KeelHelpers.stringHelper().joinStringArray(selections, " ") + (
+        return Keel.stringHelper().joinStringArray(selections, " ") + (
                 getRemarkAsComment().isEmpty() ? "" : ("\n-- " + getRemarkAsComment())
         );
     }

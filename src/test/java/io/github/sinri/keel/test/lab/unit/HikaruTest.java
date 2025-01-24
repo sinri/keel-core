@@ -4,12 +4,12 @@ import io.github.sinri.keel.facade.tesuto.KeelTest;
 import io.github.sinri.keel.facade.tesuto.TestUnit;
 import io.vertx.core.Future;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class HikaruTest extends KeelTest {
     @TestUnit
     public Future<Void> testHikaruForPikas() {
-        Pikas all = KeelHelpers.reflectionHelper().getAnnotationOfClass(Hikaru.class, Pikas.class);
+        Pikas all = Keel.reflectionHelper().getAnnotationOfClass(Hikaru.class, Pikas.class);
         for (Pika pika : all.value()) {
             getLogger().info(r -> r.message("testHikaruForPikas: Each Pika of Hikaru: " + pika.value()));
         }
@@ -18,7 +18,7 @@ public class HikaruTest extends KeelTest {
 
     @TestUnit
     public Future<Void> testHikaruForPika() {
-        Pika[] annotationsOfClass = KeelHelpers.reflectionHelper().getAnnotationsOfClass(Hikaru.class, Pika.class);
+        Pika[] annotationsOfClass = Keel.reflectionHelper().getAnnotationsOfClass(Hikaru.class, Pika.class);
         for (Pika pika : annotationsOfClass) {
             getLogger().info(r -> r.message("testHikaruForPika: Each Pika of Hikaru: " + pika.value()));
         }

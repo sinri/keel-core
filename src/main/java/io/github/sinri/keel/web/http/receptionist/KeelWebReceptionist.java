@@ -13,7 +13,7 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 2.9.2
@@ -90,7 +90,7 @@ public abstract class KeelWebReceptionist {
                 .put("request_id", routingContext.get(KeelPlatformHandler.KEEL_REQUEST_ID))
                 .put("code", "FAILED")
                 .put("data", throwable.getMessage());
-        String error = KeelHelpers.stringHelper().renderThrowableChain(throwable);
+        String error = Keel.stringHelper().renderThrowableChain(throwable);
         resp.put("throwable", error);
         getIssueRecorder().exception(throwable, r -> {
             r.message("FAILED, TO RESPOND.");
@@ -116,7 +116,7 @@ public abstract class KeelWebReceptionist {
     }
 
     public @Nonnull List<String> readRequestIPChain() {
-        return KeelHelpers.netHelper().parseWebClientIPChain(routingContext);
+        return Keel.netHelper().parseWebClientIPChain(routingContext);
     }
 
     public User readRequestUser() {

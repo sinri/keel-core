@@ -10,7 +10,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 
 /**
@@ -43,7 +43,7 @@ public class KeelDigestHelper {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(raw.getBytes());
-            return KeelHelpers.binaryHelper().encodeHexWithLowerDigits(md.digest());
+            return Keel.binaryHelper().encodeHexWithLowerDigits(md.digest());
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -61,7 +61,7 @@ public class KeelDigestHelper {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(raw.getBytes());
-            return KeelHelpers.binaryHelper().encodeHexWithUpperDigits(md.digest());
+            return Keel.binaryHelper().encodeHexWithUpperDigits(md.digest());
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -77,7 +77,7 @@ public class KeelDigestHelper {
     public String digestToLower(@Nonnull String algorithm, @Nonnull String raw) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance(algorithm);
         md.update(raw.getBytes());
-        return KeelHelpers.binaryHelper().encodeHexWithLowerDigits(md.digest());
+        return Keel.binaryHelper().encodeHexWithLowerDigits(md.digest());
     }
 
     /**
@@ -90,7 +90,7 @@ public class KeelDigestHelper {
     public String digestToUpper(@Nonnull String algorithm, @Nonnull String raw) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance(algorithm);
         md.update(raw.getBytes());
-        return KeelHelpers.binaryHelper().encodeHexWithUpperDigits(md.digest());
+        return Keel.binaryHelper().encodeHexWithUpperDigits(md.digest());
     }
 
     /**
@@ -187,7 +187,7 @@ public class KeelDigestHelper {
         } catch (UnsupportedEncodingException | NoSuchAlgorithmException | InvalidKeyException e) {
             throw new RuntimeException(e);
         }
-        return KeelHelpers.binaryHelper().encodeHexWithLowerDigits(bytes);
+        return Keel.binaryHelper().encodeHexWithLowerDigits(bytes);
     }
 
     /**
@@ -200,6 +200,6 @@ public class KeelDigestHelper {
         } catch (UnsupportedEncodingException | NoSuchAlgorithmException | InvalidKeyException e) {
             throw new RuntimeException(e);
         }
-        return KeelHelpers.binaryHelper().encodeHexWithUpperDigits(bytes);
+        return Keel.binaryHelper().encodeHexWithUpperDigits(bytes);
     }
 }

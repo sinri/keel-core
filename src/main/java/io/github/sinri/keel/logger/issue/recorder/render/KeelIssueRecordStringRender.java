@@ -6,7 +6,7 @@ import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 
 import javax.annotation.Nonnull;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.1.10
@@ -27,9 +27,9 @@ public class KeelIssueRecordStringRender implements KeelIssueRecordRender<String
     @Override
     public String renderIssueRecord(@Nonnull KeelIssueRecord<?> issueRecord) {
         StringBuilder s = new StringBuilder("㏒ ");
-        s.append(KeelHelpers.datetimeHelper().getDateExpression(issueRecord.timestamp(), KeelDateTimeHelper.MYSQL_DATETIME_MS_PATTERN));
+        s.append(Keel.datetimeHelper().getDateExpression(issueRecord.timestamp(), KeelDateTimeHelper.MYSQL_DATETIME_MS_PATTERN));
         s.append(" [").append(issueRecord.level().name()).append("]");
-        s.append(" ").append(issueRecord.topic()).append(" (").append(KeelHelpers.stringHelper().joinStringArray(issueRecord.classification(), ",")).append(")");
+        s.append(" ").append(issueRecord.topic()).append(" (").append(Keel.stringHelper().joinStringArray(issueRecord.classification(), ",")).append(")");
         if (!issueRecord.attributes().isEmpty()) {
             issueRecord.attributes().forEach(attribute -> {
                 s.append("\n ▪ ").append(attribute.getKey()).append(": ").append(attribute.getValue());
@@ -45,6 +45,6 @@ public class KeelIssueRecordStringRender implements KeelIssueRecordRender<String
     @Nonnull
     @Override
     public String renderThrowable(@Nonnull Throwable throwable) {
-        return KeelHelpers.stringHelper().renderThrowableChain(throwable, ignorableStackPackageSet());
+        return Keel.stringHelper().renderThrowableChain(throwable, ignorableStackPackageSet());
     }
 }

@@ -8,7 +8,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.0.11
@@ -50,7 +50,7 @@ public class KeelAesEcbNoPadding extends KeelAesBase {
 //            System.out.println("source bytes: " + KeelHelpers.binaryHelper().encodeHexWithUpperDigits(sourceBytes));
             byte[] encryptedBytes = cipher.doFinal(sourceBytes);
 //            System.out.println("encrypted bytes: " + KeelHelpers.binaryHelper().encodeHexWithUpperDigits(encryptedBytes));
-            return KeelHelpers.binaryHelper().encodeWithBase64ToString(encryptedBytes);
+            return Keel.binaryHelper().encodeWithBase64ToString(encryptedBytes);
         } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException |
                  InvalidKeyException e) {
             throw new RuntimeException(e);
@@ -63,7 +63,7 @@ public class KeelAesEcbNoPadding extends KeelAesBase {
             SecretKeySpec secretKeySpec = new SecretKeySpec(getKey().getBytes(ENCODING), KEY_ALGORITHM);
             Cipher cipher = Cipher.getInstance(getCipherAlgorithm().getExpression());
             cipher.init(Cipher.DECRYPT_MODE, secretKeySpec);
-            byte[] encryptedBytes = KeelHelpers.stringHelper().decodeWithBase64ToBytes(encryptStr);
+            byte[] encryptedBytes = Keel.stringHelper().decodeWithBase64ToBytes(encryptStr);
 //            System.out.println("encrypted bytes: " + KeelHelpers.binaryHelper().encodeHexWithUpperDigits(encryptedBytes));
             var decryptedBytes = cipher.doFinal(encryptedBytes);
 //            System.out.println("decrypted bytes: " + KeelHelpers.binaryHelper().encodeHexWithUpperDigits(decryptedBytes));

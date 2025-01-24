@@ -1,7 +1,6 @@
 package io.github.sinri.keel.integration.mysql.matrix;
 
 
-import io.github.sinri.keel.core.helper.KeelHelpersInterface;
 import io.github.sinri.keel.integration.mysql.exception.KeelSQLResultRowIndexError;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
@@ -14,6 +13,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 1.1
@@ -195,7 +196,7 @@ public interface ResultMatrix {
                     keyEntity.putNull(sk);
                 }
             });
-            String skEntityHash = KeelHelpersInterface.KeelHelpers.jsonHelper().getJsonForObjectWhoseItemKeysSorted(keyEntity);
+            String skEntityHash = Keel.jsonHelper().getJsonForObjectWhoseItemKeysSorted(keyEntity);
 
             keyMap.put(skEntityHash, keyEntity);
             bodyMap.computeIfAbsent(skEntityHash, s -> new ArrayList<>())

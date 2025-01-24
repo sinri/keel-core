@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
@@ -148,7 +147,7 @@ public class TableRowClassSourceCodeGenerator {
         return Keel.asyncCallIteratively(
                         tables,
                         table -> {
-                            String className = KeelHelpers.stringHelper().fromUnderScoreCaseToCamelCase(table) + "TableRow";
+                            String className = Keel.stringHelper().fromUnderScoreCaseToCamelCase(table) + "TableRow";
                             String classFile = packagePath + "/" + className + ".java";
                             return this.generateClassCodeForOneTable(schema, table, packageName, className)
                                     .compose(code -> {

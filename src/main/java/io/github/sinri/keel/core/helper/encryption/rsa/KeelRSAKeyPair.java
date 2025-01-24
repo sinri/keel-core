@@ -10,7 +10,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.0.1
@@ -40,7 +40,7 @@ public class KeelRSAKeyPair {
         RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
 
         // 得到公钥字符串
-        String publicKeyString = KeelHelpers.binaryHelper().encodeWithBase64ToString(publicKey.getEncoded());//Base64.encode(publicKey.getEncoded());
+        String publicKeyString = Keel.binaryHelper().encodeWithBase64ToString(publicKey.getEncoded());//Base64.encode(publicKey.getEncoded());
         String publicKeyFilePath = dirPath + "/publicKey.keystore";
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(publicKeyFilePath))) {
             bw.write(publicKeyString);
@@ -48,7 +48,7 @@ public class KeelRSAKeyPair {
             throw new RuntimeException(e);
         }
         // 得到私钥字符串
-        String privateKeyString = KeelHelpers.binaryHelper().encodeWithBase64ToString(privateKey.getEncoded());//Base64.encode(privateKey.getEncoded());
+        String privateKeyString = Keel.binaryHelper().encodeWithBase64ToString(privateKey.getEncoded());//Base64.encode(privateKey.getEncoded());
         String privateKeyFilePath = dirPath + "/privateKey.keystore";
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(privateKeyFilePath))) {
             bw.write(privateKeyString);
@@ -66,7 +66,7 @@ public class KeelRSAKeyPair {
      * @throws InvalidKeySpecException  不可用的公钥
      */
     public KeelRSAKeyPair loadPrivateKeyByKeyStoreFile(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] bytes = KeelHelpers.fileHelper().readFileAsByteArray(path, true);
+        byte[] bytes = Keel.fileHelper().readFileAsByteArray(path, true);
         return loadPrivateKeyByStr(new String(bytes));
     }
 
@@ -78,7 +78,7 @@ public class KeelRSAKeyPair {
      * @throws InvalidKeySpecException  不可用的公钥
      */
     public KeelRSAKeyPair loadPrivateKeyByStr(String privateKeyStr) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] buffer = KeelHelpers.stringHelper().decodeWithBase64ToBytes(privateKeyStr);//Base64.decode(privateKeyStr);
+        byte[] buffer = Keel.stringHelper().decodeWithBase64ToBytes(privateKeyStr);//Base64.decode(privateKeyStr);
 
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(buffer);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -95,7 +95,7 @@ public class KeelRSAKeyPair {
      * @throws InvalidKeySpecException  不可用的公钥
      */
     public KeelRSAKeyPair loadPublicKeyByKeyStoreFile(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] bytes = KeelHelpers.fileHelper().readFileAsByteArray(path, true);
+        byte[] bytes = Keel.fileHelper().readFileAsByteArray(path, true);
         return loadPublicKeyByStr(new String(bytes));
     }
 
@@ -107,7 +107,7 @@ public class KeelRSAKeyPair {
      * @throws InvalidKeySpecException  不可用的公钥
      */
     public KeelRSAKeyPair loadPublicKeyByStr(String publicKeyStr) throws NoSuchAlgorithmException, InvalidKeySpecException {
-        byte[] buffer = KeelHelpers.stringHelper().decodeWithBase64ToBytes(publicKeyStr);//Base64.decode(publicKeyStr);
+        byte[] buffer = Keel.stringHelper().decodeWithBase64ToBytes(publicKeyStr);//Base64.decode(publicKeyStr);
 
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         X509EncodedKeySpec keySpec = new X509EncodedKeySpec(buffer);

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.0.15
@@ -17,15 +17,12 @@ class TableRowClassBuilder {
     private final @Nonnull String packageName;
     private final @Nullable String schema;
     private final @Nonnull String table;
-
+    private final @Nonnull List<TableRowClassField> fields = new ArrayList<>();
     private boolean provideConstSchema = true;
     private boolean provideConstTable = true;
     private boolean provideConstSchemaAndTable = false;
-
     private @Nullable String tableComment;
     private @Nullable String ddl;
-
-    private final @Nonnull List<TableRowClassField> fields = new ArrayList<>();
     /**
      * @since 3.1.7
      */
@@ -81,15 +78,15 @@ class TableRowClassBuilder {
             if (split.length > 1) {
                 // this table is deprecated
                 this.tableDeprecated = true;
-                return KeelHelpers.stringHelper().escapeForHttpEntity(split[1]);
+                return Keel.stringHelper().escapeForHttpEntity(split[1]);
             } else {
-                return KeelHelpers.stringHelper().escapeForHttpEntity(tableComment);
+                return Keel.stringHelper().escapeForHttpEntity(tableComment);
             }
         }
     }
 
     public String getClassName() {
-        return KeelHelpers.stringHelper().fromUnderScoreCaseToCamelCase(table) + "TableRow";
+        return Keel.stringHelper().fromUnderScoreCaseToCamelCase(table) + "TableRow";
     }
 
     public String build() {

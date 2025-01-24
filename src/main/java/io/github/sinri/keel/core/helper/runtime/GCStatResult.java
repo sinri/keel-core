@@ -7,13 +7,42 @@ import java.lang.management.GarbageCollectorMXBean;
 import java.util.HashSet;
 import java.util.Set;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 2.9.4
  */
 public class GCStatResult implements RuntimeStatResult<GCStatResult> {
+    private static final Set<String> minorGCNames;
+    private static final Set<String> majorGCNames;
+    private static final Set<String> ignoreGCNames;
+
+    static {
+        minorGCNames = new HashSet<>();
+        majorGCNames = new HashSet<>();
+        ignoreGCNames = new HashSet<>();
+
+        // Serial Collector： "Copy"（年轻代），"MarkSweepCompact"（老年代）
+        minorGCNames.add("Copy");
+        majorGCNames.add("MarkSweepCompact");
+        //Parallel Collector： "PS Scavenge"（年轻代），"PS MarkSweep"（老年代）
+        minorGCNames.add("PS Scavenge");
+        majorGCNames.add("PS MarkSweep");
+        // CMS (Concurrent Mark Sweep) Collector： "ParNew"（年轻代），"ConcurrentMarkSweep"（老年代）
+        minorGCNames.add("ParNew");
+        majorGCNames.add("ConcurrentMarkSweep");
+        // G1 (Garbage-First) Collector： "G1 Young Generation"（年轻代），"G1 Old Generation"（老年代）
+        minorGCNames.add("G1 Young Generation");
+        majorGCNames.add("G1 Old Generation");
+        // ZGC (Z Garbage Collector)： "ZGC"
+        // @see  https://armsword.com/2023/08/10/es-jdk17-and-zgc/
+        //minorGCNames.add("ZGC");
+        ignoreGCNames.add("ZGC Pauses"); // since 3.2.5 统计的是ZGC在GC过程中暂停的次数及暂停时间，这是JDK17新增的指标bean，无法统计Allocation Stall导致的线程挂起时间
+        minorGCNames.add("ZGC Cycles"); // since 3.2.5 统计的是ZGC发生的次数以及总耗时
+        // Shenandoah： "Shenandoah Pauses"
+        minorGCNames.add("Shenandoah Pauses");
+    }
+
     private final long statTime;
     private long youngGCCount = 0;
     private long youngGCTime = 0;
@@ -116,36 +145,6 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
                 );
     }
 
-    private static final Set<String> minorGCNames;
-    private static final Set<String> majorGCNames;
-    private static final Set<String> ignoreGCNames;
-
-    static {
-        minorGCNames = new HashSet<>();
-        majorGCNames = new HashSet<>();
-        ignoreGCNames = new HashSet<>();
-
-        // Serial Collector： "Copy"（年轻代），"MarkSweepCompact"（老年代）
-        minorGCNames.add("Copy");
-        majorGCNames.add("MarkSweepCompact");
-        //Parallel Collector： "PS Scavenge"（年轻代），"PS MarkSweep"（老年代）
-        minorGCNames.add("PS Scavenge");
-        majorGCNames.add("PS MarkSweep");
-        // CMS (Concurrent Mark Sweep) Collector： "ParNew"（年轻代），"ConcurrentMarkSweep"（老年代）
-        minorGCNames.add("ParNew");
-        majorGCNames.add("ConcurrentMarkSweep");
-        // G1 (Garbage-First) Collector： "G1 Young Generation"（年轻代），"G1 Old Generation"（老年代）
-        minorGCNames.add("G1 Young Generation");
-        majorGCNames.add("G1 Old Generation");
-        // ZGC (Z Garbage Collector)： "ZGC"
-        // @see  https://armsword.com/2023/08/10/es-jdk17-and-zgc/
-        //minorGCNames.add("ZGC");
-        ignoreGCNames.add("ZGC Pauses"); // since 3.2.5 统计的是ZGC在GC过程中暂停的次数及暂停时间，这是JDK17新增的指标bean，无法统计Allocation Stall导致的线程挂起时间
-        minorGCNames.add("ZGC Cycles"); // since 3.2.5 统计的是ZGC发生的次数以及总耗时
-        // Shenandoah： "Shenandoah Pauses"
-        minorGCNames.add("Shenandoah Pauses");
-    }
-
     /**
      * @since 3.1.4
      */
@@ -166,7 +165,7 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
                     .context(new JsonObject()
                             .put("class", gc.getClass().getName())
                             .put("name", gc.getName())
-                            .put("memoryPoolNames", KeelHelpers.stringHelper().joinStringArray(gc.getMemoryPoolNames(), ","))
+                            .put("memoryPoolNames", Keel.stringHelper().joinStringArray(gc.getMemoryPoolNames(), ","))
                             .put("objectName", gc.getObjectName())
                             .put("collectionCount", gc.getCollectionCount())
                             .put("collectionTime", gc.getCollectionTime())

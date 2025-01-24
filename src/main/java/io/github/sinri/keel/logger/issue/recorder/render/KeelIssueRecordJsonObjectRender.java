@@ -8,7 +8,7 @@ import io.vertx.core.json.JsonObject;
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.1.10
@@ -51,6 +51,6 @@ public class KeelIssueRecordJsonObjectRender implements KeelIssueRecordRender<Js
     @Nonnull
     @Override
     public JsonObject renderThrowable(@Nonnull Throwable throwable) {
-        return Objects.requireNonNull(KeelHelpers.jsonHelper().renderThrowableChain(throwable, ignorableStackPackageSet()));
+        return Objects.requireNonNull(Keel.jsonHelper().renderThrowableChain(throwable, ignorableStackPackageSet()));
     }
 }

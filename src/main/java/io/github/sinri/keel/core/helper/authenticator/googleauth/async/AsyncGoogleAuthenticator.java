@@ -47,7 +47,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * This class implements the functionality described in RFC 6238 (TOTP: Time
@@ -357,14 +357,14 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
         // Decoding the secret key to get its raw byte representation.
         switch (config.getKeyRepresentation()) {
             case BASE32:
-                return KeelHelpers.stringHelper().decodeWithBase32ToBytes(secret.toUpperCase());
+                return Keel.stringHelper().decodeWithBase32ToBytes(secret.toUpperCase());
 
 //                Base32 codec32 = new Base32();
             // See: https://issues.apache.org/jira/browse/CODEC-234
             // Commons Codec Base32::decode does not support lowercase letters.
 //                return codec32.decode(secret.toUpperCase());
             case BASE64:
-                return KeelHelpers.stringHelper().decodeWithBase32ToBytes(secret);
+                return Keel.stringHelper().decodeWithBase32ToBytes(secret);
 
 //                Base64 codec64 = new Base64();
 //                return codec64.decode(secret);
@@ -537,10 +537,10 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
     private String calculateSecretKey(byte[] secretKey) {
         switch (config.getKeyRepresentation()) {
             case BASE32:
-                return KeelHelpers.binaryHelper().encodeWithBase32ToString(secretKey);
+                return Keel.binaryHelper().encodeWithBase32ToString(secretKey);
 //                return new Base32().encodeToString(secretKey);
             case BASE64:
-                return KeelHelpers.binaryHelper().encodeWithBase64ToString(secretKey);
+                return Keel.binaryHelper().encodeWithBase64ToString(secretKey);
 //                return new Base64().encodeToString(secretKey);
             default:
                 throw new IllegalArgumentException("Unknown key representation type.");

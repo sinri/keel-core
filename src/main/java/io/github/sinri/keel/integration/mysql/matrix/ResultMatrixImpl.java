@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 1.8
@@ -123,7 +123,7 @@ class ResultMatrixImpl implements ResultMatrix {
      */
     @Override
     public String getOneColumnOfFirstRowAsDateTime(String columnName) throws KeelSQLResultRowIndexError {
-        return KeelHelpers.datetimeHelper().getMySQLFormatLocalDateTimeExpression(getFirstRow().getString(columnName));
+        return Keel.datetimeHelper().getMySQLFormatLocalDateTimeExpression(getFirstRow().getString(columnName));
     }
 
     @Override
@@ -153,7 +153,7 @@ class ResultMatrixImpl implements ResultMatrix {
     public List<String> getOneColumnAsDateTime(String columnName) {
         List<String> x = new ArrayList<>();
         for (var row : rowList) {
-            x.add(KeelHelpers.datetimeHelper().getMySQLFormatLocalDateTimeExpression(row.getString(columnName)));
+            x.add(Keel.datetimeHelper().getMySQLFormatLocalDateTimeExpression(row.getString(columnName)));
         }
         return x;
     }

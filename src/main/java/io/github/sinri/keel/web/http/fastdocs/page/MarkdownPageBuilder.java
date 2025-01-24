@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 1.12
@@ -47,7 +47,7 @@ public class MarkdownPageBuilder implements FastDocsContentResponder {
             href.append(component);
             x.add("<a href='" + href + (component.endsWith(".md") ? "" : "/index.md") + "'>" + component + "</a>");
         }
-        return KeelHelpers.stringHelper().joinStringArray(x, "&nbsp;‣&nbsp;");
+        return Keel.stringHelper().joinStringArray(x, "&nbsp;‣&nbsp;");
     }
 
     protected String getFooterDivContent() {

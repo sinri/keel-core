@@ -8,7 +8,6 @@ import io.vertx.ext.web.handler.PlatformHandler;
 import java.util.Random;
 import java.util.UUID;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
@@ -33,7 +32,7 @@ public class KeelPlatformHandler implements PlatformHandler {
                     return Future.succeededFuture(new Random().nextLong() * -1);
                 })
                 .compose(id -> {
-                    routingContext.put(KEEL_REQUEST_ID, KeelHelpers.netHelper().getLocalHostAddress() + "-" + id + "-" + UUID.randomUUID());
+                    routingContext.put(KEEL_REQUEST_ID, Keel.netHelper().getLocalHostAddress() + "-" + id + "-" + UUID.randomUUID());
 
                     routingContext.put(KEEL_REQUEST_START_TIME, System.currentTimeMillis());
                     //routingContext.put(KEEL_REQUEST_CLIENT_IP_CHAIN, keel.netHelper().parseWebClientIPChain(routingContext));

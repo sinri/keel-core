@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class WriteIntoStatement extends AbstractStatement implements WriteIntoStatementMixin {
     /**
@@ -222,7 +222,7 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
             sql += schema + ".";
         }
         sql += table;
-        sql += " (" + KeelHelpers.stringHelper().joinStringArray(columns, ",") + ")";
+        sql += " (" + Keel.stringHelper().joinStringArray(columns, ",") + ")";
         if (sourceTableName != null) {
             sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "TABLE " + sourceTableName;
         } else if (sourceSelectSQL != null) {
@@ -231,15 +231,15 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
             sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "VALUES" + AbstractStatement.SQL_COMPONENT_SEPARATOR;
             List<String> items = new ArrayList<>();
             for (List<String> row : batchValues) {
-                items.add("(" + KeelHelpers.stringHelper().joinStringArray(row, ",") + ")");
+                items.add("(" + Keel.stringHelper().joinStringArray(row, ",") + ")");
             }
-            sql += KeelHelpers.stringHelper().joinStringArray(items, "," + AbstractStatement.SQL_COMPONENT_SEPARATOR);
+            sql += Keel.stringHelper().joinStringArray(items, "," + AbstractStatement.SQL_COMPONENT_SEPARATOR);
         }
         if (!onDuplicateKeyUpdateAssignmentMap.isEmpty()) {
             sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "ON DUPLICATE KEY UPDATE" + AbstractStatement.SQL_COMPONENT_SEPARATOR;
             List<String> items = new ArrayList<>();
             onDuplicateKeyUpdateAssignmentMap.forEach((key, value) -> items.add(key + " = " + value));
-            sql += KeelHelpers.stringHelper().joinStringArray(items, "," + AbstractStatement.SQL_COMPONENT_SEPARATOR);
+            sql += Keel.stringHelper().joinStringArray(items, "," + AbstractStatement.SQL_COMPONENT_SEPARATOR);
         }
         if (!getRemarkAsComment().isEmpty()) {
             sql += "\n-- " + getRemarkAsComment() + "\n";

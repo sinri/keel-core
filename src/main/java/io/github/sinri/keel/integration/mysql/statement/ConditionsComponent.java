@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 1.9 all the callback function could return null safely. by Sinri 2020-02-07
@@ -204,6 +204,6 @@ public class ConditionsComponent {
     @Override
     public String toString() {
         if (conditions.isEmpty()) return "";
-        return KeelHelpers.stringHelper().joinStringArray(conditions, " and ");
+        return Keel.stringHelper().joinStringArray(conditions, " and ");
     }
 }

@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class UpdateStatement extends AbstractStatement implements ModifyStatementMixin {
     /**
@@ -133,13 +133,13 @@ public class UpdateStatement extends AbstractStatement implements ModifyStatemen
         assignments.forEach(assignment -> {
             setPairs.add(assignment.toString());
         });
-        sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "SET " + KeelHelpers.stringHelper().joinStringArray(setPairs, ", ");
+        sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "SET " + Keel.stringHelper().joinStringArray(setPairs, ", ");
 
         if (!whereConditionsComponent.isEmpty()) {
             sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "WHERE " + whereConditionsComponent;
         }
         if (!sortRules.isEmpty()) {
-            sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "ORDER BY " + KeelHelpers.stringHelper().joinStringArray(sortRules, ",");
+            sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "ORDER BY " + Keel.stringHelper().joinStringArray(sortRules, ",");
         }
         if (limit > 0) {
             sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "LIMIT " + limit;

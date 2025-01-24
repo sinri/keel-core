@@ -5,7 +5,6 @@ import io.vertx.core.Handler;
 import javax.annotation.Nonnull;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
@@ -22,10 +21,10 @@ public class KeelRuntimeMonitor {
         Keel.getVertx().setPeriodic(interval, timer -> {
             MonitorSnapshot monitorSnapshot = new MonitorSnapshot();
 
-            GCStatResult gcSnapshot = KeelHelpers.runtimeHelper().getGCSnapshot();
-            CPUTimeResult cpuTimeSnapshot = KeelHelpers.runtimeHelper().getCPUTimeSnapshot();
+            GCStatResult gcSnapshot = Keel.runtimeHelper().getGCSnapshot();
+            CPUTimeResult cpuTimeSnapshot = Keel.runtimeHelper().getCPUTimeSnapshot();
 
-            JVMMemoryResult jvmMemoryResultSnapshot = KeelHelpers.runtimeHelper().makeJVMMemorySnapshot();
+            JVMMemoryResult jvmMemoryResultSnapshot = Keel.runtimeHelper().makeJVMMemorySnapshot();
 
             GCStatResult lastGC = _lastGCRef.get();
             if (lastGC != null) {

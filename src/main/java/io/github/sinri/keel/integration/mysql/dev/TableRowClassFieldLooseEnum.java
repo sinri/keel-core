@@ -2,7 +2,7 @@ package io.github.sinri.keel.integration.mysql.dev;
 
 import java.util.Collection;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.0.15
@@ -16,7 +16,7 @@ public class TableRowClassFieldLooseEnum {
     public TableRowClassFieldLooseEnum(String fieldName, Collection<String> enumElements) {
         this.fieldName = fieldName;
         this.enumElements = enumElements;
-        this.enumName = KeelHelpers.stringHelper().fromUnderScoreCaseToCamelCase(fieldName) + "Enum";
+        this.enumName = Keel.stringHelper().fromUnderScoreCaseToCamelCase(fieldName) + "Enum";
     }
 
     public String looseEnumName() {

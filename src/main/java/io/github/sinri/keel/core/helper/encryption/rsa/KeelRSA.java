@@ -10,7 +10,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Objects;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.0.1
@@ -129,7 +129,7 @@ public class KeelRSA extends KeelRSAKeyPair {
         signature.initSign(priKey);
         signature.update(content);
         byte[] signed = signature.sign();
-        return KeelHelpers.binaryHelper().encodeWithBase64ToString(signed);
+        return Keel.binaryHelper().encodeWithBase64ToString(signed);
     }
 
     /**
@@ -152,6 +152,6 @@ public class KeelRSA extends KeelRSAKeyPair {
         signature.initVerify(pubKey);
         signature.update(content);
 
-        return signature.verify(KeelHelpers.stringHelper().decodeWithBase64ToBytes(sign));
+        return signature.verify(Keel.stringHelper().decodeWithBase64ToBytes(sign));
     }
 }

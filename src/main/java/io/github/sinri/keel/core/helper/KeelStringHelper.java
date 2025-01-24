@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 
 /**
@@ -21,6 +21,26 @@ import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
  */
 public class KeelStringHelper {
     private static final KeelStringHelper instance = new KeelStringHelper();
+    /**
+     * @since 3.0.11
+     */
+    private static final Map<String, String> HttpEntityEscapeDictionary = new LinkedHashMap<>();
+    /**
+     * @see <a href="https://github.com/sinri/NyaCode/blob/master/javascript/NyaCode.js">NyaCode JS Impl</a>
+     * @since 3.2.14
+     */
+    private static final String NyaCodeDict = "-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz.";
+    /**
+     * @since 3.2.15 PR from yhzdys
+     */
+    private static final char[] NyaCodeDictChars = NyaCodeDict.toCharArray();
+
+    static {
+        HttpEntityEscapeDictionary.put("&", "&amp;");
+        HttpEntityEscapeDictionary.put("@", "&commat;");
+        HttpEntityEscapeDictionary.put("<", "&lt;");
+        HttpEntityEscapeDictionary.put(">", "&gt;");
+    }
 
     private KeelStringHelper() {
 
@@ -90,7 +110,7 @@ public class KeelStringHelper {
     @Nonnull
     public String bufferToHexMatrix(@Nonnull Buffer buffer, int rowSize) {
         StringBuilder matrix = new StringBuilder();
-        String s = KeelHelpers.binaryHelper().encodeHexWithUpperDigits(buffer);
+        String s = Keel.binaryHelper().encodeHexWithUpperDigits(buffer);
         for (int i = 0; i < s.length(); i += 2) {
             matrix.append(s, i, i + 2).append(" ");
             if ((i / 2) % rowSize == rowSize - 1) {
@@ -99,7 +119,6 @@ public class KeelStringHelper {
         }
         return matrix.toString();
     }
-
 
     /**
      * Make `apple_pie` to `ApplePie` or `applePie`.
@@ -129,7 +148,7 @@ public class KeelStringHelper {
             }
         }
 
-        return KeelHelpers.stringHelper().joinStringArray(camel, "");
+        return Keel.stringHelper().joinStringArray(camel, "");
     }
 
     /**
@@ -173,7 +192,7 @@ public class KeelStringHelper {
         if (part.length() > 0) {
             parts.add(part.toString());
         }
-        return KeelHelpers.stringHelper().joinStringArray(parts, "_");
+        return Keel.stringHelper().joinStringArray(parts, "_");
     }
 
     /**
@@ -252,7 +271,6 @@ public class KeelStringHelper {
         return buildStackChainText(stackTrace, Set.of());
     }
 
-
     /**
      * @since 2.9
      */
@@ -298,7 +316,7 @@ public class KeelStringHelper {
      */
     @Nonnull
     public byte[] encodeWithBase64ToBytes(@Nonnull String s) {
-        return KeelHelpers.binaryHelper().encodeWithBase64(s.getBytes());
+        return Keel.binaryHelper().encodeWithBase64(s.getBytes());
     }
 
     /**
@@ -358,18 +376,6 @@ public class KeelStringHelper {
     }
 
     /**
-     * @since 3.0.11
-     */
-    private static final Map<String, String> HttpEntityEscapeDictionary = new LinkedHashMap<>();
-
-    static {
-        HttpEntityEscapeDictionary.put("&", "&amp;");
-        HttpEntityEscapeDictionary.put("@", "&commat;");
-        HttpEntityEscapeDictionary.put("<", "&lt;");
-        HttpEntityEscapeDictionary.put(">", "&gt;");
-    }
-
-    /**
      * @see <a href="https://www.freeformatter.com/html-entities.html">HTTP Entities</a>
      * @since 3.0.11
      */
@@ -380,16 +386,6 @@ public class KeelStringHelper {
         });
         return x.get();
     }
-
-    /**
-     * @see <a href="https://github.com/sinri/NyaCode/blob/master/javascript/NyaCode.js">NyaCode JS Impl</a>
-     * @since 3.2.14
-     */
-    private static final String NyaCodeDict = "-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz.";
-    /**
-     * @since 3.2.15 PR from yhzdys
-     */
-    private static final char[] NyaCodeDictChars = NyaCodeDict.toCharArray();
 
     /**
      * @since 3.2.14

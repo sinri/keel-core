@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.0.8
@@ -79,7 +79,7 @@ public class TemplateArgument {
             }
             throw new RuntimeException();
         } else {
-            return "(" + KeelHelpers.stringHelper().joinStringArray(expressions, ",") + ")";
+            return "(" + Keel.stringHelper().joinStringArray(expressions, ",") + ")";
         }
     }
 }

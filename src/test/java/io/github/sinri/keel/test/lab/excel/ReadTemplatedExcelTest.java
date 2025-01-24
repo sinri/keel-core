@@ -16,7 +16,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.List;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class ReadTemplatedExcelTest extends KeelTest {
     private static final String file = "/Users/leqee/code/Keel/src/test/resources/excel/excel_1.xlsx";
@@ -41,15 +41,15 @@ public class ReadTemplatedExcelTest extends KeelTest {
             KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
             KeelSheetMatrix keelSheetMatrix = keelSheet.blockReadAllRowsToMatrix(1, 6, null);
             keelSheetMatrix.getRawRowList().forEach(row -> {
-                this.getLogger().info(log -> log.message("BLOCK: " + KeelHelpers.stringHelper().joinStringArray(row, ", ")));
+                this.getLogger().info(log -> log.message("BLOCK: " + Keel.stringHelper().joinStringArray(row, ", ")));
             });
 
             keelSheetMatrix.getRowIterator(KeelSheetMatrixRowExt.class).forEachRemaining(r -> {
                 this.getLogger().info(log -> log.message("record")
                         .context(c -> c
-                        .put("record_id", r.recordId())
-                        .put("name", r.name())
-                        .put("age", r.age())
+                                .put("record_id", r.recordId())
+                                .put("name", r.name())
+                                .put("age", r.age())
                         )
                 );
             });
@@ -64,7 +64,7 @@ public class ReadTemplatedExcelTest extends KeelTest {
         return keelSheet.readAllRowsToMatrix(1, 0, null)
                 .compose(keelSheetMatrix -> {
                     keelSheetMatrix.getRawRowList().forEach(row -> {
-                        this.getLogger().info(log -> log.message("ASYNC: " + KeelHelpers.stringHelper().joinStringArray(row, ", ")));
+                        this.getLogger().info(log -> log.message("ASYNC: " + Keel.stringHelper().joinStringArray(row, ", ")));
                     });
                     return Future.succeededFuture();
                 })

@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.0.15
@@ -30,23 +30,21 @@ class TableRowClassField {
     private final String type;
     private final String comment;
     private final @Nullable String strictEnumPackage;
+    private final @Nullable String aesEnvelopePackage;
+    /**
+     * @since 3.1.10
+     */
+    private final boolean nullable;
     private String returnType;
     private String readMethod;
     private @Nullable TableRowClassFieldLooseEnum looseEnum;
     private @Nullable TableRowClassFieldStrictEnum strictEnum;
-
-    private final @Nullable String aesEnvelopePackage;
     private @Nullable TableRowClassFieldAesEncryption aesEncryption;
-
     /**
      * @since 3.1.7
      */
     private boolean fieldDeprecated = false;
     private String actualComment;
-    /**
-     * @since 3.1.10
-     */
-    private final boolean nullable;
 
     public TableRowClassField(
             @Nonnull String field,
@@ -134,9 +132,9 @@ class TableRowClassField {
             if (split.length > 1) {
                 // this table is deprecated
                 this.fieldDeprecated = true;
-                actualComment = KeelHelpers.stringHelper().escapeForHttpEntity(split[1]);
+                actualComment = Keel.stringHelper().escapeForHttpEntity(split[1]);
             } else {
-                actualComment = KeelHelpers.stringHelper().escapeForHttpEntity(comment);
+                actualComment = Keel.stringHelper().escapeForHttpEntity(comment);
             }
         } else {
             actualComment = "";
@@ -144,7 +142,7 @@ class TableRowClassField {
     }
 
     public String build() {
-        String getter = "get" + KeelHelpers.stringHelper().fromUnderScoreCaseToCamelCase(field);
+        String getter = "get" + Keel.stringHelper().fromUnderScoreCaseToCamelCase(field);
 
         StringBuilder code = new StringBuilder();
         if (looseEnum != null) {

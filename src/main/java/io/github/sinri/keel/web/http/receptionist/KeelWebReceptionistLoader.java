@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.github.sinri.keel.core.helper.KeelHelpersInterface.KeelHelpers;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
@@ -39,7 +38,7 @@ public interface KeelWebReceptionistLoader {
     }
 
     static <R extends KeelWebReceptionist> void loadClass(Router router, Class<? extends R> c) {
-        ApiMeta[] apiMetaArray = KeelHelpers.reflectionHelper().getAnnotationsOfClass(c, ApiMeta.class);
+        ApiMeta[] apiMetaArray = Keel.reflectionHelper().getAnnotationsOfClass(c, ApiMeta.class);
         for (var apiMeta : apiMetaArray) {
             loadClass(router, c, apiMeta);
         }

@@ -1,5 +1,6 @@
 package io.github.sinri.keel.test.lab.cache;
 
+import io.github.sinri.keel.core.cache.NotCached;
 import io.github.sinri.keel.core.cache.impl.KeelCacheDalet;
 import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
 import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
@@ -35,7 +36,11 @@ public class KeelCacheDaletTest extends KeelInstantRunner {
                 })
                 .compose(v -> {
                     return Keel.asyncCallStepwise(10, i -> {
-                        getLogger().info("[" + i + "] " + dalet.read("last_cache_time"));
+                        try {
+                            getLogger().info("[" + i + "] " + dalet.read("last_cache_time"));
+                        } catch (NotCached e) {
+                            throw new RuntimeException(e);
+                        }
                         return Keel.asyncSleep(1000L);
                     });
                 })
@@ -51,7 +56,11 @@ public class KeelCacheDaletTest extends KeelInstantRunner {
                 })
                 .compose(v -> {
                     return Keel.asyncCallStepwise(10, i -> {
-                        getLogger().info("[" + i + "] " + dalet.read("last_cache_time"));
+                        try {
+                            getLogger().info("[" + i + "] " + dalet.read("last_cache_time"));
+                        } catch (NotCached e) {
+                            throw new RuntimeException(e);
+                        }
                         return Keel.asyncSleep(1000L);
                     });
                 });

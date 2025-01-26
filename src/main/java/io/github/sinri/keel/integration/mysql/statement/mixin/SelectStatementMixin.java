@@ -3,7 +3,6 @@ package io.github.sinri.keel.integration.mysql.statement.mixin;
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.matrix.ResultMatrix;
 import io.vertx.core.Future;
-import io.vertx.sqlclient.SqlConnection;
 
 /**
  * @since 3.2.21
@@ -18,22 +17,10 @@ public interface SelectStatementMixin extends ReadStatementMixin {
      * @since 3.2.20 Public
      */
     Future<PaginationResult> queryForPagination(
-            SqlConnection sqlConnection,
-            long pageNo,
-            long pageSize
-    );
-
-    /**
-     * @since 3.2.3
-     * @since 3.2.20 Public
-     */
-    default Future<PaginationResult> queryForPagination(
             NamedMySQLConnection sqlConnection,
             long pageNo,
             long pageSize
-    ) {
-        return this.queryForPagination(sqlConnection.getSqlConnection(), pageNo, pageSize);
-    }
+    );
 
     class PaginationResult {
         private final long total;

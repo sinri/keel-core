@@ -7,7 +7,6 @@ import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.sqlclient.SqlConnection;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -20,68 +19,19 @@ import java.util.function.Function;
  * @since 2.7
  */
 public interface ResultRow extends JsonifiableEntity<ResultRow> {
-    /**
-     * @since 3.0.11
-     * @since 3.0.18 Finished Technical Preview.
-     */
-    static <K, T extends ResultRow> Future<Map<K, List<T>>> fetchResultRowsToCategorizedMap(
-            @Nonnull NamedMySQLConnection namedSqlConnection,
-            @Nonnull ReadStatementMixin readStatement,
-            @Nonnull Class<T> classOfTableRow,
-            @Nonnull Function<T, K> categoryGenerator
-    ) {
-        return fetchResultRowsToCategorizedMap(namedSqlConnection.getSqlConnection(), readStatement, classOfTableRow, categoryGenerator);
-    }
-
-    /**
-     * @since 3.0.11
-     * @since 3.0.18 Finished Technical Preview.
-     */
-    static <K, T extends ResultRow> Future<Map<K, T>> fetchResultRowsToUniqueKeyBoundMap(
-            @Nonnull NamedMySQLConnection namedMySQLConnection,
-            @Nonnull ReadStatementMixin readStatement,
-            @Nonnull Class<T> classOfTableRow,
-            @Nonnull Function<T, K> uniqueKeyGenerator
-    ) {
-        return fetchResultRowsToUniqueKeyBoundMap(namedMySQLConnection.getSqlConnection(), readStatement, classOfTableRow, uniqueKeyGenerator);
-    }
-
-    /**
-     * @since 3.0.11
-     * @since 3.0.18 Finished Technical Preview.
-     */
-    static <T extends ResultRow> Future<List<T>> fetchResultRows(
-            @Nonnull NamedMySQLConnection namedMySQLConnection,
-            @Nonnull ReadStatementMixin readStatement,
-            @Nonnull Class<T> classOfTableRow
-    ) {
-        return fetchResultRows(namedMySQLConnection.getSqlConnection(), readStatement, classOfTableRow);
-    }
-
-    /**
-     * @since 3.0.11
-     * @since 3.0.18 Finished Technical Preview.
-     */
-    static <T extends ResultRow> Future<T> fetchResultRow(
-            @Nonnull NamedMySQLConnection namedMySQLConnection,
-            @Nonnull ReadStatementMixin readStatement,
-            @Nonnull Class<T> classOfTableRow
-    ) {
-        return fetchResultRow(namedMySQLConnection.getSqlConnection(), readStatement, classOfTableRow);
-    }
 
 
     /**
      * @since 2.9.4
      */
     static <K, T extends ResultRow> Future<Map<K, List<T>>> fetchResultRowsToCategorizedMap(
-            @Nonnull SqlConnection sqlConnection,
+            @Nonnull NamedMySQLConnection namedMySQLConnection,
             @Nonnull ReadStatementMixin readStatement,
             @Nonnull Class<T> classOfTableRow,
             @Nonnull Function<T, K> categoryGenerator
     ) {
         Map<K, List<T>> map = new HashMap<>();
-        return fetchResultRows(sqlConnection, readStatement, classOfTableRow)
+        return fetchResultRows(namedMySQLConnection, readStatement, classOfTableRow)
                 .compose(list -> {
                     list.forEach(item -> {
                         K category = categoryGenerator.apply(item);
@@ -95,13 +45,13 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
      * @since 2.9.4
      */
     static <K, T extends ResultRow> Future<Map<K, T>> fetchResultRowsToUniqueKeyBoundMap(
-            @Nonnull SqlConnection sqlConnection,
+            @Nonnull NamedMySQLConnection namedMySQLConnection,
             @Nonnull ReadStatementMixin readStatement,
             @Nonnull Class<T> classOfTableRow,
             @Nonnull Function<T, K> uniqueKeyGenerator
     ) {
         Map<K, T> map = new HashMap<>();
-        return fetchResultRows(sqlConnection, readStatement, classOfTableRow)
+        return fetchResultRows(namedMySQLConnection, readStatement, classOfTableRow)
                 .compose(list -> {
                     list.forEach(item -> {
                         K uniqueKey = uniqueKeyGenerator.apply(item);
@@ -117,11 +67,11 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
      * 如果存在，将所有行以classOfTableRow指定的类进行封装，异步返回此实例构成的List。
      */
     static <T extends ResultRow> Future<List<T>> fetchResultRows(
-            @Nonnull SqlConnection sqlConnection,
+            @Nonnull NamedMySQLConnection namedMySQLConnection,
             @Nonnull ReadStatementMixin readStatement,
             @Nonnull Class<T> classOfTableRow
     ) {
-        return readStatement.execute(sqlConnection)
+        return readStatement.execute(namedMySQLConnection)
                 .compose(resultMatrix -> {
                     List<T> ts = resultMatrix.buildTableRowList(classOfTableRow);
                     return Future.succeededFuture(ts);
@@ -135,11 +85,11 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
      * 如果存在，将第一行以classOfTableRow指定的类进行封装，异步返回此实例。
      */
     static <T extends ResultRow> Future<T> fetchResultRow(
-            @Nonnull SqlConnection sqlConnection,
+            @Nonnull NamedMySQLConnection namedMySQLConnection,
             @Nonnull ReadStatementMixin readStatement,
             @Nonnull Class<T> classOfTableRow
     ) {
-        return readStatement.execute(sqlConnection)
+        return readStatement.execute(namedMySQLConnection)
                 .compose(resultMatrix -> {
                     try {
                         T t = resultMatrix.buildTableRowByIndex(0, classOfTableRow);
@@ -171,7 +121,7 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
      * @since 2.9.4 fix null field error
      */
     @Nullable
-    default String readDateTime(@Nonnull  String field) {
+    default String readDateTime(@Nonnull String field) {
         String s = readString(field);
         if (s == null) return null;
         return LocalDateTime.parse(s)

@@ -1,5 +1,6 @@
 package io.github.sinri.keel.integration.mysql.statement;
 
+import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.condition.CompareCondition;
 import io.github.sinri.keel.integration.mysql.condition.GroupCondition;
 import io.github.sinri.keel.integration.mysql.condition.MySQLCondition;
@@ -10,7 +11,6 @@ import io.github.sinri.keel.integration.mysql.matrix.ResultMatrix;
 import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
 import io.github.sinri.keel.integration.mysql.statement.mixin.SelectStatementMixin;
 import io.vertx.core.Future;
-import io.vertx.sqlclient.SqlConnection;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -263,7 +263,7 @@ public class SelectStatement extends AbstractStatement implements SelectStatemen
      */
     @Override
     public Future<PaginationResult> queryForPagination(
-            SqlConnection sqlConnection,
+            NamedMySQLConnection sqlConnection,
             long pageNo,
             long pageSize
     ) {

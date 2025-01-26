@@ -1,12 +1,12 @@
 package io.github.sinri.keel.integration.mysql.statement;
 
+import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.matrix.ResultMatrix;
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenterAsSilent;
+import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.record.BaseIssueRecord;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
-import io.vertx.sqlclient.SqlConnection;
 
 import javax.annotation.Nonnull;
 import java.util.UUID;
@@ -19,7 +19,8 @@ abstract public class AbstractStatement implements AnyStatement {
     /**
      * @since 3.2.0 replace original SQL Audit Logger
      */
-    protected static @Nonnull KeelIssueRecorder<MySQLAuditIssueRecord> sqlAuditIssueRecorder = KeelIssueRecordCenterAsSilent.getInstance()
+    protected static @Nonnull KeelIssueRecorder<MySQLAuditIssueRecord> sqlAuditIssueRecorder
+            = KeelIssueRecordCenter.silentCenter()
             .generateIssueRecorder(MySQLAuditIssueRecord.AttributeMysqlAudit, MySQLAuditIssueRecord::new);
     protected static @Nonnull String SQL_COMPONENT_SEPARATOR = " ";//"\n";
     protected final @Nonnull String statement_uuid;
@@ -57,19 +58,19 @@ abstract public class AbstractStatement implements AnyStatement {
      * 在给定的SqlConnection上执行SQL，异步返回ResultMatrix，或异步报错。
      * （如果SQL审计日志记录器可用）将为审计记录执行的SQL和执行结果，以及任何异常。
      *
-     * @param sqlConnection Fetched from Pool
+     * @param namedSqlConnection Fetched from Pool
      * @return the result matrix wrapped in a future, any error would cause a failed future
      * @since 2.8 将整个运作体加入了try-catch，统一加入审计日志，出现异常时一律异步报错。
      * @since 3.0.0 removed try-catch
      */
     @Override
-    public final Future<ResultMatrix> execute(@Nonnull SqlConnection sqlConnection) {
+    public Future<ResultMatrix> execute(@Nonnull NamedMySQLConnection namedSqlConnection) {
         AtomicReference<String> theSql = new AtomicReference<>();
         return Future.succeededFuture(this.toString())
                 .compose(sql -> {
                     theSql.set(sql);
                     getSqlAuditIssueRecorder().info(r -> r.setPreparation(statement_uuid, sql));
-                    return sqlConnection.preparedQuery(sql).execute()
+                    return namedSqlConnection.getSqlConnection().preparedQuery(sql).execute()
                             .compose(rows -> {
                                 ResultMatrix resultMatrix = ResultMatrix.create(rows);
                                 return Future.succeededFuture(resultMatrix);

@@ -120,7 +120,7 @@ public class CutterOnString implements Cutter<String> {
 
     @Override
     public void handle(Buffer piece) {
-        //Keel.getLogger().info("into io.github.sinri.keel.core.cutter.CutterOnStringBasedOnBytes.handle");
+        // Keel.getLogger().warning("into io.github.sinri.keel.core.cutter.CutterOnStringBasedOnBytes.handle "+piece.toString());
 
         AtomicBoolean containsDelimiter = new AtomicBoolean(false);
         doWriteExclusively(v -> {

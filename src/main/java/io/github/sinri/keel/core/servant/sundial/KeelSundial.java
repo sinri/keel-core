@@ -1,6 +1,7 @@
 package io.github.sinri.keel.core.servant.sundial;
 
-import io.github.sinri.keel.core.KeelCronExpression;
+import io.github.sinri.keel.core.cron.KeelCronExpression;
+import io.github.sinri.keel.core.cron.ParsedCalenderElements;
 import io.github.sinri.keel.core.verticles.KeelVerticleImplWithEventLogger;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
@@ -41,7 +42,7 @@ public abstract class KeelSundial extends KeelVerticleImplWithEventLogger {
     }
 
     private void handleEveryMinute(Calendar now) {
-        KeelCronExpression.ParsedCalenderElements parsedCalenderElements = new KeelCronExpression.ParsedCalenderElements(now);
+        ParsedCalenderElements parsedCalenderElements = new ParsedCalenderElements(now);
         planMap.forEach((key, plan) -> {
             if (plan.cronExpression().match(parsedCalenderElements)) {
                 getLogger().debug("Sundial Plan Matched", new JsonObject()

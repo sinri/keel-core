@@ -1,11 +1,14 @@
 package io.github.sinri.keel.core.helper;
 
+import io.github.sinri.keel.core.cron.KeelCronExpression;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -162,5 +165,19 @@ public class KeelDateTimeHelper {
         } catch (Throwable e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    /**
+     * @since 3.3.0
+     */
+    public boolean isNowMatchCronExpression(@Nonnull String cronExpression) {
+        return new KeelCronExpression(cronExpression).match(Calendar.getInstance());
+    }
+
+    /**
+     * @since 3.3.0
+     */
+    public boolean isNowMatchCronExpression(@Nonnull KeelCronExpression cronExpression) {
+        return cronExpression.match(Calendar.getInstance());
     }
 }

@@ -12,7 +12,6 @@ import io.github.sinri.keel.integration.mysql.statement.templated.TemplatedReadS
 import io.github.sinri.keel.integration.mysql.statement.templated.TemplatedStatement;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.sqlclient.SqlConnection;
 
 import javax.annotation.Nonnull;
 
@@ -20,7 +19,6 @@ import javax.annotation.Nonnull;
  * @since 3.0.9
  */
 public interface AnyStatement {
-
 
     /**
      * @since 3.0.9
@@ -123,13 +121,9 @@ public interface AnyStatement {
      */
     String toString();
 
-    Future<ResultMatrix> execute(@Nonnull SqlConnection sqlConnection);
-
     /**
      * @since 3.0.11
      * @since 3.0.18 Finished Technical Preview.
      */
-    default Future<ResultMatrix> execute(@Nonnull NamedMySQLConnection namedSqlConnection) {
-        return execute(namedSqlConnection.getSqlConnection());
-    }
+    Future<ResultMatrix> execute(@Nonnull NamedMySQLConnection namedSqlConnection);
 }

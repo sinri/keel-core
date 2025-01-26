@@ -2,7 +2,6 @@ package io.github.sinri.keel.integration.mysql.statement.mixin;
 
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.vertx.core.Future;
-import io.vertx.sqlclient.SqlConnection;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -12,22 +11,13 @@ import java.util.List;
  */
 public interface WriteIntoStatementMixin extends ModifyStatementMixin {
     /**
-     * @param sqlConnection get from pool
      * @return future with last inserted id; if any error occurs, failed future returned instead.
-     * @since 1.7
-     * @since 1.10, removed the recover block
-     */
-    default Future<Long> executeForLastInsertedID(@Nonnull SqlConnection sqlConnection) {
-        return execute(sqlConnection)
-                .compose(resultMatrix -> Future.succeededFuture(resultMatrix.getLastInsertedID()));
-    }
-
-    /**
      * @since 3.0.11
      * @since 3.0.18 Finished Technical Preview.
      */
     default Future<Long> executeForLastInsertedID(@Nonnull NamedMySQLConnection namedMySQLConnection) {
-        return executeForLastInsertedID(namedMySQLConnection.getSqlConnection());
+        return execute(namedMySQLConnection)
+                .compose(resultMatrix -> Future.succeededFuture(resultMatrix.getLastInsertedID()));
     }
 
     /**

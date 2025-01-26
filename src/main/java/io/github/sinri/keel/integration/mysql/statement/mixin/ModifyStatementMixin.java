@@ -3,7 +3,6 @@ package io.github.sinri.keel.integration.mysql.statement.mixin;
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.statement.AnyStatement;
 import io.vertx.core.Future;
-import io.vertx.sqlclient.SqlConnection;
 
 import javax.annotation.Nonnull;
 
@@ -13,24 +12,15 @@ import javax.annotation.Nonnull;
 public interface ModifyStatementMixin extends AnyStatement {
 
     /**
-     * @param sqlConnection get from pool
      * @return future with affected rows; failed future when failed
-     * @since 1.7
-     * @since 1.10 removed recover
-     */
-    default Future<Integer> executeForAffectedRows(@Nonnull SqlConnection sqlConnection) {
-        return execute(sqlConnection)
-                .compose(resultMatrix -> {
-                    var afx = resultMatrix.getTotalAffectedRows();
-                    return Future.succeededFuture(afx);
-                });
-    }
-
-    /**
      * @since 3.0.11
      * @since 3.0.18 Finished Technical Preview.
      */
     default Future<Integer> executeForAffectedRows(@Nonnull NamedMySQLConnection namedMySQLConnection) {
-        return executeForAffectedRows(namedMySQLConnection.getSqlConnection());
+        return execute(namedMySQLConnection)
+                .compose(resultMatrix -> {
+                    var afx = resultMatrix.getTotalAffectedRows();
+                    return Future.succeededFuture(afx);
+                });
     }
 }

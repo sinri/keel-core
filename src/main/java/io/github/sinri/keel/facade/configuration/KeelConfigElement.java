@@ -75,62 +75,6 @@ public class KeelConfigElement {
                 });
     }
 
-//    public static ConfigStoreOptions buildConfigStoreOptionsForPropertiesFile(@Nonnull String file) {
-//        return new ConfigStoreOptions()
-//                .setType("file")
-//                .setFormat("properties")
-//                .setConfig(new JsonObject()
-//                        .put("path", file)
-//                );
-//    }
-//
-//    public static ConfigStoreOptions buildConfigStoreOptionsForJsonObject(@Nonnull JsonObject jsonObject) {
-//        return new ConfigStoreOptions()
-//                .setType("json")
-//                .setConfig(jsonObject);
-//    }
-//
-//    public static ConfigStoreOptions buildConfigStoreOptionsForEnvironment(boolean useRawData, @Nullable List<String> envKeys) {
-//        var x = new ConfigStoreOptions()
-//                .setType("env");
-//        var c = new JsonObject();
-//        if (useRawData) {
-//            c.put("raw-data", true);
-//        }
-//        if (envKeys != null) {
-//            c.put("keys", new JsonArray(envKeys));
-//        }
-//        if (!c.isEmpty()) {
-//            x.setConfig(c);
-//        }
-//        return x;
-//    }
-//
-//    public static ConfigStoreOptions buildConfigStoreOptionsForSystemProperties(
-//            boolean alwaysUseCache,
-//            boolean useRawData,
-//            boolean hierarchical
-//    ) {
-//        var x = new ConfigStoreOptions()
-//                .setType("sys");
-//        var c = new JsonObject();
-//        if (!alwaysUseCache) {
-//            c.put("cache", false);
-//        }
-//        if (useRawData) {
-//            c.put("raw-data", true);
-//        }
-//        if (hierarchical) {
-//            c.put("hierarchical", true);
-//        }
-//        if (!c.isEmpty()) {
-//            x.setConfig(c);
-//        }
-//        return x;
-//    }
-//
-//    // http, event bus, directory
-
     @Nonnull
     public String getName() {
         return name;

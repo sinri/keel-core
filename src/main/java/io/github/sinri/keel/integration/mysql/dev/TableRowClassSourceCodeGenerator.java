@@ -28,13 +28,6 @@ public class TableRowClassSourceCodeGenerator {
     private @Nullable String strictEnumPackage = null;
     private @Nullable String envelopePackage = null;
 
-    public TableRowClassSourceCodeGenerator(SqlConnection sqlConnection) {
-        this.sqlConnection = sqlConnection;
-        this.schema = null;
-        this.tableSet = new HashSet<>();
-        this.excludedTableSet = new HashSet<>();
-    }
-
     public TableRowClassSourceCodeGenerator(NamedMySQLConnection namedMySQLConnection) {
         this.sqlConnection = namedMySQLConnection.getSqlConnection();
         this.schema = null;

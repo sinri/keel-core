@@ -10,7 +10,6 @@ import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.data.Numeric;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -98,12 +97,7 @@ class ResultMatrixImpl implements ResultMatrix {
      */
     @Override
     public <T extends ResultRow> T buildTableRowByIndex(int index, Class<T> classOfTableRow) throws KeelSQLResultRowIndexError {
-        try {
-            return ResultMatrix.buildTableRow(getRowByIndex(index), classOfTableRow);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
-                 NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+        return ResultRow.of(getRowByIndex(index), classOfTableRow);
     }
 
     /**
@@ -111,12 +105,11 @@ class ResultMatrixImpl implements ResultMatrix {
      */
     @Override
     public <T extends ResultRow> List<T> buildTableRowList(Class<T> classOfTableRow) {
-        try {
-            return ResultMatrix.buildTableRowList(getRowList(), classOfTableRow);
-        } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
-                 IllegalAccessException e) {
-            throw new RuntimeException(e);
+        ArrayList<T> list = new ArrayList<>();
+        for (var x : rowList) {
+            list.add(ResultRow.of(x, classOfTableRow));
         }
+        return list;
     }
 
     /**

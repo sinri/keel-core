@@ -10,7 +10,6 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowSet;
 import io.vertx.sqlclient.data.Numeric;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -23,24 +22,6 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * May overrides this class to get Customized Data Matrix
  */
 public interface ResultMatrix {
-
-    /**
-     * @since 1.10
-     */
-    static <T extends ResultRow> T buildTableRow(JsonObject row, Class<T> classOfTableRow) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        return classOfTableRow.getConstructor(JsonObject.class).newInstance(row);
-    }
-
-    /**
-     * @since 1.10
-     */
-    static <T extends ResultRow> List<T> buildTableRowList(List<JsonObject> rowList, Class<T> classOfTableRow) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-        ArrayList<T> list = new ArrayList<>();
-        for (var x : rowList) {
-            list.add(ResultMatrix.buildTableRow(x, classOfTableRow));
-        }
-        return list;
-    }
 
     /**
      * @since 2.8

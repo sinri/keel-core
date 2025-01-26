@@ -1,107 +1,41 @@
 package io.github.sinri.keel.integration.mysql.result.row;
 
 import io.github.sinri.keel.core.json.JsonifiableEntity;
-import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
-import io.github.sinri.keel.integration.mysql.exception.KeelSQLResultRowIndexError;
-import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
-import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.sqlclient.Row;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.lang.reflect.Constructor;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Collection;
 import java.util.function.Function;
 
 /**
+ * From class `io.vertx.sqlclient.Row`, dump to a JsonObject, and then wrap it with a ResultRow implementation.
+ *
  * @since 2.7
  */
 public interface ResultRow extends JsonifiableEntity<ResultRow> {
-
-
     /**
-     * @since 2.9.4
+     * @since 3.3.0
      */
-    @Deprecated(since = "3.3.0", forRemoval = true)
-    static <K, T extends ResultRow> Future<Map<K, List<T>>> fetchResultRowsToCategorizedMap(
-            @Nonnull NamedMySQLConnection namedMySQLConnection,
-            @Nonnull ReadStatementMixin readStatement,
-            @Nonnull Class<T> classOfTableRow,
-            @Nonnull Function<T, K> categoryGenerator
-    ) {
-        Map<K, List<T>> map = new HashMap<>();
-        return fetchResultRows(namedMySQLConnection, readStatement, classOfTableRow)
-                .compose(list -> {
-                    list.forEach(item -> {
-                        K category = categoryGenerator.apply(item);
-                        map.computeIfAbsent(category, k -> new ArrayList<>()).add(item);
-                    });
-                    return Future.succeededFuture(map);
-                });
+    static <R extends ResultRow> R of(@Nonnull JsonObject tableRow, Class<R> clazz) {
+        try {
+            Constructor<R> constructor = clazz.getConstructor(JsonObject.class);
+            return constructor.newInstance(tableRow);
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
-     * @since 2.9.4
+     * @since 3.3.0
      */
-    @Deprecated(since = "3.3.0", forRemoval = true)
-    static <K, T extends ResultRow> Future<Map<K, T>> fetchResultRowsToUniqueKeyBoundMap(
-            @Nonnull NamedMySQLConnection namedMySQLConnection,
-            @Nonnull ReadStatementMixin readStatement,
-            @Nonnull Class<T> classOfTableRow,
-            @Nonnull Function<T, K> uniqueKeyGenerator
-    ) {
-        Map<K, T> map = new HashMap<>();
-        return fetchResultRows(namedMySQLConnection, readStatement, classOfTableRow)
-                .compose(list -> {
-                    list.forEach(item -> {
-                        K uniqueKey = uniqueKeyGenerator.apply(item);
-                        map.put(uniqueKey, item);
-                    });
-                    return Future.succeededFuture(map);
-                });
-    }
-
-    /**
-     * 在给定的SqlConnection上利用指定的AbstractReadStatement进行SQL查询（查询失败时异步报错）；
-     * 尝试获取查询结果；
-     * 如果存在，将所有行以classOfTableRow指定的类进行封装，异步返回此实例构成的List。
-     */
-    @Deprecated(forRemoval = true, since = "3.3.0")
-    static <T extends ResultRow> Future<List<T>> fetchResultRows(
-            @Nonnull NamedMySQLConnection namedMySQLConnection,
-            @Nonnull ReadStatementMixin readStatement,
-            @Nonnull Class<T> classOfTableRow
-    ) {
-        return readStatement.execute(namedMySQLConnection)
-                .compose(resultMatrix -> {
-                    List<T> ts = resultMatrix.buildTableRowList(classOfTableRow);
-                    return Future.succeededFuture(ts);
-                });
-    }
-
-    /**
-     * 在给定的SqlConnection上利用指定的AbstractReadStatement进行SQL查询（查询失败时异步报错）；
-     * 尝试获取查询结果；
-     * 如果不存在，异步返回null；
-     * 如果存在，将第一行以classOfTableRow指定的类进行封装，异步返回此实例。
-     */
-    @Deprecated(forRemoval = true, since = "3.3.0")
-    static <T extends ResultRow> Future<T> fetchResultRow(
-            @Nonnull NamedMySQLConnection namedMySQLConnection,
-            @Nonnull ReadStatementMixin readStatement,
-            @Nonnull Class<T> classOfTableRow
-    ) {
-        return readStatement.execute(namedMySQLConnection)
-                .compose(resultMatrix -> {
-                    try {
-                        T t = resultMatrix.buildTableRowByIndex(0, classOfTableRow);
-                        return Future.succeededFuture(t);
-                    } catch (KeelSQLResultRowIndexError e) {
-                        return Future.succeededFuture(null);
-                    }
-                });
+    static <R extends ResultRow> R of(@Nonnull Row tableRow, Class<R> clazz) {
+        return of(tableRow.toJson(), clazz);
     }
 
     static JsonArray batchToJsonArray(@Nonnull Collection<? extends ResultRow> rows) {

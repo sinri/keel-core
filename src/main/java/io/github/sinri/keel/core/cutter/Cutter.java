@@ -29,6 +29,7 @@ public interface Cutter<T> {
     Future<Void> end();
 
     /**
+     * Handle when the recently incoming buffer came.
      * @param piece the stream recently incoming buffer.
      */
     void handle(Buffer piece);
@@ -36,10 +37,10 @@ public interface Cutter<T> {
     /**
      * @since 3.2.18
      */
-    CutterOnString setRetainRepeat(int retainRepeat);
+    Cutter<T> setRetainRepeat(int retainRepeat);
 
     /**
      * @since 3.2.18
      */
-    CutterOnString setRetainTime(long retainTime);
+    Cutter<T> setRetainTime(long retainTime);
 }

@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 /**
  * @since 3.0.1
  */
+@Deprecated(since = "3.3.0")
 public class KeelAsyncTemporaryValue<P> {
     private final AtomicReference<ValueWrapper<P>> valueWrapperAtomicReference;
     private long defaultLifetimeInSeconds = 10L;

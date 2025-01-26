@@ -1,6 +1,5 @@
 package io.github.sinri.keel.logger.metric;
 
-import io.github.sinri.keel.core.TechnicalPreview;
 import io.vertx.core.Future;
 
 import java.util.*;
@@ -12,7 +11,6 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 /**
  * @since 3.1.9 Technical Preview
  */
-@TechnicalPreview(since = "3.1.9")
 abstract public class KeelMetricRecorder {
     private final AtomicBoolean endSwitch = new AtomicBoolean(false);
     private final Queue<KeelMetricRecord> metricRecordQueue = new ConcurrentLinkedQueue<>();

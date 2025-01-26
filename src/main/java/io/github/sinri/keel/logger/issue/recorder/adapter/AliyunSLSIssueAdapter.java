@@ -1,6 +1,5 @@
 package io.github.sinri.keel.logger.issue.recorder.adapter;
 
-import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.github.sinri.keel.logger.issue.recorder.render.KeelIssueRecordRender;
 import io.vertx.core.Future;
@@ -18,14 +17,9 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 /**
  * @since 3.1.10
  */
-@TechnicalPreview(since = "3.1.10")
 abstract public class AliyunSLSIssueAdapter implements KeelIssueRecorderAdapter {
-
     private final Map<String, Queue<KeelIssueRecord<?>>> issueRecordQueueMap = new ConcurrentHashMap<>();
 
-    public AliyunSLSIssueAdapter() {
-
-    }
 
     @Override
     public void record(@Nonnull String topic, @Nullable KeelIssueRecord<?> issueRecord) {
@@ -48,17 +42,14 @@ abstract public class AliyunSLSIssueAdapter implements KeelIssueRecorderAdapter 
                     }
 
                     Set<String> topics = Collections.unmodifiableSet(this.issueRecordQueueMap.keySet());
-                    //Keel.getLogger().warning("AliyunSLSIssueAdapter routine unmodifiableSet of topics got");
                     return Keel.asyncCallIteratively(topics, this::handleForTopic)
                             .compose(v -> {
-                                //Keel.getLogger().warning("AliyunSLSIssueAdapter routine unmodifiableSet of topics all handled");
                                 AtomicLong total = new AtomicLong(0);
                                 return Keel.asyncCallIteratively(topics, topic -> {
                                             total.addAndGet(this.issueRecordQueueMap.get(topic).size());
                                             return Future.succeededFuture();
                                         })
                                         .compose(vv -> {
-                                            //Keel.getLogger().warning("AliyunSLSIssueAdapter routine counted");
                                             if (total.get() == 0) {
                                                 return Keel.asyncSleep(500L);
                                             } else {
@@ -77,7 +68,6 @@ abstract public class AliyunSLSIssueAdapter implements KeelIssueRecorderAdapter 
     }
 
     private Future<Void> handleForTopic(@Nonnull final String topic) {
-        //Keel.getLogger().warning("AliyunSLSIssueAdapter handleForTopic start for TOPIC "+topic);
         Queue<KeelIssueRecord<?>> keelIssueRecords = this.issueRecordQueueMap.get(topic);
         List<KeelIssueRecord<?>> buffer = new ArrayList<>();
         while (true) {
@@ -91,7 +81,6 @@ abstract public class AliyunSLSIssueAdapter implements KeelIssueRecorderAdapter 
             }
         }
         if (buffer.isEmpty()) return Future.succeededFuture();
-        //Keel.getLogger().warning("AliyunSLSIssueAdapter handleForTopic concluded for TOPIC "+topic);
         return handleIssueRecordsForTopic(topic, buffer);
     }
 

@@ -38,15 +38,6 @@ public class SimpleJsonifiableEntity implements JsonifiableEntity<SimpleJsonifia
     }
 
     /**
-     * @since 3.2.17
-     */
-    @Nonnull
-    @Override
-    public JsonObject cloneAsJsonObject() {
-        return new JsonObject(toString());
-    }
-
-    /**
      * @since 2.8
      */
     @Override
@@ -56,9 +47,6 @@ public class SimpleJsonifiableEntity implements JsonifiableEntity<SimpleJsonifia
 
     @Override
     public SimpleJsonifiableEntity copy() {
-        SimpleJsonifiableEntity copied = new SimpleJsonifiableEntity();
-        JsonObject copiedJsonObject = this.toJsonObject().copy();
-        copied.reloadDataFromJsonObject(copiedJsonObject);
-        return copied;
+        return new SimpleJsonifiableEntity(cloneAsJsonObject());
     }
 }

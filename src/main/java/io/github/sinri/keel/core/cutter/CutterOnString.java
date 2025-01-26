@@ -31,13 +31,13 @@ public class CutterOnString implements Cutter<String> {
     }
 
     @Override
-    public CutterOnString setRetainRepeat(int retainRepeat) {
+    public Cutter<String> setRetainRepeat(int retainRepeat) {
         this.retainRepeat = retainRepeat;
         return this;
     }
 
     @Override
-    public CutterOnString setRetainTime(long retainTime) {
+    public Cutter<String> setRetainTime(long retainTime) {
         this.retainTime = retainTime;
         return this;
     }
@@ -73,8 +73,6 @@ public class CutterOnString implements Cutter<String> {
 
     @Override
     public Future<Void> end() {
-        //Keel.getLogger().info("into io.github.sinri.keel.core.cutter.CutterOnStringBasedOnBytes.end");
-
         AtomicReference<String> chunkRef = new AtomicReference<>();
         AtomicInteger counter = new AtomicInteger(this.retainRepeat);
         return Keel.asyncCallRepeatedly(routineResult -> {
@@ -112,7 +110,7 @@ public class CutterOnString implements Cutter<String> {
                         chunkRef.set(s);
                     });
                     var s = chunkRef.get();
-                    if (s != null && !s.isEmpty() && !s.isBlank()) {
+                    if (s != null && !s.isBlank()) {
                         handleComponent(s);
                     }
                     //Keel.getLogger().info("finish io.github.sinri.keel.core.cutter.CutterOnStringBasedOnBytes.end");
@@ -142,7 +140,7 @@ public class CutterOnString implements Cutter<String> {
         });
 
         var s = chunkRef.get();
-        if (s != null && !s.isEmpty() && !s.isBlank()) {
+        if (s != null && !s.isBlank()) {
             handleComponent(s);
         }
 

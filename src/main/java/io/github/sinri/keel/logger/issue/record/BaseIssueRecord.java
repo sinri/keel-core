@@ -1,6 +1,5 @@
 package io.github.sinri.keel.logger.issue.record;
 
-import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.core.json.UnmodifiableJsonifiableEntity;
 import io.github.sinri.keel.logger.KeelLogLevel;
 import io.vertx.core.json.JsonObject;
@@ -13,7 +12,6 @@ import java.util.List;
 /**
  * @since 3.1.10
  */
-@TechnicalPreview(since = "3.1.10")
 public abstract class BaseIssueRecord<T> implements KeelIssueRecord<T> {
     private final @Nonnull JsonObject attributes;
     private final @Nonnull List<String> classification;

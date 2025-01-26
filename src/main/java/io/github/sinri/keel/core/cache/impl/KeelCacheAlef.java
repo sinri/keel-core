@@ -4,8 +4,11 @@ import io.github.sinri.keel.core.cache.KeelCacheInterface;
 import io.github.sinri.keel.core.cache.ValueWrapper;
 
 import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Supplier;
 
 /**
  * An implementation of KeelCacheInterface, using ConcurrentHashMap.
@@ -42,11 +45,29 @@ public class KeelCacheAlef<K, V> implements KeelCacheInterface<K, V> {
         if (vw == null) {
             return fallbackValue;
         }
-        if (vw.isAliveNow()) {
-            return vw.getValue();
-        } else {
+        var v = vw.getValue();
+        if (v == null) {
             return fallbackValue;
         }
+        return v;
+    }
+
+    /**
+     * @since 3.3.0
+     */
+    @Override
+    public V read(@Nonnull K key, Supplier<V> generator, long lifeInSeconds) {
+        ValueWrapper<V> vw = this.map.get(key);
+        if (vw != null) {
+            V v = vw.getValue();
+            if (v != null) {
+                return v;
+            }
+        }
+
+        V v = generator.get();
+        save(key, v, lifeInSeconds);
+        return v;
     }
 
     @Override
@@ -64,7 +85,7 @@ public class KeelCacheAlef<K, V> implements KeelCacheInterface<K, V> {
         this.map.keySet().forEach(key -> {
             ValueWrapper<V> vw = this.map.get(key);
             if (vw != null) {
-                if (!vw.isAliveNow()) {
+                if (!vw.isAvailable()) {
                     this.map.remove(key, vw);
                 }
             }
@@ -73,14 +94,13 @@ public class KeelCacheAlef<K, V> implements KeelCacheInterface<K, V> {
 
     @Override
     @Nonnull
-    public ConcurrentMap<K, V> getSnapshotMap() {
-        ConcurrentMap<K, V> snapshot = new ConcurrentHashMap<>();
+    public synchronized Map<K, V> getSnapshotMap() {
+        Map<K, V> snapshot = new HashMap<>();
         this.map.keySet().forEach(key -> {
             ValueWrapper<V> vw = this.map.get(key);
-            if (vw != null) {
-                if (vw.isAliveNow()) {
-                    snapshot.put(key, vw.getValue());
-                }
+            var v = vw.getValue();
+            if (v != null) {
+                snapshot.put(key, vw.getValue());
             }
         });
         return snapshot;

@@ -1,6 +1,5 @@
 package io.github.sinri.keel.logger.issue.recorder.render;
 
-import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.core.helper.KeelDateTimeHelper;
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 
@@ -11,7 +10,6 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 /**
  * @since 3.1.10
  */
-@TechnicalPreview(since = "3.1.10")
 public class KeelIssueRecordStringRender implements KeelIssueRecordRender<String> {
     private static final KeelIssueRecordStringRender instance = new KeelIssueRecordStringRender();
 

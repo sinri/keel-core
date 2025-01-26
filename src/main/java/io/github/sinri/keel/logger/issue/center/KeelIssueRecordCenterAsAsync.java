@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
  * @since 3.1.10
  */
 @TechnicalPreview(since = "3.1.10")
+@Deprecated(since = "3.3.0", forRemoval = true)
 public class KeelIssueRecordCenterAsAsync implements KeelIssueRecordCenter {
     protected final @Nonnull KeelIssueRecorderAdapter adapter;
 

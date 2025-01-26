@@ -4,7 +4,7 @@ import io.github.sinri.keel.core.cache.impl.KeelCacheBet;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Map;
 import java.util.function.Function;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
@@ -36,7 +36,7 @@ public interface KeelAsyncCacheInterface<K, V> {
      * or return a failed future of NotCached.
      *
      * @param key key
-     * @return value of found available cached item, or `null`
+     * @return async: value of found available cached item, or an exception `NotCache`.
      */
     Future<V> read(@Nonnull K key);
 
@@ -46,7 +46,7 @@ public interface KeelAsyncCacheInterface<K, V> {
      *
      * @param key           key
      * @param fallbackValue the certain value returned when not found
-     * @return value of found available cached item, or `fallbackValue`
+     * @return async: value of found available cached item, or the provided fallbackValue.
      */
     Future<V> read(@Nonnull K key, V fallbackValue);
 
@@ -58,7 +58,7 @@ public interface KeelAsyncCacheInterface<K, V> {
      * @param key           key
      * @param generator     function to generate a value for given key, to be saved into cache and return when no cached item found
      * @param lifeInSeconds cache available in this period, in seconds
-     * @return the valued read from cache
+     * @return async: the valued read from cache
      * @since 2.5
      */
     Future<V> read(@Nonnull K key, Function<K, Future<V>> generator, long lifeInSeconds);
@@ -84,13 +84,7 @@ public interface KeelAsyncCacheInterface<K, V> {
      * @return ConcurrentMap K → V alive value only
      * @since 1.14
      */
-    Future<ConcurrentMap<K, V>> getSnapshotMap();
-
-    class NotCached extends Exception {
-        public NotCached(String key) {
-            super("For key [" + key + "], no available cached record found.");
-        }
-    }
+    Future<Map<K, V>> getSnapshotMap();
 
     /**
      * Start an endless for cleaning up.
@@ -105,4 +99,5 @@ public interface KeelAsyncCacheInterface<K, V> {
             });
         });
     }
+
 }

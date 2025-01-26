@@ -24,18 +24,25 @@ public interface KeelEverlastingCacheInterface<K, V> {
     void save(@Nonnull Map<K, V> appendEntries);
 
     /**
-     * @return cache value or null when not-existed
+     * @return found cached value for the provided key
+     * @throws NotCached when the provided key not mapped to a cached value.
+     * @since 3.3.0 throws NotCached
      */
-    default V read(@Nonnull K k) {
-        return read(k, null);
+    @Nonnull
+    default V read(@Nonnull K key) throws NotCached {
+        var v = read(key, null);
+        if (v == null) {
+            throw new NotCached(key.toString());
+        }
+        return v;
     }
 
     /**
-     * @param k key
-     * @param v default value for the situation that key not existed
+     * @param key           key
+     * @param fallbackValue default value for the situation that key not existed
      * @return @return cache value or default when not-existed
      */
-    V read(@Nonnull K k, V v);
+    V read(@Nonnull K key, V fallbackValue);
 
     /**
      * Remove the cached item with key.
@@ -65,15 +72,4 @@ public interface KeelEverlastingCacheInterface<K, V> {
     @Nonnull
     Map<K, V> getSnapshotMap();
 
-//    class LockedException extends Exception{
-//        public LockedException(){
-//            super("KeelEverlastingCacheInterface Locked");
-//        }
-//        public LockedException(String msg){
-//            super(msg);
-//        }
-//        public LockedException(Throwable throwable){
-//            super(throwable);
-//        }
-//    }
 }

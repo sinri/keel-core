@@ -20,6 +20,13 @@ import java.util.function.Function;
  */
 public interface JsonifiableEntity<E> extends UnmodifiableJsonifiableEntity, ClusterSerializable {
 
+    /**
+     * @since 3.2.11
+     */
+    static SimpleJsonifiableEntity wrap(@Nonnull JsonObject jsonObject) {
+        return new SimpleJsonifiableEntity(jsonObject);
+    }
+
     @Nonnull
     JsonObject toJsonObject();
 
@@ -70,7 +77,6 @@ public interface JsonifiableEntity<E> extends UnmodifiableJsonifiableEntity, Clu
         }
     }
 
-
     /**
      * @since 2.8
      */
@@ -119,20 +125,5 @@ public interface JsonifiableEntity<E> extends UnmodifiableJsonifiableEntity, Clu
     @Override
     default boolean isEmpty() {
         return toJsonObject().isEmpty();
-    }
-
-    /**
-     * @since 3.2.11
-     */
-    static SimpleJsonifiableEntity wrap(@Nonnull JsonObject jsonObject) {
-        return new SimpleJsonifiableEntity(jsonObject);
-    }
-
-    /**
-     * @since 4.0.0
-     */
-    @Override
-    default SimpleJsonifiableEntity copy() {
-        return new SimpleJsonifiableEntity(new JsonObject(toString()));
     }
 }

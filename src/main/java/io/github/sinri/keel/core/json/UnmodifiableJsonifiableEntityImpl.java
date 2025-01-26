@@ -30,15 +30,6 @@ public class UnmodifiableJsonifiableEntityImpl implements UnmodifiableJsonifiabl
     }
 
     /**
-     * @since 3.2.17
-     */
-    @Nonnull
-    @Override
-    public JsonObject cloneAsJsonObject() {
-        return new JsonObject(toString());
-    }
-
-    /**
      * @since 2.7
      * @since 2.8 If java.lang.ClassCastException occurred, return null instead.
      * @since 3.1.10 make it abstract.
@@ -76,5 +67,13 @@ public class UnmodifiableJsonifiableEntityImpl implements UnmodifiableJsonifiabl
     @Override
     public boolean isEmpty() {
         return jsonObject.isEmpty();
+    }
+
+    /**
+     * @since 3.3.0
+     */
+    @Override
+    public UnmodifiableJsonifiableEntityImpl copy() {
+        return new UnmodifiableJsonifiableEntityImpl(cloneAsJsonObject());
     }
 }

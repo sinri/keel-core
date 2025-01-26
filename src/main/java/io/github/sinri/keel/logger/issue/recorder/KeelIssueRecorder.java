@@ -1,6 +1,5 @@
 package io.github.sinri.keel.logger.issue.recorder;
 
-import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.logger.KeelLogLevel;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
@@ -15,7 +14,6 @@ import java.util.function.Supplier;
  * @param <T> The type of the certain implementation of the issue record used.
  * @since 3.1.10
  */
-@TechnicalPreview(since = "3.1.10")
 public interface KeelIssueRecorder<T extends KeelIssueRecord<?>> {
 
     static <T extends KeelIssueRecord<?>> KeelIssueRecorder<T> build(

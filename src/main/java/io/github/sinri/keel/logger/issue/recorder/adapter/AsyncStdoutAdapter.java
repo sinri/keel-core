@@ -1,6 +1,5 @@
 package io.github.sinri.keel.logger.issue.recorder.adapter;
 
-import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.core.servant.intravenous.KeelIntravenous;
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.github.sinri.keel.logger.issue.recorder.render.KeelIssueRecordRender;
@@ -15,7 +14,6 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 /**
  * @since 3.1.10
  */
-@TechnicalPreview(since = "3.1.10")
 public class AsyncStdoutAdapter implements KeelIssueRecorderAdapter {
     private static final AsyncStdoutAdapter instance = new AsyncStdoutAdapter();
     private final KeelIntravenous<KeelIssueRecord<?>> intravenous;

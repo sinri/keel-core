@@ -109,14 +109,6 @@ public interface KeelWebReceptionistLoader {
             classRef.set(superclass);
         }
 
-//        try {
-//            Constructor<? extends PreHandlerChain> preHandlerChainConstructor = apiMeta.preHandlerChain().getConstructor();
-//            preHandlerChain = preHandlerChainConstructor.newInstance();
-//        } catch (Throwable e) {
-//            Keel.getLogger().exception(e, r -> r.classification("KeelWebReceptionistLoader", "loadClass").message("PreHandlerChain REFLECTION EXCEPTION"));
-//            return;
-//        }
-
         if (preHandlerChain == null) {
             preHandlerChain = new PreHandlerChain();
         }
@@ -134,8 +126,4 @@ public interface KeelWebReceptionistLoader {
 
     }
 
-//    public static void main(String[] args) {
-//        Router router=Router.router(Keel.getVertx());
-//        KeelWebReceptionistLoader.loadPackage(router,"a,b",KeelWebFutureReceptionist.class);
-//    }
 }

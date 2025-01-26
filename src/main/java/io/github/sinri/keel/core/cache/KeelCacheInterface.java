@@ -2,11 +2,10 @@ package io.github.sinri.keel.core.cache;
 
 import io.github.sinri.keel.core.cache.impl.KeelCacheAlef;
 import io.github.sinri.keel.core.cache.impl.KeelCacheDummy;
-import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
-import java.util.concurrent.ConcurrentMap;
-import java.util.function.Function;
+import java.util.Map;
+import java.util.function.Supplier;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
@@ -74,10 +73,23 @@ public interface KeelCacheInterface<K, V> {
      *
      * @param key key
      * @return value of found available cached item, or `null`
+     * @throws NotCached when the key is not mapped with cached value.
      */
-    default V read(@Nonnull K key) {
-        return this.read(key, null);
+    @Nonnull
+    default V read(@Nonnull K key) throws NotCached {
+        var v = this.read(key, null);
+        if (v == null) {
+            throw new NotCached(key.toString());
+        }
+        return v;
     }
+
+    /**
+     * Seek cached value with key, generate one with generator if not cached.
+     *
+     * @since 3.3.0
+     */
+    V read(@Nonnull K key, Supplier<V> generator, long lifeInSeconds);
 
     /**
      * Remove the cached item with key.
@@ -101,22 +113,7 @@ public interface KeelCacheInterface<K, V> {
      * @since 1.14
      */
     @Nonnull
-    ConcurrentMap<K, V> getSnapshotMap();
-
-    /**
-     * @since 2.8
-     */
-    default Future<V> read(@Nonnull K key, Function<K, Future<V>> generator, long lifeInSeconds) {
-        V existed = this.read(key);
-        if (existed != null) {
-            return Future.succeededFuture(existed);
-        }
-        return generator.apply(key)
-                .compose(v -> {
-                    this.save(key, v, lifeInSeconds);
-                    return Future.succeededFuture(v);
-                });
-    }
+    Map<K, V> getSnapshotMap();
 
     /**
      * Start an endless for cleaning up.

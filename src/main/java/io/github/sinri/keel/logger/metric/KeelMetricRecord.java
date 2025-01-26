@@ -1,6 +1,5 @@
 package io.github.sinri.keel.logger.metric;
 
-import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.logger.issue.record.BaseIssueRecord;
 import io.vertx.core.json.JsonObject;
 
@@ -13,7 +12,6 @@ import java.util.Map;
  * @since 3.2.0 extends BaseIssueRecord
  * It is allowed to override this class, for fixed topic and metric.
  */
-@TechnicalPreview(since = "3.1.9")
 public class KeelMetricRecord extends BaseIssueRecord<KeelMetricRecord> {
     private final @Nonnull String topic;
     private final @Nonnull Map<String, String> labelMap = new HashMap<>();

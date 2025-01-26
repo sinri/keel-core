@@ -2,7 +2,6 @@ package io.github.sinri.keel.core.cache;
 
 import javax.annotation.Nullable;
 import java.lang.ref.SoftReference;
-import java.util.Date;
 
 /**
  * @since 2.5 moved from inner class to here
@@ -27,12 +26,38 @@ public class ValueWrapper<P> {
         return death;
     }
 
-    @Nullable
-    public P getValue() {
-        return value.get();
+    private boolean isInAlivePeriod() {
+        long now = System.currentTimeMillis();
+        boolean alive = now < this.death && now >= this.birth;
+        if (!alive) {
+            value.clear();
+        }
+        return alive;
     }
 
+    @Nullable
+    public P getValue() {
+        if (isInAlivePeriod()) {
+            return value.get();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * @since 3.3.0 clear soft reference of value when died.
+     * @deprecated use isAvailable instead.
+     */
+    @Deprecated(since = "3.3.0", forRemoval = true)
     public boolean isAliveNow() {
-        return value.get() != null && (new Date().getTime()) < this.death;
+        return isAvailable();
+    }
+
+    public boolean isAvailable() {
+        if (isInAlivePeriod()) {
+            return getValue() != null;
+        } else {
+            return false;
+        }
     }
 }

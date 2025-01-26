@@ -1,6 +1,5 @@
 package io.github.sinri.keel.logger.issue.recorder.render;
 
-import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -13,7 +12,6 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 /**
  * @since 3.1.10
  */
-@TechnicalPreview(since = "3.1.10")
 public class KeelIssueRecordJsonObjectRender implements KeelIssueRecordRender<JsonObject> {
     private static final KeelIssueRecordJsonObjectRender instance = new KeelIssueRecordJsonObjectRender();
 

@@ -29,11 +29,17 @@ public interface KeelAsyncEverlastingCacheInterface<K, V> {
     Future<Void> save(@Nonnull Map<K, V> appendEntries);
 
     /**
-     * @return cache value or null when not-existed
+     * @return async: cache value, or an exception `NotCached`.
      * @since 2.9.4 return Future
      */
     default Future<V> read(@Nonnull K k) {
-        return read(k, null);
+        return read(k, null)
+                .compose(v -> {
+                    if (v == null) {
+                        return Future.failedFuture(new NotCached(k.toString()));
+                    }
+                    return Future.succeededFuture(v);
+                });
     }
 
     /**

@@ -1,4 +1,4 @@
-package io.github.sinri.keel.integration.mysql.matrix;
+package io.github.sinri.keel.integration.mysql.result.row;
 
 import io.vertx.core.json.JsonObject;
 

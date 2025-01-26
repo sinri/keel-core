@@ -2,7 +2,7 @@ package io.github.sinri.keel.integration.mysql;
 
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLConnectionException;
 import io.github.sinri.keel.integration.mysql.exception.KeelMySQLException;
-import io.github.sinri.keel.integration.mysql.matrix.ResultMatrix;
+import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;

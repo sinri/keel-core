@@ -1,7 +1,7 @@
 package io.github.sinri.keel.integration.mysql.statement.mixin;
 
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
-import io.github.sinri.keel.integration.mysql.matrix.ResultMatrix;
+import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.vertx.core.Future;
 
 /**

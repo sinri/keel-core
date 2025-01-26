@@ -1,6 +1,7 @@
-package io.github.sinri.keel.integration.mysql.statement;
+package io.github.sinri.keel.integration.mysql.statement.impl;
 
 
+import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
 
 import javax.annotation.Nonnull;

@@ -1,4 +1,4 @@
-package io.github.sinri.keel.integration.mysql.matrix;
+package io.github.sinri.keel.integration.mysql.result.row;
 
 import io.github.sinri.keel.core.json.JsonifiableEntity;
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
@@ -24,6 +24,7 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
     /**
      * @since 2.9.4
      */
+    @Deprecated(since = "3.3.0", forRemoval = true)
     static <K, T extends ResultRow> Future<Map<K, List<T>>> fetchResultRowsToCategorizedMap(
             @Nonnull NamedMySQLConnection namedMySQLConnection,
             @Nonnull ReadStatementMixin readStatement,
@@ -44,6 +45,7 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
     /**
      * @since 2.9.4
      */
+    @Deprecated(since = "3.3.0", forRemoval = true)
     static <K, T extends ResultRow> Future<Map<K, T>> fetchResultRowsToUniqueKeyBoundMap(
             @Nonnull NamedMySQLConnection namedMySQLConnection,
             @Nonnull ReadStatementMixin readStatement,
@@ -66,6 +68,7 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
      * 尝试获取查询结果；
      * 如果存在，将所有行以classOfTableRow指定的类进行封装，异步返回此实例构成的List。
      */
+    @Deprecated(forRemoval = true, since = "3.3.0")
     static <T extends ResultRow> Future<List<T>> fetchResultRows(
             @Nonnull NamedMySQLConnection namedMySQLConnection,
             @Nonnull ReadStatementMixin readStatement,
@@ -84,6 +87,7 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
      * 如果不存在，异步返回null；
      * 如果存在，将第一行以classOfTableRow指定的类进行封装，异步返回此实例。
      */
+    @Deprecated(forRemoval = true, since = "3.3.0")
     static <T extends ResultRow> Future<T> fetchResultRow(
             @Nonnull NamedMySQLConnection namedMySQLConnection,
             @Nonnull ReadStatementMixin readStatement,

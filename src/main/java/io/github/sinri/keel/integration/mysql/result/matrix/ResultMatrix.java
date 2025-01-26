@@ -1,7 +1,8 @@
-package io.github.sinri.keel.integration.mysql.matrix;
+package io.github.sinri.keel.integration.mysql.result.matrix;
 
 
 import io.github.sinri.keel.integration.mysql.exception.KeelSQLResultRowIndexError;
+import io.github.sinri.keel.integration.mysql.result.row.ResultRow;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

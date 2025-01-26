@@ -1,13 +1,16 @@
 package io.github.sinri.keel.integration.mysql.statement.mixin;
 
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
-import io.github.sinri.keel.integration.mysql.matrix.ResultRow;
+import io.github.sinri.keel.integration.mysql.exception.KeelSQLResultRowIndexError;
+import io.github.sinri.keel.integration.mysql.result.row.ResultRow;
+import io.github.sinri.keel.integration.mysql.result.stream.ResultStreamReader;
 import io.github.sinri.keel.integration.mysql.statement.AnyStatement;
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Cursor;
-import io.vertx.sqlclient.Row;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -27,7 +30,15 @@ public interface ReadStatementMixin extends AnyStatement {
      * @since 3.0.18 Finished Technical Preview.
      */
     default <T extends ResultRow> Future<T> queryForOneRow(@Nonnull NamedMySQLConnection namedMySQLConnection, @Nonnull Class<T> classT) {
-        return ResultRow.fetchResultRow(namedMySQLConnection, this, classT);
+        return execute(namedMySQLConnection)
+                .compose(resultMatrix -> {
+                    try {
+                        T t = resultMatrix.buildTableRowByIndex(0, classT);
+                        return Future.succeededFuture(t);
+                    } catch (KeelSQLResultRowIndexError e) {
+                        return Future.succeededFuture(null);
+                    }
+                });
     }
 
     /**
@@ -38,7 +49,11 @@ public interface ReadStatementMixin extends AnyStatement {
      * @since 3.0.18 Finished Technical Preview.
      */
     default <T extends ResultRow> Future<List<T>> queryForRowList(@Nonnull NamedMySQLConnection namedMySQLConnection, @Nonnull Class<T> classT) {
-        return ResultRow.fetchResultRows(namedMySQLConnection, this, classT);
+        return execute(namedMySQLConnection)
+                .compose(resultMatrix -> {
+                    List<T> ts = resultMatrix.buildTableRowList(classT);
+                    return Future.succeededFuture(ts);
+                });
     }
 
     /**
@@ -50,7 +65,15 @@ public interface ReadStatementMixin extends AnyStatement {
             @Nonnull Class<T> classT,
             @Nonnull Function<T, K> categoryGenerator
     ) {
-        return ResultRow.fetchResultRowsToCategorizedMap(namedMySQLConnection, this, classT, categoryGenerator);
+        Map<K, List<T>> map = new HashMap<>();
+        return queryForRowList(namedMySQLConnection, classT)
+                .compose(list -> {
+                    list.forEach(item -> {
+                        K category = categoryGenerator.apply(item);
+                        map.computeIfAbsent(category, k -> new ArrayList<>()).add(item);
+                    });
+                    return Future.succeededFuture(map);
+                });
     }
 
 
@@ -63,7 +86,16 @@ public interface ReadStatementMixin extends AnyStatement {
             @Nonnull Class<T> classT,
             @Nonnull Function<T, K> uniqueKeyGenerator
     ) {
-        return ResultRow.fetchResultRowsToUniqueKeyBoundMap(namedMySQLConnection, this, classT, uniqueKeyGenerator);
+        Map<K, T> map = new HashMap<>();
+
+        return queryForRowList(namedMySQLConnection, classT)
+                .compose(list -> {
+                    list.forEach(item -> {
+                        K uniqueKey = uniqueKeyGenerator.apply(item);
+                        map.put(uniqueKey, item);
+                    });
+                    return Future.succeededFuture(map);
+                });
     }
 
     /**
@@ -71,7 +103,7 @@ public interface ReadStatementMixin extends AnyStatement {
      */
     default Future<Void> stream(
             @Nonnull NamedMySQLConnection namedMySQLConnection,
-            Function<Row, Future<Void>> readRowFunction
+            @Nonnull ResultStreamReader resultStreamReader
     ) {
         return namedMySQLConnection.getSqlConnection()
                 .prepare(toString())
@@ -86,7 +118,7 @@ public interface ReadStatementMixin extends AnyStatement {
 
                                 return cursor.read(1)
                                         .compose(rows -> {
-                                            return Keel.asyncCallIteratively(rows, readRowFunction);
+                                            return Keel.asyncCallIteratively(rows, resultStreamReader::read);
                                         });
                             })
                             .eventually(() -> cursor.close())

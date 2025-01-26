@@ -2,7 +2,7 @@ package io.github.sinri.keel.integration.mysql;
 
 import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.facade.configuration.KeelConfigElement;
-import io.github.sinri.keel.integration.mysql.matrix.ResultMatrix;
+import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.vertx.core.Future;
 import io.vertx.mysqlclient.MySQLBuilder;
 import io.vertx.mysqlclient.MySQLConnectOptions;

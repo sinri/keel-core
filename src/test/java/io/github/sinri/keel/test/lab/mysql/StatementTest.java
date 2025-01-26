@@ -3,10 +3,10 @@ package io.github.sinri.keel.test.lab.mysql;
 import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
 import io.github.sinri.keel.facade.tesuto.instant.InstantRunnerResult;
 import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
-import io.github.sinri.keel.integration.mysql.statement.UpdateStatement;
 import io.github.sinri.keel.integration.mysql.statement.component.CaseOperator;
 import io.github.sinri.keel.integration.mysql.statement.component.CaseOperatorPair;
 import io.github.sinri.keel.integration.mysql.statement.component.UpdateSetAssignmentComponent;
+import io.github.sinri.keel.integration.mysql.statement.impl.UpdateStatement;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;

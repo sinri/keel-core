@@ -1,6 +1,7 @@
-package io.github.sinri.keel.integration.mysql.statement;
+package io.github.sinri.keel.integration.mysql.statement.impl;
 
 import io.github.sinri.keel.integration.mysql.Quoter;
+import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 import io.github.sinri.keel.integration.mysql.statement.mixin.WriteIntoStatementMixin;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonArray;

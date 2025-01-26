@@ -1,4 +1,4 @@
-package io.github.sinri.keel.integration.mysql.statement;
+package io.github.sinri.keel.integration.mysql.statement.impl;
 
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.condition.CompareCondition;
@@ -7,7 +7,9 @@ import io.github.sinri.keel.integration.mysql.condition.MySQLCondition;
 import io.github.sinri.keel.integration.mysql.condition.RawCondition;
 import io.github.sinri.keel.integration.mysql.exception.KeelSQLGenerateError;
 import io.github.sinri.keel.integration.mysql.exception.KeelSQLResultRowIndexError;
-import io.github.sinri.keel.integration.mysql.matrix.ResultMatrix;
+import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
+import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
+import io.github.sinri.keel.integration.mysql.statement.component.ConditionsComponent;
 import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
 import io.github.sinri.keel.integration.mysql.statement.mixin.SelectStatementMixin;
 import io.vertx.core.Future;

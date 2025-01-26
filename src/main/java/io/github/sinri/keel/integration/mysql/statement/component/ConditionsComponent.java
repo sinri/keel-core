@@ -1,4 +1,4 @@
-package io.github.sinri.keel.integration.mysql.statement;
+package io.github.sinri.keel.integration.mysql.statement.component;
 
 import io.github.sinri.keel.integration.mysql.condition.*;
 

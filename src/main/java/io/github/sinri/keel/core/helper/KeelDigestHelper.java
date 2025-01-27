@@ -34,7 +34,7 @@ public class KeelDigestHelper {
     }
 
     /**
-     * @since 3.3.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal #22</a>
+     * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal #22</a>
      */
     private static MessageDigest getMD5MessageDigest() {
         return MD5.HOLDER.get();
@@ -46,7 +46,7 @@ public class KeelDigestHelper {
      * @param raw raw string
      * @return md5 with lower digits
      * @since 1.1
-     * @since 3.3.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal #22</a>
+     * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal #22</a>
      */
     @Nonnull
     public String md5(@Nonnull String raw) {
@@ -69,7 +69,7 @@ public class KeelDigestHelper {
      * @param raw raw string
      * @return MD5 with upper digits
      * @since 1.1
-     * @since 3.3.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal #22</a>
+     * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal #22</a>
      */
     @Nonnull
     public String MD5(@Nonnull String raw) {
@@ -223,7 +223,7 @@ public class KeelDigestHelper {
     }
 
     /**
-     * @since 3.3.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal #22</a>
+     * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal #22</a>
      */
     private static class MD5 {
 

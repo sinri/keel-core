@@ -168,14 +168,14 @@ public class KeelDateTimeHelper {
     }
 
     /**
-     * @since 3.3.0
+     * @since 4.0.0
      */
     public boolean isNowMatchCronExpression(@Nonnull String cronExpression) {
         return new KeelCronExpression(cronExpression).match(Calendar.getInstance());
     }
 
     /**
-     * @since 3.3.0
+     * @since 4.0.0
      */
     public boolean isNowMatchCronExpression(@Nonnull KeelCronExpression cronExpression) {
         return cronExpression.match(Calendar.getInstance());

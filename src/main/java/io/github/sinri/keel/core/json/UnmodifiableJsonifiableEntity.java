@@ -307,7 +307,7 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
     /**
      * @since 2.8
      * @since 3.1.10 make it abstract.
-     * @since 3.3.0 add default.
+     * @since 4.0.0 add default.
      */
     default Buffer toBuffer() {
         return cloneAsJsonObject().toBuffer();

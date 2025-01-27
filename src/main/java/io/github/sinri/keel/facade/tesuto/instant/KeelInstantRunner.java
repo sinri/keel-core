@@ -18,7 +18,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 /**
  * @since 3.0.10
  * Used for universal testing scenario, which could be run in IDE(A).
- * @since 3.3.0 renamed from KeelTest
+ * @since 4.0.0 renamed from KeelTest
  */
 abstract public class KeelInstantRunner {
     /**

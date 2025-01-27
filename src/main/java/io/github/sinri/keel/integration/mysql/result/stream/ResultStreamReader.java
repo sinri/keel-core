@@ -5,7 +5,7 @@ import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
 
 /**
- * @since 3.3.0
+ * @since 4.0.0
  */
 public interface ResultStreamReader {
     static <T> T mapRowToEntity(Row row, Class<T> clazz) {

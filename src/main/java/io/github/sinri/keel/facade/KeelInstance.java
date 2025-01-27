@@ -21,7 +21,7 @@ import java.util.function.Function;
 
 /**
  * @since 3.1.0
- * @since 3.3.0 make it final and implement KeelAsyncMixin.
+ * @since 4.0.0 make it final and implement KeelAsyncMixin.
  */
 public final class KeelInstance implements KeelHelpersInterface, KeelClusterKit, KeelAsyncMixin {
     public final static KeelInstance Keel = new KeelInstance();

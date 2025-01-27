@@ -26,7 +26,7 @@ public interface KeelEverlastingCacheInterface<K, V> {
     /**
      * @return found cached value for the provided key
      * @throws NotCached when the provided key not mapped to a cached value.
-     * @since 3.3.0 throws NotCached
+     * @since 4.0.0 throws NotCached
      */
     @Nonnull
     default V read(@Nonnull K key) throws NotCached {

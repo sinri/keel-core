@@ -12,7 +12,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 /**
  * @since 2.9.3
  */
-@Deprecated(forRemoval = true, since = "3.3.0")
+@Deprecated(forRemoval = true, since = "4.0.0")
 public class FutureRepeat {
     private final Function<RoutineResult, Future<Void>> routineFunction;
 

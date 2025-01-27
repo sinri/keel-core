@@ -4,7 +4,7 @@ package io.github.sinri.keel.core.helper;
  * @since 3.1.0
  */
 public interface KeelHelpersInterface {
-    @Deprecated(forRemoval = true, since = "3.3.0")
+    @Deprecated(forRemoval = true, since = "4.0.0")
     KeelHelpersInterface KeelHelpers = new KeelHelpersInterface() {
     };
 

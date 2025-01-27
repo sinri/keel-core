@@ -19,7 +19,7 @@ import java.util.function.Supplier;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
- * @since 3.3.0
+ * @since 4.0.0
  */
 public interface KeelAsyncMixin {
 

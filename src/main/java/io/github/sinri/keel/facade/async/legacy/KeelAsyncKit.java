@@ -21,7 +21,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 3.0.0
  * @since 3.0.8 changed a lot.
  */
-@Deprecated(forRemoval = true, since = "3.3.0")
+@Deprecated(forRemoval = true, since = "4.0.0")
 public interface KeelAsyncKit {
     /**
      * Call the provided routine function repeatedly.

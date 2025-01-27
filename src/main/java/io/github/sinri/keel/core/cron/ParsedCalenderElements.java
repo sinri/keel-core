@@ -5,7 +5,7 @@ import java.util.Calendar;
 
 /**
  * @since 3.2.4
- * @since 3.3.0 moved out
+ * @since 4.0.0 moved out
  */
 public class ParsedCalenderElements {
     public final int minute;
@@ -18,7 +18,7 @@ public class ParsedCalenderElements {
     public final int second;
 
     /**
-     * @since 3.3.0
+     * @since 4.0.0
      */
     public ParsedCalenderElements(int minute, int hour, int day, int month, int weekday, int second) {
         this.minute = minute;
@@ -30,7 +30,7 @@ public class ParsedCalenderElements {
     }
 
     /**
-     * @since 3.3.0
+     * @since 4.0.0
      */
     public ParsedCalenderElements(int minute, int hour, int day, int month, int weekday) {
         this(minute, hour, day, month, weekday, 0);

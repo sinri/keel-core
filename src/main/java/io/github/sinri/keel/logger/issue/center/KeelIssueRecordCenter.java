@@ -30,7 +30,7 @@ public interface KeelIssueRecordCenter {
         return build(SilentAdapter.getInstance());
     }
 
-    @Deprecated(since = "3.3.0", forRemoval = true)
+    @Deprecated(since = "4.0.0", forRemoval = true)
     static <X extends KeelIssueRecord<?>> KeelIssueRecorder<X> createSilentIssueRecorder() {
         return silentCenter().generateIssueRecorder("Silent", () -> null);
     }
@@ -38,7 +38,7 @@ public interface KeelIssueRecordCenter {
     /**
      * @param adapter the KeelIssueRecorderAdapter instance.
      * @return the built KeelIssueRecordCenter instance.
-     * @since 3.3.0
+     * @since 4.0.0
      */
     static KeelIssueRecordCenter build(@Nonnull KeelIssueRecorderAdapter adapter) {
         return new KeelIssueRecordCenter() {

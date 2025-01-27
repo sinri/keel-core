@@ -87,7 +87,7 @@ public interface KeelCacheInterface<K, V> {
     /**
      * Seek cached value with key, generate one with generator if not cached.
      *
-     * @since 3.3.0
+     * @since 4.0.0
      */
     V read(@Nonnull K key, Supplier<V> generator, long lifeInSeconds);
 

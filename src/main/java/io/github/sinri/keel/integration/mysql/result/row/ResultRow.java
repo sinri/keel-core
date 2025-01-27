@@ -20,7 +20,7 @@ import java.util.function.Function;
  */
 public interface ResultRow extends JsonifiableEntity<ResultRow> {
     /**
-     * @since 3.3.0
+     * @since 4.0.0
      */
     static <R extends ResultRow> R of(@Nonnull JsonObject tableRow, Class<R> clazz) {
         try {
@@ -32,7 +32,7 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
     }
 
     /**
-     * @since 3.3.0
+     * @since 4.0.0
      */
     static <R extends ResultRow> R of(@Nonnull Row tableRow, Class<R> clazz) {
         return of(tableRow.toJson(), clazz);

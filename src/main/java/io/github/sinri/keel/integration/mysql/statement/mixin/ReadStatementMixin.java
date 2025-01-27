@@ -99,7 +99,7 @@ public interface ReadStatementMixin extends AnyStatement {
     }
 
     /**
-     * @since 3.3.0
+     * @since 4.0.0
      */
     default Future<Void> stream(
             @Nonnull NamedMySQLConnection namedMySQLConnection,

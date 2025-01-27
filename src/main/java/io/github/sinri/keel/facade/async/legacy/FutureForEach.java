@@ -12,7 +12,7 @@ import java.util.function.Function;
  * @param <T> Type of elements in the source collection
  * @since 1.13
  */
-@Deprecated(forRemoval = true, since = "3.3.0")
+@Deprecated(forRemoval = true, since = "4.0.0")
 public class FutureForEach<T> {
     private final Function<T, Future<Void>> asyncItemProcessFunction;
 

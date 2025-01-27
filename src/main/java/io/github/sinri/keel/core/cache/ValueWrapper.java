@@ -45,10 +45,10 @@ public class ValueWrapper<P> {
     }
 
     /**
-     * @since 3.3.0 clear soft reference of value when died.
+     * @since 4.0.0 clear soft reference of value when died.
      * @deprecated use isAvailable instead.
      */
-    @Deprecated(since = "3.3.0", forRemoval = true)
+    @Deprecated(since = "4.0.0", forRemoval = true)
     public boolean isAliveNow() {
         return isAvailable();
     }

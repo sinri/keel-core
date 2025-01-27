@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @since 2.9.4
  */
-@Deprecated(forRemoval = true, since = "3.3.0")
+@Deprecated(forRemoval = true, since = "4.0.0")
 public class FailedInParallel extends Exception {
     private final @Nonnull List<Throwable> causes;
 

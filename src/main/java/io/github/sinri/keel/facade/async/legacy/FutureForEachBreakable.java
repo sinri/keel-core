@@ -9,7 +9,7 @@ import java.util.function.BiFunction;
 /**
  * @since 3.2.3
  */
-@Deprecated(forRemoval = true, since = "3.3.0")
+@Deprecated(forRemoval = true, since = "4.0.0")
 public class FutureForEachBreakable<T> {
 
     @Nonnull

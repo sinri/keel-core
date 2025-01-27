@@ -22,17 +22,14 @@ public interface KeelIssueRecordCenter {
      */
     static KeelIssueRecordCenter outputCenter() {
         //return KeelIssueRecordCenterAsSync.getInstanceWithStdout();
-        return build(SyncStdoutAdapter.getInstance());
+        //return build(SyncStdoutAdapter.getInstance());
+        return Holder.outputCenter;
     }
 
     static KeelIssueRecordCenter silentCenter() {
         //return KeelIssueRecordCenterAsSilent.getInstance();
-        return build(SilentAdapter.getInstance());
-    }
-
-    @Deprecated(since = "4.0.0", forRemoval = true)
-    static <X extends KeelIssueRecord<?>> KeelIssueRecorder<X> createSilentIssueRecorder() {
-        return silentCenter().generateIssueRecorder("Silent", () -> null);
+        //return build(SilentAdapter.getInstance());
+        return Holder.silentCenter;
     }
 
     /**
@@ -74,6 +71,11 @@ public interface KeelIssueRecordCenter {
     @Nonnull
     default KeelIssueRecorder<KeelEventLog> generateIssueRecorderForEventLogger(@Nonnull String topic) {
         return generateIssueRecorder(topic, () -> new KeelEventLog(topic));
+    }
+
+    class Holder {
+        final static KeelIssueRecordCenter outputCenter = build(SyncStdoutAdapter.getInstance());
+        final static KeelIssueRecordCenter silentCenter = build(SilentAdapter.getInstance());
     }
 
 }

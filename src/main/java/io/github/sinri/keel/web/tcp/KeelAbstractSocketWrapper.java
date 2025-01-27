@@ -32,7 +32,8 @@ abstract public class KeelAbstractSocketWrapper {
         this.socketID = socketID;
         this.socket = socket;
 
-        this.setIssueRecorder(KeelIssueRecordCenter.createSilentIssueRecorder());
+        KeelIssueRecorder<SocketIssueRecord> silentIssueRecorder = KeelIssueRecordCenter.silentCenter().generateIssueRecorder("silent", () -> null);
+        this.setIssueRecorder(silentIssueRecorder);
 
         this.funnel = new KeelFunnel();
         this.funnel.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));

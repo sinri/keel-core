@@ -58,7 +58,9 @@ abstract public class KeelInstantRunner {
             if (!method.getReturnType().isAssignableFrom(Future.class)) {
                 continue;
             }
-            testUnits.add(new InstantRunUnitWrapper(method, annotation));
+
+            InstantRunUnitSkipped skipAnnotated = method.getAnnotation(InstantRunUnitSkipped.class);
+            testUnits.add(new InstantRunUnitWrapper(method, annotation, skipAnnotated));
         }
 
         if (testUnits.isEmpty()) {

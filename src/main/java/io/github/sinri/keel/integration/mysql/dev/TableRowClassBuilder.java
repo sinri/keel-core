@@ -1,5 +1,8 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
+import io.github.sinri.keel.integration.mysql.result.row.AbstractTableRow;
+import io.vertx.core.json.JsonObject;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -95,8 +98,10 @@ class TableRowClassBuilder {
 
         code
                 .append("package ").append(packageName).append(";").append("\n")
-                .append("import io.github.sinri.keel.mysql.matrix.AbstractTableRow;\n")
-                .append("import io.vertx.core.json.JsonObject;\n")
+                .append("import ").append(AbstractTableRow.class.getName()).append(";\n")
+                // .append("import io.github.sinri.keel.integration.mysql.result.row.AbstractTableRow;\n")
+                .append("import ").append(JsonObject.class.getName()).append(";\n")
+                //.append("import io.vertx.core.json.JsonObject;\n")
                 .append("\n")
                 .append("import javax.annotation.Nonnull;\n")
                 .append("import javax.annotation.Nullable;\n")

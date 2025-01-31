@@ -8,8 +8,9 @@ import javax.annotation.Nullable;
 
 /**
  * @since 3.2.0
+ * @since 4.0.0 package protected
  */
-public interface IssueRecordContextMixin<T> extends KeelIssueRecordCore<T> {
+interface IssueRecordContextMixin<T> extends KeelIssueRecordCore<T> {
     String AttributeContext = "context";
 
     T context(@Nonnull JsonObject context);

@@ -1,6 +1,7 @@
 package io.github.sinri.keel.logger.event;
 
 import io.github.sinri.keel.logger.issue.record.BaseIssueRecord;
+import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 
 import javax.annotation.Nonnull;
 
@@ -12,6 +13,14 @@ public final class KeelEventLog extends BaseIssueRecord<KeelEventLog> {
 
     public KeelEventLog(@Nonnull String topic) {
         this.topic = topic;
+    }
+
+    /**
+     * @since 4.0.0
+     */
+    public KeelEventLog(KeelIssueRecord<?> baseIssueRecord) {
+        super(baseIssueRecord);
+        this.topic = baseIssueRecord.topic();
     }
 
     @Nonnull
@@ -31,6 +40,5 @@ public final class KeelEventLog extends BaseIssueRecord<KeelEventLog> {
         this.topic = topic;
         return this;
     }
-
 }
 

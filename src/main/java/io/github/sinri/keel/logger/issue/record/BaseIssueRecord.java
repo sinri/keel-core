@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * @since 3.1.10
+ * todo: think, Might it be KeelIssueRecord?
  */
 public abstract class BaseIssueRecord<T> implements KeelIssueRecord<T> {
     private final @Nonnull JsonObject attributes;
@@ -24,6 +25,17 @@ public abstract class BaseIssueRecord<T> implements KeelIssueRecord<T> {
         this.attributes = new JsonObject();
         this.level = KeelLogLevel.INFO;
         this.classification = new ArrayList<>();
+    }
+
+    /**
+     * @since 4.0.0 for KeelEventLog
+     */
+    protected BaseIssueRecord(@Nonnull KeelIssueRecord<?> baseIssueRecord) {
+        this.attributes = baseIssueRecord.attributes().cloneAsJsonObject();
+        this.classification = baseIssueRecord.classification();
+        this.timestamp = baseIssueRecord.timestamp();
+        this.level = baseIssueRecord.level();
+        this.exception = baseIssueRecord.exception();
     }
 
     @Override

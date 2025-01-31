@@ -12,8 +12,9 @@ import java.util.List;
 
 /**
  * @since 3.2.0
+ * @since 4.0.0 package protected
  */
-public interface KeelIssueRecordCore<T> extends SelfInterface<T> {
+interface KeelIssueRecordCore<T> extends SelfInterface<T> {
     String AttributeClassification = "classification";
     String AttributeLevel = "level";
     String AttributeException = "exception";

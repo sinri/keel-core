@@ -25,6 +25,9 @@ public interface KeelIssueRecorder<T extends KeelIssueRecord<?>> {
         return new KeelIssueRecorderImpl<T>(issueRecordCenter, issueRecordBuilder, topic);
     }
 
+    /**
+     * @since 4.0.0
+     */
     default KeelIssueRecorder<KeelEventLog> toEventLogger() {
         return build(
                 this.issueRecordCenter(),

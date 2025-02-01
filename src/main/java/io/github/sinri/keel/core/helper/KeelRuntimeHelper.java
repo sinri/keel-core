@@ -3,12 +3,15 @@ package io.github.sinri.keel.core.helper;
 import io.github.sinri.keel.core.helper.runtime.CPUTimeResult;
 import io.github.sinri.keel.core.helper.runtime.GCStatResult;
 import io.github.sinri.keel.core.helper.runtime.JVMMemoryResult;
+import org.openjdk.jol.info.ClassLayout;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
 
 import javax.annotation.Nonnull;
 import java.lang.management.*;
+import java.lang.reflect.Field;
+import java.util.IdentityHashMap;
 import java.util.Set;
 
 /**
@@ -16,9 +19,8 @@ import java.util.Set;
  * @since 3.1.3 Add more GarbageCollectorMXBean.
  */
 public class KeelRuntimeHelper {
-    private static final KeelRuntimeHelper instance = new KeelRuntimeHelper();
-
     public static final Set<String> ignorableCallStackPackage;
+    private static final KeelRuntimeHelper instance = new KeelRuntimeHelper();
 
     static {
         ignorableCallStackPackage = Set.of(
@@ -136,5 +138,64 @@ public class KeelRuntimeHelper {
      */
     public int getObjectPendingFinalizationCount() {
         return this.memoryMX().getObjectPendingFinalizationCount();
+    }
+
+    /**
+     * @param object the object to calculate its size
+     * @return the size of the object, in bytes.
+     * @since 4.0.0
+     */
+    public long measureObjectSizeWithJOL(Object object) {
+        ClassLayout classLayout = ClassLayout.parseInstance(object);
+        return classLayout.instanceSize();
+    }
+
+    /**
+     * To calculate the size of an object and its referenced objects.
+     * It is not accurate.
+     *
+     * @param obj the object to calculate its deep size
+     * @return the deep size of the provided object, in bytes.
+     * @since 4.0.0
+     */
+    public long calculateObjectDeepSizeWithJOL(Object obj) {
+        IdentityHashMap<Object, Object> visited = new IdentityHashMap<>();
+        return calculateObjectDeepSizeWithJOL(obj, visited);
+    }
+
+    /**
+     * @since 4.0.0
+     */
+    private long calculateObjectDeepSizeWithJOL(Object obj, IdentityHashMap<Object, Object> visited) {
+        if (obj == null || visited.containsKey(obj)) {
+            return 0;
+        }
+        visited.put(obj, null);
+
+        long size = ClassLayout.parseInstance(obj).instanceSize();
+        Class<?> clazz = obj.getClass();
+
+        while (clazz != null) {
+            for (Field field : clazz.getDeclaredFields()) {
+                // 跳过 JDK 内部类的字段
+                if (field.getDeclaringClass().getName().startsWith("java.") ||
+                        field.getDeclaringClass().getName().startsWith("javax.")) {
+                    continue;
+                }
+                if (!field.getType().isPrimitive()) {
+                    field.setAccessible(true);
+                    try {
+                        Object fieldValue = field.get(obj);
+                        if (fieldValue != null) {
+                            size += calculateObjectDeepSizeWithJOL(fieldValue, visited);
+                        }
+                    } catch (IllegalAccessException e) {
+                        //e.printStackTrace();
+                    }
+                }
+            }
+            clazz = clazz.getSuperclass();
+        }
+        return size;
     }
 }

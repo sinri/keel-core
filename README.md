@@ -19,8 +19,6 @@ A Java framework with VERT.X eco, for projects for web, job and more.
 * [Vert.x](https://vertx.io) 4.5.11
 * [org.commonmark:commonmark](https://github.com/commonmark/commonmark-java) ![GitHub](https://img.shields.io/github/license/commonmark/commonmark-java)
   0.21.0
-* [<del>org.reflections:reflections</del>](https://github.com/ronmamo/reflections) ![GitHub](https://img.shields.io/github/license/ronmamo/reflections)
-  <del> 0.10.2 REMOVED SINCE 3.2.11 </del>
 * [com.warrenstrange:googleauth](https://github.com/wstrange/GoogleAuth) ![GitHub](https://img.shields.io/github/license/wstrange/GoogleAuth)
 * [com.github.oshi:oshi-core](https://github.com/oshi/oshi) ![GitHub](https://img.shields.io/github/license/oshi/oshi)
   6.4.9
@@ -28,6 +26,8 @@ A Java framework with VERT.X eco, for projects for web, job and more.
   5.4.0
 * [com.github.pjfanning:excel-streaming-reader](https://github.com/pjfanning/excel-streaming-reader) ![GitHub](https://img.shields.io/github/license/pjfanning/excel-streaming-reader)
   5.0.3
+* [org.openjdk.jol:jol-core](https://github.com/openjdk/jol) ![GitHub](https://img.shields.io/github/license/openjdk/jol)
+  0.17
 
 ## Dry Dock of Keel
 
@@ -43,10 +43,12 @@ Keel: https://github.com/sinri/DryDockLession :)
 
 ## Migration
 
-### From 3.2.x to 3.3.x
+### From 3.2.x to 4.0.x
 
 * Packages are shrunk.
 * Object `Keel` as fully facade being.
+* ZGC Pauses are identified as Major GC.
+* Quick compatible Event Logger from Issue Recorder.
 
 ### From 3.1.x to 3.2.x
 

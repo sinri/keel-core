@@ -46,6 +46,7 @@
         <poiVersion>5.4.0</poiVersion>
         <excelStreamingReader>5.0.3</excelStreamingReader>
         <oshiCoreVersion>6.4.9</oshiCoreVersion>
+        <jolCoreVersion>0.17</jolCoreVersion>
     </properties>
 
     <dependencies>
@@ -175,10 +176,18 @@
             <version>${excelStreamingReader}</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.openjdk.jol/jol-core -->
+        <dependency>
+            <groupId>org.openjdk.jol</groupId>
+            <artifactId>jol-core</artifactId>
+            <version>${jolCoreVersion}</version>
+        </dependency>
+
+
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-junit5</artifactId>
-            <version>4.5.12</version>
+            <version>${vertxVersion}</version>
         </dependency>
     </dependencies>
 

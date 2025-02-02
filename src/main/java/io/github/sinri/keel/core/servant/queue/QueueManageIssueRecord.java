@@ -1,14 +1,14 @@
 package io.github.sinri.keel.core.servant.queue;
 
-import io.github.sinri.keel.logger.issue.record.BaseIssueRecord;
+import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 
 import javax.annotation.Nonnull;
 
-public final class QueueManageIssueRecord extends BaseIssueRecord<QueueManageIssueRecord> {
+public final class QueueManageIssueRecord extends KeelIssueRecord<QueueManageIssueRecord> {
     public static final String TopicQueue = "Queue";
 
     public QueueManageIssueRecord() {
-        super();
+        super(TopicQueue);
         this.classification("manage");
     }
 
@@ -17,11 +17,5 @@ public final class QueueManageIssueRecord extends BaseIssueRecord<QueueManageIss
     @Override
     public QueueManageIssueRecord getImplementation() {
         return this;
-    }
-
-    @Nonnull
-    @Override
-    public String topic() {
-        return TopicQueue;
     }
 }

@@ -1,0 +1,38 @@
+package io.github.sinri.keel.core.servant.sundial;
+
+import io.github.sinri.keel.core.cron.ParsedCalenderElements;
+import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
+
+import javax.annotation.Nonnull;
+import java.util.Calendar;
+
+/**
+ * @since 4.0.0
+ */
+public class SundialIssueRecord extends KeelIssueRecord<SundialIssueRecord> {
+    public static final String TopicSundial = "Sundial";
+
+    public SundialIssueRecord() {
+        super(TopicSundial);
+        this.classification("Scheduler");
+    }
+
+    public SundialIssueRecord(
+            @Nonnull KeelSundialPlan sundialPlan,
+            @Nonnull Calendar now,
+            @Nonnull String deploymentId
+    ) {
+        super(TopicSundial);
+        this.classification("Plan");
+        this.context("plan", sundialPlan.key())
+                .context("cron", sundialPlan.cronExpression().getRawCronExpression())
+                .context("time", new ParsedCalenderElements(now).toString())
+                .context("deploymentId", deploymentId);
+    }
+
+    @Nonnull
+    @Override
+    public SundialIssueRecord getImplementation() {
+        return this;
+    }
+}

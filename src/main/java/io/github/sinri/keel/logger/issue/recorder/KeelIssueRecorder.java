@@ -16,6 +16,12 @@ import java.util.function.Supplier;
  * @since 3.1.10
  */
 public interface KeelIssueRecorder<T extends KeelIssueRecord<?>> {
+    /**
+     * @since 4.0.0
+     */
+    static <T extends KeelIssueRecord<?>> KeelIssueRecorder<T> buildSilentIssueRecorder() {
+        return new SilentIssueRecorder<>();
+    }
 
     static <T extends KeelIssueRecord<?>> KeelIssueRecorder<T> build(
             @Nonnull KeelIssueRecordCenter issueRecordCenter,
@@ -33,6 +39,10 @@ public interface KeelIssueRecorder<T extends KeelIssueRecord<?>> {
                 this.issueRecordCenter(),
                 () -> {
                     T t = this.issueRecordBuilder().get();
+                    // if null returned, log is ignored.
+                    if (t == null) {
+                        return null;
+                    }
                     return new KeelEventLog(t);
                 },
                 this.topic()
@@ -48,7 +58,7 @@ public interface KeelIssueRecorder<T extends KeelIssueRecord<?>> {
     KeelIssueRecordCenter issueRecordCenter();
 
     /**
-     * @return an instance of issue, to be modified for details.
+     * @return an instance of issue, to be modified for details. If NULL supplied, no log would be handled.
      */
     @Nonnull
     Supplier<T> issueRecordBuilder();
@@ -80,6 +90,9 @@ public interface KeelIssueRecorder<T extends KeelIssueRecord<?>> {
      */
     default void record(@Nonnull Handler<T> issueHandler) {
         T issue = this.issueRecordBuilder().get();
+        if (issue == null) {
+            return;
+        }
         issueHandler.handle(issue);
 
         Handler<T> recordFormatter = getRecordFormatter();
@@ -99,6 +112,9 @@ public interface KeelIssueRecorder<T extends KeelIssueRecord<?>> {
     }
 
     default void debug(@Nonnull Handler<T> issueHandler) {
+        if (KeelLogLevel.DEBUG.isNegligibleThan(getVisibleLevel())) {
+            return;
+        }
         record(t -> {
             issueHandler.handle(t);
             t.level(KeelLogLevel.DEBUG);
@@ -106,6 +122,9 @@ public interface KeelIssueRecorder<T extends KeelIssueRecord<?>> {
     }
 
     default void info(@Nonnull Handler<T> issueHandler) {
+        if (KeelLogLevel.INFO.isNegligibleThan(getVisibleLevel())) {
+            return;
+        }
         record(t -> {
             issueHandler.handle(t);
             t.level(KeelLogLevel.INFO);
@@ -113,6 +132,9 @@ public interface KeelIssueRecorder<T extends KeelIssueRecord<?>> {
     }
 
     default void notice(@Nonnull Handler<T> issueHandler) {
+        if (KeelLogLevel.NOTICE.isNegligibleThan(getVisibleLevel())) {
+            return;
+        }
         record(t -> {
             issueHandler.handle(t);
             t.level(KeelLogLevel.NOTICE);
@@ -120,6 +142,9 @@ public interface KeelIssueRecorder<T extends KeelIssueRecord<?>> {
     }
 
     default void warning(@Nonnull Handler<T> issueHandler) {
+        if (KeelLogLevel.WARNING.isNegligibleThan(getVisibleLevel())) {
+            return;
+        }
         record(t -> {
             issueHandler.handle(t);
             t.level(KeelLogLevel.WARNING);
@@ -127,6 +152,9 @@ public interface KeelIssueRecorder<T extends KeelIssueRecord<?>> {
     }
 
     default void error(@Nonnull Handler<T> issueHandler) {
+        if (KeelLogLevel.ERROR.isNegligibleThan(getVisibleLevel())) {
+            return;
+        }
         record(t -> {
             issueHandler.handle(t);
             t.level(KeelLogLevel.ERROR);
@@ -134,6 +162,9 @@ public interface KeelIssueRecorder<T extends KeelIssueRecord<?>> {
     }
 
     default void fatal(@Nonnull Handler<T> issueHandler) {
+        if (KeelLogLevel.FATAL.isNegligibleThan(getVisibleLevel())) {
+            return;
+        }
         record(t -> {
             issueHandler.handle(t);
             t.level(KeelLogLevel.FATAL);

@@ -3,7 +3,7 @@ package io.github.sinri.keel.integration.mysql.statement;
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.github.sinri.keel.logger.issue.record.BaseIssueRecord;
+import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
@@ -85,7 +85,7 @@ abstract public class AbstractStatement implements AnyStatement {
                 });
     }
 
-    public static final class MySQLAuditIssueRecord extends BaseIssueRecord<MySQLAuditIssueRecord> {
+    public static final class MySQLAuditIssueRecord extends KeelIssueRecord<MySQLAuditIssueRecord> {
         public static final String TopicMysqlAudit = "MysqlAudit";
         public static final String AttributeMysqlAudit = "MysqlAudit";
         public static final String KeyStatementUuid = "statement_uuid";
@@ -93,16 +93,14 @@ abstract public class AbstractStatement implements AnyStatement {
         public static final String KeyTotalAffectedRows = "TotalAffectedRows";
         public static final String KeyTotalFetchedRows = "TotalFetchedRows";
 
-        @Nonnull
-        @Override
-        public MySQLAuditIssueRecord getImplementation() {
-            return this;
+        public MySQLAuditIssueRecord() {
+            super(TopicMysqlAudit);
         }
 
         @Nonnull
         @Override
-        public String topic() {
-            return TopicMysqlAudit;
+        public MySQLAuditIssueRecord getImplementation() {
+            return this;
         }
 
         public MySQLAuditIssueRecord setPreparation(@Nonnull String statement_uuid, @Nonnull String sql) {

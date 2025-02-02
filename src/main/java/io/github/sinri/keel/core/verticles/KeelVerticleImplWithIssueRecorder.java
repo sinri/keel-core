@@ -11,11 +11,11 @@ abstract public class KeelVerticleImplWithIssueRecorder<T extends KeelIssueRecor
     private @Nonnull KeelIssueRecorder<T> issueRecorder;
 
     public KeelVerticleImplWithIssueRecorder() {
-        this.issueRecorder = buildIssueRecorder();
+        this.issueRecorder = KeelIssueRecorder.buildSilentIssueRecorder();
     }
 
     @Nonnull
-    public KeelIssueRecorder<T> getIssueRecorder() {
+    public final KeelIssueRecorder<T> getIssueRecorder() {
         return issueRecorder;
     }
 
@@ -23,20 +23,34 @@ abstract public class KeelVerticleImplWithIssueRecorder<T extends KeelIssueRecor
 
     @Override
     public final void start(Promise<Void> startPromise) {
-        this.issueRecorder = buildIssueRecorder();
+        start();
         startAsKeelVerticle(startPromise);
     }
 
     @Override
     public final void start() {
         this.issueRecorder = buildIssueRecorder();
-        this.startAsKeelVerticle();
     }
 
-    protected void startAsKeelVerticle(Promise<Void> startPromise) {
-        startAsKeelVerticle();
-        startPromise.complete();
+    abstract protected void startAsKeelVerticle(Promise<Void> startPromise);
+
+    /**
+     * Just do nothing.
+     */
+    @Override
+    public final void stop() {
     }
 
-    abstract protected void startAsKeelVerticle();
+    @Override
+    public final void stop(Promise<Void> stopPromise) throws Exception {
+        stop();
+        stopAsKeelVerticle(stopPromise);
+    }
+
+    /**
+     * @since 3.2.19
+     */
+    protected void stopAsKeelVerticle(Promise<Void> stopPromise) {
+        stopPromise.complete();
+    }
 }

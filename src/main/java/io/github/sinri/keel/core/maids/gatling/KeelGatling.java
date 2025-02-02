@@ -47,7 +47,7 @@ public class KeelGatling extends KeelVerticleImplWithEventLogger {
                     return fireOnce();
                 })
                 .andThen(ar -> {
-                    super.startAsKeelVerticle(startPromise);
+                    startPromise.complete();
                 });
     }
 

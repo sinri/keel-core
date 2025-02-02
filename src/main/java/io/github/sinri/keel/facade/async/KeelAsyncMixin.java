@@ -240,11 +240,11 @@ public interface KeelAsyncMixin {
     default <T> Future<T> executeBlocking(@Nonnull Handler<Promise<T>> blockingCodeHandler) {
         Promise<T> promise = Promise.promise();
         KeelVerticle verticle = new KeelVerticleImplPure() {
-
             @Override
-            protected void startAsPureKeelVerticle() {
+            protected void startAsPureKeelVerticle(Promise<Void> startPromise) {
                 blockingCodeHandler.handle(promise);
                 promise.future().onComplete(ar -> this.undeployMe());
+                startPromise.complete();
             }
         };
         return verticle.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER))

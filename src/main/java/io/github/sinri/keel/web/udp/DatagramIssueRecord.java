@@ -1,6 +1,6 @@
 package io.github.sinri.keel.web.udp;
 
-import io.github.sinri.keel.logger.issue.record.BaseIssueRecord;
+import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 
@@ -11,13 +11,11 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 /**
  * @since 3.2.0
  */
-public final class DatagramIssueRecord extends BaseIssueRecord<DatagramIssueRecord> {
+public final class DatagramIssueRecord extends KeelIssueRecord<DatagramIssueRecord> {
     public static final String TopicUdpDatagram = "UdpDatagram";
 
-    @Nonnull
-    @Override
-    public String topic() {
-        return TopicUdpDatagram;
+    public DatagramIssueRecord() {
+        super(TopicUdpDatagram);
     }
 
     @Nonnull

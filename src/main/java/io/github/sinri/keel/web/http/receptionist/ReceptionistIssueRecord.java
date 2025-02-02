@@ -1,6 +1,6 @@
 package io.github.sinri.keel.web.http.receptionist;
 
-import io.github.sinri.keel.logger.issue.record.BaseIssueRecord;
+import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 
@@ -10,13 +10,14 @@ import javax.annotation.Nullable;
 /**
  * @since 3.2.0
  */
-public final class ReceptionistIssueRecord extends BaseIssueRecord<ReceptionistIssueRecord> {
+public final class ReceptionistIssueRecord extends KeelIssueRecord<ReceptionistIssueRecord> {
     public static final String TopicReceptionist = "Receptionist";
     public static final String AttributeRequest = "request";
     public static final String AttributeResponse = "response";
     public static final String AttributeRespondInfo = "RespondInfo";
 
     public ReceptionistIssueRecord(@Nonnull String requestId) {
+        super(TopicReceptionist);
         this.attribute("request_id", requestId);
     }
 
@@ -24,12 +25,6 @@ public final class ReceptionistIssueRecord extends BaseIssueRecord<ReceptionistI
     @Override
     public ReceptionistIssueRecord getImplementation() {
         return this;
-    }
-
-    @Nonnull
-    @Override
-    public String topic() {
-        return TopicReceptionist;
     }
 
     public ReceptionistIssueRecord setRequest(

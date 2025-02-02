@@ -65,12 +65,6 @@ class KeelEventLoggerImpl implements KeelEventLogger {
         this.getIssueRecorder().setVisibleLevel(level);
     }
 
-    @Nonnull
-    @Override
-    public String getPresetTopic() {
-        return this.getIssueRecorder().topic();
-    }
-
     @Override
     public void log(@Nonnull Handler<KeelEventLog> eventLogHandler) {
         Handler<KeelEventLog> h = r -> {

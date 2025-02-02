@@ -3,6 +3,7 @@ package io.github.sinri.keel.core.servant.queue;
 import io.github.sinri.keel.core.verticles.KeelVerticleImplWithIssueRecorder;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.ThreadingModel;
 
 import javax.annotation.Nonnull;
@@ -54,15 +55,10 @@ public abstract class KeelQueue extends KeelVerticleImplWithIssueRecorder<QueueM
     abstract protected @Nonnull SignalReader getSignalReader();
 
     @Override
-    protected void startAsKeelVerticle() {
+    protected void startAsKeelVerticle(Promise<Void> startPromise) {
         this.queueStatus = QueueStatus.RUNNING;
-
-        try {
-            routine();
-        } catch (Exception e) {
-            getIssueRecorder().exception(e, r -> r.message("Exception in routine"));
-            undeployMe();
-        }
+        routine();
+        startPromise.complete();
     }
 
     protected final void routine() {
@@ -161,8 +157,9 @@ public abstract class KeelQueue extends KeelVerticleImplWithIssueRecorder<QueueM
     }
 
     @Override
-    public void stop() {
+    protected void stopAsKeelVerticle(Promise<Void> stopPromise) {
         this.queueStatus = QueueStatus.STOPPED;
+        stopPromise.complete();
     }
 
     public enum QueueSignal {

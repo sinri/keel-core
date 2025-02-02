@@ -4,6 +4,7 @@ import io.github.sinri.keel.core.cron.KeelCronExpression;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.ThreadingModel;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -208,7 +209,7 @@ public class KeelCronWatchman extends KeelWatchmanImpl {
     }
 
     @Override
-    protected void startAsKeelVerticle() {
+    protected void startAsKeelVerticle(Promise<Void> startPromise) {
         Future.succeededFuture()
                 .compose(v -> cronTabUpdateStartup.apply(eventBusAddress()))
                 .onSuccess(v -> super.start())
@@ -217,6 +218,7 @@ public class KeelCronWatchman extends KeelWatchmanImpl {
                     });
                     undeployMe();
                 });
+        startPromise.complete();
     }
 
     /**

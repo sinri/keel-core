@@ -14,13 +14,27 @@ public abstract class KeelVerticleImplPure extends AbstractVerticle implements K
 
     @Override
     public final void start() {
-        this.startAsPureKeelVerticle();
     }
 
-    protected void startAsPureKeelVerticle(Promise<Void> startPromise) {
-        startAsPureKeelVerticle();
-        startPromise.complete();
+    abstract protected void startAsPureKeelVerticle(Promise<Void> startPromise);
+
+    /**
+     * Just do nothing.
+     */
+    @Override
+    public final void stop() {
     }
 
-    abstract protected void startAsPureKeelVerticle();
+    @Override
+    public final void stop(Promise<Void> stopPromise) throws Exception {
+        stop();
+        stopAsKeelVerticle(stopPromise);
+    }
+
+    /**
+     * @since 4.0.0
+     */
+    protected void stopAsKeelVerticle(Promise<Void> stopPromise) {
+        stopPromise.complete();
+    }
 }

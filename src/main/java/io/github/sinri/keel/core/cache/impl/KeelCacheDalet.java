@@ -96,11 +96,6 @@ abstract public class KeelCacheDalet extends KeelVerticleImplPure implements Kee
     }
 
     @Override
-    final protected void startAsPureKeelVerticle() {
-        // do nothing
-    }
-
-    @Override
     protected void startAsPureKeelVerticle(Promise<Void> startPromise) {
         fullyUpdate()
                 .onSuccess(updated -> {

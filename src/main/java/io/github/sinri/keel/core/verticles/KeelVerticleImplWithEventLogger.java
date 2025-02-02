@@ -1,6 +1,7 @@
 package io.github.sinri.keel.core.verticles;
 
 import io.github.sinri.keel.logger.event.KeelEventLogger;
+import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 
@@ -14,11 +15,11 @@ abstract public class KeelVerticleImplWithEventLogger extends AbstractVerticle i
 
     public KeelVerticleImplWithEventLogger() {
         super();
-        this.logger = buildEventLogger();
+        this.logger = KeelEventLogger.from(KeelIssueRecorder.buildSilentIssueRecorder());
     }
 
     @Nonnull
-    public KeelEventLogger getLogger() {
+    public final KeelEventLogger getLogger() {
         return logger;
     }
 
@@ -26,7 +27,7 @@ abstract public class KeelVerticleImplWithEventLogger extends AbstractVerticle i
 
     @Override
     public final void start(Promise<Void> startPromise) {
-        this.logger = buildEventLogger();
+        start();
         startAsKeelVerticle(startPromise);
     }
 
@@ -36,18 +37,9 @@ abstract public class KeelVerticleImplWithEventLogger extends AbstractVerticle i
     @Override
     public final void start() {
         this.logger = buildEventLogger();
-        this.startAsKeelVerticle();
     }
 
-    protected void startAsKeelVerticle(Promise<Void> startPromise) {
-        startAsKeelVerticle();
-        startPromise.complete();
-    }
-
-    @Deprecated(since = "3.2.19")
-    protected void startAsKeelVerticle() {
-        // do nothing
-    }
+    abstract protected void startAsKeelVerticle(Promise<Void> startPromise);
 
     /**
      * Just do nothing.

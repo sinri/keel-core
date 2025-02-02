@@ -2,6 +2,7 @@ package io.github.sinri.keel.core.servant.queue;
 
 import io.github.sinri.keel.core.verticles.KeelVerticleImplWithIssueRecorder;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 
 import javax.annotation.Nonnull;
 
@@ -22,7 +23,7 @@ public abstract class KeelQueueTask extends KeelVerticleImplWithIssueRecorder<Qu
     abstract public String getTaskCategory();
 
     @Override
-    protected final void startAsKeelVerticle() {
+    protected final void startAsKeelVerticle(Promise<Void> startPromise) {
         this.queueWorkerPoolManager.whenOneWorkerStarts();
 
         Future.succeededFuture()
@@ -42,6 +43,8 @@ public abstract class KeelQueueTask extends KeelVerticleImplWithIssueRecorder<Qu
                         this.queueWorkerPoolManager.whenOneWorkerEnds();
                     });
                 });
+
+        startPromise.complete();
     }
 
     abstract protected Future<Void> run();

@@ -30,4 +30,8 @@ public class TestReceptionist extends KeelWebFutureReceptionist {
         return KeelIssueRecordCenter.outputCenter();
     }
 
+    @Override
+    protected boolean isVerboseLogging() {
+        return true;
+    }
 }

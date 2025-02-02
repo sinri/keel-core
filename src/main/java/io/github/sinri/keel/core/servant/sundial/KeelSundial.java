@@ -4,11 +4,13 @@ import io.github.sinri.keel.core.cron.KeelCronExpression;
 import io.github.sinri.keel.core.cron.ParsedCalenderElements;
 import io.github.sinri.keel.core.verticles.KeelVerticleImplWithIssueRecorder;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
+import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.ThreadingModel;
 
+import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,6 +29,15 @@ public abstract class KeelSundial extends KeelVerticleImplWithIssueRecorder<Sund
      * @since 4.0.0
      */
     abstract protected KeelIssueRecordCenter getIssueRecordCenter();
+
+    /**
+     * @since 4.0.0
+     */
+    @Nonnull
+    @Override
+    protected KeelIssueRecorder<SundialIssueRecord> buildIssueRecorder() {
+        return getIssueRecordCenter().generateIssueRecorder(SundialIssueRecord.TopicSundial, SundialIssueRecord::new);
+    }
 
     @Override
     protected void startAsKeelVerticle(Promise<Void> startPromise) {

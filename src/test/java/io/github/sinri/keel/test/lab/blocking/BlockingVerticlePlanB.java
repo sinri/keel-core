@@ -26,7 +26,7 @@ public class BlockingVerticlePlanB {
             }
 
             @Override
-            protected void startAsKeelVerticle() {
+            protected void startAsKeelVerticle(Promise<Void> startPromise) {
                 getIssueRecorder().info(r -> r.message("in verticle " + deploymentID()));
                 blockCode.handle(promise);
 
@@ -34,6 +34,8 @@ public class BlockingVerticlePlanB {
                         .onComplete(ar -> {
                             this.undeployMe();
                         });
+
+                startPromise.complete();
             }
         };
         return verticle.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER))

@@ -91,10 +91,9 @@ public class BlockingVerticlePlanA extends KeelVerticleImplWithEventLogger {
     }
 
     @Override
-    protected void startAsKeelVerticle() {
-
+    protected void startAsKeelVerticle(Promise<Void> startPromise) {
+        startPromise.complete();
     }
-
 
     public <T> Future<T> executeBlocking(Handler<Promise<T>> promiseHandler) {
         Promise<T> promise = Promise.promise();

@@ -28,10 +28,13 @@ public class GoogleTotpTest extends KeelInstantRunner {
     @InstantRunUnit(skip = true)
     public Future<Void> createAnonymousKey() {
         GoogleAuthenticatorKey authenticatorKey = asyncGoogleAuthenticator.createCredentials();
-        getLogger().info("Created Anonymous Key", j -> j
-                .put("key", authenticatorKey.getKey())
-                .put("ScratchCodes", new JsonArray(authenticatorKey.getScratchCodes()))
-                .put("VerificationCode", authenticatorKey.getVerificationCode())
+        getLogger().info(x -> x
+                .message("Created Anonymous Key")
+                .context(j -> j
+                        .put("key", authenticatorKey.getKey())
+                        .put("ScratchCodes", new JsonArray(authenticatorKey.getScratchCodes()))
+                        .put("VerificationCode", authenticatorKey.getVerificationCode())
+                )
         );
         return Future.succeededFuture();
 
@@ -66,10 +69,12 @@ public class GoogleTotpTest extends KeelInstantRunner {
         asyncGoogleAuthenticator.setCredentialRepository(new CredentialRepositoryImpl());
         return asyncGoogleAuthenticator.createCredentials("testor")
                 .compose(authenticatorKey -> {
-                    getLogger().info("Created Named Key", j -> j
-                            .put("key", authenticatorKey.getKey())
-                            .put("ScratchCodes", new JsonArray(authenticatorKey.getScratchCodes()))
-                            .put("VerificationCode", authenticatorKey.getVerificationCode())
+                    getLogger().info(x -> x.message("Created Named Key")
+                            .context(j -> j
+                                    .put("key", authenticatorKey.getKey())
+                                    .put("ScratchCodes", new JsonArray(authenticatorKey.getScratchCodes()))
+                                    .put("VerificationCode", authenticatorKey.getVerificationCode())
+                            )
                     );
                     return Future.succeededFuture();
                 });
@@ -133,7 +138,8 @@ public class GoogleTotpTest extends KeelInstantRunner {
             return Future.succeededFuture()
                     .compose(v -> {
                         JsonObject jsonObject = dict.getJsonObject(userName);
-                        Keel.getLogger().fatal("for username " + userName, jsonObject);
+                        Keel.getLogger().fatal(x -> x.message("for username " + userName)
+                                .context(jsonObject));
                         var x = jsonObject.getString("secretKey");
                         return Future.succeededFuture(x);
                     });
@@ -154,7 +160,7 @@ public class GoogleTotpTest extends KeelInstantRunner {
                     .put("validationCode", validationCode)
                     .put("scratchCodes", new JsonArray(scratchCodes));
             this.dict.put(userName, x);
-            Keel.getLogger().fatal("saveUserCredentials for " + userName, x);
+            Keel.getLogger().fatal(eventLog -> eventLog.message("saveUserCredentials for " + userName).context(x));
             return Future.succeededFuture();
 
             /*

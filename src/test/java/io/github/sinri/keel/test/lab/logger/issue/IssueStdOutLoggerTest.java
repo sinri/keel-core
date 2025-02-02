@@ -2,21 +2,20 @@ package io.github.sinri.keel.test.lab.logger.issue;
 
 import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
 import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenterAsSync;
+import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
-import io.github.sinri.keel.logger.issue.recorder.adapter.SyncStdoutAdapter;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
 public class IssueStdOutLoggerTest extends KeelInstantRunner {
-    private KeelIssueRecordCenterAsSync center;
+    private KeelIssueRecordCenter center;
 
     @Nonnull
     @Override
     protected Future<Void> starting() {
-        center = new KeelIssueRecordCenterAsSync(SyncStdoutAdapter.getInstance());
+        center = KeelIssueRecordCenter.outputCenter();
 
         return Future.succeededFuture();
     }

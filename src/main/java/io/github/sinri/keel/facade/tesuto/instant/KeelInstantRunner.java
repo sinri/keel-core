@@ -32,12 +32,12 @@ abstract public class KeelInstantRunner {
     public static void main(String[] args) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         String calledClass = System.getProperty("sun.java.command");
 
-        eventLogger = KeelIssueRecordCenter.outputCenter().generateEventLogger("KeelTest");
-        eventLogger.setDynamicEventLogFormatter(eventLog -> {
+        eventLogger = KeelIssueRecordCenter.outputCenter().generateEventLogger("KeelInstantRunner");
+        eventLogger.setRecordFormatter(eventLog -> {
             eventLog.classification("preparing");
         });
 
-        eventLogger.debug(r -> r.message("Keel Test Class: " + calledClass));
+        eventLogger.debug(r -> r.message("Keel Instant Runner Class: " + calledClass));
 
         Class<?> aClass = Class.forName(calledClass);
 
@@ -64,7 +64,7 @@ abstract public class KeelInstantRunner {
         }
 
         if (testUnits.isEmpty()) {
-            eventLogger.fatal(r -> r.message("At least one public method with @TestUnit is required."));
+            eventLogger.fatal(r -> r.message("At least one public method with @InstantRunUnit is required."));
             System.exit(1);
         }
 
@@ -80,10 +80,10 @@ abstract public class KeelInstantRunner {
                     return ((KeelInstantRunner) testInstance).starting();
                 })
                 .compose(v -> {
-                    eventLogger.info(r -> r.message("RUNNING TEST UNITS..."));
+                    eventLogger.info(r -> r.message("RUNNING INSTANT UNITS..."));
 
                     return Keel.asyncCallIteratively(testUnits.iterator(), testUnit -> {
-                                eventLogger.setDynamicEventLogFormatter(eventLogger -> {
+                                eventLogger.setRecordFormatter(eventLogger -> {
                                     eventLogger.classification(testUnit.getName());
                                 });
                                 return testUnit.runTest((KeelInstantRunner) testInstance)
@@ -93,7 +93,7 @@ abstract public class KeelInstantRunner {
                                         });
                             })
                             .onComplete(vv -> {
-                                eventLogger.setDynamicEventLogFormatter(eventLogger -> {
+                                eventLogger.setRecordFormatter(eventLogger -> {
                                     eventLogger.classification("conclusion");
                                 });
                                 AtomicInteger totalNonSkippedRef = new AtomicInteger(0);

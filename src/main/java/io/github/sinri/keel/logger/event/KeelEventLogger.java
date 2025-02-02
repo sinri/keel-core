@@ -1,291 +1,94 @@
 package io.github.sinri.keel.logger.event;
 
 import io.github.sinri.keel.logger.KeelLogLevel;
+import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Handler;
-import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
- * @since 3.2.0
- * The brand new KeelEventLogger based on KeelIssueRecorder.
+ * @since 3.2.0 The brand new KeelEventLogger based on KeelIssueRecorder.
+ * @since 4.0.0 refine to class
  */
-public interface KeelEventLogger {
+public final class KeelEventLogger implements KeelIssueRecorder<KeelEventLog> {
+    private final @Nonnull KeelIssueRecordCenter issueRecordCenter;
+    private KeelLogLevel level;
+    private final @Nonnull String topic;
+    private final List<KeelIssueRecorder<KeelEventLog>> bypassIssueRecorders;
+    private @Nullable Handler<KeelEventLog> recordFormatter;
 
-    static KeelEventLogger from(@Nonnull KeelIssueRecorder<KeelEventLog> issueRecorder) {
-        return from(issueRecorder, null);
+    public KeelEventLogger(
+            @Nonnull KeelIssueRecordCenter issueRecordCenter,
+            @Nullable Handler<KeelEventLog> recordFormatter,
+            @Nonnull String topic
+    ) {
+        this.issueRecordCenter = issueRecordCenter;
+        this.level = KeelLogLevel.INFO;
+        this.topic = topic;
+        this.bypassIssueRecorders = new ArrayList<>();
     }
 
-    static KeelEventLogger from(@Nonnull KeelIssueRecorder<KeelEventLog> issueRecorder, @Nullable Handler<KeelEventLog> templateEventLogEditor) {
-        return new KeelEventLoggerImpl(issueRecorder, templateEventLogEditor);
+    public static KeelEventLogger from(@Nonnull KeelIssueRecorder<KeelEventLog> issueRecorder) {
+        return new KeelEventLogger(issueRecorder.issueRecordCenter(), null, issueRecorder.topic());
+    }
+
+    public static KeelEventLogger from(@Nonnull KeelIssueRecorder<KeelEventLog> issueRecorder, @Nullable Handler<KeelEventLog> recordFormatter) {
+        return new KeelEventLogger(issueRecorder.issueRecordCenter(), recordFormatter, issueRecorder.topic());
+    }
+
+    @Nonnull
+    @Override
+    public KeelLogLevel getVisibleLevel() {
+        return level;
+    }
+
+    @Override
+    public void setVisibleLevel(@Nonnull KeelLogLevel level) {
+        this.level = level;
+    }
+
+    @Nonnull
+    @Override
+    public KeelIssueRecordCenter issueRecordCenter() {
+        return this.issueRecordCenter;
+    }
+
+    @Nonnull
+    @Override
+    public Supplier<KeelEventLog> issueRecordBuilder() {
+        return () -> new KeelEventLog(topic());
+    }
+
+    @Override
+    public void addBypassIssueRecorder(@Nonnull KeelIssueRecorder<KeelEventLog> bypassIssueRecorder) {
+        this.bypassIssueRecorders.add(bypassIssueRecorder);
+    }
+
+    @Nonnull
+    @Override
+    public List<KeelIssueRecorder<KeelEventLog>> getBypassIssueRecorders() {
+        return this.bypassIssueRecorders;
+    }
+
+    @Nonnull
+    @Override
+    public String topic() {
+        return topic;
     }
 
     @Nullable
-    Handler<KeelEventLog> templateEventLogEditor();
-
-    /**
-     * @since 3.2.7
-     */
-    void setDynamicEventLogFormatter(@Nullable Handler<KeelEventLog> formatter);
-
-    /**
-     * @return Logs of this level or higher are visible.
-     */
-    @Nonnull
-    KeelLogLevel getVisibleLevel();
-
-    /**
-     * @param level Logs of this level or higher are visible.
-     */
-    void setVisibleLevel(@Nonnull KeelLogLevel level);
-
-    void addBypassLogger(@Nonnull KeelEventLogger bypassLogger);
-
-    @Nonnull
-    List<KeelEventLogger> getBypassLoggers();
-
-    void log(@Nonnull Handler<KeelEventLog> eventLogHandler);
-
-    default void debug(@Nonnull Handler<KeelEventLog> eventLogHandler) {
-        log(eventLog -> {
-            eventLog.level(KeelLogLevel.DEBUG);
-            eventLogHandler.handle(eventLog);
-        });
+    @Override
+    public Handler<KeelEventLog> getRecordFormatter() {
+        return this.recordFormatter;
     }
 
-    default void info(@Nonnull Handler<KeelEventLog> eventLogHandler) {
-        log(eventLog -> {
-            eventLog.level(KeelLogLevel.INFO);
-            eventLogHandler.handle(eventLog);
-        });
-    }
-
-    default void notice(@Nonnull Handler<KeelEventLog> eventLogHandler) {
-        log(eventLog -> {
-            eventLog.level(KeelLogLevel.NOTICE);
-            eventLogHandler.handle(eventLog);
-        });
-    }
-
-    default void warning(@Nonnull Handler<KeelEventLog> eventLogHandler) {
-        log(eventLog -> {
-            eventLog.level(KeelLogLevel.WARNING);
-            eventLogHandler.handle(eventLog);
-        });
-    }
-
-    default void error(@Nonnull Handler<KeelEventLog> eventLogHandler) {
-        log(eventLog -> {
-            eventLog.level(KeelLogLevel.ERROR);
-            eventLogHandler.handle(eventLog);
-        });
-    }
-
-    default void fatal(@Nonnull Handler<KeelEventLog> eventLogHandler) {
-        log(eventLog -> {
-            eventLog.level(KeelLogLevel.FATAL);
-            eventLogHandler.handle(eventLog);
-        });
-    }
-
-    default void debug(@Nonnull String msg) {
-        debug(eventLog -> eventLog.message(msg));
-    }
-
-    default void info(@Nonnull String msg) {
-        // done debugging
-//        System.out.println("KeelEventLogger::info("+msg+") start");
-        info(eventLog -> eventLog.message(msg));
-//        System.out.println("KeelEventLogger::info("+msg+") end");
-    }
-
-    default void notice(@Nonnull String msg) {
-        notice(eventLog -> eventLog.message(msg));
-    }
-
-    default void warning(@Nonnull String msg) {
-        warning(eventLog -> eventLog.message(msg));
-    }
-
-    default void error(@Nonnull String msg) {
-        error(eventLog -> eventLog.message(msg));
-    }
-
-    default void fatal(@Nonnull String msg) {
-        fatal(eventLog -> eventLog.message(msg));
-    }
-
-    default void exception(@Nonnull Throwable throwable) {
-        exception(throwable, "Exception Occurred");
-    }
-
-    default void exception(@Nonnull Throwable throwable, @Nonnull String msg) {
-        exception(throwable, eventLog -> {
-            eventLog.message(msg);
-        });
-    }
-
-    /**
-     * @since 3.0.1
-     */
-    default void exception(@Nonnull Throwable throwable, @Nonnull String msg, @Nullable JsonObject context) {
-        exception(throwable, eventLog -> {
-            eventLog.message(msg);
-            if (context != null) eventLog.context(context);
-        });
-    }
-
-    default void exception(@Nonnull Throwable throwable, @Nonnull Handler<KeelEventLog> eventLogHandler) {
-        error(eventLog -> {
-            eventLog.exception(throwable);
-            eventLogHandler.handle(eventLog);
-        });
-    }
-
-    /**
-     * @since 3.0.1
-     */
-    default void debug(@Nonnull String msg, @Nonnull JsonObject context) {
-        debug(event -> {
-            event.message(msg);
-            event.context(context);
-        });
-    }
-
-    /**
-     * @since 3.0.1
-     */
-    default void info(@Nonnull String msg, @Nonnull JsonObject context) {
-        info(event -> {
-            event.message(msg);
-            event.context(context);
-        });
-    }
-
-    /**
-     * @since 3.0.1
-     */
-    default void notice(@Nonnull String msg, @Nonnull JsonObject context) {
-        notice(event -> {
-            event.message(msg);
-            event.context(context);
-        });
-    }
-
-    /**
-     * @since 3.0.1
-     */
-    default void warning(@Nonnull String msg, @Nonnull JsonObject context) {
-        warning(event -> {
-            event.message(msg);
-            event.context(context);
-        });
-    }
-
-    /**
-     * @since 3.0.1
-     */
-    default void error(@Nonnull String msg, @Nonnull JsonObject context) {
-        error(event -> {
-            event.message(msg);
-            event.context(context);
-        });
-    }
-
-    /**
-     * @since 3.0.1
-     */
-    default void fatal(@Nonnull String msg, @Nonnull JsonObject context) {
-        fatal(event -> {
-            event.message(msg);
-            event.context(context);
-        });
-    }
-
-    /**
-     * @since 3.1.10
-     */
-    default void debug(@Nonnull String msg, @Nonnull Handler<JsonObject> contextHandler) {
-        debug(event -> {
-            JsonObject context = new JsonObject();
-            contextHandler.handle(context);
-            event.message(msg);
-            event.context(context);
-        });
-    }
-
-    /**
-     * @since 3.1.10
-     */
-    default void info(@Nonnull String msg, @Nonnull Handler<JsonObject> contextHandler) {
-        info(event -> {
-            JsonObject context = new JsonObject();
-            contextHandler.handle(context);
-            event.message(msg);
-            event.context(context);
-        });
-    }
-
-    /**
-     * @since 3.1.10
-     */
-    default void notice(@Nonnull String msg, @Nonnull Handler<JsonObject> contextHandler) {
-        notice(event -> {
-            JsonObject context = new JsonObject();
-            contextHandler.handle(context);
-            event.message(msg);
-            event.context(context);
-        });
-    }
-
-    /**
-     * @since 3.1.10
-     */
-    default void warning(@Nonnull String msg, @Nonnull Handler<JsonObject> contextHandler) {
-        warning(event -> {
-            JsonObject context = new JsonObject();
-            contextHandler.handle(context);
-            event.message(msg);
-            event.context(context);
-        });
-    }
-
-    /**
-     * @since 3.1.10
-     */
-    default void error(@Nonnull String msg, @Nonnull Handler<JsonObject> contextHandler) {
-        error(event -> {
-            JsonObject context = new JsonObject();
-            contextHandler.handle(context);
-            event.message(msg);
-            event.context(context);
-        });
-    }
-
-    /**
-     * @since 3.1.10
-     */
-    default void fatal(@Nonnull String msg, @Nonnull Handler<JsonObject> contextHandler) {
-        fatal(event -> {
-            JsonObject context = new JsonObject();
-            contextHandler.handle(context);
-            event.message(msg);
-            event.context(context);
-        });
-    }
-
-    /**
-     * @since 3.1.10
-     */
-    default void exception(@Nonnull Throwable throwable, @Nonnull String msg, @Nonnull Handler<JsonObject> contextHandler) {
-        exception(throwable, eventLog -> {
-            JsonObject context = new JsonObject();
-            contextHandler.handle(context);
-            eventLog.message(msg);
-            eventLog.context(context);
-        });
+    @Override
+    public void setRecordFormatter(@Nullable Handler<KeelEventLog> handler) {
+        this.recordFormatter = handler;
     }
 }

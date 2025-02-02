@@ -23,17 +23,17 @@ public class Config1 {
                 .addStore(configStoreOptions);
         ConfigRetriever configRetriever = ConfigRetriever.create(Keel.getVertx(), configRetrieverOptions);
         JsonObject cachedConfig = configRetriever.getCachedConfig();
-        Keel.getLogger().fatal("cachedConfig: ", cachedConfig);
+        Keel.getLogger().fatal(x -> x.message("cachedConfig: ").context(cachedConfig));
 
         configRetriever.getConfig()
                 .compose(config -> {
-                    Keel.getLogger().fatal("Retrieved: ", config);
+                    Keel.getLogger().fatal(x -> x.message("Retrieved: ").context(config));
                     return Future.succeededFuture();
                 });
 
         Keel.getVertx().setTimer(3000L, v -> {
             JsonObject cachedConfig2 = configRetriever.getCachedConfig();
-            Keel.getLogger().fatal("cachedConfig2: ", cachedConfig);
+            Keel.getLogger().fatal(x -> x.message("cachedConfig2: ").context(cachedConfig2));
             Keel.close();
         });
     }

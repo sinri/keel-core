@@ -67,7 +67,7 @@ public class KeelUnitTest {
     public void setUp() {
         JsonObject env = new JsonObject();
         System.getenv().forEach(env::put);
-        getLogger().info("env", env);
+        getLogger().info(x -> x.message("env").context(env));
         for (var e : Thread.currentThread().getStackTrace()) {
             getLogger().info("stack: " + e.getClassName() + "::" + e.getMethodName());
         }

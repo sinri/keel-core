@@ -21,7 +21,7 @@ public class TestQueueTaskSeeker implements KeelQueueNextTaskSeeker {
     }
 
     @Override
-    public Future<KeelQueueTask> get() {
+    public Future<KeelQueueTask> seekNextTask() {
         return Future.succeededFuture()
                 .compose(v -> {
                     int rest = (int) (10 * Math.random());

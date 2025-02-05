@@ -105,7 +105,7 @@ public abstract class KeelQueue extends KeelVerticleImplWithIssueRecorder<QueueM
                     }
                 })
                 .eventually(() -> {
-                    long waitingMs = nextTaskSeeker.waitingMs();
+                    long waitingMs = nextTaskSeeker.getWaitingPeriodInMs();
                     getIssueRecorder().debug(r -> r.message("set timer for next routine after " + waitingMs + " ms"));
                     Keel.getVertx().setTimer(waitingMs, timerID -> routine());
                     return Future.succeededFuture();
@@ -130,7 +130,7 @@ public abstract class KeelQueue extends KeelVerticleImplWithIssueRecorder<QueueM
                     }
 
                     return Future.succeededFuture()
-                            .compose(v -> nextTaskSeeker.get())
+                            .compose(v -> nextTaskSeeker.seekNextTask())
                             .compose(task -> {
                                 if (task == null) {
                                     // 队列里已经空了，不必再找

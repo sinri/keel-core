@@ -2,7 +2,9 @@ package io.github.sinri.keel.logger.metric;
 
 import io.vertx.core.Future;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -21,6 +23,15 @@ abstract public class KeelMetricRecorder {
 
     protected int bufferSize() {
         return 1000;
+    }
+
+    /**
+     * Override this to change topic of metric recorder.
+     *
+     * @since 4.0.0
+     */
+    protected String topic() {
+        return "metric";
     }
 
     public void start() {
@@ -44,10 +55,13 @@ abstract public class KeelMetricRecorder {
                             }
                             return Keel.asyncSleep(1000L);
                         } else {
-                            Map<String, List<KeelMetricRecord>> map = groupByTopic(buffer);
-                            return Keel.asyncCallIteratively(map.keySet(), topic -> {
-                                return handleForTopic(topic, map.get(topic));
-                            });
+                            // since 4.0.0 no various topics supported.
+//                            Map<String, List<KeelMetricRecord>> map = groupByTopic(buffer);
+//                            return Keel.asyncCallIteratively(map.keySet(), topic -> {
+//                                return handleForTopic(topic, map.get(topic));
+//                            });
+
+                            return handleForTopic(topic(), buffer);
                         }
                     });
         });
@@ -55,15 +69,6 @@ abstract public class KeelMetricRecorder {
 
     public void end() {
         endSwitch.set(true);
-    }
-
-    private Map<String, List<KeelMetricRecord>> groupByTopic(List<KeelMetricRecord> buffer) {
-        Map<String, List<KeelMetricRecord>> byTopicMap = new HashMap<>();
-
-        buffer.forEach(metricRecord -> byTopicMap.computeIfAbsent(metricRecord.topic(), s -> new ArrayList<>())
-                .add(metricRecord));
-
-        return byTopicMap;
     }
 
     abstract protected Future<Void> handleForTopic(String topic, List<KeelMetricRecord> buffer);

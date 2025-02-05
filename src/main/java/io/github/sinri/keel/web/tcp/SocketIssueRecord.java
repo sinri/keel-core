@@ -15,7 +15,7 @@ public final class SocketIssueRecord extends KeelIssueRecord<SocketIssueRecord> 
     public static final String TopicTcpSocket = "TcpSocket";
 
     public SocketIssueRecord() {
-        super(TopicTcpSocket);
+        super();
     }
 
     @Nonnull

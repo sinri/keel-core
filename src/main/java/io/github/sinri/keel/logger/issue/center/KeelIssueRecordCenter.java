@@ -70,7 +70,7 @@ public interface KeelIssueRecordCenter {
 
     @Nonnull
     default KeelIssueRecorder<KeelEventLog> generateIssueRecorderForEventLogger(@Nonnull String topic) {
-        return generateIssueRecorder(topic, () -> new KeelEventLog(topic));
+        return generateIssueRecorder(topic, KeelEventLog::new);
     }
 
     class Holder {

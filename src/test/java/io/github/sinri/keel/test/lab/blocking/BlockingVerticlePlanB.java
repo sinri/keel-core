@@ -16,7 +16,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  */
 public class BlockingVerticlePlanB {
     private static Future<Void> executeBlocking(Handler<Promise<Void>> blockCode) {
-        var issueRecorder = KeelIssueRecordCenter.outputCenter().generateIssueRecorder("Sample", () -> new KeelEventLog("Sample"));
+        var issueRecorder = KeelIssueRecordCenter.outputCenter().generateIssueRecorder("Sample", KeelEventLog::new);
         Promise<Void> promise = Promise.promise();
         KeelVerticleImplWithIssueRecorder<KeelEventLog> verticle = new KeelVerticleImplWithIssueRecorder<>() {
             @Nonnull

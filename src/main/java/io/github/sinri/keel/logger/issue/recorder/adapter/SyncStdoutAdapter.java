@@ -30,7 +30,7 @@ public class SyncStdoutAdapter implements KeelIssueRecorderAdapter {
     @Override
     public void record(@Nonnull String topic, @Nullable KeelIssueRecord<?> issueRecord) {
         if (issueRecord != null) {
-            String s = this.issueRecordRender().renderIssueRecord(issueRecord);
+            String s = this.issueRecordRender().renderIssueRecord(topic, issueRecord);
             System.out.println(s);
         }
     }

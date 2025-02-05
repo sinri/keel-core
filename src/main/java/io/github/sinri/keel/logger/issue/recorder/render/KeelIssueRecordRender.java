@@ -21,7 +21,7 @@ public interface KeelIssueRecordRender<R> {
     }
 
     @Nonnull
-    R renderIssueRecord(@Nonnull KeelIssueRecord<?> issueRecord);
+    R renderIssueRecord(@Nonnull String topic, @Nonnull KeelIssueRecord<?> issueRecord);
 
     @Nonnull
     R renderThrowable(@Nonnull Throwable throwable);

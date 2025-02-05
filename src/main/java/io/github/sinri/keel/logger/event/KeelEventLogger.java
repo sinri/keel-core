@@ -61,7 +61,7 @@ public final class KeelEventLogger implements KeelIssueRecorder<KeelEventLog> {
     @Nonnull
     @Override
     public Supplier<KeelEventLog> issueRecordBuilder() {
-        return () -> new KeelEventLog(topic());
+        return KeelEventLog::new;
     }
 
     @Override

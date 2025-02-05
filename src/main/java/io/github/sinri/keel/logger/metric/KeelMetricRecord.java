@@ -17,8 +17,8 @@ public class KeelMetricRecord extends KeelIssueRecord<KeelMetricRecord> {
     private final @Nonnull String metricName;
     private final double value;
 
-    public KeelMetricRecord(@Nonnull String topic, @Nonnull String metricName, double value) {
-        super(topic);
+    public KeelMetricRecord(@Nonnull String metricName, double value) {
+        super();
         this.metricName = metricName;
         this.value = value;
     }

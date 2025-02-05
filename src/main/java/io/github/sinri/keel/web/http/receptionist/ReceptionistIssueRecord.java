@@ -17,7 +17,7 @@ public final class ReceptionistIssueRecord extends KeelIssueRecord<ReceptionistI
     public static final String AttributeRespondInfo = "RespondInfo";
 
     public ReceptionistIssueRecord(@Nonnull String requestId) {
-        super(TopicReceptionist);
+        super();
         this.attribute("request_id", requestId);
     }
 

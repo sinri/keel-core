@@ -19,9 +19,6 @@ interface KeelIssueRecordCore<T> extends SelfInterface<T> {
     String AttributeLevel = "level";
     String AttributeException = "exception";
 
-    @Nonnull
-    String topic();
-
     T timestamp(long timestamp);
 
     long timestamp();

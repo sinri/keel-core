@@ -23,11 +23,11 @@ public class KeelIssueRecordStringRender implements KeelIssueRecordRender<String
 
     @Nonnull
     @Override
-    public String renderIssueRecord(@Nonnull KeelIssueRecord<?> issueRecord) {
+    public String renderIssueRecord(@Nonnull String topic, @Nonnull KeelIssueRecord<?> issueRecord) {
         StringBuilder s = new StringBuilder("㏒ ");
         s.append(Keel.datetimeHelper().getDateExpression(issueRecord.timestamp(), KeelDateTimeHelper.MYSQL_DATETIME_MS_PATTERN));
         s.append(" [").append(issueRecord.level().name()).append("]");
-        s.append(" ").append(issueRecord.topic()).append(" (").append(Keel.stringHelper().joinStringArray(issueRecord.classification(), ",")).append(")");
+        s.append(" ").append(topic).append(" (").append(Keel.stringHelper().joinStringArray(issueRecord.classification(), ",")).append(")");
         if (!issueRecord.attributes().isEmpty()) {
             issueRecord.attributes().forEach(attribute -> {
                 s.append("\n ▪ ").append(attribute.getKey()).append(": ").append(attribute.getValue());

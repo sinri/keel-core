@@ -10,8 +10,8 @@ import javax.annotation.Nonnull;
  */
 public final class KeelEventLog extends KeelIssueRecord<KeelEventLog> {
 
-    public KeelEventLog(@Nonnull String topic) {
-        super(topic);
+    public KeelEventLog() {
+        super();
     }
 
     /**

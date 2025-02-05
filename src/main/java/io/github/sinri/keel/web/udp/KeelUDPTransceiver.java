@@ -1,5 +1,6 @@
 package io.github.sinri.keel.web.udp;
 
+import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
@@ -20,15 +21,23 @@ public class KeelUDPTransceiver {
     /**
      * @since 3.2.0
      */
-    private @Nonnull KeelIssueRecorder<DatagramIssueRecord> issueRecorder;
+    private @Nonnull
+    final KeelIssueRecorder<DatagramIssueRecord> issueRecorder;
     private BiConsumer<SocketAddress, Buffer> datagramSocketConsumer = (sender, buffer) -> {
         // do nothing
     };
 
-    public KeelUDPTransceiver(DatagramSocket udpServer, int port, @Nonnull KeelIssueRecorder<DatagramIssueRecord> issueRecorder) {
+    /**
+     * @since 4.0.0 parameter issueRecorder changed to issueRecordCenter
+     */
+    public KeelUDPTransceiver(
+            DatagramSocket udpServer,
+            int port,
+            @Nonnull KeelIssueRecordCenter issueRecordCenter
+    ) {
         this.port = port;
         this.udpServer = udpServer;
-        this.setIssueRecorder(issueRecorder);
+        this.issueRecorder = issueRecordCenter.generateIssueRecorder(DatagramIssueRecord.TopicUdpDatagram, DatagramIssueRecord::new);
     }
 
     /**
@@ -37,16 +46,6 @@ public class KeelUDPTransceiver {
     public @Nonnull KeelIssueRecorder<DatagramIssueRecord> getIssueRecorder() {
         return issueRecorder;
     }
-
-    /**
-     * @since 3.2.0
-     */
-    public KeelUDPTransceiver setIssueRecorder(KeelIssueRecorder<DatagramIssueRecord> issueRecorder) {
-        this.issueRecorder = issueRecorder;
-        this.issueRecorder.setRecordFormatter(r -> r.classification("port:" + port));
-        return this;
-    }
-
 
     public KeelUDPTransceiver setDatagramSocketConsumer(BiConsumer<SocketAddress, Buffer> datagramSocketConsumer) {
         Objects.requireNonNull(datagramSocketConsumer);

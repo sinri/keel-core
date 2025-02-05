@@ -1,9 +1,6 @@
 package io.github.sinri.keel.test.lab.queue;
 
-import io.github.sinri.keel.core.servant.queue.KeelQueue;
-import io.github.sinri.keel.core.servant.queue.KeelQueueNextTaskSeeker;
-import io.github.sinri.keel.core.servant.queue.QueueManageIssueRecord;
-import io.github.sinri.keel.core.servant.queue.QueueWorkerPoolManager;
+import io.github.sinri.keel.core.servant.queue.*;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
@@ -14,16 +11,23 @@ public class TestQueue extends KeelQueue {
     @Nonnull
     @Override
     protected KeelQueueNextTaskSeeker getNextTaskSeeker() {
-        return new TestQueueTaskSeeker();
+        KeelIssueRecorder<QueueManageIssueRecord> issueRecorder = getIssueRecorder();
+        return new TestQueueTaskSeeker(issueRecorder);
     }
 
     @Nonnull
     @Override
-    protected SignalReader getSignalReader() {
-        return new SignalReader() {
+    protected KeelQueueSignalReader getSignalReader() {
+        KeelIssueRecorder<QueueManageIssueRecord> issueRecorder = this.getIssueRecorder();
+        return new KeelQueueSignalReader() {
             @Override
-            public Future<QueueSignal> readSignal() {
-                return Future.succeededFuture(QueueSignal.RUN);
+            public KeelIssueRecorder<QueueManageIssueRecord> getIssueRecorder() {
+                return issueRecorder;
+            }
+
+            @Override
+            public Future<KeelQueueSignal> readSignal() {
+                return Future.succeededFuture(KeelQueueSignal.RUN);
             }
         };
     }
@@ -34,9 +38,9 @@ public class TestQueue extends KeelQueue {
         return new QueueWorkerPoolManager(3);
     }
 
-    @Nonnull
+
     @Override
-    protected KeelIssueRecorder<QueueManageIssueRecord> buildIssueRecorder() {
-        return KeelIssueRecordCenter.outputCenter().generateIssueRecorder(QueueManageIssueRecord.TopicQueue, QueueManageIssueRecord::new);
+    protected KeelIssueRecordCenter getIssueRecordCenter() {
+        return KeelIssueRecordCenter.outputCenter();
     }
 }

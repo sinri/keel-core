@@ -16,12 +16,16 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  */
 public class AsyncStdoutAdapter implements KeelIssueRecorderAdapter {
     private static final AsyncStdoutAdapter instance = new AsyncStdoutAdapter();
-    private final KeelIntravenous<KeelIssueRecord<?>> intravenous;
+    private final KeelIntravenous<WrappedIssueRecord> intravenous;
     private volatile boolean stopped = false;
     private volatile boolean closed = true;
 
     private AsyncStdoutAdapter() {
-        this.intravenous = new KeelIntravenous<>(keelIssueRecords -> Keel.asyncCallIteratively(keelIssueRecords, this::writeOneIssueRecord));
+        this.intravenous = new KeelIntravenous<>(items -> {
+            return Keel.asyncCallIteratively(items, item -> {
+                return this.writeOneIssueRecord(item.topic, item.issueRecord);
+            });
+        });
         this.intravenous.start();
         closed = false;
     }
@@ -30,8 +34,8 @@ public class AsyncStdoutAdapter implements KeelIssueRecorderAdapter {
         return instance;
     }
 
-    private Future<Void> writeOneIssueRecord(@Nonnull KeelIssueRecord<?> issueRecord) {
-        String s = this.issueRecordRender().renderIssueRecord(issueRecord);
+    private Future<Void> writeOneIssueRecord(@Nonnull String topic, @Nonnull KeelIssueRecord<?> issueRecord) {
+        String s = this.issueRecordRender().renderIssueRecord(topic, issueRecord);
         System.out.println(s);
         return Future.succeededFuture();
     }
@@ -44,7 +48,7 @@ public class AsyncStdoutAdapter implements KeelIssueRecorderAdapter {
     @Override
     public void record(@Nonnull String topic, @Nullable KeelIssueRecord<?> issueRecord) {
         if (issueRecord != null) {
-            this.intravenous.add(issueRecord);
+            this.intravenous.add(new WrappedIssueRecord(topic, issueRecord));
         }
     }
 
@@ -70,5 +74,18 @@ public class AsyncStdoutAdapter implements KeelIssueRecorderAdapter {
     @Override
     public boolean isClosed() {
         return closed;
+    }
+
+    /**
+     * @since 4.0.0
+     */
+    private static class WrappedIssueRecord {
+        public final KeelIssueRecord<?> issueRecord;
+        public final String topic;
+
+        private WrappedIssueRecord(String topic, KeelIssueRecord<?> issueRecord) {
+            this.issueRecord = issueRecord;
+            this.topic = topic;
+        }
     }
 }

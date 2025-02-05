@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 
 public final class BetIssueRecord extends KeelIssueRecord<BetIssueRecord> {
     public BetIssueRecord(@Nonnull String caller) {
-        super("Bet");
+        super();
         this.classification("Bet", caller);
     }
 

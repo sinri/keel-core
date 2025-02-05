@@ -16,7 +16,6 @@ public interface KeelIssueRecorderAdapter {
 
     void record(@Nonnull String topic, @Nullable KeelIssueRecord<?> issueRecord);
 
-
     void close(@Nonnull Promise<Void> promise);
 
 

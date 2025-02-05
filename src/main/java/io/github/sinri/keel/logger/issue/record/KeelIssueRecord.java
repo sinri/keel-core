@@ -17,16 +17,11 @@ import java.util.List;
 public abstract class KeelIssueRecord<T> implements KeelIssueRecordCore<T>, IssueRecordMessageMixin<T>, IssueRecordContextMixin<T> {
     private final @Nonnull JsonObject attributes;
     private final @Nonnull List<String> classification;
-    /**
-     * @since 4.0.0
-     */
-    private final @Nonnull String topic;
     private long timestamp;
     private @Nonnull KeelLogLevel level;
     private @Nullable Throwable exception;
 
-    public KeelIssueRecord(@Nonnull String topic) {
-        this.topic = topic;
+    public KeelIssueRecord() {
         this.timestamp = System.currentTimeMillis();
         this.attributes = new JsonObject();
         this.level = KeelLogLevel.INFO;
@@ -37,18 +32,11 @@ public abstract class KeelIssueRecord<T> implements KeelIssueRecordCore<T>, Issu
      * @since 4.0.0 for KeelEventLog
      */
     protected KeelIssueRecord(@Nonnull KeelIssueRecord<?> baseIssueRecord) {
-        this.topic = baseIssueRecord.topic;
         this.attributes = baseIssueRecord.attributes().cloneAsJsonObject();
         this.classification = baseIssueRecord.classification();
         this.timestamp = baseIssueRecord.timestamp();
         this.level = baseIssueRecord.level();
         this.exception = baseIssueRecord.exception();
-    }
-
-    @Nonnull
-    @Override
-    final public String topic() {
-        return topic;
     }
 
     @Override

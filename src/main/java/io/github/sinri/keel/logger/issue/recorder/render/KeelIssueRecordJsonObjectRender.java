@@ -25,7 +25,7 @@ public class KeelIssueRecordJsonObjectRender implements KeelIssueRecordRender<Js
 
     @Nonnull
     @Override
-    public JsonObject renderIssueRecord(@Nonnull KeelIssueRecord<?> issueRecord) {
+    public JsonObject renderIssueRecord(@Nonnull String topic, @Nonnull KeelIssueRecord<?> issueRecord) {
         // by default, the topic is neglected for Aliyun SLS eco
 
         JsonObject x = new JsonObject();

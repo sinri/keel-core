@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 public class AlefIssueRecord extends KeelIssueRecord<AlefIssueRecord> {
 
     public AlefIssueRecord() {
-        super("alef");
+        super();
     }
 
     @Nonnull

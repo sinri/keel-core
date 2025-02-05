@@ -1,6 +1,8 @@
 package io.github.sinri.keel.core.servant.queue;
 
 import io.github.sinri.keel.core.verticles.KeelVerticleImplWithIssueRecorder;
+import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
+import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -20,14 +22,28 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 public abstract class KeelQueue extends KeelVerticleImplWithIssueRecorder<QueueManageIssueRecord> {
     private KeelQueueNextTaskSeeker nextTaskSeeker;
     private QueueWorkerPoolManager queueWorkerPoolManager;
-    private SignalReader signalReader;
-    private QueueStatus queueStatus = QueueStatus.INIT;
+    private KeelQueueSignalReader signalReader;
+    private KeelQueueStatus queueStatus = KeelQueueStatus.INIT;
 
-    public QueueStatus getQueueStatus() {
+    /**
+     * @since 4.0.0
+     */
+    protected abstract KeelIssueRecordCenter getIssueRecordCenter();
+
+    /**
+     * @since 4.0.0 Finalize this implementation.
+     */
+    @Nonnull
+    @Override
+    protected final KeelIssueRecorder<QueueManageIssueRecord> buildIssueRecorder() {
+        return getIssueRecordCenter().generateIssueRecorder(QueueManageIssueRecord.TopicQueue, QueueManageIssueRecord::new);
+    }
+
+    public KeelQueueStatus getQueueStatus() {
         return queueStatus;
     }
 
-    protected KeelQueue setQueueStatus(QueueStatus queueStatus) {
+    protected KeelQueue setQueueStatus(KeelQueueStatus queueStatus) {
         this.queueStatus = queueStatus;
         return this;
     }
@@ -52,11 +68,11 @@ public abstract class KeelQueue extends KeelVerticleImplWithIssueRecorder<QueueM
      *
      * @since 3.0.1
      */
-    abstract protected @Nonnull SignalReader getSignalReader();
+    abstract protected @Nonnull KeelQueueSignalReader getSignalReader();
 
     @Override
     protected void startAsKeelVerticle(Promise<Void> startPromise) {
-        this.queueStatus = QueueStatus.RUNNING;
+        this.queueStatus = KeelQueueStatus.RUNNING;
         routine();
         startPromise.complete();
     }
@@ -73,16 +89,16 @@ public abstract class KeelQueue extends KeelVerticleImplWithIssueRecorder<QueueM
                 })
                 .recover(throwable -> {
                     getIssueRecorder().debug(r -> r.message("AS IS. Failed to read signal: " + throwable.getMessage()));
-                    if (getQueueStatus() == QueueStatus.STOPPED) {
-                        return Future.succeededFuture(QueueSignal.STOP);
+                    if (getQueueStatus() == KeelQueueStatus.STOPPED) {
+                        return Future.succeededFuture(KeelQueueSignal.STOP);
                     } else {
-                        return Future.succeededFuture(QueueSignal.RUN);
+                        return Future.succeededFuture(KeelQueueSignal.RUN);
                     }
                 })
                 .compose(signal -> {
-                    if (signal == QueueSignal.STOP) {
+                    if (signal == KeelQueueSignal.STOP) {
                         return this.whenSignalStopCame();
-                    } else if (signal == QueueSignal.RUN) {
+                    } else if (signal == KeelQueueSignal.RUN) {
                         return this.whenSignalRunCame(nextTaskSeeker);
                     } else {
                         return Future.failedFuture("Unknown Signal");
@@ -98,15 +114,15 @@ public abstract class KeelQueue extends KeelVerticleImplWithIssueRecorder<QueueM
     }
 
     private Future<Void> whenSignalStopCame() {
-        if (getQueueStatus() == QueueStatus.RUNNING) {
-            this.queueStatus = QueueStatus.STOPPED;
+        if (getQueueStatus() == KeelQueueStatus.RUNNING) {
+            this.queueStatus = KeelQueueStatus.STOPPED;
             getIssueRecorder().notice(r -> r.message("Signal Stop Received"));
         }
         return Future.succeededFuture();
     }
 
     private Future<Void> whenSignalRunCame(KeelQueueNextTaskSeeker nextTaskSeeker) {
-        this.queueStatus = QueueStatus.RUNNING;
+        this.queueStatus = KeelQueueStatus.RUNNING;
 
         return Keel.asyncCallRepeatedly(routineResult -> {
                     if (this.queueWorkerPoolManager.isBusy()) {
@@ -158,22 +174,8 @@ public abstract class KeelQueue extends KeelVerticleImplWithIssueRecorder<QueueM
 
     @Override
     protected void stopAsKeelVerticle(Promise<Void> stopPromise) {
-        this.queueStatus = QueueStatus.STOPPED;
+        this.queueStatus = KeelQueueStatus.STOPPED;
         stopPromise.complete();
     }
 
-    public enum QueueSignal {
-        RUN,
-        STOP
-    }
-
-    public enum QueueStatus {
-        INIT,
-        RUNNING,
-        STOPPED
-    }
-
-    public interface SignalReader {
-        Future<KeelQueue.QueueSignal> readSignal();
-    }
 }

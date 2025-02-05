@@ -16,13 +16,16 @@ import java.util.concurrent.atomic.AtomicReference;
  * @since 1.7
  */
 abstract public class AbstractStatement implements AnyStatement {
+    protected static @Nonnull String SQL_COMPONENT_SEPARATOR = " ";//"\n";
     /**
      * @since 3.2.0 replace original SQL Audit Logger
      */
-    protected static @Nonnull KeelIssueRecorder<MySQLAuditIssueRecord> sqlAuditIssueRecorder
-            = KeelIssueRecordCenter.silentCenter()
-            .generateIssueRecorder(MySQLAuditIssueRecord.AttributeMysqlAudit, MySQLAuditIssueRecord::new);
-    protected static @Nonnull String SQL_COMPONENT_SEPARATOR = " ";//"\n";
+    protected static @Nonnull KeelIssueRecorder<MySQLAuditIssueRecord> sqlAuditIssueRecorder;
+
+    static {
+        sqlAuditIssueRecorder = buildSqlAuditIssueRecorder(KeelIssueRecordCenter.silentCenter());
+    }
+
     protected final @Nonnull String statement_uuid;
     private @Nonnull String remarkAsComment = "";
 
@@ -35,8 +38,21 @@ abstract public class AbstractStatement implements AnyStatement {
         return sqlAuditIssueRecorder;
     }
 
-    public static void setSqlAuditIssueRecorder(@Nonnull KeelIssueRecorder<MySQLAuditIssueRecord> sqlAuditIssueRecorder) {
-        AbstractStatement.sqlAuditIssueRecorder = sqlAuditIssueRecorder;
+    /**
+     * @since 4.0.0
+     */
+    private static KeelIssueRecorder<MySQLAuditIssueRecord> buildSqlAuditIssueRecorder(@Nonnull KeelIssueRecordCenter issueRecordCenter) {
+        return issueRecordCenter.generateIssueRecorder(MySQLAuditIssueRecord.AttributeMysqlAudit, MySQLAuditIssueRecord::new);
+    }
+
+    /**
+     * Change the SQL Audit Issue Recorder.
+     *
+     * @param issueRecordCenter with which issue record center the sql audit sent to.
+     * @since 4.0.0
+     */
+    public static synchronized void reloadSqlAuditIssueRecording(@Nonnull KeelIssueRecordCenter issueRecordCenter) {
+        sqlAuditIssueRecorder = buildSqlAuditIssueRecorder(issueRecordCenter);
     }
 
     public static void setSqlComponentSeparator(@Nonnull String sqlComponentSeparator) {
@@ -94,7 +110,7 @@ abstract public class AbstractStatement implements AnyStatement {
         public static final String KeyTotalFetchedRows = "TotalFetchedRows";
 
         public MySQLAuditIssueRecord() {
-            super(TopicMysqlAudit);
+            super();
         }
 
         @Nonnull
@@ -137,4 +153,6 @@ abstract public class AbstractStatement implements AnyStatement {
             return this;
         }
     }
+
+
 }

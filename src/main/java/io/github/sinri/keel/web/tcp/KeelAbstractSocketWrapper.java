@@ -32,8 +32,9 @@ abstract public class KeelAbstractSocketWrapper {
         this.socketID = socketID;
         this.socket = socket;
 
-        KeelIssueRecorder<SocketIssueRecord> silentIssueRecorder = KeelIssueRecordCenter.silentCenter().generateIssueRecorder("silent", () -> null);
-        this.setIssueRecorder(silentIssueRecorder);
+        //KeelIssueRecorder<SocketIssueRecord> silentIssueRecorder = KeelIssueRecordCenter.silentCenter().generateIssueRecorder("silent", () -> null);
+        //this.setIssueRecorder(silentIssueRecorder);
+        this.buildIssueRecorder();
 
         this.funnel = new KeelFunnel();
         this.funnel.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));
@@ -85,6 +86,15 @@ abstract public class KeelAbstractSocketWrapper {
     }
 
     /**
+     * By default, it is silent.
+     *
+     * @since 4.0.0
+     */
+    protected KeelIssueRecordCenter getIssueRecordCenter() {
+        return KeelIssueRecordCenter.silentCenter();
+    }
+
+    /**
      * @since 3.2.0
      */
     public KeelIssueRecorder<SocketIssueRecord> getIssueRecorder() {
@@ -92,12 +102,11 @@ abstract public class KeelAbstractSocketWrapper {
     }
 
     /**
-     * @since 3.2.0
+     * @since 4.0.0
      */
-    public KeelAbstractSocketWrapper setIssueRecorder(KeelIssueRecorder<SocketIssueRecord> issueRecorder) {
-        this.issueRecorder = issueRecorder;
-        this.issueRecorder.setRecordFormatter(r -> r.classification("socket_id:" + socketID));
-        return this;
+    private void buildIssueRecorder() {
+        issueRecorder = getIssueRecordCenter().generateIssueRecorder(SocketIssueRecord.TopicTcpSocket, SocketIssueRecord::new);
+        issueRecorder.setRecordFormatter(r -> r.classification("socket_id:" + socketID));
     }
 
     /**

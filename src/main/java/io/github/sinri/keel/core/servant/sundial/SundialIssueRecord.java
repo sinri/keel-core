@@ -13,7 +13,7 @@ public class SundialIssueRecord extends KeelIssueRecord<SundialIssueRecord> {
     public static final String TopicSundial = "Sundial";
 
     public SundialIssueRecord() {
-        super(TopicSundial);
+        super();
         this.classification("Scheduler");
     }
 
@@ -22,7 +22,7 @@ public class SundialIssueRecord extends KeelIssueRecord<SundialIssueRecord> {
             @Nonnull Calendar now,
             @Nonnull String deploymentId
     ) {
-        super(TopicSundial);
+        super();
         this.classification("Plan");
         this.context("plan", sundialPlan.key())
                 .context("cron", sundialPlan.cronExpression().getRawCronExpression())

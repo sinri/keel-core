@@ -8,7 +8,7 @@ public final class QueueManageIssueRecord extends KeelIssueRecord<QueueManageIss
     public static final String TopicQueue = "Queue";
 
     public QueueManageIssueRecord() {
-        super(TopicQueue);
+        super();
         this.classification("manage");
     }
 

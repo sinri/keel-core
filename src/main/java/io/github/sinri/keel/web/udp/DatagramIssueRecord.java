@@ -15,7 +15,7 @@ public final class DatagramIssueRecord extends KeelIssueRecord<DatagramIssueReco
     public static final String TopicUdpDatagram = "UdpDatagram";
 
     public DatagramIssueRecord() {
-        super(TopicUdpDatagram);
+        super();
     }
 
     @Nonnull

@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.servant.queue;
 
+import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
 
 import java.util.function.Supplier;
@@ -9,6 +10,10 @@ import java.util.function.Supplier;
  * @since 2.8 extends Supplier{Future{KeelQueueTask}}
  */
 public interface KeelQueueNextTaskSeeker extends Supplier<Future<KeelQueueTask>> {
+    /**
+     * @since 4.0.0
+     */
+    KeelIssueRecorder<QueueManageIssueRecord> getIssueRecorder();
 
     /**
      * 找出一个task且保证其完成锁定。

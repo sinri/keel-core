@@ -11,8 +11,11 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.ext.web.client.WebClient;
+import io.vertx.ext.web.client.WebClientOptions;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -138,14 +141,31 @@ public final class KeelInstance implements KeelHelpersInterface, KeelClusterKit,
     }
 
     /**
+     * @since 4.0.1
+     */
+    public <T> Future<T> useWebClient(WebClientOptions webClientOptions, Function<WebClient, Future<T>> usage) {
+        WebClient webClient = WebClient.create(getVertx(), webClientOptions);
+        return Future.succeededFuture()
+                .compose(v -> usage.apply(webClient))
+                .onComplete(ar -> webClient.close());
+    }
+
+    /**
      * @since 3.2.18
      * @since 3.2.19 Fix to avoid cross-verticle loss.
      */
     public <T> Future<T> useWebClient(Function<WebClient, Future<T>> usage) {
-        WebClient webClient = WebClient.create(getVertx());
+        return useWebClient(new WebClientOptions(), usage);
+    }
+
+    /**
+     * @since 4.0.1
+     */
+    public <T> Future<T> useHttpClient(HttpClientOptions httpClientOptions, Function<HttpClient, Future<T>> usage) {
+        HttpClient httpClient = Keel.getVertx().createHttpClient(httpClientOptions);
         return Future.succeededFuture()
-                .compose(v -> usage.apply(webClient))
-                .onComplete(ar -> webClient.close());
+                .compose(v -> usage.apply(httpClient))
+                .onComplete(ar -> httpClient.close());
     }
 
     public Future<Void> gracefullyClose(@Nonnull io.vertx.core.Handler<Promise<Void>> promiseHandler) {

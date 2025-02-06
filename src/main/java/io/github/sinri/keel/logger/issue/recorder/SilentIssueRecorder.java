@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 /**
  * @since 4.0.0
  */
-public final class SilentIssueRecorder<T extends KeelIssueRecord<?>> implements KeelIssueRecorder<T> {
+public final class SilentIssueRecorder<T extends KeelIssueRecord<T>> implements KeelIssueRecorder<T> {
     private final List<KeelIssueRecorder<T>> bypassIssueRecorders = new ArrayList<>();
 
     @Nonnull

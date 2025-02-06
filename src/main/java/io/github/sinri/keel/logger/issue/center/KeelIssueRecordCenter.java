@@ -54,7 +54,7 @@ public interface KeelIssueRecordCenter {
      * @param issueRecordBuilder Sample for silent: {@code Supplier<T> issueRecordBuilder= () -> null;}
      */
     @Nonnull
-    default <T extends KeelIssueRecord<?>> KeelIssueRecorder<T> generateIssueRecorder(@Nonnull String topic, @Nonnull Supplier<T> issueRecordBuilder) {
+    default <T extends KeelIssueRecord<T>> KeelIssueRecorder<T> generateIssueRecorder(@Nonnull String topic, @Nonnull Supplier<T> issueRecordBuilder) {
         return KeelIssueRecorder.build(this, issueRecordBuilder, topic);
     }
 

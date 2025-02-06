@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 /**
  * @since 3.1.10
  */
-class KeelIssueRecorderImpl<T extends KeelIssueRecord<?>> implements KeelIssueRecorder<T> {
+class KeelIssueRecorderImpl<T extends KeelIssueRecord<T>> implements KeelIssueRecorder<T> {
     protected final @Nonnull Supplier<T> issueRecordBuilder;
     private final @Nonnull KeelIssueRecordCenter issueRecordCenter;
     private final @Nonnull String topic;

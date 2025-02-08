@@ -244,23 +244,6 @@ public class CompareCondition implements MySQLCondition {
     }
 
     /**
-     * A macro for quick coding
-     *
-     * @param fieldName field name, would not be quoted
-     * @param value     string or number, would be quoted
-     * @return this class instance
-     * @since 1.4
-     * @deprecated use expressionEqualsLiteralValue or expressionEqualsNumericValue
-     */
-    @Deprecated(since = "3.1.8")
-    public CompareCondition filedEqualsValue(@Nonnull String fieldName, @Nullable Object value) {
-        if (value == null) {
-            return this.isNull().compareExpression(fieldName);
-        }
-        return this.operator(OP_EQ).compareExpression(fieldName).againstValue(value);
-    }
-
-    /**
      * @since 3.1.8
      */
     public CompareCondition expressionEqualsLiteralValue(@Nonnull String expression, @Nullable Object value) {

@@ -34,38 +34,42 @@ class InstantRunUnitWrapper {
         long startTime = System.currentTimeMillis();
 
         return Future.succeededFuture(isSkip())
-                .compose(toSkip -> {
-                    if (toSkip) {
-                        long endTime = System.currentTimeMillis();
-                        this.testUnitResult.setSpentTime(endTime - startTime);
-                        this.testUnitResult.declareSkipped();
-                        return Future.succeededFuture();
-                    } else {
-                        return Future.succeededFuture()
-                                .compose(vv -> {
-//                                    testInstance.getLogger().setDynamicEventLogFormatter(keelEventLog -> {
-//                                        keelEventLog.classification(this.getName());
-//                                    });
-                                    try {
-                                        return (Future<?>) this.method.invoke(testInstance);
-                                    } catch (Throwable e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                })
-                                .compose(passed -> {
-                                    long endTime = System.currentTimeMillis();
-                                    this.testUnitResult.setSpentTime(endTime - startTime).declareDone();
-                                    return Future.succeededFuture();
-                                }, throwable -> {
-                                    long endTime = System.currentTimeMillis();
-                                    this.testUnitResult.setSpentTime(endTime - startTime).declareFailed(throwable);
-                                    return Future.succeededFuture();
-                                });
-                    }
-                })
-                .compose(v -> {
-                    return Future.succeededFuture(testUnitResult);
-                });
+                     .compose(toSkip -> {
+                         if (toSkip) {
+                             long endTime = System.currentTimeMillis();
+                             this.testUnitResult.setSpentTime(endTime - startTime);
+                             this.testUnitResult.declareSkipped();
+                             return Future.succeededFuture();
+                         } else {
+                             return Future.succeededFuture()
+                                          .compose(vv -> {
+                                              //                                    testInstance.getLogger()
+                                              //                                    .setDynamicEventLogFormatter
+                                              //                                    (keelEventLog -> {
+                                              //                                        keelEventLog.classification
+                                              //                                        (this.getName());
+                                              //                                    });
+                                              try {
+                                                  return (Future<?>) this.method.invoke(testInstance);
+                                              } catch (Throwable e) {
+                                                  throw new RuntimeException(e);
+                                              }
+                                          })
+                                          .compose(passed -> {
+                                              long endTime = System.currentTimeMillis();
+                                              this.testUnitResult.setSpentTime(endTime - startTime).declareDone();
+                                              return Future.succeededFuture();
+                                          }, throwable -> {
+                                              long endTime = System.currentTimeMillis();
+                                              this.testUnitResult.setSpentTime(endTime - startTime)
+                                                                 .declareFailed(throwable);
+                                              return Future.succeededFuture();
+                                          });
+                         }
+                     })
+                     .compose(v -> {
+                         return Future.succeededFuture(testUnitResult);
+                     });
     }
 
     public String getName() {

@@ -1,6 +1,7 @@
 package io.github.sinri.keel.core.helper;
 
-import io.vertx.ext.auth.VertxContextPRNG;
+
+import io.vertx.ext.auth.prng.VertxContextPRNG;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;

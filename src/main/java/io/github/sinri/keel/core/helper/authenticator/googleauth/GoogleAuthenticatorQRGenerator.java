@@ -79,7 +79,7 @@ public final class GoogleAuthenticatorQRGenerator {
      * @see <a href="https://code.google.com/p/google-authenticator/wiki/KeyUriFormat">Google Authenticator - KeyUriFormat</a>
      */
     private static String formatLabel(String issuer, String accountName) {
-        if (accountName == null || accountName.trim().length() == 0) {
+        if (accountName == null || accountName.trim().isEmpty()) {
             throw new IllegalArgumentException("Account name must not be empty.");
         }
 

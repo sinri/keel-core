@@ -26,7 +26,7 @@ public abstract class KeelVerticleImplPure extends AbstractVerticle implements K
     }
 
     @Override
-    public final void stop(Promise<Void> stopPromise) throws Exception {
+    public final void stop(Promise<Void> stopPromise) {
         stop();
         stopAsKeelVerticle(stopPromise);
     }

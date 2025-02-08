@@ -1,6 +1,9 @@
 package io.github.sinri.keel.integration.poi.excel;
 
 import io.github.sinri.keel.core.ValueBox;
+import io.vertx.core.Closeable;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -13,13 +16,14 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * @since 3.0.13
  * @since 3.0.18 Finished Technical Preview.
+ * @since 4.0.2 implements `io.vertx.core.Closeable`, remove `java.lang.AutoCloseable`.
  */
-public class KeelSheets implements AutoCloseable {
-
+public class KeelSheets implements Closeable {
     /**
      * @since 3.1.3
      */
@@ -30,25 +34,24 @@ public class KeelSheets implements AutoCloseable {
      * @param workbook The generated POI Workbook Implementation.
      * @since 3.0.20
      */
-    public KeelSheets(@Nonnull Workbook workbook) {
+    protected KeelSheets(@Nonnull Workbook workbook) {
         this(workbook, false);
     }
 
     /**
      * Create a new Sheets.
      */
-    public KeelSheets() {
+    protected KeelSheets() {
         this(null, false);
     }
 
     /**
-     * Open an existed workbook or create.
-     * Not use stream-write mode by default.
+     * Open an existed workbook or create. Not use stream-write mode by default.
      *
      * @param workbook if null, create a new Sheets; otherwise, use it.
      * @since 3.1.3
      */
-    public KeelSheets(@Nullable Workbook workbook, boolean withFormulaEvaluator) {
+    protected KeelSheets(@Nullable Workbook workbook, boolean withFormulaEvaluator) {
         autoWorkbook = Objects.requireNonNullElseGet(workbook, XSSFWorkbook::new);
         if (withFormulaEvaluator) {
             formulaEvaluator = autoWorkbook.getCreationHelper().createFormulaEvaluator();
@@ -58,109 +61,98 @@ public class KeelSheets implements AutoCloseable {
     }
 
     /**
-     * @since 3.2.11
+     * @since 4.0.2
      */
-    public static KeelSheets openFile(@Nonnull FileAccessOptions fileAccessOptions) {
-        try {
-            if (fileAccessOptions.isUseStreamReading()) {
-
-                if (fileAccessOptions.getInputStream() != null) {
-                    return new KeelSheets(fileAccessOptions.getStreamingReaderBuilder()
-                            .open(fileAccessOptions.getInputStream())
-                    );
-                } else if (fileAccessOptions.getFile() != null) {
-                    return new KeelSheets(fileAccessOptions.getStreamingReaderBuilder()
-                            .open(fileAccessOptions.getFile())
-                    );
-                }
-            } else {
-                if (fileAccessOptions.getInputStream() != null) {
-                    return new KeelSheets(WorkbookFactory.create(
-                            fileAccessOptions.getFile()),
-                            fileAccessOptions.isWithFormulaEvaluator()
-                    );
-                } else if (fileAccessOptions.getFile() != null) {
-                    return new KeelSheets(WorkbookFactory.create(
-                            fileAccessOptions.getFile()),
-                            fileAccessOptions.isWithFormulaEvaluator()
-                    );
-                }
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        throw new RuntimeException("No input source!");
+    public static <T> Future<T> useSheets(@Nonnull SheetsOpenOptions sheetsOpenOptions,
+                                          @Nonnull Function<KeelSheets, Future<T>> usage) {
+        return Future.succeededFuture()
+                     .compose(v -> {
+                         try {
+                             KeelSheets keelSheets;
+                             if (sheetsOpenOptions.isUseHugeXlsxStreamReading()) {
+                                 if (sheetsOpenOptions.getInputStream() != null) {
+                                     keelSheets = new KeelSheets(sheetsOpenOptions.getHugeXlsxStreamingReaderBuilder()
+                                                                                  .open(sheetsOpenOptions.getInputStream())
+                                     );
+                                 } else if (sheetsOpenOptions.getFile() != null) {
+                                     keelSheets = new KeelSheets(sheetsOpenOptions.getHugeXlsxStreamingReaderBuilder()
+                                                                                  .open(sheetsOpenOptions.getFile())
+                                     );
+                                 } else {
+                                     throw new IOException("No input source!");
+                                 }
+                             } else {
+                                 InputStream inputStream = sheetsOpenOptions.getInputStream();
+                                 if (inputStream != null) {
+                                     Workbook workbook;
+                                     Boolean useXlsx = sheetsOpenOptions.isUseXlsx();
+                                     if (useXlsx == null) {
+                                         try {
+                                             workbook = new XSSFWorkbook(inputStream);
+                                         } catch (IOException e) {
+                                             try {
+                                                 workbook = new HSSFWorkbook(inputStream);
+                                             } catch (IOException ex) {
+                                                 throw new RuntimeException(ex);
+                                             }
+                                         }
+                                     } else {
+                                         if (useXlsx) {
+                                             workbook = new XSSFWorkbook(inputStream);
+                                         } else {
+                                             workbook = new HSSFWorkbook(inputStream);
+                                         }
+                                     }
+                                     keelSheets = new KeelSheets(workbook, sheetsOpenOptions.isWithFormulaEvaluator());
+                                 } else if (sheetsOpenOptions.getFile() != null) {
+                                     keelSheets = new KeelSheets(
+                                             WorkbookFactory.create(sheetsOpenOptions.getFile()),
+                                             sheetsOpenOptions.isWithFormulaEvaluator()
+                                     );
+                                 } else {
+                                     throw new IOException("No input source!!");
+                                 }
+                             }
+                             return usage.apply(keelSheets)
+                                         .andThen(ar -> {
+                                             Promise<Void> promise = Promise.promise();
+                                             keelSheets.close(promise);
+                                         });
+                         } catch (IOException e) {
+                             return Future.failedFuture(e);
+                         }
+                     });
     }
 
     /**
-     * @since 3.0.20
+     * @since 4.0.2
      */
-    @Deprecated(since = "3.2.11")
-    public static KeelSheets factory(@Nonnull String file) {
-        return openFile(new FileAccessOptions()
-                .setFile(file)
-                .setWithFormulaEvaluator(false)
-        );
-    }
+    public static <T> Future<T> useSheets(@Nonnull SheetsCreateOptions sheetsCreateOptions,
+                                          @Nonnull Function<KeelSheets, Future<T>> usage) {
+        return Future.succeededFuture()
+                     .compose(v -> {
+                         KeelSheets keelSheets;
+                         if (sheetsCreateOptions.isUseXlsx()) {
+                             keelSheets = KeelSheets.autoGenerateXLSX(sheetsCreateOptions.isWithFormulaEvaluator());
+                             if (sheetsCreateOptions.isUseStreamWriting()) {
+                                 keelSheets.useStreamWrite();
+                             }
+                         } else {
+                             keelSheets = KeelSheets.autoGenerateXLS(sheetsCreateOptions.isWithFormulaEvaluator());
+                         }
 
-    /**
-     * @since 3.1.4
-     */
-    @Deprecated(since = "3.2.11")
-    public static KeelSheets factory(@Nonnull String file, boolean withFormulaEvaluator) {
-        return openFile(new FileAccessOptions()
-                .setFile(file)
-                .setWithFormulaEvaluator(withFormulaEvaluator)
-        );
-    }
-
-    /**
-     * @since 3.0.20
-     */
-    @Deprecated(since = "3.2.11")
-    public static KeelSheets factory(@Nonnull File file) {
-        return openFile(new FileAccessOptions()
-                .setFile(file)
-                .setWithFormulaEvaluator(false)
-        );
-    }
-
-    /**
-     * @since 3.1.4
-     */
-    @Deprecated(since = "3.2.11")
-    public static KeelSheets factory(@Nonnull File file, boolean withFormulaEvaluator) {
-        return openFile(new FileAccessOptions()
-                .setFile(file)
-                .setWithFormulaEvaluator(withFormulaEvaluator)
-        );
-    }
-
-    /**
-     * @since 3.0.20
-     */
-    @Deprecated(since = "3.2.11")
-    public static KeelSheets factory(@Nonnull InputStream inputStream) {
-        return openFile(new FileAccessOptions()
-                .setInputStream(inputStream)
-                .setWithFormulaEvaluator(false)
-        );
-    }
-
-    /**
-     * @since 3.1.4
-     */
-    @Deprecated(since = "3.2.11")
-    public static KeelSheets factory(@Nonnull InputStream inputStream, boolean withFormulaEvaluator) {
-        return openFile(new FileAccessOptions()
-                .setInputStream(inputStream)
-                .setWithFormulaEvaluator(withFormulaEvaluator)
-        );
+                         return usage.apply(keelSheets)
+                                     .andThen(ar -> {
+                                         Promise<Void> promise = Promise.promise();
+                                         keelSheets.close(promise);
+                                     });
+                     });
     }
 
     /**
      * @since 3.0.20 The great DAN and HONG discovered an issue with POI Factory Mode.
      */
+    @Deprecated(since = "4.0.2", forRemoval = true)
     public static KeelSheets autoGenerate(@Nonnull InputStream inputStream) {
         return autoGenerate(inputStream, false);
     }
@@ -168,6 +160,7 @@ public class KeelSheets implements AutoCloseable {
     /**
      * @since 3.1.4
      */
+    @Deprecated(since = "4.0.2", forRemoval = true)
     public static KeelSheets autoGenerate(@Nonnull InputStream inputStream, boolean withFormulaEvaluator) {
         Workbook workbook;
         try {
@@ -187,15 +180,15 @@ public class KeelSheets implements AutoCloseable {
     /**
      * @since 3.1.1
      */
+    @Deprecated(since = "4.0.2", forRemoval = true)
     public static KeelSheets autoGenerateXLSX() {
         return new KeelSheets(new XSSFWorkbook());
     }
 
     /**
-     * @param withFormulaEvaluator
-     * @return
      * @since 3.1.4
      */
+    @Deprecated(since = "4.0.2", forRemoval = true)
     public static KeelSheets autoGenerateXLSX(boolean withFormulaEvaluator) {
         return new KeelSheets(new XSSFWorkbook(), withFormulaEvaluator);
     }
@@ -203,20 +196,23 @@ public class KeelSheets implements AutoCloseable {
     /**
      * @since 3.1.1
      */
+    @Deprecated(since = "4.0.2", forRemoval = true)
     public static KeelSheets autoGenerateXLS() {
         return new KeelSheets(new HSSFWorkbook());
     }
 
     /**
-     * @param withFormulaEvaluator
-     * @return
      * @since 3.1.4
      */
+    @Deprecated(since = "4.0.2", forRemoval = true)
     public static KeelSheets autoGenerateXLS(boolean withFormulaEvaluator) {
         return new KeelSheets(new HSSFWorkbook(), withFormulaEvaluator);
     }
 
-    public KeelSheets useStreamWrite() {
+    /**
+     * @since 4.0.2 became private
+     */
+    private KeelSheets useStreamWrite() {
         if (autoWorkbook instanceof XSSFWorkbook) {
             autoWorkbook = new SXSSFWorkbook((XSSFWorkbook) autoWorkbook);
         } else {
@@ -301,12 +297,17 @@ public class KeelSheets implements AutoCloseable {
         save(new File(fileName));
     }
 
+    /**
+     * @param completion the promise to signal when close has completed
+     * @since 4.0.2
+     */
     @Override
-    public void close() {
+    public void close(Promise<Void> completion) {
         try {
             autoWorkbook.close();
+            completion.complete();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            completion.fail(e);
         }
     }
 }

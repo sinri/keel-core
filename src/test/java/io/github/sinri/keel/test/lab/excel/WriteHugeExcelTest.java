@@ -5,6 +5,7 @@ import io.github.sinri.keel.facade.tesuto.instant.InstantRunnerResult;
 import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.poi.excel.KeelSheet;
 import io.github.sinri.keel.integration.poi.excel.KeelSheets;
+import io.github.sinri.keel.integration.poi.excel.SheetsCreateOptions;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
@@ -31,44 +32,44 @@ public class WriteHugeExcelTest extends KeelInstantRunner {
 
     //@TestUnit
     public Future<Void> test1() {
-        KeelSheets sheets = new KeelSheets();
-        KeelSheet sheet = sheets.generateWriterForSheet("Needs");
-        sheet.blockWriteAllRows(List.of(
-                List.of("Name", "Need", "Note"),
-                List.of("Tim", "Apple", "small"),
-                List.of("Steve", "Pear", "round"),
-                List.of("Wake", "Banana", "long")
-        ), 10, 10);
-        sheets.save(file);
-        sheets.close();
-        return Future.succeededFuture();
+        return KeelSheets.useSheets(new SheetsCreateOptions(), sheets -> {
+            KeelSheet sheet = sheets.generateWriterForSheet("Needs");
+            sheet.blockWriteAllRows(List.of(
+                    List.of("Name", "Need", "Note"),
+                    List.of("Tim", "Apple", "small"),
+                    List.of("Steve", "Pear", "round"),
+                    List.of("Wake", "Banana", "long")
+            ), 10, 10);
+            sheets.save(file);
+            return Future.succeededFuture();
+        });
     }
 
     @InstantRunUnit(skip = true)
     public Future<Void> testWriteNotStream() {
-        KeelSheets sheets = new KeelSheets();
-        KeelSheet sheet = sheets.generateWriterForSheet("Huge");
+        return KeelSheets.useSheets(new SheetsCreateOptions(), sheets -> {
+            KeelSheet sheet = sheets.generateWriterForSheet("Huge");
 
-        return write20wRows(sheet)
-                .compose(v -> {
-                    sheets.save(file);
-                    sheets.close();
-                    return Future.succeededFuture();
-                });
+            return write20wRows(sheet)
+                    .compose(v -> {
+                        sheets.save(file);
+                        return Future.succeededFuture();
+                    });
+        });
     }
 
     @InstantRunUnit
     public Future<Void> testWriteStream() {
-        KeelSheets sheets = new KeelSheets();
-        sheets.useStreamWrite();
-        KeelSheet sheet = sheets.generateWriterForSheet("Huge");
+        return KeelSheets.useSheets(new SheetsCreateOptions()
+                .setUseStreamWriting(true), sheets -> {
+            KeelSheet sheet = sheets.generateWriterForSheet("Huge");
 
-        return write20wRows(sheet)
-                .compose(v -> {
-                    sheets.save(file);
-                    sheets.close();
-                    return Future.succeededFuture();
-                });
+            return write20wRows(sheet)
+                    .compose(v -> {
+                        sheets.save(file);
+                        return Future.succeededFuture();
+                    });
+        });
     }
 
 

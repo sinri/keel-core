@@ -60,4 +60,14 @@ public class ValueWrapper<P> {
             return false;
         }
     }
+
+    /**
+     * @since 4.0.2
+     */
+    public boolean isNotAvailable() {
+        if (!isInAlivePeriod()) {
+            return true;
+        }
+        return getValue() == null;
+    }
 }

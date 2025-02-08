@@ -67,7 +67,8 @@ public final class KeelInstance implements KeelHelpersInterface, KeelClusterKit,
     }
 
     public void setVertx(@Nonnull Vertx outsideVertx) {
-        eventLogger.debug(r -> r.message("KeelInstance::setVertx is called with outsideVertx " + outsideVertx + " while currently vertx is " + vertx));
+        eventLogger.debug(r -> r.message("KeelInstance::setVertx is called with outsideVertx " + outsideVertx + " " +
+                "while currently vertx is " + vertx));
         if (vertx == null) {
             vertx = outsideVertx;
         } else {
@@ -97,20 +98,16 @@ public final class KeelInstance implements KeelHelpersInterface, KeelClusterKit,
             return Future.succeededFuture();
         } else {
             return Vertx.builder().with(vertxOptions).withClusterManager(clusterManager).buildClustered()
-                    .compose(x -> {
-                        this.vertx = x;
-                        return Future.succeededFuture();
-                    });
+                        .compose(x -> {
+                            this.vertx = x;
+                            return Future.succeededFuture();
+                        });
         }
     }
 
     public void initializeVertxStandalone(@Nonnull VertxOptions vertxOptions) {
-        // todo: remove legacy code, follow vertx
-        if (vertxOptions.getClusterManager() != null) {
-            vertxOptions.setClusterManager(null);
-        }
         this.clusterManager = null;
-        this.vertx = Vertx.builder().with(vertxOptions).withClusterManager(null).build();
+        this.vertx = Vertx.builder().with(vertxOptions).build();
     }
 
     public boolean isVertxInitialized() {
@@ -122,10 +119,9 @@ public final class KeelInstance implements KeelHelpersInterface, KeelClusterKit,
     }
 
     /**
-     * @since 3.2.0
-     * To acquire an instant logger for those logs without designed topic.
-     * By default, it is print to stdout and only WARNING and above may be recorded.
-     * If you want to debug locally, just get it and reset its visible level.
+     * @since 3.2.0 To acquire an instant logger for those logs without designed topic. By default, it is print to
+     *         stdout and only WARNING and above may be recorded. If you want to debug locally, just get it and reset
+     *         its visible level.
      */
     @Nonnull
     public KeelEventLogger getLogger() {
@@ -146,8 +142,8 @@ public final class KeelInstance implements KeelHelpersInterface, KeelClusterKit,
     public <T> Future<T> useWebClient(WebClientOptions webClientOptions, Function<WebClient, Future<T>> usage) {
         WebClient webClient = WebClient.create(getVertx(), webClientOptions);
         return Future.succeededFuture()
-                .compose(v -> usage.apply(webClient))
-                .onComplete(ar -> webClient.close());
+                     .compose(v -> usage.apply(webClient))
+                     .onComplete(ar -> webClient.close());
     }
 
     /**
@@ -164,15 +160,15 @@ public final class KeelInstance implements KeelHelpersInterface, KeelClusterKit,
     public <T> Future<T> useHttpClient(HttpClientOptions httpClientOptions, Function<HttpClient, Future<T>> usage) {
         HttpClient httpClient = Keel.getVertx().createHttpClient(httpClientOptions);
         return Future.succeededFuture()
-                .compose(v -> usage.apply(httpClient))
-                .onComplete(ar -> httpClient.close());
+                     .compose(v -> usage.apply(httpClient))
+                     .onComplete(ar -> httpClient.close());
     }
 
     public Future<Void> gracefullyClose(@Nonnull io.vertx.core.Handler<Promise<Void>> promiseHandler) {
         Promise<Void> promise = Promise.promise();
         promiseHandler.handle(promise);
         return promise.future()
-                .compose(v -> getVertx().close());
+                      .compose(v -> getVertx().close());
     }
 
     public Future<Void> close() {

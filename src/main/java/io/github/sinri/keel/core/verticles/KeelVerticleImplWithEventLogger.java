@@ -49,7 +49,7 @@ abstract public class KeelVerticleImplWithEventLogger extends AbstractVerticle i
     }
 
     @Override
-    public final void stop(Promise<Void> stopPromise) throws Exception {
+    public final void stop(Promise<Void> stopPromise) {
         stop();
         stopAsKeelVerticle(stopPromise);
     }

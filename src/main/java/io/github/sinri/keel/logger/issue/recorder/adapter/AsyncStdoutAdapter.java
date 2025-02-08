@@ -18,7 +18,7 @@ public class AsyncStdoutAdapter implements KeelIssueRecorderAdapter {
     private static final AsyncStdoutAdapter instance = new AsyncStdoutAdapter();
     private final KeelIntravenous<WrappedIssueRecord> intravenous;
     private volatile boolean stopped = false;
-    private volatile boolean closed = true;
+    private volatile boolean closed;
 
     private AsyncStdoutAdapter() {
         this.intravenous = new KeelIntravenous<>(items -> {

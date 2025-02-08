@@ -5,6 +5,7 @@ import io.github.sinri.keel.facade.tesuto.instant.InstantRunnerResult;
 import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.poi.excel.KeelSheet;
 import io.github.sinri.keel.integration.poi.excel.KeelSheets;
+import io.github.sinri.keel.integration.poi.excel.SheetsOpenOptions;
 import io.github.sinri.keel.integration.poi.excel.entity.KeelSheetMatrix;
 import io.github.sinri.keel.integration.poi.excel.entity.KeelSheetMatrixRow;
 import io.github.sinri.keel.integration.poi.excel.entity.KeelSheetTemplatedMatrix;
@@ -37,7 +38,7 @@ public class ReadTemplatedExcelTest extends KeelInstantRunner {
 
     @InstantRunUnit(skip = true)
     public Future<Void> test1() {
-        try (KeelSheets keelSheets = KeelSheets.factory(file)) {
+        return KeelSheets.useSheets(new SheetsOpenOptions().setFile(file), keelSheets -> {
             KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
             KeelSheetMatrix keelSheetMatrix = keelSheet.blockReadAllRowsToMatrix(1, 6, null);
             keelSheetMatrix.getRawRowList().forEach(row -> {
@@ -46,67 +47,64 @@ public class ReadTemplatedExcelTest extends KeelInstantRunner {
 
             keelSheetMatrix.getRowIterator(KeelSheetMatrixRowExt.class).forEachRemaining(r -> {
                 this.getLogger().info(log -> log.message("record")
-                        .context(c -> c
-                                .put("record_id", r.recordId())
-                                .put("name", r.name())
-                                .put("age", r.age())
-                        )
+                                                .context(c -> c
+                                                        .put("record_id", r.recordId())
+                                                        .put("name", r.name())
+                                                        .put("age", r.age())
+                                                )
                 );
             });
-        }
-        return Future.succeededFuture();
+            return Future.succeededFuture();
+        });
     }
 
     @InstantRunUnit(skip = false)
     public Future<Void> test2() {
-        KeelSheets keelSheets = KeelSheets.factory(file);
-        KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
-        return keelSheet.readAllRowsToMatrix(1, 0, null)
-                .compose(keelSheetMatrix -> {
-                    keelSheetMatrix.getRawRowList().forEach(row -> {
-                        this.getLogger().info(log -> log.message("ASYNC: " + Keel.stringHelper().joinStringArray(row, ", ")));
-                    });
-                    return Future.succeededFuture();
-                })
-                .andThen(ar -> {
-                    keelSheets.close();
-                })
-                .compose(v -> {
-                    return Future.succeededFuture();
-                });
+        return KeelSheets.useSheets(new SheetsOpenOptions().setFile(file), keelSheets -> {
+            KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
+            return keelSheet.readAllRowsToMatrix(1, 0, null)
+                            .compose(keelSheetMatrix -> {
+                                keelSheetMatrix.getRawRowList().forEach(row -> {
+                                    this.getLogger().info(log -> log.message("ASYNC: " + Keel.stringHelper()
+                                                                                             .joinStringArray(row, "," +
+                                                                                                     " ")));
+                                });
+                                return Future.succeededFuture();
+                            })
+                            .compose(v -> {
+                                return Future.succeededFuture();
+                            });
+        });
     }
 
     @InstantRunUnit(skip = true)
     public Future<Void> test3() {
-        try (KeelSheets keelSheets = KeelSheets.factory(file)) {
+        return KeelSheets.useSheets(new SheetsOpenOptions().setFile(file), keelSheets -> {
             KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
             KeelSheetTemplatedMatrix templatedMatrix = keelSheet.blockReadAllRowsToTemplatedMatrix(0, 6, null);
             templatedMatrix.getRows().forEach(row -> {
                 this.getLogger().info(log -> log.message("BLOCK TEMPLATED: " + row.toJsonObject()));
             });
-        }
-        return Future.succeededFuture();
+            return Future.succeededFuture();
+        });
     }
 
     @InstantRunUnit(skip = true)
     public Future<Void> test4() {
-        KeelSheets keelSheets = KeelSheets.factory(file);
-        KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
-        return keelSheet.readAllRowsToTemplatedMatrix(0, 7, null)
-                .compose(templatedMatrix -> {
-                    templatedMatrix.getRows().forEach(row -> {
-                        this.getLogger().info(log -> log.message("ASYNC TEMPLATED: " + row.toJsonObject()));
-                    });
+        return KeelSheets.useSheets(new SheetsOpenOptions().setFile(file), keelSheets -> {
+            KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
+            return keelSheet.readAllRowsToTemplatedMatrix(0, 7, null)
+                            .compose(templatedMatrix -> {
+                                templatedMatrix.getRows().forEach(row -> {
+                                    this.getLogger().info(log -> log.message("ASYNC TEMPLATED: " + row.toJsonObject()));
+                                });
 
-                    return Future.succeededFuture();
-                })
-                .andThen(ar -> {
-                    keelSheets.close();
-                })
-                .compose(v -> {
-                    return Future.succeededFuture();
-                });
-
+                                return Future.succeededFuture();
+                            })
+                            .compose(v -> {
+                                return Future.succeededFuture();
+                            });
+        });
     }
 
     @InstantRunUnit(skip = true)
@@ -117,23 +115,20 @@ public class ReadTemplatedExcelTest extends KeelInstantRunner {
         } catch (FileNotFoundException e) {
             throw new RuntimeException(e);
         }
-        KeelSheets keelSheets = KeelSheets.factory(fileInputStream);
-        KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
-        return keelSheet.readAllRowsToTemplatedMatrix(0, 128, null)
-                .compose(templatedMatrix -> {
-                    templatedMatrix.getRows().forEach(row -> {
-                        this.getLogger().info(log -> log.message("ASYNC TEMPLATED: " + row.toJsonObject()));
-                    });
+        return KeelSheets.useSheets(new SheetsOpenOptions().setInputStream(fileInputStream), keelSheets -> {
+            KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
+            return keelSheet.readAllRowsToTemplatedMatrix(0, 128, null)
+                            .compose(templatedMatrix -> {
+                                templatedMatrix.getRows().forEach(row -> {
+                                    this.getLogger().info(log -> log.message("ASYNC TEMPLATED: " + row.toJsonObject()));
+                                });
 
-                    return Future.succeededFuture();
-                })
-                .andThen(ar -> {
-                    keelSheets.close();
-                })
-                .compose(v -> {
-                    return Future.succeededFuture();
-                });
-
+                                return Future.succeededFuture();
+                            })
+                            .compose(v -> {
+                                return Future.succeededFuture();
+                            });
+        });
     }
 
     public static class KeelSheetMatrixRowExt extends KeelSheetMatrixRow {

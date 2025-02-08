@@ -4,6 +4,8 @@ import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
 import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.poi.excel.KeelSheet;
 import io.github.sinri.keel.integration.poi.excel.KeelSheets;
+import io.github.sinri.keel.integration.poi.excel.SheetsCreateOptions;
+import io.github.sinri.keel.integration.poi.excel.SheetsOpenOptions;
 import io.github.sinri.keel.integration.poi.excel.entity.KeelSheetMatrixRow;
 import io.vertx.core.Future;
 
@@ -17,59 +19,66 @@ public class ReadWriteExcelTest extends KeelInstantRunner {
 
     @InstantRunUnit(skip = true)
     public Future<Void> write() {
-        KeelSheets keelSheets = KeelSheets.autoGenerateXLSX();
-        KeelSheet keelSheet = keelSheets.generateWriterForSheet("First Sheet");
-        keelSheet.blockWriteAllRows(List.of(
-                List.of("name", "value"),
-                List.of("A1", "1"),
-                List.of("A2", "1.0"),
-                List.of("A3", "1.1"),
-                List.of("B1", "100000"),
-                List.of("B2", "100000.0"),
-                List.of("B3", "100000.1"),
-                List.of("C1", "10000000000"),
-                List.of("C2", "10000000000.0"),
-                List.of("C3", "10000000000.1")
-        ));
-        keelSheets.save(file);
-        keelSheets.close();
-        return Future.succeededFuture();
+        return KeelSheets.useSheets(new SheetsCreateOptions().setUseXlsx(true),
+                keelSheets -> {
+                    KeelSheet keelSheet = keelSheets.generateWriterForSheet("First Sheet");
+                    keelSheet.blockWriteAllRows(List.of(
+                            List.of("name", "value"),
+                            List.of("A1", "1"),
+                            List.of("A2", "1.0"),
+                            List.of("A3", "1.1"),
+                            List.of("B1", "100000"),
+                            List.of("B2", "100000.0"),
+                            List.of("B3", "100000.1"),
+                            List.of("C1", "10000000000"),
+                            List.of("C2", "10000000000.0"),
+                            List.of("C3", "10000000000.1")
+                    ));
+                    keelSheets.save(file);
+                    return Future.succeededFuture();
+                });
     }
 
     @InstantRunUnit(skip = false)
     public Future<Void> read() {
-        KeelSheets keelSheets = KeelSheets.factory(file);
-        KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
-        return keelSheet.readAllRowsToMatrix(1, 3, null)
-                .compose(matrix -> {
-//                    matrix.getRawRowList().forEach(row -> {
-//                        logger().info(log -> log.message("ROW")
-//                                .put("row", row)
-//                        );
-//                    });
-                    Iterator<RowModel> rowIterator = matrix.getRowIterator(RowModel.class);
-                    while (rowIterator.hasNext()) {
-                        RowModel rowModel = rowIterator.next();
-                        String name = rowModel.readValue(0);
-                        String raw = rowModel.readValue(1);
-                        double d = rowModel.readValueToDouble(1);
-                        Integer i = rowModel.readValueToInteger(1);
-                        Long l = rowModel.readValueToLong(1);
-                        BigDecimal b = rowModel.readValueToBigDecimal(1);
-                        BigDecimal s = rowModel.readValueToBigDecimalStrippedTrailingZeros(1);
+        return KeelSheets.useSheets(
+                new SheetsOpenOptions().setFile(file),
+                keelSheets -> {
+                    KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
+                    return keelSheet.readAllRowsToMatrix(1, 3, null)
+                                    .compose(matrix -> {
+                                        //                    matrix.getRawRowList().forEach(row -> {
+                                        //                        logger().info(log -> log.message("ROW")
+                                        //                                .put("row", row)
+                                        //                        );
+                                        //                    });
+                                        Iterator<RowModel> rowIterator = matrix.getRowIterator(RowModel.class);
+                                        while (rowIterator.hasNext()) {
+                                            RowModel rowModel = rowIterator.next();
+                                            String name = rowModel.readValue(0);
+                                            String raw = rowModel.readValue(1);
+                                            double d = rowModel.readValueToDouble(1);
+                                            Integer i = rowModel.readValueToInteger(1);
+                                            Long l = rowModel.readValueToLong(1);
+                                            BigDecimal b = rowModel.readValueToBigDecimal(1);
+                                            BigDecimal s = rowModel.readValueToBigDecimalStrippedTrailingZeros(1);
 
-                        BigDecimal f = rowModel.readValueToBigDecimalStrippedTrailingZeros(2);
+                                            BigDecimal f = rowModel.readValueToBigDecimalStrippedTrailingZeros(2);
 
-                        getLogger().info(log -> log.message("Row [" + name + "]=" + raw)
-                                .context(c -> c
-                                        .put("number", "d=" + d + " i=" + i + " l=" + l + " b=" + b.toPlainString() + " s=" + s.toPlainString())
-                                        .put("formula", f.toPlainString())
-                                )
-                        );
-                    }
-                    keelSheets.close();
-                    return Future.succeededFuture();
-                });
+                                            getLogger().info(log -> log.message("Row [" + name + "]=" + raw)
+                                                                       .context(c -> c
+                                                                               .put("number", "d=" + d + " i=" + i +
+                                                                                       " l=" + l +
+                                                                                       " b=" + b.toPlainString() + " " +
+                                                                                       "s=" + s.toPlainString())
+                                                                               .put("formula", f.toPlainString())
+                                                                       )
+                                            );
+                                        }
+                                        return Future.succeededFuture();
+                                    });
+                }
+        );
     }
 
     public static class RowModel extends KeelSheetMatrixRow {

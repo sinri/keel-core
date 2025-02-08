@@ -33,14 +33,14 @@ public class KeelCsvReader {
 
     public static Future<KeelCsvReader> create(@Nonnull File file, @Nonnull Charset charset) {
         return Future.succeededFuture()
-                .compose(v -> {
-                    try {
-                        var fis = new FileInputStream(file);
-                        return create(fis, charset);
-                    } catch (IOException e) {
-                        return Future.failedFuture(e);
-                    }
-                });
+                     .compose(v -> {
+                         try {
+                             var fis = new FileInputStream(file);
+                             return create(fis, charset);
+                         } catch (IOException e) {
+                             return Future.failedFuture(e);
+                         }
+                     });
 
     }
 
@@ -64,7 +64,7 @@ public class KeelCsvReader {
          * < 0111211122
          */
         int quoterFlag = 0;
-        String buffer = null;
+        StringBuilder buffer = null;
 
         String line;
         while (true) {
@@ -74,17 +74,15 @@ public class KeelCsvReader {
                 // no more chars...
                 if (row == null) return null;
                 else {
-                    if (buffer != null) {
-                        row.addCell(new CsvCell(buffer));
-                    }
+                    row.addCell(new CsvCell(buffer.toString()));
                     break;
                 }
             }
 
             if (row == null) row = new CsvRow();
-            if (buffer == null) buffer = "";
+            if (buffer == null) buffer = new StringBuilder();
             else {
-                buffer += "\n";
+                buffer.append("\n");
             }
 
             for (int i = 0; i < line.length(); i++) {
@@ -95,31 +93,31 @@ public class KeelCsvReader {
                     } else if (quoterFlag == 1) {
                         quoterFlag = 2;
                     } else {
-                        buffer += singleString;
+                        buffer.append(singleString);
                         quoterFlag = 1;
                     }
                 } else if (singleString.equals(separator)) {
                     if (quoterFlag == 0 || quoterFlag == 2) {
                         // buffer to cell
-                        row.addCell(new CsvCell(buffer));
+                        row.addCell(new CsvCell(buffer.toString()));
                         quoterFlag = 0;
-                        buffer = "";
+                        buffer = new StringBuilder();
                     } else {
-                        buffer += singleString;
+                        buffer.append(singleString);
                     }
                 } else {
-                    buffer += singleString;
+                    buffer.append(singleString);
                 }
             }
 
             // now this line ends
             if (quoterFlag == 0 || quoterFlag == 2) {
                 // the row ends within this line
-                row.addCell(new CsvCell(buffer));
+                row.addCell(new CsvCell(buffer.toString()));
                 break;
-            } else {
-                // the row expends to the next line
             }
+            //else: the row expends to the next line
+
         }
 
         return row;
@@ -127,14 +125,14 @@ public class KeelCsvReader {
 
     public Future<CsvRow> readRow() {
         return Future.succeededFuture()
-                .compose(v -> {
-                    try {
-                        var row = this.blockReadRow();
-                        return Future.succeededFuture(row);
-                    } catch (IOException e) {
-                        return Future.failedFuture(e);
-                    }
-                });
+                     .compose(v -> {
+                         try {
+                             var row = this.blockReadRow();
+                             return Future.succeededFuture(row);
+                         } catch (IOException e) {
+                             return Future.failedFuture(e);
+                         }
+                     });
     }
 
     public void blockClose() throws IOException {
@@ -143,14 +141,14 @@ public class KeelCsvReader {
 
     public Future<Void> close() {
         return Future.succeededFuture()
-                .compose(v -> {
-                    try {
-                        blockClose();
-                        return Future.succeededFuture();
-                    } catch (IOException e) {
-                        return Future.failedFuture(e);
-                    }
-                });
+                     .compose(v -> {
+                         try {
+                             blockClose();
+                             return Future.succeededFuture();
+                         } catch (IOException e) {
+                             return Future.failedFuture(e);
+                         }
+                     });
     }
 
 }

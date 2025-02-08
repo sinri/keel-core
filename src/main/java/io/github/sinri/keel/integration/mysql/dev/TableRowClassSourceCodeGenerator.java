@@ -36,7 +36,7 @@ public class TableRowClassSourceCodeGenerator {
     }
 
     public TableRowClassSourceCodeGenerator forSchema(String schema) {
-        if (schema == null || schema.isEmpty() || schema.isBlank()) {
+        if (schema == null || schema.isBlank()) {
             this.schema = null;
         } else {
             this.schema = schema;
@@ -200,7 +200,7 @@ public class TableRowClassSourceCodeGenerator {
 
     private Future<List<TableRowClassField>> getFieldsOfTable(@Nonnull String table, @Nullable String schema) {
         String sql_for_columns = "show full columns in ";
-        if (schema != null && !schema.isEmpty() && !schema.isBlank()) {
+        if (schema != null && !schema.isBlank()) {
             sql_for_columns += "`" + schema + "`.";
         }
         sql_for_columns += "`" + table + "`;";

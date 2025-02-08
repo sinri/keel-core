@@ -216,11 +216,6 @@ public class KeelSheet {
         return blockReadAllRowsToMatrix(0, 0, SheetRowFilter.toThrowEmptyRows());
     }
 
-    @Deprecated(since = "3.0.20", forRemoval = true)
-    public final KeelSheetMatrix blockReadAllRowsToMatrix(int headerRowIndex, int maxColumns) {
-        return blockReadAllRowsToMatrix(0, 0, null);
-    }
-
     /**
      * Fetch the matrix, the rows before header row would be thrown!
      *

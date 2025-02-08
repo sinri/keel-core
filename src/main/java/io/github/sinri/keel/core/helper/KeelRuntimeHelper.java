@@ -9,7 +9,10 @@ import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
 
 import javax.annotation.Nonnull;
-import java.lang.management.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
+import java.lang.management.OperatingSystemMXBean;
 import java.lang.reflect.Field;
 import java.util.IdentityHashMap;
 import java.util.Set;
@@ -57,15 +60,7 @@ public class KeelRuntimeHelper {
 
     @Nonnull
     public GCStatResult getGCSnapshot() {
-        GCStatResult gcStat = new GCStatResult();
-        for (GarbageCollectorMXBean gc : ManagementFactory.getGarbageCollectorMXBeans()) {
-            //Objects.requireNonNull(gc);
-            if (gc == null) {
-                continue;
-            }
-            gcStat.refreshWithGC(gc);
-        }
-        return gcStat;
+        return GCStatResult.parseGarbageCollectorMXBeans(ManagementFactory.getGarbageCollectorMXBeans());
     }
 
     /**

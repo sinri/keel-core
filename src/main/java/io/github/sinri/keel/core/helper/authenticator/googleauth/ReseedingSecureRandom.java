@@ -79,12 +79,16 @@ public class ReseedingSecureRandom {
 
     private void buildSecureRandom() {
         try {
-            if (this.algorithm == null && this.provider == null) {
+            // since 4.0.2: when algorithm is null, no matter what provider is,
+            //  `SecureRandom::getInstance` is not available, so just new one instance.
+            if (algorithm == null) {
                 this.secureRandom = new SecureRandom();
-            } else if (this.provider == null) {
-                this.secureRandom = SecureRandom.getInstance(this.algorithm);
             } else {
-                this.secureRandom = SecureRandom.getInstance(this.algorithm, this.provider);
+                if (this.provider == null) {
+                    this.secureRandom = SecureRandom.getInstance(this.algorithm);
+                } else {
+                    this.secureRandom = SecureRandom.getInstance(this.algorithm, this.provider);
+                }
             }
         } catch (NoSuchAlgorithmException e) {
             throw new GoogleAuthenticatorException(

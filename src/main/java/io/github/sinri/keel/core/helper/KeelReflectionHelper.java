@@ -115,13 +115,18 @@ public class KeelReflectionHelper {
                 URI uri = resource.toURI();
                 Path startPath = Paths.get(uri);
                 Files.walkFileTree(startPath, new SimpleFileVisitor<Path>() {
+                    @Nonnull
                     @Override
-                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    public FileVisitResult visitFile(Path file, @Nonnull BasicFileAttributes attrs) {
                         if (file.toString().endsWith(".class")) {
                             String className = file.toString().replace(".class", "").replace("/", ".");
                             className = className.substring(className.indexOf(packageName));
 
                             try {
+                                // since java 16, you may use:
+                                // if (clazzAny instanceof Class<? extends R> clazzR) {
+                                //    // 在这里可以安全地使用 clazzR
+                                // }
                                 Class<? extends R> clazz = (Class<? extends R>) classLoader.loadClass(className);
                                 if (baseClass.isAssignableFrom(clazz)) {
                                     descendantClasses.add(clazz);

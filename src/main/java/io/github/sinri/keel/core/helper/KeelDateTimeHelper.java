@@ -32,17 +32,8 @@ public class KeelDateTimeHelper {
     }
 
     /**
-     * @return current timestamp expressed in MySQL Date Time Format
-     * @since 3.0.0
-     * @since 3.0.10 use `getCurrentDatetime` instead.
-     */
-    @Deprecated(since = "3.0.10", forRemoval = true)
-    public String getCurrentDateExpression() {
-        return getCurrentDatetime();
-    }
-
-    /**
      * @since 3.0.10
+     * @return current timestamp expressed in MySQL Date Time Format
      */
     public String getCurrentDatetime() {
         return getCurrentDateExpression(MYSQL_DATETIME_PATTERN);

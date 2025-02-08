@@ -1,10 +1,13 @@
 package io.github.sinri.keel.core.helper.runtime;
 
+import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.management.GarbageCollectorMXBean;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
@@ -37,17 +40,22 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
         // ZGC (Z Garbage Collector)： "ZGC"
         // @see  https://armsword.com/2023/08/10/es-jdk17-and-zgc/
         //minorGCNames.add("ZGC");
-        majorGCNames.add("ZGC Pauses"); // since 4.0.0 majar since 3.2.5 统计的是ZGC在GC过程中暂停的次数及暂停时间，这是JDK17新增的指标bean，无法统计Allocation Stall导致的线程挂起时间
+        majorGCNames.add("ZGC Pauses"); // since 4.0.0 majar since 3.2.5
+        // 统计的是ZGC在GC过程中暂停的次数及暂停时间，这是JDK17新增的指标bean，无法统计Allocation Stall导致的线程挂起时间
         minorGCNames.add("ZGC Cycles"); // since 3.2.5 统计的是ZGC发生的次数以及总耗时
         // Shenandoah： "Shenandoah Pauses"
         minorGCNames.add("Shenandoah Pauses");
     }
 
     private final long statTime;
-    private long youngGCCount = 0;
-    private long youngGCTime = 0;
-    private long oldGCCount = 0;
-    private long oldGCTime = 0;
+    private long minorGCCount = 0;
+    private long minorGCTime = 0;
+    private long majorGCCount = 0;
+    private long majorGCTime = 0;
+    @Nullable
+    private String majorGCType;
+    @Nullable
+    private String minorGCType;
 
     public GCStatResult() {
         this.statTime = System.currentTimeMillis();
@@ -57,64 +65,71 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
         this.statTime = statTime;
     }
 
-    public long getYoungGCCount() {
-        return youngGCCount;
+    /**
+     * @since 4.0.2
+     */
+    public static void handleMajorGCNames(@Nonnull Handler<Set<String>> handler) {
+        handler.handle(majorGCNames);
     }
 
-    @Deprecated
-    public GCStatResult setYoungGCCount(long youngGCCount) {
-        this.youngGCCount = youngGCCount;
-        return this;
+    /**
+     * @since 4.0.2
+     */
+    public static void handleMinorGCNames(@Nonnull Handler<Set<String>> handler) {
+        handler.handle(minorGCNames);
     }
 
-    public GCStatResult addGCCountAsYoung(long youngGCCount) {
-        this.youngGCCount += youngGCCount;
-        return this;
+    /**
+     * @since 4.0.2
+     */
+    public static void handleIgnoreGCNames(@Nonnull Handler<Set<String>> handler) {
+        handler.handle(ignoreGCNames);
     }
 
-    public long getYoungGCTime() {
-        return youngGCTime;
+    /**
+     * @since 4.0.2
+     */
+    public static GCStatResult parseGarbageCollectorMXBeans(@Nonnull List<GarbageCollectorMXBean> gcList) {
+        GCStatResult gcStatResult = new GCStatResult();
+        for (GarbageCollectorMXBean gc : gcList) {
+            if (gc == null) {
+                continue;
+            }
+            gcStatResult.refreshWithGC(gc);
+        }
+        return gcStatResult;
     }
 
-    @Deprecated
-    public GCStatResult setYoungGCTime(long youngGCTime) {
-        this.youngGCTime = youngGCTime;
-        return this;
+    public long getMinorGCCount() {
+        return minorGCCount;
     }
 
-    public GCStatResult addGCTimeAsYoung(long youngGCTime) {
-        this.youngGCTime += youngGCTime;
-        return this;
+    public long getMinorGCTime() {
+        return minorGCTime;
     }
 
-    public long getOldGCCount() {
-        return oldGCCount;
+    public long getMajorGCCount() {
+        return majorGCCount;
     }
 
-    @Deprecated
-    public GCStatResult setOldGCCount(long oldGCCount) {
-        this.oldGCCount = oldGCCount;
-        return this;
+    public long getMajorGCTime() {
+        return majorGCTime;
     }
 
-    public GCStatResult addGCCountAsOld(long oldGCCount) {
-        this.oldGCCount += oldGCCount;
-        return this;
+    /**
+     * @since 4.0.2
+     */
+    @Nullable
+    public String getMajorGCType() {
+        return majorGCType;
     }
 
-    public long getOldGCTime() {
-        return oldGCTime;
-    }
-
-    @Deprecated
-    public GCStatResult setOldGCTime(long oldGCTime) {
-        this.oldGCTime = oldGCTime;
-        return this;
-    }
-
-    public GCStatResult addGCTimeAsOld(long oldGCTime) {
-        this.oldGCTime += oldGCTime;
-        return this;
+    /**
+     * @since 4.0.2
+     */
+    @Nullable
+    public String getMinorGCType() {
+        return minorGCType;
     }
 
     public long getStatTime() {
@@ -123,12 +138,14 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
 
     @Override
     public GCStatResult since(GCStatResult start) {
-        return new GCStatResult(getStatTime())
-                .addGCCountAsOld(getOldGCCount() - start.getOldGCCount())
-                .addGCCountAsYoung(getYoungGCCount() - start.getYoungGCCount())
-                .addGCTimeAsOld(getOldGCTime() - start.getOldGCTime())
-                .addGCTimeAsYoung(getYoungGCTime() - start.getYoungGCTime())
-                ;
+        GCStatResult x = new GCStatResult(getStatTime());
+        x.majorGCCount = getMajorGCCount() - start.getMajorGCCount();
+        x.minorGCCount = getMinorGCCount() - start.getMinorGCCount();
+        x.majorGCTime = getMajorGCTime() - start.getMajorGCTime();
+        x.minorGCTime = getMinorGCTime() - start.getMinorGCTime();
+        x.majorGCType = this.majorGCType;
+        x.minorGCType = this.minorGCType;
+        return x;
     }
 
     @Override
@@ -136,29 +153,34 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
         return new JsonObject()
                 .put("stat_time", getStatTime())
                 .put("major", new JsonObject()
-                        .put("count", getOldGCCount())
-                        .put("time", getOldGCTime())
+                        .put("count", getMajorGCCount())
+                        .put("time", getMajorGCTime())
+                        .put("type", getMajorGCType())
                 )
                 .put("minor", new JsonObject()
-                        .put("count", getYoungGCCount())
-                        .put("time", getYoungGCTime())
+                        .put("count", getMinorGCCount())
+                        .put("time", getMinorGCTime())
+                        .put("type", getMinorGCType())
                 );
     }
 
     /**
      * @since 3.1.4
+     * @since 4.0.2 refine
      */
-    public GCStatResult refreshWithGC(@Nonnull GarbageCollectorMXBean gc) {
+    private void refreshWithGC(@Nonnull GarbageCollectorMXBean gc) {
         if (minorGCNames.contains(gc.getName())) {
-            this.addGCCountAsYoung(gc.getCollectionCount());
+            this.minorGCCount = gc.getCollectionCount();
             if (gc.getCollectionTime() >= 0) {
-                this.addGCTimeAsYoung(gc.getCollectionTime());
+                this.minorGCTime = gc.getCollectionTime();
             }
+            this.minorGCType = gc.getName();
         } else if (majorGCNames.contains(gc.getName())) {
-            this.addGCCountAsOld(gc.getCollectionCount());
+            this.majorGCCount = gc.getCollectionCount();
             if (gc.getCollectionTime() >= 0) {
-                this.addGCTimeAsOld(gc.getCollectionTime());
+                this.majorGCTime = gc.getCollectionTime();
             }
+            this.majorGCType = gc.getName();
         } else if (!ignoreGCNames.contains(gc.getName())) {
             Keel.getLogger().error(log -> log
                     .message("Found Unknown GarbageCollectorMXBean Name")
@@ -172,6 +194,5 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
                     )
             );
         }
-        return this;
     }
 }

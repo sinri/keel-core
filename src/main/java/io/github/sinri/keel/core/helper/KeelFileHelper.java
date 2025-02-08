@@ -54,34 +54,11 @@ public class KeelFileHelper {
     /**
      * @param filePath path string of the target file, or directory
      * @return the URL of target file; if not there, null return.
-     * @deprecated USAGE CLEANED
-     */
-    @Nullable
-    @Deprecated(forRemoval = true, since = "3.2.12.1")
-    public URL getUrlOfFileInJar(@Nonnull String filePath) {
-        return getUrlOfFileInRunningJar(filePath);
-    }
-
-    /**
-     * @param filePath path string of the target file, or directory
-     * @return the URL of target file; if not there, null return.
      * @since 3.2.12.1 original name is `getUrlOfFileInJar`.
      */
     @Nullable
     public URL getUrlOfFileInRunningJar(@Nonnull String filePath) {
         return KeelFileHelper.class.getClassLoader().getResource(filePath);
-    }
-
-    /**
-     * Seek in JAR, under the root (exclusive)
-     * @param root ends with '/'
-     * @return list of JarEntry
-     * @deprecated USAGE CLEANED
-     */
-    @Deprecated(forRemoval = true, since = "3.2.12.1")
-    @Nonnull
-    public List<JarEntry> traversalInJar(@Nonnull String root) {
-        return traversalInRunningJar(root);
     }
 
     /**
@@ -159,17 +136,6 @@ public class KeelFileHelper {
         String classpath = System.getProperty("java.class.path");
         String[] classpathEntries = classpath.split(File.pathSeparator);
         return new ArrayList<>(Arrays.asList(classpathEntries));
-    }
-
-    /**
-     * The in-class classes, i.e. subclasses, would be neglected.
-     *
-     * @since 3.2.11
-     * @deprecated USAGE CLEANED
-     */
-    @Deprecated(since = "3.2.12.1", forRemoval = true)
-    public Set<String> seekPackageClassFilesInJar(@Nonnull String packageName) {
-        return seekPackageClassFilesInRunningJar(packageName);
     }
 
     /**

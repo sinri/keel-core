@@ -39,7 +39,7 @@ public class KeelAsyncTemporaryValue<P> {
                     if (pValueWrapper == null) {
                         throw new ValueInvalidNow();
                     }
-                    if (!pValueWrapper.isAliveNow()) {
+                    if (!pValueWrapper.isAvailable()) {
                         throw new ValueInvalidNow();
                     }
                     return Future.succeededFuture(pValueWrapper.getValue());
@@ -62,7 +62,7 @@ public class KeelAsyncTemporaryValue<P> {
                     if (pValueWrapper == null) {
                         throw new ValueInvalidNow();
                     }
-                    if (!pValueWrapper.isAliveNow()) {
+                    if (!pValueWrapper.isAvailable()) {
                         throw new ValueInvalidNow();
                     }
                     return Future.succeededFuture(pValueWrapper.getValue());
@@ -71,7 +71,7 @@ public class KeelAsyncTemporaryValue<P> {
                     return loader.get()
                             .compose(p -> {
                                 if (p == null) {
-                                    this.set(p);
+                                    this.set(null);
                                 }
                                 return Future.succeededFuture(p);
                             });

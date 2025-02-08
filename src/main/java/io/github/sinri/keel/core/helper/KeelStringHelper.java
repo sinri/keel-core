@@ -99,8 +99,7 @@ public class KeelStringHelper {
     }
 
     /**
-     * 获取一个Buffer的十六进制表达，每个字节以两个字符表示（字母大写）。
-     * 字节间空格分隔；每行容纳一定量的字节数。
+     * 获取一个Buffer的十六进制表达，每个字节以两个字符表示（字母大写）。 字节间空格分隔；每行容纳一定量的字节数。
      *
      * @param buffer  an instance of Buffer defined in Vertx
      * @param rowSize how many bytes in one row
@@ -138,7 +137,7 @@ public class KeelStringHelper {
 
         boolean isFirst = true;
         for (var part : parts) {
-            if (part != null && !part.isEmpty() && !part.isBlank()) {
+            if (part != null && !part.isBlank()) {
                 if (isFirst && firstCharLower) {
                     camel.add(part);
                     isFirst = false;
@@ -168,7 +167,7 @@ public class KeelStringHelper {
         if (camelCase == null) {
             return null;
         }
-        if (camelCase.isEmpty() || camelCase.isBlank()) {
+        if (camelCase.isBlank()) {
             return "";
         }
         if (camelCase.length() == 1) {
@@ -199,7 +198,8 @@ public class KeelStringHelper {
      * @since 2.9
      */
     @Nonnull
-    public String buildStackChainText(@Nullable StackTraceElement[] stackTrace, @Nonnull Set<String> ignorableStackPackageSet) {
+    public String buildStackChainText(@Nullable StackTraceElement[] stackTrace,
+                                      @Nonnull Set<String> ignorableStackPackageSet) {
         StringBuilder sb = new StringBuilder();
         if (stackTrace != null) {
             String ignoringClassPackage = null;
@@ -216,33 +216,33 @@ public class KeelStringHelper {
                 if (matchedClassPackage == null) {
                     if (ignoringCount > 0) {
                         sb.append("\t\t")
-                                .append("[").append(ignoringCount).append("] ")
-                                .append(ignoringClassPackage)
-                                .append(System.lineSeparator());
+                          .append("[").append(ignoringCount).append("] ")
+                          .append(ignoringClassPackage)
+                          .append(System.lineSeparator());
 
                         ignoringClassPackage = null;
                         ignoringCount = 0;
                     }
 
                     sb.append("\t\t")
-                            .append(stackTranceItem.getClassName())
-                            .append(".")
-                            .append(stackTranceItem.getMethodName())
-                            .append(" (")
-                            .append(stackTranceItem.getFileName())
-                            .append(":")
-                            .append(stackTranceItem.getLineNumber())
-                            .append(")")
-                            .append(System.lineSeparator());
+                      .append(stackTranceItem.getClassName())
+                      .append(".")
+                      .append(stackTranceItem.getMethodName())
+                      .append(" (")
+                      .append(stackTranceItem.getFileName())
+                      .append(":")
+                      .append(stackTranceItem.getLineNumber())
+                      .append(")")
+                      .append(System.lineSeparator());
                 } else {
                     if (ignoringCount > 0) {
                         if (ignoringClassPackage.equals(matchedClassPackage)) {
                             ignoringCount += 1;
                         } else {
                             sb.append("\t\t")
-                                    .append("[").append(ignoringCount).append("] ")
-                                    .append(ignoringClassPackage)
-                                    .append(System.lineSeparator());
+                              .append("[").append(ignoringCount).append("] ")
+                              .append(ignoringClassPackage)
+                              .append(System.lineSeparator());
 
                             ignoringClassPackage = matchedClassPackage;
                             ignoringCount = 1;
@@ -255,9 +255,9 @@ public class KeelStringHelper {
             }
             if (ignoringCount > 0) {
                 sb.append("\t\t")
-                        .append("[").append(ignoringCount).append("] ")
-                        .append(ignoringClassPackage)
-                        .append(System.lineSeparator());
+                  .append("[").append(ignoringCount).append("] ")
+                  .append(ignoringClassPackage)
+                  .append(System.lineSeparator());
             }
         }
         return sb.toString();

@@ -20,9 +20,9 @@ public class CacheMemTest extends KeelInstantRunner {
             getLogger().info("Monitor |" +
                     " HEAP=" + ms.getJvmMemoryResult().getMxHeapUsedBytes()
                     +
-                    " YGC=" + ms.getGCStat().getYoungGCCount()
+                    " YGC=" + ms.getGCStat().getMinorGCCount()
                     +
-                    " FGC=" + ms.getGCStat().getOldGCCount()
+                    " FGC=" + ms.getGCStat().getMajorGCCount()
             );
         });
         return super.starting();

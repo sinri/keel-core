@@ -32,7 +32,8 @@ public class CataloguePageBuilder implements FastDocsContentResponder {
         }
         this.embedded = x.toString().contains("!/");
         this.actualFileRootOutsideJAR = x.getPath();
-        // options.eventLogger.debug(r -> r.message("EMBEDDED: " + embedded + " url: " + x + " actualFileRootOutsideJAR: " + actualFileRootOutsideJAR));
+        // options.eventLogger.debug(r -> r.message("EMBEDDED: " + embedded + " url: " + x + "
+        // actualFileRootOutsideJAR: " + actualFileRootOutsideJAR));
     }
 
     @Override
@@ -43,8 +44,8 @@ public class CataloguePageBuilder implements FastDocsContentResponder {
     @Override
     public Future<Void> respond() {
         return this.options.ctx.response()
-                .putHeader("Content-Type", "text/html;charset=UTF-8")
-                .end(this.buildPage());
+                               .putHeader("Content-Type", "text/html;charset=UTF-8")
+                               .end(this.buildPage());
     }
 
     protected String buildPage() {
@@ -137,7 +138,8 @@ public class CataloguePageBuilder implements FastDocsContentResponder {
     protected String getPageTitle() {
         return options.subjectOfDocuments
                 + " - " +
-                URLDecoder.decode(options.ctx.request().path().substring(this.options.rootURLPath.length()), StandardCharsets.UTF_8);
+                URLDecoder.decode(options.ctx.request().path()
+                                             .substring(this.options.rootURLPath.length()), StandardCharsets.UTF_8);
     }
 
     protected String getCatalogueDivContent() {
@@ -173,13 +175,15 @@ public class CataloguePageBuilder implements FastDocsContentResponder {
         sb.append("<div class='dir_box_body_item'>");
         sb.append("<div style='display: inline-block;width:20px;border-left: 1px solid lightgrey;'>&nbsp;</div>".repeat(Math.max(0, tree.level)));
         sb.append("<div class='dir_box_title' style='display: inline-block;'>")
-//                .append("<span>")
-//                .append("\uD83D\uDCC1&nbsp;")
-//                .append("</span>")
-//                .append("<span>")
-                .append("<a href='").append(boxHref).append("' ").append(isFromDoc() ? "target='_parent'" : "").append(" style='white-space: nowrap;display: inline-block;'").append(" >").append("\uD83D\uDCC1&nbsp;").append(displayDirName).append("</a>")
-//                .append("</span>")
-                .append("</div>");
+          //                .append("<span>")
+          //                .append("\uD83D\uDCC1&nbsp;")
+          //                .append("</span>")
+          //                .append("<span>")
+          .append("<a href='").append(boxHref).append("' ").append(isFromDoc() ? "target='_parent'" : "")
+          .append(" style='white-space: nowrap;display: inline-block;'").append(" >").append("\uD83D\uDCC1&nbsp;")
+          .append(displayDirName).append("</a>")
+          //                .append("</span>")
+          .append("</div>");
         sb.append("</div>");
 
         // DIRS start
@@ -190,16 +194,18 @@ public class CataloguePageBuilder implements FastDocsContentResponder {
                     sb.append(createHTMLCodeForDir(child));
                 } else {
                     sb.append("<div class='dir_box_body_item'>");
-                    sb.append("<div style='display: inline-block;width:20px;border-left: 1px solid lightgrey;'>&nbsp;</div>".repeat(Math.max(0, tree.level + 1)));
+                    sb.append(("<div style='display: inline-block;width:20px;border-left: 1px solid lightgrey;" +
+                            "'>&nbsp;" +
+                            "</div>").repeat(Math.max(0, tree.level + 1)));
                     //                .append("<span>")
                     //                            .append("\uD83D\uDCC4&nbsp;")
                     //                .append("</span>")
                     //                .append("<span>")
                     sb
                             //                .append("<span>")
-//                            .append("\uD83D\uDCC4&nbsp;")
-//                .append("</span>")
-//                .append("<span>")
+                            //                            .append("\uD83D\uDCC4&nbsp;")
+                            //                .append("</span>")
+                            //                .append("<span>")
                             .append("<a href='")
                             .append(child.href)
                             .append("' ")
@@ -207,7 +213,7 @@ public class CataloguePageBuilder implements FastDocsContentResponder {
                             .append(" style='white-space: nowrap;display: inline-block;'")
                             .append(" >").append("\uD83D\uDCC4&nbsp;").append(child.name)
                             .append("</a>")
-//                            .append("</span>")
+                            //                            .append("</span>")
                             .append("</div>");
                 }
             }
@@ -235,7 +241,8 @@ public class CataloguePageBuilder implements FastDocsContentResponder {
     }
 
     private TreeNode buildTreeNodeInJar(JarEntry jarEntry) {
-        // options.eventLogger.debug(r -> r.message("buildTreeNodeInJar: " + jarEntry.getName() + " isDir: " + jarEntry.isDirectory()));
+        // options.eventLogger.debug(r -> r.message("buildTreeNodeInJar: " + jarEntry.getName() + " isDir: " +
+        // jarEntry.isDirectory()));
         TreeNode treeNode = new TreeNode();
         treeNode.name = String.valueOf(Path.of(jarEntry.getName()).getFileName());
         if (jarEntry.isDirectory()) {
@@ -321,7 +328,7 @@ public class CataloguePageBuilder implements FastDocsContentResponder {
         return treeNode;
     }
 
-    protected static class TreeNode {
+    public static class TreeNode {
         private final List<TreeNode> _children = new ArrayList<>();
         public String href;
         public String name;

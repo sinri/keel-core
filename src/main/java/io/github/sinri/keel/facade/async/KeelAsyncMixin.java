@@ -22,6 +22,71 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 4.0.0
  */
 public interface KeelAsyncMixin {
+    /**
+     * @since 4.0.2
+     */
+    default <T> Future<Void> parallelForAllSuccess(@Nonnull Iterable<T> collection, @Nonnull Function<T,
+            Future<Void>> itemProcessor) {
+        return parallelForAllSuccess(collection.iterator(), itemProcessor);
+    }
+
+    /**
+     * @since 4.0.2
+     */
+    default <T> Future<Void> parallelForAllSuccess(@Nonnull Iterator<T> iterator,
+                                                   @Nonnull Function<T, Future<Void>> itemProcessor) {
+        List<Future<Void>> futures = new ArrayList<>();
+        while (iterator.hasNext()) {
+            Future<Void> f = itemProcessor.apply(iterator.next());
+            futures.add(f);
+        }
+        return Future.all(futures)
+                     .compose(v -> Future.succeededFuture());
+    }
+
+    /**
+     * @since 4.0.2
+     */
+    default <T> Future<Void> parallelForAnySuccess(@Nonnull Iterable<T> collection, @Nonnull Function<T,
+            Future<Void>> itemProcessor) {
+        return parallelForAnySuccess(collection.iterator(), itemProcessor);
+    }
+
+    /**
+     * @since 4.0.2
+     */
+    default <T> Future<Void> parallelForAnySuccess(@Nonnull Iterator<T> iterator,
+                                                   @Nonnull Function<T, Future<Void>> itemProcessor) {
+        List<Future<Void>> futures = new ArrayList<>();
+        while (iterator.hasNext()) {
+            Future<Void> f = itemProcessor.apply(iterator.next());
+            futures.add(f);
+        }
+        return Future.any(futures)
+                     .compose(v -> Future.succeededFuture());
+    }
+
+    /**
+     * @since 4.0.2
+     */
+    default <T> Future<Void> parallelForAllComplete(@Nonnull Iterable<T> collection, @Nonnull Function<T,
+            Future<Void>> itemProcessor) {
+        return parallelForAllComplete(collection.iterator(), itemProcessor);
+    }
+
+    /**
+     * @since 4.0.2
+     */
+    default <T> Future<Void> parallelForAllComplete(@Nonnull Iterator<T> iterator,
+                                                    @Nonnull Function<T, Future<Void>> itemProcessor) {
+        List<Future<Void>> futures = new ArrayList<>();
+        while (iterator.hasNext()) {
+            Future<Void> f = itemProcessor.apply(iterator.next());
+            futures.add(f);
+        }
+        return Future.join(futures)
+                     .compose(v -> Future.succeededFuture());
+    }
 
     private Future<Void> asyncCallRepeatedly(@Nonnull RepeatedlyCallTask repeatedlyCallTask) {
         Promise<Void> promise = Promise.promise();
@@ -158,6 +223,7 @@ public interface KeelAsyncMixin {
                     .eventually(() -> Future.succeededFuture());
         });
     }
+
 
     default Future<Void> asyncSleep(long time) {
         return asyncSleep(time, null);

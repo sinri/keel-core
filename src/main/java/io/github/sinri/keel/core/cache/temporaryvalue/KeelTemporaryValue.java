@@ -37,7 +37,7 @@ public class KeelTemporaryValue<P> {
         if (pValueWrapper == null) {
             throw new ValueInvalidNow();
         }
-        if (!pValueWrapper.isAliveNow()) {
+        if (!pValueWrapper.isAvailable()) {
             throw new ValueInvalidNow();
         }
         return pValueWrapper.getValue();
@@ -61,7 +61,7 @@ public class KeelTemporaryValue<P> {
             if (pValueWrapper == null) {
                 throw new ValueInvalidNow();
             }
-            if (!pValueWrapper.isAliveNow()) {
+            if (!pValueWrapper.isAvailable()) {
                 throw new ValueInvalidNow();
             }
             return pValueWrapper.getValue();

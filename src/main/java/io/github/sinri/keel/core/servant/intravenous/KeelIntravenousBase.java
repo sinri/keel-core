@@ -1,11 +1,13 @@
 package io.github.sinri.keel.core.servant.intravenous;
 
-import io.github.sinri.keel.core.verticles.KeelVerticleImplWithEventLogger;
-import io.github.sinri.keel.logger.event.KeelEventLogger;
+import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
+import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
+import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
@@ -15,10 +17,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
- * @param <T>
  * @since 3.0.1 redesigned from the original KeelIntravenous
  */
-abstract public class KeelIntravenousBase<T> extends KeelVerticleImplWithEventLogger {
+abstract public class KeelIntravenousBase<T> extends KeelVerticleImpl<KeelEventLog> {
     private final Queue<T> queue;
     private final AtomicReference<Promise<Void>> interruptRef;
     protected long sleepTime = 1_000L;
@@ -49,7 +50,7 @@ abstract public class KeelIntravenousBase<T> extends KeelVerticleImplWithEventLo
     }
 
     @Override
-    protected void startAsKeelVerticle(Promise<Void> startPromise) {
+    protected Future<Void> startVerticle() {
         queueAcceptTask = true;
 
         int configuredBatchSize = getBatchSize();
@@ -58,45 +59,45 @@ abstract public class KeelIntravenousBase<T> extends KeelVerticleImplWithEventLo
             this.interruptRef.set(null);
 
             return Keel.asyncCallRepeatedly(routineResult -> {
-                        List<T> buffer = new ArrayList<>();
-                        while (true) {
-                            T t = queue.poll();
-                            if (t != null) {
-                                buffer.add(t);
-                                if (buffer.size() >= configuredBatchSize) {
-                                    break;
-                                }
-                            } else {
-                                break;
-                            }
-                        }
-                        if (buffer.isEmpty()) {
-                            routineResult.stop();
-                            return Future.succeededFuture();
-                        }
+                           List<T> buffer = new ArrayList<>();
+                           while (true) {
+                               T t = queue.poll();
+                               if (t != null) {
+                                   buffer.add(t);
+                                   if (buffer.size() >= configuredBatchSize) {
+                                       break;
+                                   }
+                               } else {
+                                   break;
+                               }
+                           }
+                           if (buffer.isEmpty()) {
+                               routineResult.stop();
+                               return Future.succeededFuture();
+                           }
 
-                        // got one job to do, no matter if done
-                        return Future.succeededFuture()
-                                .compose(v -> {
-                                    return this.process(buffer);
-                                })
-                                .compose(v -> {
-                                    return Future.succeededFuture();
-                                }, throwable -> {
-                                    return Future.succeededFuture();
-                                });
-                    })
-                    .andThen(ar -> {
-                        this.interruptRef.set(Promise.promise());
+                           // got one job to do, no matter if done
+                           return Future.succeededFuture()
+                                        .compose(v -> {
+                                            return this.process(buffer);
+                                        })
+                                        .compose(v -> {
+                                            return Future.succeededFuture();
+                                        }, throwable -> {
+                                            return Future.succeededFuture();
+                                        });
+                       })
+                       .andThen(ar -> {
+                           this.interruptRef.set(Promise.promise());
 
-                        Keel.asyncSleep(sleptTime(), getCurrentInterrupt())
-                                .andThen(slept -> {
-                                    repeatedlyCallTask.stop();
-                                });
-                    });
+                           Keel.asyncSleep(sleptTime(), getCurrentInterrupt())
+                               .andThen(slept -> {
+                                   repeatedlyCallTask.stop();
+                               });
+                       });
         });
 
-        startPromise.complete();
+        return Future.succeededFuture();
     }
 
     protected int getBatchSize() {
@@ -123,23 +124,21 @@ abstract public class KeelIntravenousBase<T> extends KeelVerticleImplWithEventLo
         declareShutdown();
         // waiting for the queue clear
         return Keel.asyncCallRepeatedly(routineResult -> {
-                    if (this.queue.isEmpty()) {
-                        routineResult.stop();
-                        return Future.succeededFuture();
-                    } else {
-                        return Keel.asyncSleep(100L);
-                    }
-                })
-                .compose(allTasksInQueueIsConsumed -> {
-                    return this.undeployMe();
-                });
+                       if (this.queue.isEmpty()) {
+                           routineResult.stop();
+                           return Future.succeededFuture();
+                       } else {
+                           return Keel.asyncSleep(100L);
+                       }
+                   })
+                   .compose(allTasksInQueueIsConsumed -> {
+                       return this.undeployMe();
+                   });
     }
 
-    /**
-     * @since 3.2.0
-     */
+    @Nonnull
     @Override
-    protected KeelEventLogger buildEventLogger() {
+    protected KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
         return KeelIssueRecordCenter.silentCenter().generateEventLogger(getClass().getName());
     }
 

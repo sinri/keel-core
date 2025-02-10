@@ -11,7 +11,7 @@ public class HikaruTest extends KeelInstantRunner {
     public Future<Void> testHikaruForPikas() {
         Pikas all = Keel.reflectionHelper().getAnnotationOfClass(Hikaru.class, Pikas.class);
         for (Pika pika : all.value()) {
-            getLogger().info(r -> r.message("testHikaruForPikas: Each Pika of Hikaru: " + pika.value()));
+            getIssueRecorder().info(r -> r.message("testHikaruForPikas: Each Pika of Hikaru: " + pika.value()));
         }
         return Future.succeededFuture();
     }
@@ -20,7 +20,7 @@ public class HikaruTest extends KeelInstantRunner {
     public Future<Void> testHikaruForPika() {
         Pika[] annotationsOfClass = Keel.reflectionHelper().getAnnotationsOfClass(Hikaru.class, Pika.class);
         for (Pika pika : annotationsOfClass) {
-            getLogger().info(r -> r.message("testHikaruForPika: Each Pika of Hikaru: " + pika.value()));
+            getIssueRecorder().info(r -> r.message("testHikaruForPika: Each Pika of Hikaru: " + pika.value()));
         }
         return Future.succeededFuture();
     }

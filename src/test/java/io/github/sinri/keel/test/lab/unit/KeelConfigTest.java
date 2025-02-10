@@ -19,8 +19,8 @@ public class KeelConfigTest extends KeelInstantRunner {
 
     @InstantRunUnit
     public Future<Void> readTest() {
-        getLogger().info(x -> x.message("all").context(Keel.getConfiguration().toJsonObject()));
-        getLogger().info("email.smtp.default_smtp_name: " + Keel.config("email.smtp.default_smtp_name"));
+        getIssueRecorder().info(x -> x.message("all").context(Keel.getConfiguration().toJsonObject()));
+        getIssueRecorder().info("email.smtp.default_smtp_name: " + Keel.config("email.smtp.default_smtp_name"));
         return Future.succeededFuture();
     }
 }

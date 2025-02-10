@@ -1,7 +1,8 @@
 package io.github.sinri.keel.facade.tesuto.unit;
 
-import io.github.sinri.keel.logger.event.KeelEventLogger;
+import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
+import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -14,11 +15,10 @@ import java.util.function.Supplier;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
- * @since 3.2.19
- * A base class for `mvn test`, each method named like `void test*()` would be executed.
+ * @since 3.2.19 A base class for `mvn test`, each method named like `void test*()` would be executed.
  */
 public class KeelUnitTest {
-    private KeelEventLogger logger;
+    private KeelIssueRecorder<KeelEventLog> issueRecorder;
 
     public KeelUnitTest() {
         VertxOptions vertxOptions = buildVertxOptions();
@@ -26,11 +26,12 @@ public class KeelUnitTest {
             Keel.initializeVertxStandalone(vertxOptions);
         }
         Keel.getConfiguration().loadPropertiesFile("config.properties");
-        this.logger = KeelIssueRecordCenter.outputCenter().generateEventLogger("KeelUnitTest");
+        this.issueRecorder = KeelIssueRecordCenter.outputCenter()
+                                                  .generateIssueRecorder("KeelUnitTest", KeelEventLog::new);
         prepareEnvironment();
-        KeelEventLogger builtLogger = this.buildLogger();
+        var builtLogger = this.buildIssueRecorder();
         if (builtLogger != null) {
-            this.logger = builtLogger;
+            this.issueRecorder = builtLogger;
         }
     }
 
@@ -49,16 +50,18 @@ public class KeelUnitTest {
     }
 
     /**
-     * By default, KeelUnitTest provides a logger to write to STDOUT;
-     * Override this method to return a Non-Null instance of KeelEventLogger
-     * to initialize the logger if you have a special logging requirement.
+     * By default, KeelUnitTest provides a logger to write to STDOUT; Override this method to return a Non-Null instance
+     * of KeelEventLogger to initialize the logger if you have a special logging requirement.
      */
-    protected @Nullable KeelEventLogger buildLogger() {
+    protected @Nullable KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
         return null;
     }
 
-    public final KeelEventLogger getLogger() {
-        return logger;
+    /**
+     * @since 4.0.2
+     */
+    public KeelIssueRecorder<KeelEventLog> getIssueRecorder() {
+        return issueRecorder;
     }
 
     /**
@@ -67,13 +70,13 @@ public class KeelUnitTest {
     public void setUp() {
         JsonObject env = new JsonObject();
         System.getenv().forEach(env::put);
-        getLogger().info(x -> x.message("env").context(env));
+        getIssueRecorder().info(x -> x.message("env").context(env));
         for (var e : Thread.currentThread().getStackTrace()) {
-            getLogger().info("stack: " + e.getClassName() + "::" + e.getMethodName());
+            getIssueRecorder().info("stack: " + e.getClassName() + "::" + e.getMethodName());
         }
 
         System.getProperties().forEach((k, v) -> {
-            getLogger().info("property: " + k + "=" + v);
+            getIssueRecorder().info("property: " + k + "=" + v);
         });
     }
 

@@ -1,9 +1,9 @@
 package io.github.sinri.keel.core.cache.impl;
 
 import io.github.sinri.keel.core.cache.KeelEverlastingCacheInterface;
-import io.github.sinri.keel.core.verticles.KeelVerticleImplPure;
+import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
+import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -15,16 +15,15 @@ import java.util.concurrent.ConcurrentMap;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
- * This implement is to provide:
- * 1. initialized cache data;
- * 2. everlasting cache till modified;
- * 3. regular updating.
+ * This implement is to provide: 1. initialized cache data; 2. everlasting cache till modified; 3. regular updating.
  *
  * @since 3.2.11
  */
-abstract public class KeelCacheDalet extends KeelVerticleImplPure implements KeelEverlastingCacheInterface<String, String> {
+abstract public class KeelCacheDalet
+        //extends KeelVerticleImplPure
+        extends KeelVerticleImpl<KeelEventLog>
+        implements KeelEverlastingCacheInterface<String, String> {
     private final ConcurrentMap<String, String> map = new ConcurrentHashMap<>();
-
 
     /**
      * Save the item to cache.
@@ -96,25 +95,23 @@ abstract public class KeelCacheDalet extends KeelVerticleImplPure implements Kee
     }
 
     @Override
-    protected void startAsPureKeelVerticle(Promise<Void> startPromise) {
-        fullyUpdate()
-                .onSuccess(updated -> {
+    protected Future<Void> startVerticle() {
+        return fullyUpdate()
+                .compose(updated -> {
                     if (regularUpdatePeriod() >= 0) {
                         Keel.asyncCallEndlessly(() -> {
                             return Future.succeededFuture()
-                                    .compose(v -> {
-                                        if (regularUpdatePeriod() == 0) return Future.succeededFuture();
-                                        else return Keel.asyncSleep(regularUpdatePeriod());
-                                    })
-                                    .compose(v -> {
-                                        return fullyUpdate();
-                                    });
+                                         .compose(v -> {
+                                             if (regularUpdatePeriod() == 0) return Future.succeededFuture();
+                                             else return Keel.asyncSleep(regularUpdatePeriod());
+                                         })
+                                         .compose(v -> {
+                                             return fullyUpdate();
+                                         });
                         });
                     }
-
-                    startPromise.complete();
-                })
-                .onFailure(startPromise::fail);
+                    return Future.succeededFuture();
+                });
     }
 
     abstract public Future<Void> fullyUpdate();

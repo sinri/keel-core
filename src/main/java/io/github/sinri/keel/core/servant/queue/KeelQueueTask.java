@@ -1,17 +1,16 @@
 package io.github.sinri.keel.core.servant.queue;
 
-import io.github.sinri.keel.core.verticles.KeelVerticleImplWithIssueRecorder;
+import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 
 import javax.annotation.Nonnull;
 
 /**
  * @since 2.1
  */
-public abstract class KeelQueueTask extends KeelVerticleImplWithIssueRecorder<QueueTaskIssueRecord> {
+public abstract class KeelQueueTask extends KeelVerticleImpl<QueueTaskIssueRecord> {
     private QueueWorkerPoolManager queueWorkerPoolManager;
 
     final void setQueueWorkerPoolManager(QueueWorkerPoolManager queueWorkerPoolManager) {
@@ -35,32 +34,34 @@ public abstract class KeelQueueTask extends KeelVerticleImplWithIssueRecorder<Qu
     @Nonnull
     @Override
     protected final KeelIssueRecorder<QueueTaskIssueRecord> buildIssueRecorder() {
-        return getIssueRecordCenter().generateIssueRecorder(QueueTaskIssueRecord.TopicQueue, () -> new QueueTaskIssueRecord(getTaskReference(), getTaskCategory()));
+        return getIssueRecordCenter().generateIssueRecorder(QueueTaskIssueRecord.TopicQueue,
+                () -> new QueueTaskIssueRecord(getTaskReference(), getTaskCategory()));
     }
 
     @Override
-    protected final void startAsKeelVerticle(Promise<Void> startPromise) {
+    protected Future<Void> startVerticle() {
         this.queueWorkerPoolManager.whenOneWorkerStarts();
 
         Future.succeededFuture()
-                .compose(v -> {
-                    notifyAfterDeployed();
-                    return Future.succeededFuture();
-                })
-                .compose(v -> run())
-                .recover(throwable -> {
-                    getIssueRecorder().exception(throwable, r -> r.message("KeelQueueTask Caught throwable from Method run"));
-                    return Future.succeededFuture();
-                })
-                .eventually(() -> {
-                    getIssueRecorder().info(r -> r.message("KeelQueueTask to undeploy"));
-                    notifyBeforeUndeploy();
-                    return undeployMe().onSuccess(done -> {
-                        this.queueWorkerPoolManager.whenOneWorkerEnds();
-                    });
-                });
+              .compose(v -> {
+                  notifyAfterDeployed();
+                  return Future.succeededFuture();
+              })
+              .compose(v -> run())
+              .recover(throwable -> {
+                  getIssueRecorder().exception(throwable, r -> r.message("KeelQueueTask Caught throwable from Method " +
+                          "run"));
+                  return Future.succeededFuture();
+              })
+              .eventually(() -> {
+                  getIssueRecorder().info(r -> r.message("KeelQueueTask to undeploy"));
+                  notifyBeforeUndeploy();
+                  return undeployMe().onSuccess(done -> {
+                      this.queueWorkerPoolManager.whenOneWorkerEnds();
+                  });
+              });
 
-        startPromise.complete();
+        return Future.succeededFuture();
     }
 
     abstract protected Future<Void> run();

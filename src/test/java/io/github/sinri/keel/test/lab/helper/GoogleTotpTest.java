@@ -28,7 +28,7 @@ public class GoogleTotpTest extends KeelInstantRunner {
     @InstantRunUnit(skip = true)
     public Future<Void> createAnonymousKey() {
         GoogleAuthenticatorKey authenticatorKey = asyncGoogleAuthenticator.createCredentials();
-        getLogger().info(x -> x
+        getIssueRecorder().info(x -> x
                 .message("Created Anonymous Key")
                 .context(j -> j
                         .put("key", authenticatorKey.getKey())
@@ -55,10 +55,10 @@ public class GoogleTotpTest extends KeelInstantRunner {
         return asyncGoogleAuthenticator.authorize(key, totpPassword)
                 .compose(ok -> {
                     if (ok) {
-                        getLogger().info("AUTH OK");
+                        getIssueRecorder().info("AUTH OK");
                         return Future.succeededFuture();
                     } else {
-                        getLogger().error("AUTH FAILED");
+                        getIssueRecorder().error("AUTH FAILED");
                         return Future.failedFuture("AUTH FAILED");
                     }
                 });
@@ -69,7 +69,7 @@ public class GoogleTotpTest extends KeelInstantRunner {
         asyncGoogleAuthenticator.setCredentialRepository(new CredentialRepositoryImpl());
         return asyncGoogleAuthenticator.createCredentials("testor")
                 .compose(authenticatorKey -> {
-                    getLogger().info(x -> x.message("Created Named Key")
+                    getIssueRecorder().info(x -> x.message("Created Named Key")
                             .context(j -> j
                                     .put("key", authenticatorKey.getKey())
                                     .put("ScratchCodes", new JsonArray(authenticatorKey.getScratchCodes()))
@@ -88,10 +88,10 @@ public class GoogleTotpTest extends KeelInstantRunner {
         return asyncGoogleAuthenticator.authorizeUser("testor", 265377)
                 .compose(ok -> {
                     if (ok) {
-                        getLogger().info("AUTH OK");
+                        getIssueRecorder().info("AUTH OK");
                         return Future.succeededFuture();
                     } else {
-                        getLogger().error("AUTH FAILED");
+                        getIssueRecorder().error("AUTH FAILED");
                         return Future.failedFuture("AUTH FAILED");
                     }
                 });
@@ -107,7 +107,7 @@ public class GoogleTotpTest extends KeelInstantRunner {
                         .setVerificationCode(408813)
                         .build()
         );
-        getLogger().info("otpAuthTotpURL: " + otpAuthTotpURL);
+        getIssueRecorder().info("otpAuthTotpURL: " + otpAuthTotpURL);
         return Future.succeededFuture();
     }
 
@@ -138,7 +138,7 @@ public class GoogleTotpTest extends KeelInstantRunner {
             return Future.succeededFuture()
                     .compose(v -> {
                         JsonObject jsonObject = dict.getJsonObject(userName);
-                        Keel.getLogger().fatal(x -> x.message("for username " + userName)
+                        Keel.getIssueRecorder().fatal(x -> x.message("for username " + userName)
                                 .context(jsonObject));
                         var x = jsonObject.getString("secretKey");
                         return Future.succeededFuture(x);
@@ -160,7 +160,8 @@ public class GoogleTotpTest extends KeelInstantRunner {
                     .put("validationCode", validationCode)
                     .put("scratchCodes", new JsonArray(scratchCodes));
             this.dict.put(userName, x);
-            Keel.getLogger().fatal(eventLog -> eventLog.message("saveUserCredentials for " + userName).context(x));
+            Keel.getIssueRecorder()
+                .fatal(eventLog -> eventLog.message("saveUserCredentials for " + userName).context(x));
             return Future.succeededFuture();
 
             /*

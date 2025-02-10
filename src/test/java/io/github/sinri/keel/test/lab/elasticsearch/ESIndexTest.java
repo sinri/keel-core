@@ -15,7 +15,7 @@ public class ESIndexTest {
 
         test1()
                 .onFailure(throwable -> {
-                    Keel.getLogger().exception(throwable);
+                    Keel.getIssueRecorder().exception(throwable);
                 })
                 .eventually(() -> {
                     return Keel.getVertx().close();

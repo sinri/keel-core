@@ -56,7 +56,7 @@ public class ReadHugeExcelTest extends KeelInstantRunner {
                 //            this.logger().info("index: " + index + " spent: " + spent);
                 x.incrementAndGet();
             });
-            this.getLogger().info(r -> r.message("FIN 1 " + x.get()));
+            getIssueRecorder().info(r -> r.message("FIN 1 " + x.get()));
 
             return Future.succeededFuture();
         });
@@ -78,7 +78,7 @@ public class ReadHugeExcelTest extends KeelInstantRunner {
                                        return Future.succeededFuture();
                                    }, 1000)
                                    .compose(v -> {
-                                       this.getLogger().info(r -> r.message("FIN 2 " + x.get()));
+                                       getIssueRecorder().info(r -> r.message("FIN 2 " + x.get()));
                                        return Future.succeededFuture();
                                    });
         });

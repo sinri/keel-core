@@ -32,7 +32,7 @@ public interface KeelWebReceptionistLoader {
         try {
             allClasses.forEach(c -> loadClass(router, c));
         } catch (Exception e) {
-            Keel.getLogger().exception(e, r -> r.classification("KeelWebReceptionistLoader", "loadPackage"));
+            Keel.getIssueRecorder().exception(e, r -> r.classification("KeelWebReceptionistLoader", "loadPackage"));
         }
     }
 
@@ -44,7 +44,7 @@ public interface KeelWebReceptionistLoader {
     }
 
     private static <R extends KeelWebReceptionist> void loadClass(Router router, Class<? extends R> c, ApiMeta apiMeta) {
-        Keel.getLogger().info(r -> r
+        Keel.getIssueRecorder().info(r -> r
                 .classification("KeelWebReceptionistLoader", "loadClass")
                 .message("Loading " + c.getName())
                 .context(j -> {
@@ -65,7 +65,8 @@ public interface KeelWebReceptionistLoader {
         try {
             receptionistConstructor = c.getConstructor(RoutingContext.class);
         } catch (NoSuchMethodException e) {
-            Keel.getLogger().exception(e, r -> r.classification("KeelWebReceptionistLoader", "loadClass").message("HANDLER REFLECTION EXCEPTION"));
+            Keel.getIssueRecorder().exception(e, r -> r.classification("KeelWebReceptionistLoader", "loadClass")
+                                                       .message("HANDLER REFLECTION EXCEPTION"));
             return;
         }
 
@@ -99,7 +100,8 @@ public interface KeelWebReceptionistLoader {
                 try {
                     preHandlerChain = preHandlerChainClass.getConstructor().newInstance();
                 } catch (Throwable e) {
-                    Keel.getLogger().exception(e, r -> r.classification("KeelWebReceptionistLoader", "loadClass").message("PreHandlerChain REFLECTION EXCEPTION"));
+                    Keel.getIssueRecorder().exception(e, r -> r.classification("KeelWebReceptionistLoader", "loadClass")
+                                                               .message("PreHandlerChain REFLECTION EXCEPTION"));
                     return;
                 }
                 break;

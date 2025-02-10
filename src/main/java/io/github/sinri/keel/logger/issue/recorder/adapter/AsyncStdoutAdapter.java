@@ -56,14 +56,14 @@ public class AsyncStdoutAdapter implements KeelIssueRecorderAdapter {
     public void close(@Nonnull Promise<Void> promise) {
         this.stopped = true;
         this.intravenous.shutdown()
-                .andThen(ar -> {
-                    if (ar.failed()) {
-                        promise.fail(ar.cause());
-                    } else {
-                        this.closed = true;
-                        promise.complete();
-                    }
-                });
+                        .andThen(ar -> {
+                            if (ar.failed()) {
+                                promise.fail(ar.cause());
+                            } else {
+                                this.closed = true;
+                                promise.complete();
+                            }
+                        });
     }
 
     @Override

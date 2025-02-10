@@ -13,13 +13,14 @@ import java.util.function.Supplier;
 
 /**
  * @since 3.2.0 The brand new KeelEventLogger based on KeelIssueRecorder.
- * @since 4.0.0 refine to class
+ * @since 4.0.0 shrink to a class, and prefer to use `KeelIssueRecorder<KeelEventLog>` directly.
  */
+@Deprecated(since = "4.0.0")
 public final class KeelEventLogger implements KeelIssueRecorder<KeelEventLog> {
     private final @Nonnull KeelIssueRecordCenter issueRecordCenter;
-    private KeelLogLevel level;
     private final @Nonnull String topic;
     private final List<KeelIssueRecorder<KeelEventLog>> bypassIssueRecorders;
+    private KeelLogLevel level;
     private @Nullable Handler<KeelEventLog> recordFormatter;
 
     public KeelEventLogger(
@@ -31,13 +32,15 @@ public final class KeelEventLogger implements KeelIssueRecorder<KeelEventLog> {
         this.level = KeelLogLevel.INFO;
         this.topic = topic;
         this.bypassIssueRecorders = new ArrayList<>();
+        this.recordFormatter = recordFormatter;
     }
 
     public static KeelEventLogger from(@Nonnull KeelIssueRecorder<KeelEventLog> issueRecorder) {
         return new KeelEventLogger(issueRecorder.issueRecordCenter(), null, issueRecorder.topic());
     }
 
-    public static KeelEventLogger from(@Nonnull KeelIssueRecorder<KeelEventLog> issueRecorder, @Nullable Handler<KeelEventLog> recordFormatter) {
+    public static KeelEventLogger from(@Nonnull KeelIssueRecorder<KeelEventLog> issueRecorder,
+                                       @Nullable Handler<KeelEventLog> recordFormatter) {
         return new KeelEventLogger(issueRecorder.issueRecordCenter(), recordFormatter, issueRecorder.topic());
     }
 
@@ -90,5 +93,13 @@ public final class KeelEventLogger implements KeelIssueRecorder<KeelEventLog> {
     @Override
     public void setRecordFormatter(@Nullable Handler<KeelEventLog> handler) {
         this.recordFormatter = handler;
+    }
+
+    /**
+     * @return this instance as raw KeelIssueRecorder type.
+     * @since 4.0.2
+     */
+    public KeelIssueRecorder<KeelEventLog> asIssueRecorder() {
+        return this;
     }
 }

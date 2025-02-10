@@ -7,6 +7,10 @@ import io.vertx.core.Promise;
 
 import javax.annotation.Nonnull;
 
+/**
+ * @deprecated use {@link KeelVerticleImpl} instead.
+ */
+@Deprecated(since = "4.0.0")
 abstract public class KeelVerticleImplWithIssueRecorder<T extends KeelIssueRecord<T>> extends AbstractVerticle implements KeelVerticle {
     private @Nonnull KeelIssueRecorder<T> issueRecorder;
 

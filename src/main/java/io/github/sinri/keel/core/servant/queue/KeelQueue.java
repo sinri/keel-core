@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.servant.queue;
 
-import io.github.sinri.keel.core.verticles.KeelVerticleImplWithIssueRecorder;
+import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.DeploymentOptions;
@@ -19,7 +19,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  *
  * @since 2.1
  */
-public abstract class KeelQueue extends KeelVerticleImplWithIssueRecorder<QueueManageIssueRecord> {
+public abstract class KeelQueue extends KeelVerticleImpl<QueueManageIssueRecord> {
     private KeelQueueNextTaskSeeker nextTaskSeeker;
     private QueueWorkerPoolManager queueWorkerPoolManager;
     private KeelQueueSignalReader signalReader;
@@ -36,7 +36,8 @@ public abstract class KeelQueue extends KeelVerticleImplWithIssueRecorder<QueueM
     @Nonnull
     @Override
     protected final KeelIssueRecorder<QueueManageIssueRecord> buildIssueRecorder() {
-        return getIssueRecordCenter().generateIssueRecorder(QueueManageIssueRecord.TopicQueue, QueueManageIssueRecord::new);
+        return getIssueRecordCenter().generateIssueRecorder(QueueManageIssueRecord.TopicQueue,
+                QueueManageIssueRecord::new);
     }
 
     public KeelQueueStatus getQueueStatus() {
@@ -49,8 +50,8 @@ public abstract class KeelQueue extends KeelVerticleImplWithIssueRecorder<QueueM
     }
 
     /**
-     * Create a new instance of QueueWorkerPoolManager when routine starts.
-     * By default, it uses an unlimited pool, this could be override if needed.
+     * Create a new instance of QueueWorkerPoolManager when routine starts. By default, it uses an unlimited pool, this
+     * could be override if needed.
      *
      * @since 3.0.9
      */
@@ -71,10 +72,10 @@ public abstract class KeelQueue extends KeelVerticleImplWithIssueRecorder<QueueM
     abstract protected @Nonnull KeelQueueSignalReader getSignalReader();
 
     @Override
-    protected void startAsKeelVerticle(Promise<Void> startPromise) {
+    protected Future<Void> startVerticle() {
         this.queueStatus = KeelQueueStatus.RUNNING;
         routine();
-        startPromise.complete();
+        return Future.succeededFuture();
     }
 
     protected final void routine() {
@@ -84,32 +85,32 @@ public abstract class KeelQueue extends KeelVerticleImplWithIssueRecorder<QueueM
         this.nextTaskSeeker = getNextTaskSeeker();
 
         Future.succeededFuture()
-                .compose(v -> {
-                    return signalReader.readSignal();
-                })
-                .recover(throwable -> {
-                    getIssueRecorder().debug(r -> r.message("AS IS. Failed to read signal: " + throwable.getMessage()));
-                    if (getQueueStatus() == KeelQueueStatus.STOPPED) {
-                        return Future.succeededFuture(KeelQueueSignal.STOP);
-                    } else {
-                        return Future.succeededFuture(KeelQueueSignal.RUN);
-                    }
-                })
-                .compose(signal -> {
-                    if (signal == KeelQueueSignal.STOP) {
-                        return this.whenSignalStopCame();
-                    } else if (signal == KeelQueueSignal.RUN) {
-                        return this.whenSignalRunCame(nextTaskSeeker);
-                    } else {
-                        return Future.failedFuture("Unknown Signal");
-                    }
-                })
-                .eventually(() -> {
-                    long waitingMs = nextTaskSeeker.getWaitingPeriodInMs();
-                    getIssueRecorder().debug(r -> r.message("set timer for next routine after " + waitingMs + " ms"));
-                    Keel.getVertx().setTimer(waitingMs, timerID -> routine());
-                    return Future.succeededFuture();
-                })
+              .compose(v -> {
+                  return signalReader.readSignal();
+              })
+              .recover(throwable -> {
+                  getIssueRecorder().debug(r -> r.message("AS IS. Failed to read signal: " + throwable.getMessage()));
+                  if (getQueueStatus() == KeelQueueStatus.STOPPED) {
+                      return Future.succeededFuture(KeelQueueSignal.STOP);
+                  } else {
+                      return Future.succeededFuture(KeelQueueSignal.RUN);
+                  }
+              })
+              .compose(signal -> {
+                  if (signal == KeelQueueSignal.STOP) {
+                      return this.whenSignalStopCame();
+                  } else if (signal == KeelQueueSignal.RUN) {
+                      return this.whenSignalRunCame(nextTaskSeeker);
+                  } else {
+                      return Future.failedFuture("Unknown Signal");
+                  }
+              })
+              .eventually(() -> {
+                  long waitingMs = nextTaskSeeker.getWaitingPeriodInMs();
+                  getIssueRecorder().debug(r -> r.message("set timer for next routine after " + waitingMs + " ms"));
+                  Keel.getVertx().setTimer(waitingMs, timerID -> routine());
+                  return Future.succeededFuture();
+              })
         ;
     }
 
@@ -125,57 +126,57 @@ public abstract class KeelQueue extends KeelVerticleImplWithIssueRecorder<QueueM
         this.queueStatus = KeelQueueStatus.RUNNING;
 
         return Keel.asyncCallRepeatedly(routineResult -> {
-                    if (this.queueWorkerPoolManager.isBusy()) {
-                        return Keel.asyncSleep(1_000L);
-                    }
+                       if (this.queueWorkerPoolManager.isBusy()) {
+                           return Keel.asyncSleep(1_000L);
+                       }
 
-                    return Future.succeededFuture()
-                            .compose(v -> nextTaskSeeker.seekNextTask())
-                            .compose(task -> {
-                                if (task == null) {
-                                    // 队列里已经空了，不必再找
-                                    getIssueRecorder().debug(r -> r.message("No more task todo"));
-                                    // 通知 FutureUntil 结束
-                                    routineResult.stop();
-                                    return Future.succeededFuture();
-                                }
+                       return Future.succeededFuture()
+                                    .compose(v -> nextTaskSeeker.seekNextTask())
+                                    .compose(task -> {
+                                        if (task == null) {
+                                            // 队列里已经空了，不必再找
+                                            getIssueRecorder().debug(r -> r.message("No more task todo"));
+                                            // 通知 FutureUntil 结束
+                                            routineResult.stop();
+                                            return Future.succeededFuture();
+                                        }
 
-                                // 队列里找出来一个task, deploy it (至于能不能跑起来有没有锁就不管了)
-                                getIssueRecorder().info(r -> r.message("To run task: " + task.getTaskReference()));
-                                getIssueRecorder().info(r -> r.message("Trusted that task is already locked by seeker: " + task.getTaskReference()));
+                                        // 队列里找出来一个task, deploy it (至于能不能跑起来有没有锁就不管了)
+                                        getIssueRecorder().info(r -> r.message("To run task: " + task.getTaskReference()));
+                                        getIssueRecorder().info(r -> r.message("Trusted that task is already locked " +
+                                                "by seeker: " + task.getTaskReference()));
 
-                                // since 3.0.9
-                                task.setQueueWorkerPoolManager(this.queueWorkerPoolManager);
+                                        // since 3.0.9
+                                        task.setQueueWorkerPoolManager(this.queueWorkerPoolManager);
 
-                                return Future.succeededFuture()
-                                        .compose(v -> task.deployMe(new DeploymentOptions()
-                                                .setThreadingModel(ThreadingModel.WORKER)
-                                        ))
-                                        .compose(
-                                                deploymentID -> {
-                                                    getIssueRecorder().info(r -> r.message("TASK [" + task.getTaskReference() + "] VERTICLE DEPLOYED: " + deploymentID));
-                                                    // 通知 FutureUntil 继续下一轮
-                                                    return Future.succeededFuture();
-                                                },
-                                                throwable -> {
-                                                    getIssueRecorder().exception(throwable, r -> r.message("CANNOT DEPLOY TASK [" + task.getTaskReference() + "] VERTICLE"));
-                                                    // 通知 FutureUntil 继续下一轮
-                                                    return Future.succeededFuture();
-                                                }
-                                        );
-
-                            });
-                })
-                .recover(throwable -> {
-                    getIssueRecorder().exception(throwable, r -> r.message("KeelQueue 递归找活干里出现了奇怪的故障"));
-                    return Future.succeededFuture();
-                });
+                                        return Future.succeededFuture()
+                                                     .compose(v -> task.deployMe(new DeploymentOptions()
+                                                             .setThreadingModel(ThreadingModel.WORKER)
+                                                     ))
+                                                     .compose(
+                                                             deploymentID -> {
+                                                                 getIssueRecorder().info(r -> r.message("TASK [" + task.getTaskReference() + "] VERTICLE DEPLOYED: " + deploymentID));
+                                                                 // 通知 FutureUntil 继续下一轮
+                                                                 return Future.succeededFuture();
+                                                             },
+                                                             throwable -> {
+                                                                 getIssueRecorder().exception(throwable,
+                                                                         r -> r.message("CANNOT DEPLOY TASK [" + task.getTaskReference() + "] VERTICLE"));
+                                                                 // 通知 FutureUntil 继续下一轮
+                                                                 return Future.succeededFuture();
+                                                             }
+                                                     );
+                                    });
+                   })
+                   .recover(throwable -> {
+                       getIssueRecorder().exception(throwable, r -> r.message("KeelQueue 递归找活干里出现了奇怪的故障"));
+                       return Future.succeededFuture();
+                   });
     }
 
     @Override
-    protected void stopAsKeelVerticle(Promise<Void> stopPromise) {
+    public void stop(Promise<Void> stopPromise) throws Exception {
         this.queueStatus = KeelQueueStatus.STOPPED;
         stopPromise.complete();
     }
-
 }

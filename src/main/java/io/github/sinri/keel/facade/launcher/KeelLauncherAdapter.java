@@ -1,7 +1,8 @@
 package io.github.sinri.keel.facade.launcher;
 
-import io.github.sinri.keel.logger.event.KeelEventLogger;
+import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
+import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.launcher.VertxLifecycleHooks;
@@ -16,8 +17,7 @@ import javax.annotation.Nullable;
 public interface KeelLauncherAdapter extends VertxLifecycleHooks {
 
     /**
-     * Run this in main.
-     * Do not override this.
+     * Run this in main. Do not override this.
      *
      * @param args refer to the main.
      */
@@ -26,27 +26,27 @@ public interface KeelLauncherAdapter extends VertxLifecycleHooks {
     }
 
     /**
-     * Create a launcher.
-     * Do not override this.
+     * Create a launcher. Do not override this.
      */
     default @Nonnull KeelLauncher launcher() {
         return new KeelLauncher(this);
     }
 
     /**
-     * @since 3.2.0
+     * @since 4.0.2
      */
-    default @Nonnull KeelEventLogger buildEventLoggerForLauncher() {
-        return KeelIssueRecordCenter.outputCenter().generateEventLogger(getClass().getName());
+    default @Nonnull KeelIssueRecorder<KeelEventLog> buildIssueRecorderForLauncher() {
+        return KeelIssueRecordCenter.outputCenter().generateIssueRecorder(getClass().getName(), KeelEventLog::new);
     }
-
 
     void beforeStoppingVertx();
 
     void afterStoppingVertx();
 
     @Override
-    default void handleDeployFailed(Vertx vertx, String mainVerticle, DeploymentOptions deploymentOptions, Throwable cause) {
+    default void handleDeployFailed(
+            Vertx vertx, String mainVerticle, DeploymentOptions deploymentOptions, Throwable cause
+    ) {
         vertx.close();
     }
 

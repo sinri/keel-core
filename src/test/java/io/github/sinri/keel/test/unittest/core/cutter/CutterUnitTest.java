@@ -19,7 +19,7 @@ public class CutterUnitTest extends KeelUnitTest {
             CutterOnString cutterOnString = new CutterOnString();
             List<String> results = new ArrayList<>();
             cutterOnString.setComponentHandler(s -> {
-                getLogger().info("component: " + s);
+                getIssueRecorder().info("component: " + s);
                 results.add(s);
             });
 

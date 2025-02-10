@@ -1,10 +1,16 @@
 package io.github.sinri.keel.core.verticles;
 
+import io.github.sinri.keel.logger.event.KeelEventLog;
+import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
+import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Verticle;
 import io.vertx.core.json.JsonObject;
+
+import javax.annotation.Nonnull;
+import java.util.function.Supplier;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
@@ -13,6 +19,23 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 3.2.0 remove logger
  */
 public interface KeelVerticle extends Verticle {
+    /**
+     * @param startFutureSupplier confirm what would start in this verticle?
+     * @param logger              the KeelIssueRecorder instance following KeelEventLog format.
+     * @since 4.0.2
+     */
+    static KeelVerticle instant(
+            @Nonnull Supplier<Future<Void>> startFutureSupplier,
+            @Nonnull KeelIssueRecorder<KeelEventLog> logger
+    ) {
+        return new KeelInstantVerticle(startFutureSupplier, logger);
+    }
+
+    static KeelVerticle instant(@Nonnull Supplier<Future<Void>> startFutureSupplier) {
+        KeelIssueRecorder<KeelEventLog> issueRecorder = KeelIssueRecordCenter.silentCenter()
+                                                                             .generateIssueRecorder("", () -> null);
+        return instant(startFutureSupplier, issueRecorder);
+    }
 
     /**
      * copied from AbstractVerticle
@@ -36,7 +59,6 @@ public interface KeelVerticle extends Verticle {
                 .put("deployment_id", this.deploymentID());
     }
 
-
     default Future<String> deployMe(DeploymentOptions deploymentOptions) {
         return Keel.getVertx().deployVerticle(this, deploymentOptions);
     }
@@ -47,5 +69,4 @@ public interface KeelVerticle extends Verticle {
     default Future<Void> undeployMe() {
         return Keel.getVertx().undeploy(deploymentID());
     }
-
 }

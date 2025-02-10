@@ -132,7 +132,8 @@ public class KeelReflectionHelper {
                                     descendantClasses.add(clazz);
                                 }
                             } catch (Throwable e) {
-                                Keel.getLogger().debug(getClass() + " seekClassDescendantsInPackageForFileSystem for " + className + " error: " + e.getMessage());
+                                Keel.getIssueRecorder()
+                                    .debug(getClass() + " seekClassDescendantsInPackageForFileSystem for " + className + " error: " + e.getMessage());
                             }
                         }
                         return FileVisitResult.CONTINUE;
@@ -140,7 +141,7 @@ public class KeelReflectionHelper {
                 });
             }
         } catch (Exception e) {
-            Keel.getLogger().exception(e);
+            Keel.getIssueRecorder().exception(e);
         }
         return descendantClasses;
     }
@@ -158,7 +159,8 @@ public class KeelReflectionHelper {
                     descendantClasses.add((Class<? extends R>) aClass);
                 }
             } catch (Throwable e) {
-                Keel.getLogger().debug(getClass() + " seekClassDescendantsInPackageForRunningJar for " + s + " error: " + e.getMessage());
+                Keel.getIssueRecorder()
+                    .debug(getClass() + " seekClassDescendantsInPackageForRunningJar for " + s + " error: " + e.getMessage());
             }
         }
         return descendantClasses;
@@ -179,7 +181,9 @@ public class KeelReflectionHelper {
                         descendantClasses.add(clazz);
                     }
                 } catch (Throwable e) {
-                    Keel.getLogger().debug(getClass() + " seekClassDescendantsInPackageForProvidedJar for " + className + " error: " + e.getMessage());
+                    Keel.getIssueRecorder()
+                        .debug(getClass() + " seekClassDescendantsInPackageForProvidedJar for " + className + " error" +
+                                ": " + e.getMessage());
                 }
             }
         });

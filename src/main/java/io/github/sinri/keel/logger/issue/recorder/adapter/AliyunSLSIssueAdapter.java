@@ -35,32 +35,32 @@ abstract public class AliyunSLSIssueAdapter implements KeelIssueRecorderAdapter 
 
     public final void start() {
         Keel.asyncCallRepeatedly(routineResult -> {
-                    if (isStopped()) {
-                        Keel.getLogger().warning("AliyunSLSIssueAdapter routine to stop");
-                        routineResult.stop();
-                        return Future.succeededFuture();
-                    }
+                if (isStopped()) {
+                    Keel.getIssueRecorder().warning("AliyunSLSIssueAdapter routine to stop");
+                    routineResult.stop();
+                    return Future.succeededFuture();
+                }
 
-                    Set<String> topics = Collections.unmodifiableSet(this.issueRecordQueueMap.keySet());
-                    return Keel.asyncCallIteratively(topics, this::handleForTopic)
-                            .compose(v -> {
-                                AtomicLong total = new AtomicLong(0);
-                                return Keel.asyncCallIteratively(topics, topic -> {
-                                            total.addAndGet(this.issueRecordQueueMap.get(topic).size());
-                                            return Future.succeededFuture();
-                                        })
-                                        .compose(vv -> {
-                                            if (total.get() == 0) {
-                                                return Keel.asyncSleep(500L);
-                                            } else {
-                                                return Future.succeededFuture();
-                                            }
-                                        });
-                            });
-                })
-                .onFailure(throwable -> {
-                    Keel.getLogger().exception(throwable, "AliyunSLSIssueAdapter routine exception");
-                });
+                Set<String> topics = Collections.unmodifiableSet(this.issueRecordQueueMap.keySet());
+                return Keel.asyncCallIteratively(topics, this::handleForTopic)
+                           .compose(v -> {
+                               AtomicLong total = new AtomicLong(0);
+                               return Keel.asyncCallIteratively(topics, topic -> {
+                                              total.addAndGet(this.issueRecordQueueMap.get(topic).size());
+                                              return Future.succeededFuture();
+                                          })
+                                          .compose(vv -> {
+                                              if (total.get() == 0) {
+                                                  return Keel.asyncSleep(500L);
+                                              } else {
+                                                  return Future.succeededFuture();
+                                              }
+                                          });
+                           });
+            })
+            .onFailure(throwable -> {
+                Keel.getIssueRecorder().exception(throwable, "AliyunSLSIssueAdapter routine exception");
+            });
     }
 
     protected int bufferSize() {
@@ -84,7 +84,8 @@ abstract public class AliyunSLSIssueAdapter implements KeelIssueRecorderAdapter 
         return handleIssueRecordsForTopic(topic, buffer);
     }
 
-    abstract protected Future<Void> handleIssueRecordsForTopic(@Nonnull final String topic, @Nonnull final List<KeelIssueRecord<?>> buffer);
+    abstract protected Future<Void> handleIssueRecordsForTopic(@Nonnull final String topic,
+                                                               @Nonnull final List<KeelIssueRecord<?>> buffer);
 
     @Override
     public KeelIssueRecordRender<JsonObject> issueRecordRender() {

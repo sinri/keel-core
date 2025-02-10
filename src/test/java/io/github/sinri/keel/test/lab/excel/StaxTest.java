@@ -57,7 +57,7 @@ public class StaxTest extends KeelInstantRunner {
                 , keelSheets -> {
                     KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
                     keelSheet.getMatrixRowIterator(3, null).forEachRemaining(row -> {
-                        getLogger().info("<" + row.readValue(0) + "> " + row.readValueToBigDecimal(1));
+                        getIssueRecorder().info("<" + row.readValue(0) + "> " + row.readValueToBigDecimal(1));
                     });
                     return Future.succeededFuture();
                 });

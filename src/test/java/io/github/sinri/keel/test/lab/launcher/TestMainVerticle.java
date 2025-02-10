@@ -1,26 +1,29 @@
 package io.github.sinri.keel.test.lab.launcher;
 
-import io.github.sinri.keel.core.verticles.KeelVerticleImplWithEventLogger;
-import io.github.sinri.keel.logger.event.KeelEventLogger;
+import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
+import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
+import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
+
+import javax.annotation.Nonnull;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
-public class TestMainVerticle extends KeelVerticleImplWithEventLogger {
+public class TestMainVerticle extends KeelVerticleImpl<KeelEventLog> {
 
     @Override
-    protected void startAsKeelVerticle(Promise<Void> startPromise) {
+    protected Future<Void> startVerticle() {
         Keel.asyncCallEndlessly(() -> {
-            getLogger().info(r -> r.message("X"));
+            getIssueRecorder().info(r -> r.message("X"));
             return Future.succeededFuture();
         });
-        startPromise.complete();
+        return Future.succeededFuture();
     }
 
+    @Nonnull
     @Override
-    protected KeelEventLogger buildEventLogger() {
-        return KeelIssueRecordCenter.outputCenter().generateEventLogger(getClass().getName());
+    protected KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
+        return KeelIssueRecordCenter.outputCenter().generateIssueRecorder(getClass().getName(), KeelEventLog::new);
     }
 }

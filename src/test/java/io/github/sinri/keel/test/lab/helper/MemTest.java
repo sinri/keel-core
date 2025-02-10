@@ -38,7 +38,7 @@ public class MemTest extends KeelInstantRunner {
         double b = a * 2;
         double c = new Random().nextDouble();
         double x = 1.0 / ((b - a) * c - a * c);
-        getLogger().info(r -> r.context("result", new JsonObject()
+        getIssueRecorder().info(r -> r.context("result", new JsonObject()
                         .put("x", x)
                         .put("isFinite", Double.isFinite(x))
                         .put("isInfinite", Double.isInfinite(x))
@@ -53,7 +53,7 @@ public class MemTest extends KeelInstantRunner {
     private void printMemoryUsage() {
         MemoryUsage heapMemoryUsage = memoryMXBean.getHeapMemoryUsage();
         MemoryUsage nonHeapMemoryUsage = memoryMXBean.getNonHeapMemoryUsage();
-        getLogger().info(log -> log.message("mem")
+        getIssueRecorder().info(log -> log.message("mem")
                 .context(c -> c
                         .put("heap", new JsonObject()
                                 .put("init", heapMemoryUsage.getInit() / (1024 * 2024 * 1.0))
@@ -73,11 +73,11 @@ public class MemTest extends KeelInstantRunner {
 
     @InstantRunUnit
     public Future<Void> test3() {
-        getLogger().info(r -> r.message("point 1"));
+        getIssueRecorder().info(r -> r.message("point 1"));
         AtomicInteger iRef = new AtomicInteger(2);
         Promise<Void> promise = Promise.promise();
         Keel.getVertx().setPeriodic(3000L, 2000L, timer -> {
-            getLogger().info(r -> r.message("point 2"));
+            getIssueRecorder().info(r -> r.message("point 2"));
             if (iRef.decrementAndGet() <= 0) {
                 if (Keel.getVertx().cancelTimer(timer)) {
                     promise.complete();

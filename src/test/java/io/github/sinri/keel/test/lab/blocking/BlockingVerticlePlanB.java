@@ -1,6 +1,6 @@
 package io.github.sinri.keel.test.lab.blocking;
 
-import io.github.sinri.keel.core.verticles.KeelVerticleImplWithIssueRecorder;
+import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
 import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
@@ -18,7 +18,7 @@ public class BlockingVerticlePlanB {
     private static Future<Void> executeBlocking(Handler<Promise<Void>> blockCode) {
         var issueRecorder = KeelIssueRecordCenter.outputCenter().generateIssueRecorder("Sample", KeelEventLog::new);
         Promise<Void> promise = Promise.promise();
-        KeelVerticleImplWithIssueRecorder<KeelEventLog> verticle = new KeelVerticleImplWithIssueRecorder<>() {
+        KeelVerticleImpl<KeelEventLog> verticle = new KeelVerticleImpl<>() {
             @Nonnull
             @Override
             public KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
@@ -26,53 +26,54 @@ public class BlockingVerticlePlanB {
             }
 
             @Override
-            protected void startAsKeelVerticle(Promise<Void> startPromise) {
+            protected Future<Void> startVerticle() {
                 getIssueRecorder().info(r -> r.message("in verticle " + deploymentID()));
                 blockCode.handle(promise);
 
                 promise.future()
-                        .onComplete(ar -> {
-                            this.undeployMe();
-                        });
+                       .onComplete(ar -> {
+                           this.undeployMe();
+                       });
 
-                startPromise.complete();
+                return Future.succeededFuture();
             }
         };
         return verticle.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER))
-                .compose(deploymentId -> {
-                    issueRecorder.info(r -> r.message("deployed: " + deploymentId));
-                    return promise.future();
-                });
+                       .compose(deploymentId -> {
+                           issueRecorder.info(r -> r.message("deployed: " + deploymentId));
+                           return promise.future();
+                       });
     }
 
     public static void main(String[] args) {
         Keel.initializeVertx(new VertxOptions())
-                .compose(done -> {
-                    KeelEventLogger loggerInEventLoopContext = KeelIssueRecordCenter.outputCenter().generateEventLogger("Sample");
+            .compose(done -> {
+                KeelEventLogger loggerInEventLoopContext = KeelIssueRecordCenter.outputCenter()
+                                                                                .generateEventLogger("Sample");
 
-                    loggerInEventLoopContext.info(log -> log
-                            .message("init")
-                            .context(c -> c
-                                    .put("thread_id", Thread.currentThread().getId())
-                            )
-                    );
+                loggerInEventLoopContext.info(log -> log
+                        .message("init")
+                        .context(c -> c
+                                .put("thread_id", Thread.currentThread().getId())
+                        )
+                );
 
-                    return Future.all(
-                                    blockPiece(loggerInEventLoopContext),
-                                    blockPiece(loggerInEventLoopContext)
-                            )
-                            .compose(compositeFuture -> {
-                                loggerInEventLoopContext.info("FIN");
-                                return Future.succeededFuture();
-                            });
-                })
+                return Future.all(
+                                     blockPiece(loggerInEventLoopContext),
+                                     blockPiece(loggerInEventLoopContext)
+                             )
+                             .compose(compositeFuture -> {
+                                 loggerInEventLoopContext.info("FIN");
+                                 return Future.succeededFuture();
+                             });
+            })
 
-                .onFailure(throwable -> {
-                    throwable.printStackTrace();
-                })
-                .eventually(() -> {
-                    return Keel.close();
-                });
+            .onFailure(throwable -> {
+                throwable.printStackTrace();
+            })
+            .eventually(() -> {
+                return Keel.close();
+            });
     }
 
     private static Future<Void> blockPiece(KeelEventLogger loggerInEventLoopContext) {
@@ -94,14 +95,14 @@ public class BlockingVerticlePlanB {
         KeelEventLogger loggerInBlockingContext = KeelIssueRecordCenter.outputCenter().generateEventLogger("Sample");
 
         loggerInBlockingContext.info(log -> log.message("START")
-                .context(c -> c.put("thread_id", Thread.currentThread().getId())));
+                                               .context(c -> c.put("thread_id", Thread.currentThread().getId())));
         try {
             Thread.sleep(30_000L);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
         loggerInBlockingContext.info(log -> log.message("END")
-                .context(c -> c.put("thread_id", Thread.currentThread().getId())));
+                                               .context(c -> c.put("thread_id", Thread.currentThread().getId())));
         promise.complete();
     }
 }

@@ -2,7 +2,7 @@ package io.github.sinri.keel.core.servant.sundial;
 
 import io.github.sinri.keel.core.cron.KeelCronExpression;
 import io.github.sinri.keel.core.cron.ParsedCalenderElements;
-import io.github.sinri.keel.core.verticles.KeelVerticleImplWithIssueRecorder;
+import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.DeploymentOptions;
@@ -21,7 +21,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 3.2.4 use verticle to handle the sundial plan executing.
  * @since 4.0.0 changed to use issue recorder
  */
-public abstract class KeelSundial extends KeelVerticleImplWithIssueRecorder<SundialIssueRecord> {
+public abstract class KeelSundial extends KeelVerticleImpl<SundialIssueRecord> {
     private final Map<String, KeelSundialPlan> planMap = new ConcurrentHashMap<>();
     private Long timerID;
 
@@ -40,13 +40,13 @@ public abstract class KeelSundial extends KeelVerticleImplWithIssueRecorder<Sund
     }
 
     @Override
-    protected void startAsKeelVerticle(Promise<Void> startPromise) {
+    protected Future<Void> startVerticle() {
         int delaySeconds = 61 - KeelCronExpression.parseCalenderToElements(Calendar.getInstance()).second;
         this.timerID = Keel.getVertx().setPeriodic(delaySeconds * 1000L, 60_000L, timerID -> {
             handleEveryMinute(Calendar.getInstance());
             refreshPlans();
         });
-        startPromise.complete();
+        return Future.succeededFuture();
     }
 
     private void handleEveryMinute(Calendar now) {
@@ -83,40 +83,40 @@ public abstract class KeelSundial extends KeelVerticleImplWithIssueRecorder<Sund
      */
     private void refreshPlans() {
         Keel.asyncCallExclusively(
-                        "io.github.sinri.keel.servant.sundial.KeelSundial.refreshPlans",
-                        1000L,
-                        () -> {
-                            return fetchPlans()
-                                    .compose(plans -> {
-                                        // treat null as NOT MODIFIED
-                                        if (plans != null) {
-                                            Set<String> toDelete = new HashSet<>(planMap.keySet());
-                                            plans.forEach(plan -> {
-                                                toDelete.remove(plan.key());
-                                                planMap.put(plan.key(), plan);
-                                            });
-                                            if (!toDelete.isEmpty()) {
-                                                toDelete.forEach(planMap::remove);
-                                            }
+                    "io.github.sinri.keel.servant.sundial.KeelSundial.refreshPlans",
+                    1000L,
+                    () -> {
+                        return fetchPlans()
+                                .compose(plans -> {
+                                    // treat null as NOT MODIFIED
+                                    if (plans != null) {
+                                        Set<String> toDelete = new HashSet<>(planMap.keySet());
+                                        plans.forEach(plan -> {
+                                            toDelete.remove(plan.key());
+                                            planMap.put(plan.key(), plan);
+                                        });
+                                        if (!toDelete.isEmpty()) {
+                                            toDelete.forEach(planMap::remove);
                                         }
-                                        return Future.succeededFuture();
-                                    });
-                        }
-                )
-                .onFailure(throwable -> {
-                    getIssueRecorder().exception(throwable, "io.github.sinri.keel.core.servant.sundial.KeelSundial.refreshPlans exception");
-                });
+                                    }
+                                    return Future.succeededFuture();
+                                });
+                    }
+            )
+            .onFailure(throwable -> {
+                getIssueRecorder().exception(throwable, "io.github.sinri.keel.core.servant.sundial.KeelSundial" +
+                        ".refreshPlans exception");
+            });
     }
 
     /**
-     * @since 3.0.1
-     * Before plansSupplier is removed, when plansSupplier returns non-null supplier, use that and ignore this.
-     * If future as null, means `NOT MODIFIED`.
+     * @since 3.0.1 Before plansSupplier is removed, when plansSupplier returns non-null supplier, use that and ignore
+     *         this. If future as null, means `NOT MODIFIED`.
      */
     abstract protected Future<Collection<KeelSundialPlan>> fetchPlans();
 
     @Override
-    protected void stopAsKeelVerticle(Promise<Void> stopPromise) {
+    public void stop(Promise<Void> stopPromise) throws Exception {
         if (this.timerID != null) {
             Keel.getVertx().cancelTimer(this.timerID);
         }

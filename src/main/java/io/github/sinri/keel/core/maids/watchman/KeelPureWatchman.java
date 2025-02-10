@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.maids.watchman;
 
-import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -18,15 +17,16 @@ public class KeelPureWatchman extends KeelWatchmanImpl {
 
     private final Options options;
 
-    protected KeelPureWatchman(String watchmanName, Options options) {
-        super(watchmanName);
+    protected KeelPureWatchman(String watchmanName, Options options, KeelIssueRecordCenter issueRecordCenter) {
+        super(watchmanName, issueRecordCenter);
         this.options = options;
     }
 
-    public static Future<String> deploy(String watchmanName, Handler<Options> optionsHandler) {
+    public static Future<String> deploy(String watchmanName, Handler<Options> optionsHandler,
+                                        KeelIssueRecordCenter issueRecordCenter) {
         Options options = new Options();
         optionsHandler.handle(options);
-        KeelPureWatchman keelPureWatchman = new KeelPureWatchman(watchmanName, options);
+        KeelPureWatchman keelPureWatchman = new KeelPureWatchman(watchmanName, options, issueRecordCenter);
         return Keel.getVertx().deployVerticle(keelPureWatchman, new DeploymentOptions()
                 .setThreadingModel(ThreadingModel.WORKER)
         );
@@ -39,14 +39,6 @@ public class KeelPureWatchman extends KeelWatchmanImpl {
     @Override
     public long interval() {
         return options.getInterval();
-    }
-
-    /**
-     * @since 3.2.0
-     */
-    @Override
-    protected KeelEventLogger buildEventLogger() {
-        return KeelIssueRecordCenter.silentCenter().generateEventLogger(getClass().getName());
     }
 
     public static class Options {

@@ -5,6 +5,9 @@ import io.github.sinri.keel.core.cache.impl.KeelCacheDalet;
 import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
 import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.logger.KeelLogLevel;
+import io.github.sinri.keel.logger.event.KeelEventLog;
+import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
+import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
@@ -19,7 +22,7 @@ public class KeelCacheDaletTest extends KeelInstantRunner {
     @Nonnull
     @Override
     protected Future<Void> starting() {
-        Keel.getLogger().setVisibleLevel(KeelLogLevel.DEBUG);
+        Keel.getIssueRecorder().setVisibleLevel(KeelLogLevel.DEBUG);
         return super.starting();
     }
 
@@ -28,16 +31,16 @@ public class KeelCacheDaletTest extends KeelInstantRunner {
         Dalet dalet = new Dalet();
         return dalet.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER))
                 .compose(deploymentId -> {
-                    getLogger().notice("deployment id: " + deploymentId);
+                    getIssueRecorder().notice("deployment id: " + deploymentId);
                     return Future.succeededFuture();
                 }, throwable -> {
-                    getLogger().exception(throwable);
+                    getIssueRecorder().exception(throwable);
                     return Future.failedFuture(throwable);
                 })
                 .compose(v -> {
                     return Keel.asyncCallStepwise(10, i -> {
                         try {
-                            getLogger().info("[" + i + "] " + dalet.read("last_cache_time"));
+                            getIssueRecorder().info("[" + i + "] " + dalet.read("last_cache_time"));
                         } catch (NotCached e) {
                             throw new RuntimeException(e);
                         }
@@ -47,17 +50,17 @@ public class KeelCacheDaletTest extends KeelInstantRunner {
                 .compose(v -> {
                     return dalet.undeployMe()
                             .compose(undeployed -> {
-                                getLogger().notice("undeployed");
+                                getIssueRecorder().notice("undeployed");
                                 return Future.succeededFuture();
                             }, throwable -> {
-                                getLogger().exception(throwable);
+                                getIssueRecorder().exception(throwable);
                                 return Future.failedFuture(throwable);
                             });
                 })
                 .compose(v -> {
                     return Keel.asyncCallStepwise(10, i -> {
                         try {
-                            getLogger().info("[" + i + "] " + dalet.read("last_cache_time"));
+                            getIssueRecorder().info("[" + i + "] " + dalet.read("last_cache_time"));
                         } catch (NotCached e) {
                             throw new RuntimeException(e);
                         }
@@ -72,13 +75,19 @@ public class KeelCacheDaletTest extends KeelInstantRunner {
         public Future<Void> fullyUpdate() {
             this.save("last_cache_time", String.valueOf(System.currentTimeMillis()));
             this.save("last_cache_date", new Date().toString());
-            Keel.getLogger().info("updated cache");
+            Keel.getIssueRecorder().info("updated cache");
             return Future.succeededFuture();
         }
 
         @Override
         protected long regularUpdatePeriod() {
             return 3_000L;
+        }
+
+        @Nonnull
+        @Override
+        protected KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
+            return KeelIssueRecordCenter.outputCenter().generateIssueRecorder("Dalet", KeelEventLog::new);
         }
     }
 }

@@ -50,12 +50,12 @@ public class DebugB extends KeelInstantRunner {
                                                 .put("j3", null)
                                                 .put("j4", "234")
                                         );
-                                getLogger().info("sql: " + w);
+                                           getIssueRecorder().info("sql: " + w);
                             })
                             .executeForLastInsertedID(dynamicNamedMySQLConnection);
                 })
                 .compose(id -> {
-                    getLogger().info("id: " + id);
+                    getIssueRecorder().info("id: " + id);
                     return Future.succeededFuture();
                 });
     }
@@ -72,10 +72,10 @@ public class DebugB extends KeelInstantRunner {
                 .compose(resultMatrix -> {
                     try {
                         var row = resultMatrix.getFirstRow();
-                        getLogger().info("j1: " + row.getValue("j1").getClass());
-                        getLogger().info("j2: " + row.getValue("j2").getClass());
+                        getIssueRecorder().info("j1: " + row.getValue("j1").getClass());
+                        getIssueRecorder().info("j2: " + row.getValue("j2").getClass());
                         //getLogger().info("j3: " + row.getValue("j3").getClass());
-                        getLogger().info("j4: " + row.getValue("j4").getClass());
+                        getIssueRecorder().info("j4: " + row.getValue("j4").getClass());
                     } catch (KeelSQLResultRowIndexError e) {
                         throw new RuntimeException(e);
                     }

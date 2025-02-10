@@ -3,8 +3,9 @@ package io.github.sinri.keel.test.lab.pleiades;
 import io.github.sinri.keel.core.maids.pleiades.Pleiades;
 import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
 import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
-import io.github.sinri.keel.logger.event.KeelEventLogger;
+import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
+import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
@@ -12,6 +13,7 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageProducer;
 
+import javax.annotation.Nonnull;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -22,48 +24,48 @@ public class TestForPleiades extends KeelInstantRunner {
     public Future<Void> run() {
         AtomicReference<String> deploymentIdRef = new AtomicReference<>();
         return Keel.getVertx().deployVerticle(
-                        PleiadesSample.class,
-                        new DeploymentOptions()
-                                .setInstances(2)
-                                .setThreadingModel(ThreadingModel.WORKER)
-                )
-                .compose(deployed -> {
-                    getLogger().info("TestForPleiades deployed: " + deployed);
-                    deploymentIdRef.set(deployed);
+                           PleiadesSample.class,
+                           new DeploymentOptions()
+                                   .setInstances(2)
+                                   .setThreadingModel(ThreadingModel.WORKER)
+                   )
+                   .compose(deployed -> {
+                       getIssueRecorder().info("TestForPleiades deployed: " + deployed);
+                       deploymentIdRef.set(deployed);
 
-                    MessageProducer<String> sender = PleiadesSample.generateMessageProducer(
-                            PleiadesSample.ADDRESS,
-                            new DeliveryOptions()
-                                    .setSendTimeout(100L));
+                       MessageProducer<String> sender = PleiadesSample.generateMessageProducer(
+                               PleiadesSample.ADDRESS,
+                               new DeliveryOptions()
+                                       .setSendTimeout(100L));
 
-                    return Keel.asyncCallStepwise(5, integer -> {
-                                PleiadesSample.sendMessage("A[" + integer + "]");
-                                return Keel.asyncSleep(500L);
-                            })
-                            .compose(v -> {
-                                return Keel.asyncCallStepwise(5000, integer -> {
-                                    sender.write("B[" + integer + "]");
-                                    return Keel.asyncSleep(500L);
-                                });
-                            })
-                            .compose(v -> {
-                                return Keel.asyncSleep(60_000L)
-                                        .compose(vv -> {
-                                            return Keel.getVertx().undeploy(deploymentIdRef.get())
-                                                    .compose(x -> {
-                                                        getLogger().info("UNDEPLOYED " + deploymentIdRef.get());
-                                                        return Future.succeededFuture();
-                                                    });
-                                        });
-                            })
-                            .compose(v -> {
-                                PleiadesSample.sendMessage("C");
-                                return sender.write("D");
-                            });
-                })
-                .compose(v -> {
-                    return Keel.asyncSleep(60_000L);
-                });
+                       return Keel.asyncCallStepwise(5, integer -> {
+                                      PleiadesSample.sendMessage("A[" + integer + "]");
+                                      return Keel.asyncSleep(500L);
+                                  })
+                                  .compose(v -> {
+                                      return Keel.asyncCallStepwise(5000, integer -> {
+                                          sender.write("B[" + integer + "]");
+                                          return Keel.asyncSleep(500L);
+                                      });
+                                  })
+                                  .compose(v -> {
+                                      return Keel.asyncSleep(60_000L)
+                                                 .compose(vv -> {
+                                                     return Keel.getVertx().undeploy(deploymentIdRef.get())
+                                                                .compose(x -> {
+                                                                    getIssueRecorder().info("UNDEPLOYED " + deploymentIdRef.get());
+                                                                    return Future.succeededFuture();
+                                                                });
+                                                 });
+                                  })
+                                  .compose(v -> {
+                                      PleiadesSample.sendMessage("C");
+                                      return sender.write("D");
+                                  });
+                   })
+                   .compose(v -> {
+                       return Keel.asyncSleep(60_000L);
+                   });
     }
 
     public static class PleiadesSample extends Pleiades<String> {
@@ -80,10 +82,12 @@ public class TestForPleiades extends KeelInstantRunner {
             Keel.getVertx().eventBus().send(ADDRESS, content);
         }
 
+        @Nonnull
         @Override
-        protected KeelEventLogger buildEventLogger() {
+        protected KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
             return KeelIssueRecordCenter.outputCenter()
-                    .generateEventLogger("RobertaSample", x -> x.classification(uuid));
+                                        .generateIssueRecorder("RobertaSample",
+                                                () -> new KeelEventLog().classification(uuid));
         }
 
         @Override
@@ -93,11 +97,11 @@ public class TestForPleiades extends KeelInstantRunner {
 
         @Override
         protected void handleMessage(Message<String> message) {
-            getLogger().info("start with " + message.body());
+            getIssueRecorder().info("start with " + message.body());
             Keel.asyncSleep(2_000L)
-                    .andThen(slept -> {
-                        getLogger().info("end with " + message.body());
-                    });
+                .andThen(slept -> {
+                    getIssueRecorder().info("end with " + message.body());
+                });
         }
     }
 }

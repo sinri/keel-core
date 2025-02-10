@@ -1,7 +1,6 @@
 package io.github.sinri.keel.facade.async;
 
 import io.github.sinri.keel.core.verticles.KeelVerticle;
-import io.github.sinri.keel.core.verticles.KeelVerticleImplPure;
 import io.vertx.core.*;
 
 import javax.annotation.Nonnull;
@@ -151,14 +150,14 @@ public interface KeelAsyncMixin {
     ) {
         return asyncCallRepeatedly(routineResult -> {
             return Future.succeededFuture()
-                    .compose(v -> {
-                        if (iterator.hasNext()) {
-                            return itemProcessor.apply(iterator.next(), routineResult);
-                        } else {
-                            routineResult.stop();
-                            return Future.succeededFuture();
-                        }
-                    });
+                         .compose(v -> {
+                             if (iterator.hasNext()) {
+                                 return itemProcessor.apply(iterator.next(), routineResult);
+                             } else {
+                                 routineResult.stop();
+                                 return Future.succeededFuture();
+                             }
+                         });
         });
     }
 
@@ -186,21 +185,22 @@ public interface KeelAsyncMixin {
         return asyncCallIteratively(iterable.iterator(), itemProcessor);
     }
 
-    default Future<Void> asyncCallStepwise(long start, long end, long step, BiFunction<Long, RepeatedlyCallTask, Future<Void>> processor) {
+    default Future<Void> asyncCallStepwise(long start, long end, long step, BiFunction<Long, RepeatedlyCallTask,
+            Future<Void>> processor) {
         if (step == 0) throw new IllegalArgumentException("step must not be 0");
         AtomicLong ptr = new AtomicLong(start);
         return asyncCallRepeatedly(task -> {
             return Future.succeededFuture()
-                    .compose(vv -> {
-                        return processor.apply(ptr.get(), task)
-                                .compose(v -> {
-                                    long y = ptr.addAndGet(step);
-                                    if (y >= end) {
-                                        task.stop();
-                                    }
-                                    return Future.succeededFuture();
-                                });
-                    });
+                         .compose(vv -> {
+                             return processor.apply(ptr.get(), task)
+                                             .compose(v -> {
+                                                 long y = ptr.addAndGet(step);
+                                                 if (y >= end) {
+                                                     task.stop();
+                                                 }
+                                                 return Future.succeededFuture();
+                                             });
+                         });
         });
     }
 
@@ -219,8 +219,8 @@ public interface KeelAsyncMixin {
     default void asyncCallEndlessly(@Nonnull Supplier<Future<Void>> supplier) {
         asyncCallRepeatedly(routineResult -> {
             return Future.succeededFuture()
-                    .compose(v -> supplier.get())
-                    .eventually(() -> Future.succeededFuture());
+                         .compose(v -> supplier.get())
+                         .eventually(() -> Future.succeededFuture());
         });
     }
 
@@ -244,16 +244,18 @@ public interface KeelAsyncMixin {
         return promise.future();
     }
 
-    default <T> Future<T> asyncCallExclusively(@Nonnull String lockName, long waitTimeForLock, @Nonnull Supplier<Future<T>> exclusiveSupplier) {
+    default <T> Future<T> asyncCallExclusively(@Nonnull String lockName, long waitTimeForLock,
+                                               @Nonnull Supplier<Future<T>> exclusiveSupplier) {
         return Keel.getVertx().sharedData()
-                .getLockWithTimeout(lockName, waitTimeForLock)
-                .compose(lock -> Future.succeededFuture()
-                        .compose(v -> exclusiveSupplier.get())
-                        .andThen(ar -> lock.release())
-                );
+                   .getLockWithTimeout(lockName, waitTimeForLock)
+                   .compose(lock -> Future.succeededFuture()
+                                          .compose(v -> exclusiveSupplier.get())
+                                          .andThen(ar -> lock.release())
+                   );
     }
 
-    default <T> Future<T> asyncCallExclusively(@Nonnull String lockName, @Nonnull Supplier<Future<T>> exclusiveSupplier) {
+    default <T> Future<T> asyncCallExclusively(@Nonnull String lockName,
+                                               @Nonnull Supplier<Future<T>> exclusiveSupplier) {
         return asyncCallExclusively(lockName, 1_000L, exclusiveSupplier);
     }
 
@@ -289,7 +291,9 @@ public interface KeelAsyncMixin {
                                 promise.fail(e);
                             }
                         } else {
-                            promise.fail(new Exception("io.github.sinri.keel.core.async.KeelAsyncMixin.vertxizedRawFuture failed with rawFuture is not done."));
+                            promise.fail(new Exception(
+                                    "io.github.sinri.keel.core.async.KeelAsyncMixin.vertxizedRawFuture failed with " +
+                                            "rawFuture is not done."));
                         }
                     } else {
                         promise.fail(ar.cause());
@@ -305,16 +309,16 @@ public interface KeelAsyncMixin {
 
     default <T> Future<T> executeBlocking(@Nonnull Handler<Promise<T>> blockingCodeHandler) {
         Promise<T> promise = Promise.promise();
-        KeelVerticle verticle = new KeelVerticleImplPure() {
-            @Override
-            protected void startAsPureKeelVerticle(Promise<Void> startPromise) {
-                blockingCodeHandler.handle(promise);
-                promise.future().onComplete(ar -> this.undeployMe());
-                startPromise.complete();
-            }
-        };
+
+        KeelVerticle verticle = KeelVerticle.instant(() -> {
+            blockingCodeHandler.handle(promise);
+            return Future.succeededFuture();
+        });
         return verticle.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER))
-                .compose(deploymentId -> promise.future());
+                       .compose(deploymentId -> {
+                           return promise.future()
+                                         .onComplete(ar -> verticle.undeployMe());
+                       });
     }
 
     private <T> CompletableFuture<T> createPseudoAwaitCompletableFuture(Handler<Promise<T>> blockingCodeHandler) {
@@ -350,23 +354,23 @@ public interface KeelAsyncMixin {
 
         public static void start(@Nonnull RepeatedlyCallTask thisTask, @Nonnull Promise<Void> finalPromise) {
             Future.succeededFuture()
-                    .compose(v -> {
-                        if (thisTask.toStop) {
-                            return Future.succeededFuture();
-                        }
-                        return thisTask.processor.apply(thisTask);
-                    })
-                    .andThen(shouldStopAR -> {
-                        if (shouldStopAR.succeeded()) {
-                            if (thisTask.toStop) {
-                                finalPromise.complete();
-                            } else {
-                                Keel.getVertx().setTimer(1L, x -> start(thisTask, finalPromise));
-                            }
-                        } else {
-                            finalPromise.fail(shouldStopAR.cause());
-                        }
-                    });
+                  .compose(v -> {
+                      if (thisTask.toStop) {
+                          return Future.succeededFuture();
+                      }
+                      return thisTask.processor.apply(thisTask);
+                  })
+                  .andThen(shouldStopAR -> {
+                      if (shouldStopAR.succeeded()) {
+                          if (thisTask.toStop) {
+                              finalPromise.complete();
+                          } else {
+                              Keel.getVertx().setTimer(1L, x -> start(thisTask, finalPromise));
+                          }
+                      } else {
+                          finalPromise.fail(shouldStopAR.cause());
+                      }
+                  });
         }
 
         public void stop() {

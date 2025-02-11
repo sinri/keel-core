@@ -25,7 +25,7 @@ public class DebugA extends KeelInstantRunner {
                         "select 1"
                 )
                 .compose(resultMatrix -> {
-                    getIssueRecorder().info(x -> x.message("lalala: ")
+                    getInstantLogger().info(x -> x.message("lalala: ")
                                                   .context(j -> j.put("result_matrix", resultMatrix.toJsonArray())));
                     return Future.succeededFuture();
                 });

@@ -33,7 +33,7 @@ public class ESCatIndicesTest extends KeelInstantRunner {
                         null
                 )
                 .compose(resp -> {
-                    getIssueRecorder().info(x -> x.message("resp").context(resp));
+                    getInstantLogger().info(x -> x.message("resp").context(resp));
                     return Future.succeededFuture();
                 });
     }

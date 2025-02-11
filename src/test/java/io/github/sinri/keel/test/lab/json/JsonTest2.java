@@ -19,8 +19,8 @@ public class JsonTest2 extends KeelInstantRunner {
 
         VO vo = Json.decodeValue(j.toString(), VO.class);
 
-        getIssueRecorder().info("vo.name = " + vo.name);
-        getIssueRecorder().info("vo.value = " + vo.value);
+        getInstantLogger().info("vo.name = " + vo.name);
+        getInstantLogger().info("vo.value = " + vo.value);
 
         return Future.succeededFuture();
     }

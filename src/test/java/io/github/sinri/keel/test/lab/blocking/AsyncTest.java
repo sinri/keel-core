@@ -24,7 +24,7 @@ public class AsyncTest extends KeelInstantRunner {
 
             @Override
             protected Future<Void> handleItem(Integer item, AtomicBoolean breakAtomic) {
-                getIssueRecorder().info("handle " + item);
+                getInstantLogger().info("handle " + item);
                 if (item % 5 == 4) {
                     breakAtomic.set(true);
                 }
@@ -34,10 +34,10 @@ public class AsyncTest extends KeelInstantRunner {
         return x.start()
                 .compose(Future::succeededFuture)
                 .onSuccess(v -> {
-                    getIssueRecorder().notice("FIN");
+                    getInstantLogger().notice("FIN");
                 })
                 .onFailure(e -> {
-                    getIssueRecorder().exception(e);
+                    getInstantLogger().exception(e);
                 });
     }
 

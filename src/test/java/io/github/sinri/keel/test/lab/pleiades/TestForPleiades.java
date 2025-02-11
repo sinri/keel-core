@@ -29,7 +29,7 @@ public class TestForPleiades extends KeelInstantRunner {
                                    .setThreadingModel(ThreadingModel.WORKER)
                    )
                    .compose(deployed -> {
-                       getIssueRecorder().info("TestForPleiades deployed: " + deployed);
+                       getInstantLogger().info("TestForPleiades deployed: " + deployed);
                        deploymentIdRef.set(deployed);
 
                        MessageProducer<String> sender = PleiadesSample.generateMessageProducer(
@@ -52,7 +52,7 @@ public class TestForPleiades extends KeelInstantRunner {
                                                  .compose(vv -> {
                                                      return Keel.getVertx().undeploy(deploymentIdRef.get())
                                                                 .compose(x -> {
-                                                                    getIssueRecorder().info("UNDEPLOYED " + deploymentIdRef.get());
+                                                                    getInstantLogger().info("UNDEPLOYED " + deploymentIdRef.get());
                                                                     return Future.succeededFuture();
                                                                 });
                                                  });
@@ -98,7 +98,7 @@ public class TestForPleiades extends KeelInstantRunner {
             getPleiadesLogger().info("start with " + message.body());
             Keel.asyncSleep(2_000L)
                 .andThen(slept -> {
-                    getIssueRecorder().info("end with " + message.body());
+                    getInstantLogger().info("end with " + message.body());
                 });
         }
     }

@@ -23,15 +23,15 @@ public class ReadCsvTest extends KeelInstantRunner {
                                 return keelCsvReader.readRow()
                                         .compose(csvRow -> {
                                             if (csvRow == null) {
-                                                getIssueRecorder().warning(r -> r.message("CSV OVER"));
+                                                getInstantLogger().warning(r -> r.message("CSV OVER"));
                                                 routineResult.stop();
                                             } else {
                                                 JsonArray array = new JsonArray();
                                                 for (int i = 0; i < csvRow.size(); i++) {
                                                     array.add(csvRow.getCell(i).getString());
                                                 }
-                                                getIssueRecorder().info(log -> log.message("ROW")
-                                                        .context(c -> c
+                                                getInstantLogger().info(log -> log.message("ROW")
+                                                                                  .context(c -> c
                                                                 .put("i", indexRef.get())
                                                                 .put("cell", array)
                                                         )

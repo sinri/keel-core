@@ -28,16 +28,16 @@ public class KeelCacheDaletTest extends KeelInstantRunner {
         Dalet dalet = new Dalet();
         return dalet.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER))
                 .compose(deploymentId -> {
-                    getIssueRecorder().notice("deployment id: " + deploymentId);
+                    getInstantLogger().notice("deployment id: " + deploymentId);
                     return Future.succeededFuture();
                 }, throwable -> {
-                    getIssueRecorder().exception(throwable);
+                    getInstantLogger().exception(throwable);
                     return Future.failedFuture(throwable);
                 })
                 .compose(v -> {
                     return Keel.asyncCallStepwise(10, i -> {
                         try {
-                            getIssueRecorder().info("[" + i + "] " + dalet.read("last_cache_time"));
+                            getInstantLogger().info("[" + i + "] " + dalet.read("last_cache_time"));
                         } catch (NotCached e) {
                             throw new RuntimeException(e);
                         }
@@ -47,17 +47,17 @@ public class KeelCacheDaletTest extends KeelInstantRunner {
                 .compose(v -> {
                     return dalet.undeployMe()
                             .compose(undeployed -> {
-                                getIssueRecorder().notice("undeployed");
+                                getInstantLogger().notice("undeployed");
                                 return Future.succeededFuture();
                             }, throwable -> {
-                                getIssueRecorder().exception(throwable);
+                                getInstantLogger().exception(throwable);
                                 return Future.failedFuture(throwable);
                             });
                 })
                 .compose(v -> {
                     return Keel.asyncCallStepwise(10, i -> {
                         try {
-                            getIssueRecorder().info("[" + i + "] " + dalet.read("last_cache_time"));
+                            getInstantLogger().info("[" + i + "] " + dalet.read("last_cache_time"));
                         } catch (NotCached e) {
                             throw new RuntimeException(e);
                         }

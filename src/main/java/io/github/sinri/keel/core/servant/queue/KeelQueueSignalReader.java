@@ -10,7 +10,7 @@ public interface KeelQueueSignalReader {
     /**
      * @since 4.0.0
      */
-    KeelIssueRecorder<QueueManageIssueRecord> getIssueRecorder();
+    KeelIssueRecorder<QueueManageIssueRecord> getQueueManageIssueRecorder();
 
     Future<KeelQueueSignal> readSignal();
 }

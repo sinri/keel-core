@@ -18,7 +18,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 3.2.19 A base class for `mvn test`, each method named like `void test*()` would be executed.
  */
 public class KeelUnitTest {
-    private KeelIssueRecorder<KeelEventLog> issueRecorder;
+    private KeelIssueRecorder<KeelEventLog> unitTestLogger;
 
     public KeelUnitTest() {
         VertxOptions vertxOptions = buildVertxOptions();
@@ -26,12 +26,12 @@ public class KeelUnitTest {
             Keel.initializeVertxStandalone(vertxOptions);
         }
         Keel.getConfiguration().loadPropertiesFile("config.properties");
-        this.issueRecorder = KeelIssueRecordCenter.outputCenter()
-                                                  .generateIssueRecorder("KeelUnitTest", KeelEventLog::new);
+        this.unitTestLogger = KeelIssueRecordCenter.outputCenter()
+                                                   .generateIssueRecorder("KeelUnitTest", KeelEventLog::new);
         prepareEnvironment();
-        var builtLogger = this.buildIssueRecorder();
+        var builtLogger = this.buildUnitTestLogger();
         if (builtLogger != null) {
-            this.issueRecorder = builtLogger;
+            this.unitTestLogger = builtLogger;
         }
     }
 
@@ -53,15 +53,15 @@ public class KeelUnitTest {
      * By default, KeelUnitTest provides a logger to write to STDOUT; Override this method to return a Non-Null instance
      * of KeelEventLogger to initialize the logger if you have a special logging requirement.
      */
-    protected @Nullable KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
+    protected @Nullable KeelIssueRecorder<KeelEventLog> buildUnitTestLogger() {
         return null;
     }
 
     /**
      * @since 4.0.2
      */
-    public KeelIssueRecorder<KeelEventLog> getIssueRecorder() {
-        return issueRecorder;
+    public KeelIssueRecorder<KeelEventLog> getUnitTestLogger() {
+        return unitTestLogger;
     }
 
     /**
@@ -70,13 +70,13 @@ public class KeelUnitTest {
     public void setUp() {
         JsonObject env = new JsonObject();
         System.getenv().forEach(env::put);
-        getIssueRecorder().info(x -> x.message("env").context(env));
+        getUnitTestLogger().info(x -> x.message("env").context(env));
         for (var e : Thread.currentThread().getStackTrace()) {
-            getIssueRecorder().info("stack: " + e.getClassName() + "::" + e.getMethodName());
+            getUnitTestLogger().info("stack: " + e.getClassName() + "::" + e.getMethodName());
         }
 
         System.getProperties().forEach((k, v) -> {
-            getIssueRecorder().info("property: " + k + "=" + v);
+            getUnitTestLogger().info("property: " + k + "=" + v);
         });
     }
 

@@ -16,7 +16,7 @@ public class TestQueueTaskSeeker implements KeelQueueNextTaskSeeker {
     }
 
     @Override
-    public KeelIssueRecorder<QueueManageIssueRecord> getIssueRecorder() {
+    public KeelIssueRecorder<QueueManageIssueRecord> getQueueManageIssueRecorder() {
         return this.issueRecorder;
     }
 

@@ -6,7 +6,6 @@ import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.poi.excel.KeelSheet;
 import io.github.sinri.keel.integration.poi.excel.KeelSheets;
 import io.github.sinri.keel.integration.poi.excel.SheetsOpenOptions;
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
@@ -20,8 +19,9 @@ public class ReadHugeExcelTest extends KeelInstantRunner {
     @Nonnull
     @Override
     protected Future<Void> starting() {
-        var issueRecorder = KeelIssueRecordCenter.outputCenter().generateEventLogger(getClass().getSimpleName());
-        setLogger(issueRecorder);
+        //        var issueRecorder = KeelIssueRecordCenter.outputCenter().generateEventLogger(getClass()
+        //        .getSimpleName());
+        //        setInstantLogger(issueRecorder);
 
         //        try {
         //            this.excelStreamReader = new KeelStreamSheets(file);
@@ -56,7 +56,7 @@ public class ReadHugeExcelTest extends KeelInstantRunner {
                 //            this.logger().info("index: " + index + " spent: " + spent);
                 x.incrementAndGet();
             });
-            getIssueRecorder().info(r -> r.message("FIN 1 " + x.get()));
+            getInstantLogger().info(r -> r.message("FIN 1 " + x.get()));
 
             return Future.succeededFuture();
         });
@@ -78,7 +78,7 @@ public class ReadHugeExcelTest extends KeelInstantRunner {
                                        return Future.succeededFuture();
                                    }, 1000)
                                    .compose(v -> {
-                                       getIssueRecorder().info(r -> r.message("FIN 2 " + x.get()));
+                                       getInstantLogger().info(r -> r.message("FIN 2 " + x.get()));
                                        return Future.succeededFuture();
                                    });
         });

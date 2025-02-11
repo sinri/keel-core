@@ -21,7 +21,7 @@ public class TestQueue extends KeelQueue {
         KeelIssueRecorder<QueueManageIssueRecord> issueRecorder = this.getQueueManageIssueRecorder();
         return new KeelQueueSignalReader() {
             @Override
-            public KeelIssueRecorder<QueueManageIssueRecord> getIssueRecorder() {
+            public KeelIssueRecorder<QueueManageIssueRecord> getQueueManageIssueRecorder() {
                 return issueRecorder;
             }
 

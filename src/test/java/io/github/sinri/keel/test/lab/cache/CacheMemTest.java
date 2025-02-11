@@ -17,7 +17,7 @@ public class CacheMemTest extends KeelInstantRunner {
     @Override
     protected Future<Void> starting() {
         new KeelRuntimeMonitor().startRuntimeMonitor(5_000L, ms -> {
-            getIssueRecorder().info("Monitor |" +
+            getInstantLogger().info("Monitor |" +
                     " HEAP=" + ms.getJvmMemoryResult().getMxHeapUsedBytes()
                     +
                     " YGC=" + ms.getGCStat().getMinorGCCount()

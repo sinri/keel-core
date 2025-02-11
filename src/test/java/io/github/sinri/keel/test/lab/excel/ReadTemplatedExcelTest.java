@@ -42,13 +42,13 @@ public class ReadTemplatedExcelTest extends KeelInstantRunner {
             KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
             KeelSheetMatrix keelSheetMatrix = keelSheet.blockReadAllRowsToMatrix(1, 6, null);
             keelSheetMatrix.getRawRowList().forEach(row -> {
-                getIssueRecorder()
+                getInstantLogger()
                     .info(log -> log.message("BLOCK: " + Keel.stringHelper().joinStringArray(row, ", ")));
             });
 
             keelSheetMatrix.getRowIterator(KeelSheetMatrixRowExt.class).forEachRemaining(r -> {
-                getIssueRecorder().info(log -> log.message("record")
-                                                .context(c -> c
+                getInstantLogger().info(log -> log.message("record")
+                                                  .context(c -> c
                                                         .put("record_id", r.recordId())
                                                         .put("name", r.name())
                                                         .put("age", r.age())
@@ -66,8 +66,9 @@ public class ReadTemplatedExcelTest extends KeelInstantRunner {
             return keelSheet.readAllRowsToMatrix(1, 0, null)
                             .compose(keelSheetMatrix -> {
                                 keelSheetMatrix.getRawRowList().forEach(row -> {
-                                    getIssueRecorder().info(log -> log.message("ASYNC: " + Keel.stringHelper()
-                                                                                             .joinStringArray(row, "," +
+                                    getInstantLogger().info(log -> log.message("ASYNC: " + Keel.stringHelper()
+                                                                                               .joinStringArray(row,
+                                                                                                       "," +
                                                                                                      " ")));
                                 });
                                 return Future.succeededFuture();
@@ -84,7 +85,7 @@ public class ReadTemplatedExcelTest extends KeelInstantRunner {
             KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
             KeelSheetTemplatedMatrix templatedMatrix = keelSheet.blockReadAllRowsToTemplatedMatrix(0, 6, null);
             templatedMatrix.getRows().forEach(row -> {
-                getIssueRecorder().info(log -> log.message("BLOCK TEMPLATED: " + row.toJsonObject()));
+                getInstantLogger().info(log -> log.message("BLOCK TEMPLATED: " + row.toJsonObject()));
             });
             return Future.succeededFuture();
         });
@@ -97,7 +98,7 @@ public class ReadTemplatedExcelTest extends KeelInstantRunner {
             return keelSheet.readAllRowsToTemplatedMatrix(0, 7, null)
                             .compose(templatedMatrix -> {
                                 templatedMatrix.getRows().forEach(row -> {
-                                    getIssueRecorder()
+                                    getInstantLogger()
                                         .info(log -> log.message("ASYNC TEMPLATED: " + row.toJsonObject()));
                                 });
 
@@ -122,7 +123,7 @@ public class ReadTemplatedExcelTest extends KeelInstantRunner {
             return keelSheet.readAllRowsToTemplatedMatrix(0, 128, null)
                             .compose(templatedMatrix -> {
                                 templatedMatrix.getRows().forEach(row -> {
-                                    getIssueRecorder()
+                                    getInstantLogger()
                                         .info(log -> log.message("ASYNC TEMPLATED: " + row.toJsonObject()));
                                 });
 

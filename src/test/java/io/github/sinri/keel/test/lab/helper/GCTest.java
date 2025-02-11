@@ -20,7 +20,7 @@ public class GCTest extends KeelInstantRunner {
                 buffer.appendBytes(new byte[102400]);
                 buffer2 = Buffer.buffer("Buffer " + i);
             }
-            getIssueRecorder().debug("x=" + x + " > Buffer2 is " + buffer2);
+            getInstantLogger().debug("x=" + x + " > Buffer2 is " + buffer2);
             showGC();
         }
         return Future.succeededFuture();
@@ -43,7 +43,7 @@ public class GCTest extends KeelInstantRunner {
                     .append(" | collectionTime=").append(collectionTime).append(" | collectionCount=").append(collectionCount)
                     .append("\n");
         }
-        getIssueRecorder().info(sb.toString());
+        getInstantLogger().info(sb.toString());
     }
 }
 /*

@@ -65,8 +65,8 @@ public class ReadWriteExcelTest extends KeelInstantRunner {
 
                                             BigDecimal f = rowModel.readValueToBigDecimalStrippedTrailingZeros(2);
 
-                                            getIssueRecorder().info(log -> log.message("Row [" + name + "]=" + raw)
-                                                                       .context(c -> c
+                                            getInstantLogger().info(log -> log.message("Row [" + name + "]=" + raw)
+                                                                              .context(c -> c
                                                                                .put("number", "d=" + d + " i=" + i +
                                                                                        " l=" + l +
                                                                                        " b=" + b.toPlainString() + " " +

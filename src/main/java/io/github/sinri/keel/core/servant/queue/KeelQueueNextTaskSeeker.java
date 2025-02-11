@@ -12,7 +12,7 @@ public interface KeelQueueNextTaskSeeker {
     /**
      * @since 4.0.0
      */
-    KeelIssueRecorder<QueueManageIssueRecord> getIssueRecorder();
+    KeelIssueRecorder<QueueManageIssueRecord> getQueueManageIssueRecorder();
 
     /**
      * 找出一个task且保证其完成锁定。

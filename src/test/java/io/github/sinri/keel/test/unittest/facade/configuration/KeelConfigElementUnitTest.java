@@ -9,6 +9,6 @@ public class KeelConfigElementUnitTest extends KeelUnitTest {
     public void test1() {
         KeelConfigElement keelConfigElement = new KeelConfigElement("");
         keelConfigElement.loadPropertiesFile("test.sample.properties");
-        getIssueRecorder().info(x -> x.message("config").context(keelConfigElement.toJsonObject()));
+        getUnitTestLogger().info(x -> x.message("config").context(keelConfigElement.toJsonObject()));
     }
 }

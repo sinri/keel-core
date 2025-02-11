@@ -37,14 +37,14 @@ public final class KeelInstance implements KeelHelpersInterface, KeelClusterKit,
     /**
      * @since 4.0.0
      */
-    private final KeelIssueRecorder<KeelEventLog> issueRecorder;
+    private final KeelIssueRecorder<KeelEventLog> logger;
     private @Nullable Vertx vertx;
     private @Nullable ClusterManager clusterManager;
 
     private KeelInstance() {
         this.configuration = new KeelConfigElement("");
-        this.issueRecorder = KeelIssueRecordCenter.outputCenter().generateIssueRecorder("Keel", KeelEventLog::new);
-        this.issueRecorder.setVisibleLevel(KeelLogLevel.WARNING);
+        this.logger = KeelIssueRecordCenter.outputCenter().generateIssueRecorder("Keel", KeelEventLog::new);
+        this.logger.setVisibleLevel(KeelLogLevel.WARNING);
     }
 
     @Nonnull
@@ -67,7 +67,7 @@ public final class KeelInstance implements KeelHelpersInterface, KeelClusterKit,
     }
 
     public void setVertx(@Nonnull Vertx outsideVertx) {
-        getIssueRecorder().debug(r -> r
+        getLogger().debug(r -> r
                 .message("KeelInstance::setVertx is called with outsideVertx " + outsideVertx + " while currently " +
                         "vertx is " + vertx));
         if (vertx == null) {
@@ -124,8 +124,8 @@ public final class KeelInstance implements KeelHelpersInterface, KeelClusterKit,
      *         stdout and only WARNING and above may be recorded. If you want to debug locally, just get it and reset
      *         its visible level.
      */
-    public KeelIssueRecorder<KeelEventLog> getIssueRecorder() {
-        return issueRecorder;
+    public KeelIssueRecorder<KeelEventLog> getLogger() {
+        return logger;
     }
 
     /**

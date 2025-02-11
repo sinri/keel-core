@@ -31,12 +31,12 @@ public class TestQueueTask extends KeelQueueTask {
 
     @Override
     protected Future<Void> run() {
-        getIssueRecorder().setRecordFormatter(r -> r.context("id", id).context("life", life));
+        getQueueTaskIssueRecorder().setRecordFormatter(r -> r.context("id", id).context("life", life));
 
-        getIssueRecorder().info(r -> r.message("START"));
+        getQueueTaskIssueRecorder().info(r -> r.message("START"));
         return Keel.asyncSleep(this.life * 1000L)
                 .eventually(() -> {
-                    getIssueRecorder().info(r -> r.message("END"));
+                    getQueueTaskIssueRecorder().info(r -> r.message("END"));
                     return Future.succeededFuture();
                 });
     }

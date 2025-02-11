@@ -21,9 +21,13 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 3.2.4 use verticle to handle the sundial plan executing.
  * @since 4.0.0 changed to use issue recorder
  */
-public abstract class KeelSundial extends KeelVerticleImpl<SundialIssueRecord> {
+public abstract class KeelSundial extends KeelVerticleImpl {
     private final Map<String, KeelSundialPlan> planMap = new ConcurrentHashMap<>();
     private Long timerID;
+    /**
+     * @since 4.0.2
+     */
+    private KeelIssueRecorder<SundialIssueRecord> sundialIssueRecorder;
 
     /**
      * @since 4.0.0
@@ -34,13 +38,20 @@ public abstract class KeelSundial extends KeelVerticleImpl<SundialIssueRecord> {
      * @since 4.0.0
      */
     @Nonnull
-    @Override
     protected KeelIssueRecorder<SundialIssueRecord> buildIssueRecorder() {
         return getIssueRecordCenter().generateIssueRecorder(SundialIssueRecord.TopicSundial, SundialIssueRecord::new);
     }
 
+    /**
+     * @since 4.0.2
+     */
+    public KeelIssueRecorder<SundialIssueRecord> getSundialIssueRecorder() {
+        return sundialIssueRecorder;
+    }
+
     @Override
     protected Future<Void> startVerticle() {
+        this.sundialIssueRecorder = buildIssueRecorder();
         int delaySeconds = 61 - KeelCronExpression.parseCalenderToElements(Calendar.getInstance()).second;
         this.timerID = Keel.getVertx().setPeriodic(delaySeconds * 1000L, 60_000L, timerID -> {
             handleEveryMinute(Calendar.getInstance());
@@ -53,7 +64,7 @@ public abstract class KeelSundial extends KeelVerticleImpl<SundialIssueRecord> {
         ParsedCalenderElements parsedCalenderElements = new ParsedCalenderElements(now);
         planMap.forEach((key, plan) -> {
             if (plan.cronExpression().match(parsedCalenderElements)) {
-                getIssueRecorder().debug(x -> x
+                getSundialIssueRecorder().debug(x -> x
                         .message("Sundial Plan Matched")
                         .context("plan_key", plan.key())
                         .context("plan_cron", plan.cronExpression().getRawCronExpression())
@@ -65,10 +76,10 @@ public abstract class KeelSundial extends KeelVerticleImpl<SundialIssueRecord> {
                 if (plan.isWorkerThreadRequired()) {
                     deploymentOptions.setThreadingModel(ThreadingModel.WORKER);
                 }
-                new KeelSundialVerticle(plan, now, getIssueRecordCenter())
+                new KeelSundialVerticle(plan, now, getSundialIssueRecorder())
                         .deployMe(deploymentOptions);
             } else {
-                getIssueRecorder().debug(x -> x
+                getSundialIssueRecorder().debug(x -> x
                         .message("Sundial Plan Not Match")
                         .context("plan_key", plan.key())
                         .context("plan_cron", plan.cronExpression().getRawCronExpression())
@@ -104,7 +115,7 @@ public abstract class KeelSundial extends KeelVerticleImpl<SundialIssueRecord> {
                     }
             )
             .onFailure(throwable -> {
-                getIssueRecorder().exception(throwable, "io.github.sinri.keel.core.servant.sundial.KeelSundial" +
+                getSundialIssueRecorder().exception(throwable, "io.github.sinri.keel.core.servant.sundial.KeelSundial" +
                         ".refreshPlans exception");
             });
     }

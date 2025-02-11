@@ -138,8 +138,8 @@ public class GoogleTotpTest extends KeelInstantRunner {
             return Future.succeededFuture()
                     .compose(v -> {
                         JsonObject jsonObject = dict.getJsonObject(userName);
-                        Keel.getIssueRecorder().fatal(x -> x.message("for username " + userName)
-                                .context(jsonObject));
+                        Keel.getLogger().fatal(x -> x.message("for username " + userName)
+                                                     .context(jsonObject));
                         var x = jsonObject.getString("secretKey");
                         return Future.succeededFuture(x);
                     });
@@ -160,7 +160,7 @@ public class GoogleTotpTest extends KeelInstantRunner {
                     .put("validationCode", validationCode)
                     .put("scratchCodes", new JsonArray(scratchCodes));
             this.dict.put(userName, x);
-            Keel.getIssueRecorder()
+            Keel.getLogger()
                 .fatal(eventLog -> eventLog.message("saveUserCredentials for " + userName).context(x));
             return Future.succeededFuture();
 

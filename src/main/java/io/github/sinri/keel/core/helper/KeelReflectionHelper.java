@@ -132,7 +132,7 @@ public class KeelReflectionHelper {
                                     descendantClasses.add(clazz);
                                 }
                             } catch (Throwable e) {
-                                Keel.getIssueRecorder()
+                                Keel.getLogger()
                                     .debug(getClass() + " seekClassDescendantsInPackageForFileSystem for " + className + " error: " + e.getMessage());
                             }
                         }
@@ -141,7 +141,7 @@ public class KeelReflectionHelper {
                 });
             }
         } catch (Exception e) {
-            Keel.getIssueRecorder().exception(e);
+            Keel.getLogger().exception(e);
         }
         return descendantClasses;
     }
@@ -159,7 +159,7 @@ public class KeelReflectionHelper {
                     descendantClasses.add((Class<? extends R>) aClass);
                 }
             } catch (Throwable e) {
-                Keel.getIssueRecorder()
+                Keel.getLogger()
                     .debug(getClass() + " seekClassDescendantsInPackageForRunningJar for " + s + " error: " + e.getMessage());
             }
         }
@@ -181,7 +181,7 @@ public class KeelReflectionHelper {
                         descendantClasses.add(clazz);
                     }
                 } catch (Throwable e) {
-                    Keel.getIssueRecorder()
+                    Keel.getLogger()
                         .debug(getClass() + " seekClassDescendantsInPackageForProvidedJar for " + className + " error" +
                                 ": " + e.getMessage());
                 }

@@ -13,7 +13,6 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageProducer;
 
-import javax.annotation.Nonnull;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -82,9 +81,8 @@ public class TestForPleiades extends KeelInstantRunner {
             Keel.getVertx().eventBus().send(ADDRESS, content);
         }
 
-        @Nonnull
         @Override
-        protected KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
+        protected KeelIssueRecorder<KeelEventLog> buildPleiadesLogger() {
             return KeelIssueRecordCenter.outputCenter()
                                         .generateIssueRecorder("RobertaSample",
                                                 () -> new KeelEventLog().classification(uuid));
@@ -97,7 +95,7 @@ public class TestForPleiades extends KeelInstantRunner {
 
         @Override
         protected void handleMessage(Message<String> message) {
-            getIssueRecorder().info("start with " + message.body());
+            getPleiadesLogger().info("start with " + message.body());
             Keel.asyncSleep(2_000L)
                 .andThen(slept -> {
                     getIssueRecorder().info("end with " + message.body());

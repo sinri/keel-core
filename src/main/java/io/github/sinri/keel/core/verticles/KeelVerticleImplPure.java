@@ -5,7 +5,7 @@ import io.vertx.core.Promise;
 
 /**
  * @since 3.2.0
- * @deprecated use {@link KeelVerticleImpl} or {@link KeelInstantVerticle} instead.
+ * @deprecated use {@link KeelVerticleImpl} instead.
  */
 @Deprecated(since = "4.0.0")
 public abstract class KeelVerticleImplPure extends AbstractVerticle implements KeelVerticle {

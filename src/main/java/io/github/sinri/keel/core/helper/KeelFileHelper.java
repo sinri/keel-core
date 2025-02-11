@@ -174,7 +174,7 @@ public class KeelFileHelper {
                     }
                 }
             } catch (IOException e) {
-                Keel.getIssueRecorder()
+                Keel.getLogger()
                     .debug(getClass() + " seekPackageClassFilesInRunningJar for package " + packageName + " error: " + e.getMessage());
             }
         }

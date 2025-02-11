@@ -2,19 +2,16 @@ package io.github.sinri.keel.test.lab.blocking;
 
 import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
 import io.github.sinri.keel.logger.event.KeelEventLog;
-import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.*;
-
-import javax.annotation.Nonnull;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * 这个解决方案的问题是只能有一个Verticle在worker模式跑，如果有多个异步任务，无法以池模式运行，只能排队。
  */
-public class BlockingVerticlePlanA extends KeelVerticleImpl<KeelEventLog> {
+public class BlockingVerticlePlanA extends KeelVerticleImpl {
 
     private static void block(Promise<Void> promise) {
         var loggerInBlockingContext = KeelIssueRecordCenter.outputCenter()
@@ -34,7 +31,9 @@ public class BlockingVerticlePlanA extends KeelVerticleImpl<KeelEventLog> {
     public static void main(String[] args) {
         Keel.initializeVertx(new VertxOptions())
                 .compose(done -> {
-                    var loggerInEventLoopContext = KeelIssueRecordCenter.outputCenter().generateEventLogger("Sample");
+                    var loggerInEventLoopContext = KeelIssueRecordCenter.outputCenter()
+                                                                        .generateIssueRecorder("Sample",
+                                                                                KeelEventLog::new);
 
                     BlockingVerticlePlanA futureForBlocking = new BlockingVerticlePlanA();
                     return futureForBlocking.deployMe(new DeploymentOptions()
@@ -68,15 +67,12 @@ public class BlockingVerticlePlanA extends KeelVerticleImpl<KeelEventLog> {
                                 return Future.succeededFuture();
                             });
                 })
-                .onFailure(throwable -> {
-                    throwable.printStackTrace();
-                })
-                .eventually(() -> {
-                    return Keel.close();
-                });
+            .onFailure(Throwable::printStackTrace)
+            .eventually(Keel::close);
     }
 
-    private static Future<Void> blockPiece(BlockingVerticlePlanA futureForBlocking, KeelEventLogger loggerInEventLoopContext) {
+    private static Future<Void> blockPiece(BlockingVerticlePlanA futureForBlocking,
+                                           KeelIssueRecorder<KeelEventLog> loggerInEventLoopContext) {
         loggerInEventLoopContext.info(log -> log
                 .message("here before executeBlocking handler")
                 .context(c -> c
@@ -112,9 +108,9 @@ public class BlockingVerticlePlanA extends KeelVerticleImpl<KeelEventLog> {
         return promise.future();
     }
 
-    @Nonnull
-    @Override
-    protected KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
-        return KeelIssueRecordCenter.outputCenter().generateEventLogger(getClass().getName());
-    }
+    //    @Nonnull
+    //    @Override
+    //    protected KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
+    //        return KeelIssueRecordCenter.outputCenter().generateEventLogger(getClass().getName());
+    //    }
 }

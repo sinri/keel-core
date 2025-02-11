@@ -5,9 +5,6 @@ import io.github.sinri.keel.core.cache.impl.KeelCacheDalet;
 import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
 import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.logger.KeelLogLevel;
-import io.github.sinri.keel.logger.event.KeelEventLog;
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
@@ -22,7 +19,7 @@ public class KeelCacheDaletTest extends KeelInstantRunner {
     @Nonnull
     @Override
     protected Future<Void> starting() {
-        Keel.getIssueRecorder().setVisibleLevel(KeelLogLevel.DEBUG);
+        Keel.getLogger().setVisibleLevel(KeelLogLevel.DEBUG);
         return super.starting();
     }
 
@@ -75,7 +72,7 @@ public class KeelCacheDaletTest extends KeelInstantRunner {
         public Future<Void> fullyUpdate() {
             this.save("last_cache_time", String.valueOf(System.currentTimeMillis()));
             this.save("last_cache_date", new Date().toString());
-            Keel.getIssueRecorder().info("updated cache");
+            Keel.getLogger().info("updated cache");
             return Future.succeededFuture();
         }
 
@@ -84,10 +81,10 @@ public class KeelCacheDaletTest extends KeelInstantRunner {
             return 3_000L;
         }
 
-        @Nonnull
-        @Override
-        protected KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
-            return KeelIssueRecordCenter.outputCenter().generateIssueRecorder("Dalet", KeelEventLog::new);
-        }
+        //        @Nonnull
+        //        @Override
+        //        protected KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
+        //            return KeelIssueRecordCenter.outputCenter().generateIssueRecorder("Dalet", KeelEventLog::new);
+        //        }
     }
 }

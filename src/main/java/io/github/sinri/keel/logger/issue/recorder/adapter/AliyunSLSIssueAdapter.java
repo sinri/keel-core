@@ -36,7 +36,7 @@ abstract public class AliyunSLSIssueAdapter implements KeelIssueRecorderAdapter 
     public final void start() {
         Keel.asyncCallRepeatedly(routineResult -> {
                 if (isStopped()) {
-                    Keel.getIssueRecorder().warning("AliyunSLSIssueAdapter routine to stop");
+                    Keel.getLogger().warning("AliyunSLSIssueAdapter routine to stop");
                     routineResult.stop();
                     return Future.succeededFuture();
                 }
@@ -59,7 +59,7 @@ abstract public class AliyunSLSIssueAdapter implements KeelIssueRecorderAdapter 
                            });
             })
             .onFailure(throwable -> {
-                Keel.getIssueRecorder().exception(throwable, "AliyunSLSIssueAdapter routine exception");
+                Keel.getLogger().exception(throwable, "AliyunSLSIssueAdapter routine exception");
             });
     }
 

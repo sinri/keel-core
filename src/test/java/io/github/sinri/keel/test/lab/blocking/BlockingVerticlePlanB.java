@@ -2,12 +2,9 @@ package io.github.sinri.keel.test.lab.blocking;
 
 import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
 import io.github.sinri.keel.logger.event.KeelEventLog;
-import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.*;
-
-import javax.annotation.Nonnull;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
@@ -16,18 +13,13 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  */
 public class BlockingVerticlePlanB {
     private static Future<Void> executeBlocking(Handler<Promise<Void>> blockCode) {
-        var issueRecorder = KeelIssueRecordCenter.outputCenter().generateIssueRecorder("Sample", KeelEventLog::new);
+        var logger = KeelIssueRecordCenter.outputCenter().generateIssueRecorder("Sample", KeelEventLog::new);
         Promise<Void> promise = Promise.promise();
-        KeelVerticleImpl<KeelEventLog> verticle = new KeelVerticleImpl<>() {
-            @Nonnull
-            @Override
-            public KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
-                return issueRecorder;
-            }
+        KeelVerticleImpl verticle = new KeelVerticleImpl() {
 
             @Override
             protected Future<Void> startVerticle() {
-                getIssueRecorder().info(r -> r.message("in verticle " + deploymentID()));
+                logger.info(r -> r.message("in verticle " + deploymentID()));
                 blockCode.handle(promise);
 
                 promise.future()
@@ -40,7 +32,7 @@ public class BlockingVerticlePlanB {
         };
         return verticle.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER))
                        .compose(deploymentId -> {
-                           issueRecorder.info(r -> r.message("deployed: " + deploymentId));
+                           logger.info(r -> r.message("deployed: " + deploymentId));
                            return promise.future();
                        });
     }
@@ -48,8 +40,8 @@ public class BlockingVerticlePlanB {
     public static void main(String[] args) {
         Keel.initializeVertx(new VertxOptions())
             .compose(done -> {
-                KeelEventLogger loggerInEventLoopContext = KeelIssueRecordCenter.outputCenter()
-                                                                                .generateEventLogger("Sample");
+                var loggerInEventLoopContext = KeelIssueRecordCenter.outputCenter()
+                                                                    .generateIssueRecorder("Sample", KeelEventLog::new);
 
                 loggerInEventLoopContext.info(log -> log
                         .message("init")
@@ -68,15 +60,11 @@ public class BlockingVerticlePlanB {
                              });
             })
 
-            .onFailure(throwable -> {
-                throwable.printStackTrace();
-            })
-            .eventually(() -> {
-                return Keel.close();
-            });
+            .onFailure(Throwable::printStackTrace)
+            .eventually(Keel::close);
     }
 
-    private static Future<Void> blockPiece(KeelEventLogger loggerInEventLoopContext) {
+    private static Future<Void> blockPiece(KeelIssueRecorder<KeelEventLog> loggerInEventLoopContext) {
         return executeBlocking(new Handler<Promise<Void>>() {
             @Override
             public void handle(Promise<Void> event) {
@@ -92,7 +80,8 @@ public class BlockingVerticlePlanB {
     }
 
     private static void block(Promise<Void> promise) {
-        KeelEventLogger loggerInBlockingContext = KeelIssueRecordCenter.outputCenter().generateEventLogger("Sample");
+        var loggerInBlockingContext = KeelIssueRecordCenter.outputCenter()
+                                                           .generateIssueRecorder("Sample", KeelEventLog::new);
 
         loggerInBlockingContext.info(log -> log.message("START")
                                                .context(c -> c.put("thread_id", Thread.currentThread().getId())));

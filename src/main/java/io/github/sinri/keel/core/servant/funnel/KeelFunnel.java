@@ -19,13 +19,14 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 /**
  * @since 3.0.0
  */
-public class KeelFunnel extends KeelVerticleImpl<KeelEventLog> {
+public class KeelFunnel extends KeelVerticleImpl {
     /**
      * The interrupt, to stop sleeping when idle time ends (a new task comes).
      */
     private final AtomicReference<Promise<Void>> interruptRef;
     private final Queue<Supplier<Future<Void>>> queue;
     private final AtomicLong sleepTimeRef;
+    private KeelIssueRecorder<KeelEventLog> funnelLogger;
 
     public KeelFunnel() {
         this.sleepTimeRef = new AtomicLong(1_000L);
@@ -33,11 +34,19 @@ public class KeelFunnel extends KeelVerticleImpl<KeelEventLog> {
         this.interruptRef = new AtomicReference<>();
     }
 
-
+    /**
+     * @since 4.0.2
+     */
     @Nonnull
-    @Override
-    protected KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
+    protected KeelIssueRecorder<KeelEventLog> buildFunnelLogger() {
         return KeelIssueRecordCenter.outputCenter().generateIssueRecorder("Funnel", KeelEventLog::new);
+    }
+
+    /**
+     * @since 4.0.2
+     */
+    protected KeelIssueRecorder<KeelEventLog> getFunnelLogger() {
+        return funnelLogger;
     }
 
     public void setSleepTime(long sleepTime) {
@@ -62,6 +71,7 @@ public class KeelFunnel extends KeelVerticleImpl<KeelEventLog> {
 
     @Override
     protected Future<Void> startVerticle() {
+        this.funnelLogger = buildFunnelLogger();
         Keel.asyncCallRepeatedly(repeatedlyCallTask -> {
             this.interruptRef.set(null);
 
@@ -82,7 +92,7 @@ public class KeelFunnel extends KeelVerticleImpl<KeelEventLog> {
                                             //getLogger().debug("funnel done");
                                             return Future.succeededFuture();
                                         }, throwable -> {
-                                            getIssueRecorder().exception(throwable, r -> r.message("funnel task " +
+                                            getFunnelLogger().exception(throwable, r -> r.message("funnel task " +
                                                     "error"));
                                             return Future.succeededFuture();
                                         });

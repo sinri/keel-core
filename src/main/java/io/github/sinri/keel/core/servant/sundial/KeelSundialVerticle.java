@@ -1,7 +1,6 @@
 package io.github.sinri.keel.core.servant.sundial;
 
 import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
 
@@ -13,23 +12,24 @@ import java.util.Calendar;
  * @since 3.2.5 Used in KeelSundial
  * @since 4.0.0 become abstract
  */
-final class KeelSundialVerticle extends KeelVerticleImpl<SundialIssueRecord> {
+final class KeelSundialVerticle extends KeelVerticleImpl {
     private final KeelSundialPlan sundialPlan;
     private final Calendar now;
-    private final KeelIssueRecordCenter issueRecordCenter;
+    private final @Nonnull KeelIssueRecorder<SundialIssueRecord> sundialIssueRecorder;
 
-    public KeelSundialVerticle(@Nonnull KeelSundialPlan sundialPlan, @Nonnull Calendar now,
-                               @Nonnull KeelIssueRecordCenter issueRecordCenter) {
+    public KeelSundialVerticle(
+            @Nonnull KeelSundialPlan sundialPlan,
+            @Nonnull Calendar now,
+            @Nonnull KeelIssueRecorder<SundialIssueRecord> sundialIssueRecorder
+    ) {
         this.sundialPlan = sundialPlan;
         this.now = now;
-        this.issueRecordCenter = issueRecordCenter;
+        this.sundialIssueRecorder = sundialIssueRecorder;
     }
 
     @Nonnull
-    @Override
-    protected KeelIssueRecorder<SundialIssueRecord> buildIssueRecorder() {
-        return issueRecordCenter.generateIssueRecorder(SundialIssueRecord.TopicSundial,
-                () -> new SundialIssueRecord(sundialPlan, now, deploymentID()));
+    public KeelIssueRecorder<SundialIssueRecord> getSundialIssueRecorder() {
+        return sundialIssueRecorder;
     }
 
     @Override

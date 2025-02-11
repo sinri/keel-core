@@ -118,7 +118,7 @@ public class NamedMySQLDataSource<C extends NamedMySQLConnection> {
                         String versionExp = firstRow.getString("v");
                         return Future.succeededFuture(versionExp);
                     } catch (Throwable e) {
-                        Keel.getIssueRecorder().exception(e);
+                        Keel.getLogger().exception(e);
                         return Future.succeededFuture(null);
                     }
                 });

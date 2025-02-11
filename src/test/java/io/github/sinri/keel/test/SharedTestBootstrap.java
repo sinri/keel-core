@@ -24,7 +24,7 @@ public class SharedTestBootstrap {
                         .setMaxEventLoopExecuteTimeUnit(TimeUnit.NANOSECONDS)
                 )
                 .onSuccess(v -> {
-                    Keel.getIssueRecorder().setVisibleLevel(KeelLogLevel.DEBUG);
+                    Keel.getLogger().setVisibleLevel(KeelLogLevel.DEBUG);
                     handler.handle(null);
                 })
                 .onFailure(throwable -> {

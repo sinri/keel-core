@@ -11,14 +11,14 @@ public class TestQueue extends KeelQueue {
     @Nonnull
     @Override
     protected KeelQueueNextTaskSeeker getNextTaskSeeker() {
-        KeelIssueRecorder<QueueManageIssueRecord> issueRecorder = getIssueRecorder();
+        KeelIssueRecorder<QueueManageIssueRecord> issueRecorder = getQueueManageIssueRecorder();
         return new TestQueueTaskSeeker(issueRecorder);
     }
 
     @Nonnull
     @Override
     protected KeelQueueSignalReader getSignalReader() {
-        KeelIssueRecorder<QueueManageIssueRecord> issueRecorder = this.getIssueRecorder();
+        KeelIssueRecorder<QueueManageIssueRecord> issueRecorder = this.getQueueManageIssueRecorder();
         return new KeelQueueSignalReader() {
             @Override
             public KeelIssueRecorder<QueueManageIssueRecord> getIssueRecorder() {

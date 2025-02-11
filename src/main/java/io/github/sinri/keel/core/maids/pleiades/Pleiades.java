@@ -3,6 +3,7 @@ package io.github.sinri.keel.core.maids.pleiades;
 import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
 import io.github.sinri.keel.logger.event.KeelEventLog;
+import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.DeliveryOptions;
@@ -19,8 +20,9 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 3.2.19
  */
 @TechnicalPreview(since = "3.2.19")
-public abstract class Pleiades<T> extends KeelVerticleImpl<KeelEventLog> {
+public abstract class Pleiades<T> extends KeelVerticleImpl {
     private MessageConsumer<T> consumer;
+    private KeelIssueRecorder<KeelEventLog> pleiadesLogger;
 
     public static <T> MessageProducer<T> generateMessageProducer(String address) {
         return generateMessageProducer(address, new DeliveryOptions());
@@ -34,8 +36,21 @@ public abstract class Pleiades<T> extends KeelVerticleImpl<KeelEventLog> {
 
     abstract protected void handleMessage(Message<T> message);
 
+    /**
+     * @since 4.0.2
+     */
+    abstract protected KeelIssueRecorder<KeelEventLog> buildPleiadesLogger();
+
+    /**
+     * @since 4.0.2
+     */
+    public KeelIssueRecorder<KeelEventLog> getPleiadesLogger() {
+        return pleiadesLogger;
+    }
+
     @Override
     protected Future<Void> startVerticle() {
+        this.pleiadesLogger = buildPleiadesLogger();
         consumer = Keel.getVertx().eventBus().consumer(getAddress(), this::handleMessage);
         return Future.succeededFuture();
     }

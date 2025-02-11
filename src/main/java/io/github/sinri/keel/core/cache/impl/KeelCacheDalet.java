@@ -2,7 +2,6 @@ package io.github.sinri.keel.core.cache.impl;
 
 import io.github.sinri.keel.core.cache.KeelEverlastingCacheInterface;
 import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
-import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
@@ -19,10 +18,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  *
  * @since 3.2.11
  */
-abstract public class KeelCacheDalet
-        //extends KeelVerticleImplPure
-        extends KeelVerticleImpl<KeelEventLog>
-        implements KeelEverlastingCacheInterface<String, String> {
+abstract public class KeelCacheDalet extends KeelVerticleImpl implements KeelEverlastingCacheInterface<String, String> {
     private final ConcurrentMap<String, String> map = new ConcurrentHashMap<>();
 
     /**

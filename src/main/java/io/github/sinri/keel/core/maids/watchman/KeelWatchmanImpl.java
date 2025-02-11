@@ -17,10 +17,11 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 /**
  * @since 2.9.3
  */
-abstract class KeelWatchmanImpl extends KeelVerticleImpl<KeelEventLog> implements KeelWatchman<KeelEventLog> {
+abstract class KeelWatchmanImpl extends KeelVerticleImpl implements KeelWatchman {
     private final String watchmanName;
     private final KeelIssueRecordCenter issueRecordCenter;
     private MessageConsumer<Long> consumer;
+    private KeelIssueRecorder<KeelEventLog> watchmanLogger;
 
     public KeelWatchmanImpl(String watchmanName, KeelIssueRecordCenter issueRecordCenter) {
         this.watchmanName = watchmanName;
@@ -38,9 +39,11 @@ abstract class KeelWatchmanImpl extends KeelVerticleImpl<KeelEventLog> implement
 
     @Override
     protected Future<Void> startVerticle() {
+        this.watchmanLogger = this.buildWatchmanLogger();
+
         this.consumer = Keel.getVertx().eventBus().consumer(eventBusAddress());
         this.consumer.handler(this::consumeHandleMassage);
-        this.consumer.exceptionHandler(throwable -> getIssueRecorder()
+        this.consumer.exceptionHandler(throwable -> getWatchmanLogger()
                 .exception(throwable, r -> r.message(watchmanName() + " ERROR")));
 
         try {
@@ -62,20 +65,20 @@ abstract class KeelWatchmanImpl extends KeelVerticleImpl<KeelEventLog> implement
 
     protected void consumeHandleMassage(Message<Long> message) {
         Long timestamp = message.body();
-        getIssueRecorder().debug(r -> r.message(watchmanName() + " TRIGGERED FOR " + timestamp));
+        getWatchmanLogger().debug(r -> r.message(watchmanName() + " TRIGGERED FOR " + timestamp));
 
         long x = timestamp / interval();
         Keel.getVertx().sharedData()
             .getLockWithTimeout(eventBusAddress() + "@" + x, Math.min(3_000L, interval() - 1), lockAR -> {
                 if (lockAR.failed()) {
-                    getIssueRecorder().warning(r -> r.message("LOCK ACQUIRE FAILED FOR " + timestamp + " i.e. " + x));
+                    getWatchmanLogger().warning(r -> r.message("LOCK ACQUIRE FAILED FOR " + timestamp + " i.e. " + x));
                 } else {
                     Lock lock = lockAR.result();
-                    getIssueRecorder().info(r -> r.message("LOCK ACQUIRED FOR " + timestamp + " i.e. " + x));
+                    getWatchmanLogger().info(r -> r.message("LOCK ACQUIRED FOR " + timestamp + " i.e. " + x));
                     regularHandler().handle(timestamp);
                     Keel.getVertx().setTimer(interval(), timerID -> {
                         lock.release();
-                        getIssueRecorder().info(r -> r.message("LOCK RELEASED FOR " + timestamp + " i.e. " + x));
+                        getWatchmanLogger().info(r -> r.message("LOCK RELEASED FOR " + timestamp + " i.e. " + x));
                     });
                 }
             });
@@ -98,8 +101,14 @@ abstract class KeelWatchmanImpl extends KeelVerticleImpl<KeelEventLog> implement
      * @since 4.0.2
      */
     @Nonnull
-    @Override
-    protected KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
+    protected KeelIssueRecorder<KeelEventLog> buildWatchmanLogger() {
         return getIssueRecordCenter().generateIssueRecorder("Watchman", KeelEventLog::new);
+    }
+
+    /**
+     * @since 4.0.2
+     */
+    public KeelIssueRecorder<KeelEventLog> getWatchmanLogger() {
+        return watchmanLogger;
     }
 }

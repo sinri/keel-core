@@ -1,8 +1,5 @@
 package io.github.sinri.keel.core.verticles;
 
-import io.github.sinri.keel.logger.event.KeelEventLog;
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -21,20 +18,10 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 public interface KeelVerticle extends Verticle {
     /**
      * @param startFutureSupplier confirm what would start in this verticle?
-     * @param logger              the KeelIssueRecorder instance following KeelEventLog format.
      * @since 4.0.2
      */
-    static KeelVerticle instant(
-            @Nonnull Supplier<Future<Void>> startFutureSupplier,
-            @Nonnull KeelIssueRecorder<KeelEventLog> logger
-    ) {
-        return new KeelInstantVerticle(startFutureSupplier, logger);
-    }
-
     static KeelVerticle instant(@Nonnull Supplier<Future<Void>> startFutureSupplier) {
-        KeelIssueRecorder<KeelEventLog> issueRecorder = KeelIssueRecordCenter.silentCenter()
-                                                                             .generateIssueRecorder("", () -> null);
-        return instant(startFutureSupplier, issueRecorder);
+        return new KeelVerticleWrap(startFutureSupplier);
     }
 
     /**

@@ -182,7 +182,7 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
             }
             this.majorGCType = gc.getName();
         } else if (!ignoreGCNames.contains(gc.getName())) {
-            Keel.getIssueRecorder().error(log -> log
+            Keel.getLogger().error(log -> log
                     .message("Found Unknown GarbageCollectorMXBean Name")
                     .context(new JsonObject()
                             .put("class", gc.getClass().getName())

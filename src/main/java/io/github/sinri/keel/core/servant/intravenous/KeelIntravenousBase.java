@@ -19,12 +19,13 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 /**
  * @since 3.0.1 redesigned from the original KeelIntravenous
  */
-abstract public class KeelIntravenousBase<T> extends KeelVerticleImpl<KeelEventLog> {
+abstract public class KeelIntravenousBase<T> extends KeelVerticleImpl {
     private final Queue<T> queue;
     private final AtomicReference<Promise<Void>> interruptRef;
     protected long sleepTime = 1_000L;
     protected int batchSize = 1;
     private boolean queueAcceptTask = false;
+    private KeelIssueRecorder<KeelEventLog> intravenousLogger;
 
     public KeelIntravenousBase() {
         this.queue = new ConcurrentLinkedQueue<>();
@@ -51,6 +52,8 @@ abstract public class KeelIntravenousBase<T> extends KeelVerticleImpl<KeelEventL
 
     @Override
     protected Future<Void> startVerticle() {
+        this.intravenousLogger = buildIntravenousIssueRecorder();
+
         queueAcceptTask = true;
 
         int configuredBatchSize = getBatchSize();
@@ -136,10 +139,18 @@ abstract public class KeelIntravenousBase<T> extends KeelVerticleImpl<KeelEventL
                    });
     }
 
+    /**
+     * @since 4.0.2
+     */
     @Nonnull
-    @Override
-    protected KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
+    protected KeelIssueRecorder<KeelEventLog> buildIntravenousIssueRecorder() {
         return KeelIssueRecordCenter.silentCenter().generateEventLogger(getClass().getName());
     }
 
+    /**
+     * @since 4.0.2
+     */
+    public KeelIssueRecorder<KeelEventLog> getIntravenousLogger() {
+        return intravenousLogger;
+    }
 }

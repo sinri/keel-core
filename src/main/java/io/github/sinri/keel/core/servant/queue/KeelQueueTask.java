@@ -10,8 +10,9 @@ import javax.annotation.Nonnull;
 /**
  * @since 2.1
  */
-public abstract class KeelQueueTask extends KeelVerticleImpl<QueueTaskIssueRecord> {
+public abstract class KeelQueueTask extends KeelVerticleImpl {
     private QueueWorkerPoolManager queueWorkerPoolManager;
+    private KeelIssueRecorder<QueueTaskIssueRecord> queueTaskIssueRecorder;
 
     final void setQueueWorkerPoolManager(QueueWorkerPoolManager queueWorkerPoolManager) {
         this.queueWorkerPoolManager = queueWorkerPoolManager;
@@ -32,14 +33,22 @@ public abstract class KeelQueueTask extends KeelVerticleImpl<QueueTaskIssueRecor
      * @since 4.0.0
      */
     @Nonnull
-    @Override
-    protected final KeelIssueRecorder<QueueTaskIssueRecord> buildIssueRecorder() {
+    protected final KeelIssueRecorder<QueueTaskIssueRecord> buildQueueTaskIssueRecorder() {
         return getIssueRecordCenter().generateIssueRecorder(QueueTaskIssueRecord.TopicQueue,
                 () -> new QueueTaskIssueRecord(getTaskReference(), getTaskCategory()));
     }
 
+    /**
+     * @since 4.0.2
+     */
+    public KeelIssueRecorder<QueueTaskIssueRecord> getQueueTaskIssueRecorder() {
+        return queueTaskIssueRecorder;
+    }
+
     @Override
     protected Future<Void> startVerticle() {
+        this.queueTaskIssueRecorder = buildQueueTaskIssueRecorder();
+
         this.queueWorkerPoolManager.whenOneWorkerStarts();
 
         Future.succeededFuture()
@@ -49,12 +58,13 @@ public abstract class KeelQueueTask extends KeelVerticleImpl<QueueTaskIssueRecor
               })
               .compose(v -> run())
               .recover(throwable -> {
-                  getIssueRecorder().exception(throwable, r -> r.message("KeelQueueTask Caught throwable from Method " +
+                  getQueueTaskIssueRecorder().exception(throwable, r -> r.message("KeelQueueTask Caught throwable " +
+                          "from Method " +
                           "run"));
                   return Future.succeededFuture();
               })
               .eventually(() -> {
-                  getIssueRecorder().info(r -> r.message("KeelQueueTask to undeploy"));
+                  getQueueTaskIssueRecorder().info(r -> r.message("KeelQueueTask to undeploy"));
                   notifyBeforeUndeploy();
                   return undeployMe().onSuccess(done -> {
                       this.queueWorkerPoolManager.whenOneWorkerEnds();

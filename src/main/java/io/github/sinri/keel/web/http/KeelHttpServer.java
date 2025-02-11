@@ -15,11 +15,12 @@ import javax.annotation.Nonnull;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
-abstract public class KeelHttpServer extends KeelVerticleImpl<KeelEventLog> {
+abstract public class KeelHttpServer extends KeelVerticleImpl {
     public static final String CONFIG_HTTP_SERVER_PORT = "http_server_port";
     public static final String CONFIG_HTTP_SERVER_OPTIONS = "http_server_options";
     public static final String CONFIG_IS_MAIN_SERVICE = "is_main_service";
     protected HttpServer server;
+    private KeelIssueRecorder<KeelEventLog> httpServerLogger;
 
     protected int getHttpServerPort() {
         return this.config().getInteger(CONFIG_HTTP_SERVER_PORT, 8080);
@@ -43,6 +44,8 @@ abstract public class KeelHttpServer extends KeelVerticleImpl<KeelEventLog> {
 
     @Override
     protected Future<Void> startVerticle() {
+        this.httpServerLogger = buildHttpServerIssueRecorder();
+
         this.server = Keel.getVertx().createHttpServer(getHttpServerOptions());
 
         Router router = Router.router(Keel.getVertx());
@@ -50,15 +53,15 @@ abstract public class KeelHttpServer extends KeelVerticleImpl<KeelEventLog> {
 
         server.requestHandler(router)
               .exceptionHandler(throwable -> {
-                  getIssueRecorder().exception(throwable, r -> r.message("KeelHttpServer Exception"));
+                  getHttpServerLogger().exception(throwable, r -> r.message("KeelHttpServer Exception"));
               })
               .listen(httpServerAsyncResult -> {
                   if (httpServerAsyncResult.succeeded()) {
                       HttpServer httpServer = httpServerAsyncResult.result();
-                      getIssueRecorder().info(r -> r.message("HTTP Server Established, Actual Port: " + httpServer.actualPort()));
+                      getHttpServerLogger().info(r -> r.message("HTTP Server Established, Actual Port: " + httpServer.actualPort()));
                   } else {
                       Throwable throwable = httpServerAsyncResult.cause();
-                      getIssueRecorder().exception(throwable, r -> r.message("Listen failed"));
+                      getHttpServerLogger().exception(throwable, r -> r.message("Listen failed"));
 
                       if (this.isMainService()) {
                           Keel.gracefullyClose(Promise::complete);
@@ -69,20 +72,28 @@ abstract public class KeelHttpServer extends KeelVerticleImpl<KeelEventLog> {
         return Future.succeededFuture();
     }
 
-
+    /**
+     * @since 4.0.2
+     */
     @Nonnull
-    @Override
-    protected KeelIssueRecorder<KeelEventLog> buildIssueRecorder() {
+    protected KeelIssueRecorder<KeelEventLog> buildHttpServerIssueRecorder() {
         return KeelIssueRecordCenter.outputCenter().generateIssueRecorder("KeelHttpServer", KeelEventLog::new);
+    }
+
+    /**
+     * @since 4.0.2
+     */
+    public KeelIssueRecorder<KeelEventLog> getHttpServerLogger() {
+        return httpServerLogger;
     }
 
     public void terminate(Promise<Void> promise) {
         server.close().andThen(ar -> {
                   if (ar.succeeded()) {
-                      getIssueRecorder().info(r -> r.message("HTTP Server Closed"));
+                      getHttpServerLogger().info(r -> r.message("HTTP Server Closed"));
                       promise.complete();
                   } else {
-                      getIssueRecorder().exception(ar.cause(),
+                      getHttpServerLogger().exception(ar.cause(),
                               r -> r.message("HTTP Server Closing Failure: " + ar.cause()
                                                                                  .getMessage()));
                       promise.fail(ar.cause());

@@ -1,36 +1,17 @@
 package io.github.sinri.keel.core.verticles;
 
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
-import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 
-import javax.annotation.Nonnull;
-
 /**
- * @since 4.0.2
+ * @since 4.0.2 remove the logging embeddings.
  */
-public abstract class KeelVerticleImpl<T extends KeelIssueRecord<T>> extends AbstractVerticle implements KeelVerticle {
-    @Nonnull
-    protected KeelIssueRecorder<T> issueRecorder;
+public abstract class KeelVerticleImpl extends AbstractVerticle implements KeelVerticle {
 
-    protected KeelVerticleImpl() {
-        issueRecorder = KeelIssueRecordCenter.silentCenter().generateIssueRecorder("", () -> null);
-    }
-
-    @Nonnull
-    protected abstract KeelIssueRecorder<T> buildIssueRecorder();
-
-    @Nonnull
-    public KeelIssueRecorder<T> getIssueRecorder() {
-        return issueRecorder;
-    }
 
     @Override
     public final void start() {
-        issueRecorder = buildIssueRecorder();
     }
 
     @Override

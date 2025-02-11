@@ -23,9 +23,10 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 2.9.1
  * @since 2.9.3 change to VERTICLE
  */
-abstract public class KeelGatling extends KeelVerticleImpl<KeelEventLog> {
+abstract public class KeelGatling extends KeelVerticleImpl {
     private final Options options;
     private final AtomicInteger barrelUsed = new AtomicInteger(0);
+    private KeelIssueRecorder<KeelEventLog> gatlingLogger;
 
     private KeelGatling(Options options) {
         this.options = options;
@@ -38,12 +39,22 @@ abstract public class KeelGatling extends KeelVerticleImpl<KeelEventLog> {
         return Keel.asyncSleep(actualRestInterval);
     }
 
+    /**
+     * @since 4.0.2
+     */
     @Nonnull
-    @Override
-    abstract protected KeelIssueRecorder<KeelEventLog> buildIssueRecorder();
+    abstract protected KeelIssueRecorder<KeelEventLog> buildGatlingLogger();
+
+    /**
+     * @since 4.0.2
+     */
+    public KeelIssueRecorder<KeelEventLog> getGatlingLogger() {
+        return gatlingLogger;
+    }
 
     @Override
     protected Future<Void> startVerticle() {
+        this.gatlingLogger = buildGatlingLogger();
         barrelUsed.set(0);
         Keel.asyncCallRepeatedly(routineResult -> {
             return fireOnce();
@@ -53,7 +64,7 @@ abstract public class KeelGatling extends KeelVerticleImpl<KeelEventLog> {
 
     private Future<Void> fireOnce() {
         if (barrelUsed.get() >= options.getBarrels()) {
-            getIssueRecorder().debug(r -> r.message("BARREL FULL"));
+            getGatlingLogger().debug(r -> r.message("BARREL FULL"));
             return rest();
         }
         return Future.succeededFuture()
@@ -67,10 +78,10 @@ abstract public class KeelGatling extends KeelVerticleImpl<KeelEventLog> {
 
                          fireBullet(bullet, firedAR -> {
                              if (firedAR.failed()) {
-                                 getIssueRecorder().exception(firedAR.cause(), r -> r.message("BULLET FIRED " +
+                                 getGatlingLogger().exception(firedAR.cause(), r -> r.message("BULLET FIRED " +
                                          "ERROR"));
                              } else {
-                                 getIssueRecorder().info(r -> r.message("BULLET FIRED DONE"));
+                                 getGatlingLogger().info(r -> r.message("BULLET FIRED DONE"));
                              }
                              barrelUsed.decrementAndGet();
                          });
@@ -78,7 +89,7 @@ abstract public class KeelGatling extends KeelVerticleImpl<KeelEventLog> {
                          return Keel.asyncSleep(10L);
                      })
                      .recover(throwable -> {
-                         getIssueRecorder().exception(throwable, r -> r.message("FAILED TO LOAD BULLET"));
+                         getGatlingLogger().exception(throwable, r -> r.message("FAILED TO LOAD BULLET"));
                          return rest();
                      });
     }

@@ -1,8 +1,10 @@
 package io.github.sinri.keel.core.servant.sundial;
 
 import io.github.sinri.keel.core.cron.KeelCronExpression;
+import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
 
+import javax.annotation.Nonnull;
 import java.util.Calendar;
 
 /**
@@ -25,4 +27,12 @@ public interface KeelSundialPlan {
     default boolean isWorkerThreadRequired() {
         return true;
     }
+
+    /**
+     * It should be passed in on construction.
+     *
+     * @since 4.0.3
+     */
+    @Nonnull
+    KeelIssueRecorder<SundialIssueRecord> getSundialIssueRecorder();
 }

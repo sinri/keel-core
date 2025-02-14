@@ -76,8 +76,7 @@ public abstract class KeelSundial extends KeelVerticleImpl {
                 if (plan.isWorkerThreadRequired()) {
                     deploymentOptions.setThreadingModel(ThreadingModel.WORKER);
                 }
-                new KeelSundialVerticle(plan, now, getSundialIssueRecorder())
-                        .deployMe(deploymentOptions);
+                new KeelSundialVerticle(plan, now).deployMe(deploymentOptions);
             } else {
                 getSundialIssueRecorder().debug(x -> x
                         .message("Sundial Plan Not Match")

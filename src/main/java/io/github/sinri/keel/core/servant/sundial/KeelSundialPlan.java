@@ -4,7 +4,6 @@ import io.github.sinri.keel.core.cron.KeelCronExpression;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
 
-import javax.annotation.Nonnull;
 import java.util.Calendar;
 
 /**
@@ -16,7 +15,10 @@ public interface KeelSundialPlan {
 
     KeelCronExpression cronExpression();
 
-    Future<Void> execute(Calendar now);
+    /**
+     * @param sundialIssueRecorder as of 4.0.3
+     */
+    Future<Void> execute(Calendar now, KeelIssueRecorder<SundialIssueRecord> sundialIssueRecorder);
 
     /**
      * For some easy work, run with event pool might be an open choice.
@@ -27,12 +29,4 @@ public interface KeelSundialPlan {
     default boolean isWorkerThreadRequired() {
         return true;
     }
-
-    /**
-     * It should be passed in on construction.
-     *
-     * @since 4.0.3
-     */
-    @Nonnull
-    KeelIssueRecorder<SundialIssueRecord> getSundialIssueRecorder();
 }

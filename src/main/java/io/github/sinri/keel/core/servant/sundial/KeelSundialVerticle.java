@@ -15,31 +15,27 @@ import java.util.Calendar;
 final class KeelSundialVerticle extends KeelVerticleImpl {
     private final KeelSundialPlan sundialPlan;
     private final Calendar now;
+    private final KeelIssueRecorder<SundialIssueRecord> sundialIssueRecorder;
 
     public KeelSundialVerticle(
             @Nonnull KeelSundialPlan sundialPlan,
-            @Nonnull Calendar now
+            @Nonnull Calendar now,
+            @Nonnull KeelIssueRecorder<SundialIssueRecord> sundialIssueRecorder
     ) {
         this.sundialPlan = sundialPlan;
         this.now = now;
-    }
-
-    @Nonnull
-    public KeelIssueRecorder<SundialIssueRecord> getSundialIssueRecorder() {
-        return sundialPlan.getSundialIssueRecorder();
+        this.sundialIssueRecorder = sundialIssueRecorder;
     }
 
     @Override
     protected Future<Void> startVerticle() {
         Future.succeededFuture()
               .compose(v -> {
-                  return sundialPlan.execute(now);
+                  return sundialPlan.execute(now, sundialIssueRecorder);
               })
               .onComplete(ar -> {
                   undeployMe();
               });
         return Future.succeededFuture();
     }
-
-
 }

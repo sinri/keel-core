@@ -11,6 +11,9 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**
+ * To filter out the situation that Response Status Code is set and not 200, and the response body is not in JSON object
+ * format, and the value mapped to key {@code code} is not {@code OK}.
+ *
  * @since 4.0.3
  */
 public class KeelWebResponseExtractorOnOKCode extends KeelWebResponseExtractorOnJsonObjectFormat {

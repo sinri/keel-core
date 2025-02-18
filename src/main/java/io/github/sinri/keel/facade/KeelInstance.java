@@ -9,7 +9,7 @@ import io.github.sinri.keel.logger.KeelLogLevel;
 import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
-import io.github.sinri.keel.web.http.requester.KeelWebRequestKit;
+import io.github.sinri.keel.web.http.requester.KeelWebRequestMixin;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -24,7 +24,7 @@ import java.util.Objects;
  * @since 3.1.0
  * @since 4.0.0 make it final and implement KeelAsyncMixin.
  */
-public final class KeelInstance implements KeelHelpersInterface, KeelClusterKit, KeelAsyncMixin, KeelWebRequestKit {
+public final class KeelInstance implements KeelHelpersInterface, KeelClusterKit, KeelAsyncMixin, KeelWebRequestMixin {
     public final static KeelInstance Keel = new KeelInstance();
 
     /**

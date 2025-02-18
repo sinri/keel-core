@@ -13,7 +13,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 /**
  * @since 4.0.3
  */
-public interface KeelWebRequestKit {
+public interface KeelWebRequestMixin {
 
     /**
      * @since 4.0.1

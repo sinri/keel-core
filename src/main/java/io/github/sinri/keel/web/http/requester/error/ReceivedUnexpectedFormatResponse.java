@@ -5,6 +5,8 @@ import io.vertx.core.buffer.Buffer;
 import javax.annotation.Nullable;
 
 /**
+ * The exception that HTTP Response Status Code is not 200, or the response body is not in the expected format.
+ *
  * @since 4.0.3
  */
 public final class ReceivedUnexpectedFormatResponse extends ReceivedUnexpectedResponse {

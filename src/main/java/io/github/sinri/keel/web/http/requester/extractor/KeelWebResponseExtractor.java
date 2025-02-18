@@ -8,6 +8,8 @@ import io.vertx.ext.web.client.HttpResponse;
 import javax.annotation.Nullable;
 
 /**
+ * Validate the response of web requests, and extract the content if validated.
+ *
  * @since 4.0.3
  */
 public abstract class KeelWebResponseExtractor<T> {

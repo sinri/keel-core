@@ -19,10 +19,11 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  *
  * @since 2.1
  */
-public abstract class KeelQueue extends KeelVerticleImpl {
-    private KeelQueueNextTaskSeeker nextTaskSeeker;
+public abstract class KeelQueue extends KeelVerticleImpl
+        implements KeelQueueNextTaskSeeker, KeelQueueSignalReader {
+    //private KeelQueueNextTaskSeeker nextTaskSeeker;
     private QueueWorkerPoolManager queueWorkerPoolManager;
-    private KeelQueueSignalReader signalReader;
+    //private KeelQueueSignalReader signalReader;
     private KeelQueueStatus queueStatus = KeelQueueStatus.INIT;
     private KeelIssueRecorder<QueueManageIssueRecord> queueManageIssueRecorder;
 
@@ -66,18 +67,6 @@ public abstract class KeelQueue extends KeelVerticleImpl {
         return new QueueWorkerPoolManager(0);
     }
 
-    /**
-     * Create a new instance of KeelQueueNextTaskSeeker when routine starts.
-     */
-    abstract protected @Nonnull KeelQueueNextTaskSeeker getNextTaskSeeker();
-
-    /**
-     * Create a new instance of SignalReader when routine starts.
-     *
-     * @since 3.0.1
-     */
-    abstract protected @Nonnull KeelQueueSignalReader getSignalReader();
-
     @Override
     protected Future<Void> startVerticle() {
         this.queueStatus = KeelQueueStatus.RUNNING;
@@ -89,13 +78,11 @@ public abstract class KeelQueue extends KeelVerticleImpl {
         queueManageIssueRecorder = this.buildQueueManageIssueRecorder();
 
         getQueueManageIssueRecorder().debug(r -> r.message("KeelQueue::routine start"));
-        this.signalReader = getSignalReader();
         this.queueWorkerPoolManager = getQueueWorkerPoolManager();
-        this.nextTaskSeeker = getNextTaskSeeker();
 
         Future.succeededFuture()
               .compose(v -> {
-                  return signalReader.readSignal();
+                  return this.readSignal();
               })
               .recover(throwable -> {
                   getQueueManageIssueRecorder().debug(r -> r.message("AS IS. Failed to read signal: " + throwable.getMessage()));
@@ -109,13 +96,13 @@ public abstract class KeelQueue extends KeelVerticleImpl {
                   if (signal == KeelQueueSignal.STOP) {
                       return this.whenSignalStopCame();
                   } else if (signal == KeelQueueSignal.RUN) {
-                      return this.whenSignalRunCame(nextTaskSeeker);
+                      return this.whenSignalRunCame();
                   } else {
                       return Future.failedFuture("Unknown Signal");
                   }
               })
               .eventually(() -> {
-                  long waitingMs = nextTaskSeeker.getWaitingPeriodInMs();
+                  long waitingMs = this.getWaitingPeriodInMsWhenTaskFree();
                   getQueueManageIssueRecorder().debug(r -> r.message("set timer for next routine after " + waitingMs + " ms"));
                   Keel.getVertx().setTimer(waitingMs, timerID -> routine());
                   return Future.succeededFuture();
@@ -131,7 +118,7 @@ public abstract class KeelQueue extends KeelVerticleImpl {
         return Future.succeededFuture();
     }
 
-    private Future<Void> whenSignalRunCame(KeelQueueNextTaskSeeker nextTaskSeeker) {
+    private Future<Void> whenSignalRunCame() {
         this.queueStatus = KeelQueueStatus.RUNNING;
 
         return Keel.asyncCallRepeatedly(routineResult -> {
@@ -140,7 +127,7 @@ public abstract class KeelQueue extends KeelVerticleImpl {
                        }
 
                        return Future.succeededFuture()
-                                    .compose(v -> nextTaskSeeker.seekNextTask())
+                                    .compose(v -> this.seekNextTask())
                                     .compose(task -> {
                                         if (task == null) {
                                             // 队列里已经空了，不必再找

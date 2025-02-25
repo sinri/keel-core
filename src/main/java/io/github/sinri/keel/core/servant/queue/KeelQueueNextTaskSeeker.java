@@ -25,10 +25,12 @@ public interface KeelQueueNextTaskSeeker {
     Future<KeelQueueTask> seekNextTask();
 
     /**
-     * @since 2.8 default to 10s
-     * @since 4.0.0 rename
+     * As of 4.0.4, renamed to current method name.
+     *
+     * @return the sleep time (in ms) when no task sought to deal with.
      */
-    default long getWaitingPeriodInMs() {
-        return 1000 * 10;
+    default long getWaitingPeriodInMsWhenTaskFree() {
+        return 1000L * 10;
     }
+
 }

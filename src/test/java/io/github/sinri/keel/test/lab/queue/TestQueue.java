@@ -1,35 +1,31 @@
 package io.github.sinri.keel.test.lab.queue;
 
-import io.github.sinri.keel.core.servant.queue.*;
+import io.github.sinri.keel.core.servant.queue.KeelQueue;
+import io.github.sinri.keel.core.servant.queue.KeelQueueSignal;
+import io.github.sinri.keel.core.servant.queue.KeelQueueTask;
+import io.github.sinri.keel.core.servant.queue.QueueWorkerPoolManager;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
+import java.util.UUID;
 
 public class TestQueue extends KeelQueue {
-    @Nonnull
     @Override
-    protected KeelQueueNextTaskSeeker getNextTaskSeeker() {
-        KeelIssueRecorder<QueueManageIssueRecord> issueRecorder = getQueueManageIssueRecorder();
-        return new TestQueueTaskSeeker(issueRecorder);
+    public Future<KeelQueueTask> seekNextTask() {
+        return Future.succeededFuture()
+                     .compose(v -> {
+                         int rest = (int) (10 * Math.random());
+                         return Future.succeededFuture(new TestQueueTask(
+                                 UUID.randomUUID().toString(),
+                                 rest
+                         ));
+                     });
     }
 
-    @Nonnull
     @Override
-    protected KeelQueueSignalReader getSignalReader() {
-        KeelIssueRecorder<QueueManageIssueRecord> issueRecorder = this.getQueueManageIssueRecorder();
-        return new KeelQueueSignalReader() {
-            @Override
-            public KeelIssueRecorder<QueueManageIssueRecord> getQueueManageIssueRecorder() {
-                return issueRecorder;
-            }
-
-            @Override
-            public Future<KeelQueueSignal> readSignal() {
-                return Future.succeededFuture(KeelQueueSignal.RUN);
-            }
-        };
+    public Future<KeelQueueSignal> readSignal() {
+        return Future.succeededFuture(KeelQueueSignal.RUN);
     }
 
     @Nonnull

@@ -3,6 +3,13 @@ package io.github.sinri.keel.integration.mysql.statement;
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.github.sinri.keel.integration.mysql.statement.impl.*;
+import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.TruncateTableStatement;
+import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.alter.AlterTableStatement;
+import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.create.CreateTableLikeTableStatement;
+import io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.create.CreateTableStatement;
+import io.github.sinri.keel.integration.mysql.statement.impl.ddl.view.AlterViewStatement;
+import io.github.sinri.keel.integration.mysql.statement.impl.ddl.view.CreateViewStatement;
+import io.github.sinri.keel.integration.mysql.statement.impl.ddl.view.DropViewStatement;
 import io.github.sinri.keel.integration.mysql.statement.mixin.ModifyStatementMixin;
 import io.github.sinri.keel.integration.mysql.statement.mixin.ReadStatementMixin;
 import io.github.sinri.keel.integration.mysql.statement.mixin.SelectStatementMixin;
@@ -95,6 +102,69 @@ public interface AnyStatement {
         CallStatement callStatement = new CallStatement();
         statementHandler.handle(callStatement);
         return callStatement;
+    }
+
+    /**
+     * @since 4.0.4
+     */
+    static AbstractStatement truncateTable(@Nonnull Handler<TruncateTableStatement> statementHandler) {
+        TruncateTableStatement truncateTableStatement = new TruncateTableStatement();
+        statementHandler.handle(truncateTableStatement);
+        return truncateTableStatement;
+    }
+
+    /**
+     * @since 4.0.4
+     */
+    static AbstractStatement createTable(@Nonnull Handler<CreateTableStatement> statementHandler) {
+        CreateTableStatement createTableStatement = new CreateTableStatement();
+        statementHandler.handle(createTableStatement);
+        return createTableStatement;
+    }
+
+    /**
+     * @since 4.0.4
+     */
+    static AbstractStatement createTableLikeTable(@Nonnull Handler<CreateTableLikeTableStatement> statementHandler) {
+        CreateTableLikeTableStatement createTableStatement = new CreateTableLikeTableStatement();
+        statementHandler.handle(createTableStatement);
+        return createTableStatement;
+    }
+
+    /**
+     * @since 4.0.4
+     */
+    static AbstractStatement alterTable(@Nonnull Handler<AlterTableStatement> statementHandler) {
+        AlterTableStatement alterTableStatement = new AlterTableStatement();
+        statementHandler.handle(alterTableStatement);
+        return alterTableStatement;
+    }
+
+    /**
+     * @since 4.0.4
+     */
+    static AbstractStatement createView(@Nonnull Handler<CreateViewStatement> statementHandler) {
+        CreateViewStatement createViewStatement = new CreateViewStatement();
+        statementHandler.handle(createViewStatement);
+        return createViewStatement;
+    }
+
+    /**
+     * @since 4.0.4
+     */
+    static AbstractStatement alterView(@Nonnull Handler<AlterViewStatement> statementHandler) {
+        AlterViewStatement alterViewStatement = new AlterViewStatement();
+        statementHandler.handle(alterViewStatement);
+        return alterViewStatement;
+    }
+
+    /**
+     * @since 4.0.4
+     */
+    static AbstractStatement dropView(@Nonnull Handler<DropViewStatement> statementHandler) {
+        DropViewStatement dropViewStatement = new DropViewStatement();
+        statementHandler.handle(dropViewStatement);
+        return dropViewStatement;
     }
 
     /**

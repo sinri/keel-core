@@ -1,10 +1,11 @@
 package io.github.sinri.keel.web.http.receptionist;
 
+import io.github.sinri.keel.logger.KeelLogLevel;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.github.sinri.keel.web.http.prehandler.KeelPlatformHandler;
+import io.github.sinri.keel.web.http.receptionist.responder.KeelWebResponder;
 import io.vertx.core.http.impl.CookieImpl;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 
@@ -23,10 +24,14 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 public abstract class KeelWebReceptionist {
     private final @Nonnull RoutingContext routingContext;
     private final @Nonnull KeelIssueRecorder<ReceptionistIssueRecord> issueRecorder;
+    private final @Nonnull KeelWebResponder responder;
 
     public KeelWebReceptionist(@Nonnull RoutingContext routingContext) {
         this.routingContext = routingContext;
         this.issueRecorder = issueRecordCenter().generateIssueRecorder(ReceptionistIssueRecord.TopicReceptionist, () -> new ReceptionistIssueRecord(readRequestID()));
+        if (isVerboseLogging()) {
+            this.issueRecorder.setVisibleLevel(KeelLogLevel.DEBUG);
+        }
         this.issueRecorder.info(r -> r.setRequest(
                 routingContext.request().method(),
                 routingContext.request().path(),
@@ -34,6 +39,7 @@ public abstract class KeelWebReceptionist {
                 (isVerboseLogging() ? routingContext.request().query() : null),
                 (isVerboseLogging() ? routingContext.body().asString() : null)
         ));
+        this.responder = buildResponder();
     }
 
     @Nonnull
@@ -41,15 +47,35 @@ public abstract class KeelWebReceptionist {
         return routingContext;
     }
 
+    /**
+     * @return (as of 4.0.4) whether to use DEBUG logging.
+     */
     protected boolean isVerboseLogging() {
         return false;
     }
 
     /**
+     * @return return a reference of an independent KeelIssueRecordCenter instance; do not create an instance here.
      * @since 3.2.0
      */
     @Nonnull
     abstract protected KeelIssueRecordCenter issueRecordCenter();
+
+    /**
+     * @since 4.0.4
+     */
+    protected KeelWebResponder buildResponder() {
+        return KeelWebResponder.createCommonInstance(routingContext, issueRecorder);
+    }
+
+    /**
+     * @return the built KeelWebResponder instance of this class instance.
+     * @since 4.0.4
+     */
+    @Nonnull
+    public final KeelWebResponder getResponder() {
+        return responder;
+    }
 
     /**
      * @since 3.2.0
@@ -61,44 +87,28 @@ public abstract class KeelWebReceptionist {
 
     abstract public void handle();
 
-    private void respondWithJsonObject(@Nonnull JsonObject resp) {
-        routingContext.json(resp);
-    }
-
     /**
+     * As of 4.0.4, this method is not overrideable. Use {@link KeelWebReceptionist#getResponder()}.
+     *
      * @since 3.0.12 add request_id to output json object
      */
-    protected void respondOnSuccess(@Nullable Object data) {
-        JsonObject resp = new JsonObject()
-                .put("request_id", routingContext.get(KeelPlatformHandler.KEEL_REQUEST_ID))
-                .put("code", "OK")
-                .put("data", data);
+    protected final void respondOnSuccess(@Nullable Object data) {
+        getResponder().respondOnSuccess(data);
         getIssueRecorder().info(r -> {
             r.message("SUCCESS, TO RESPOND.");
-            if (isVerboseLogging()) {
-                r.setResponse(resp);
-            }
         });
-        respondWithJsonObject(resp);
     }
 
     /**
+     * As of 4.0.4, this method is not overrideable. Use {@link KeelWebReceptionist#getResponder()}.
+     *
      * @since 3.0.12 add request_id to output json object
      */
-    protected void respondOnFailure(@Nonnull Throwable throwable) {
-        var resp = new JsonObject()
-                .put("request_id", routingContext.get(KeelPlatformHandler.KEEL_REQUEST_ID))
-                .put("code", "FAILED")
-                .put("data", throwable.getMessage());
-        String error = Keel.stringHelper().renderThrowableChain(throwable);
-        resp.put("throwable", error);
+    protected final void respondOnFailure(@Nonnull Throwable throwable) {
+        getResponder().respondOnFailure(throwable);
         getIssueRecorder().exception(throwable, r -> {
             r.message("FAILED, TO RESPOND.");
-            if (isVerboseLogging()) {
-                r.setResponse(resp);
-            }
         });
-        respondWithJsonObject(resp);
     }
 
     /**
@@ -147,5 +157,4 @@ public abstract class KeelWebReceptionist {
     protected void removeCookie(@Nonnull String name) {
         getRoutingContext().response().removeCookie(name);
     }
-
 }

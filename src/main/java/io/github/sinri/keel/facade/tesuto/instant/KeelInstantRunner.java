@@ -12,6 +12,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
@@ -76,6 +77,8 @@ abstract public class KeelInstantRunner {
         AtomicInteger totalPassedRef = new AtomicInteger();
         List<InstantRunnerResult> testUnitResults = new ArrayList<>();
 
+        CountDownLatch countDownLatch = new CountDownLatch(testUnits.size());
+
         Future.succeededFuture()
               .compose(v -> {
                   instantLogger.info(r -> r.message("STARTING..."));
@@ -91,6 +94,13 @@ abstract public class KeelInstantRunner {
                                  return testUnit.runTest((KeelInstantRunner) testInstance)
                                                 .compose(testUnitResult -> {
                                                     testUnitResults.add(testUnitResult);
+                                                    return Future.succeededFuture();
+                                                })
+                                                .eventually(() -> {
+                                                    countDownLatch.countDown();
+                                                    return Future.succeededFuture();
+                                                })
+                                                .compose(vv -> {
                                                     return Future.succeededFuture();
                                                 });
                              })
@@ -123,9 +133,19 @@ abstract public class KeelInstantRunner {
               .eventually(() -> {
                   return ((KeelInstantRunner) testInstance).ending(testUnitResults);
               })
-              .eventually(() -> {
-                  return Keel.getVertx().close();
-              });
+        //              .eventually(() -> {
+        //                  return Keel.getVertx().close();
+        //              })
+        ;
+
+        try {
+            // Wait for the async operation to complete
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            getInstantLogger().exception(e);
+        } finally {
+            Keel.close();
+        }
     }
 
     /**

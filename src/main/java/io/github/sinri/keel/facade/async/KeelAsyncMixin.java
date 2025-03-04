@@ -259,7 +259,18 @@ public interface KeelAsyncMixin {
         return asyncCallExclusively(lockName, 1_000L, exclusiveSupplier);
     }
 
+    /**
+     * @deprecated typo, use {@link KeelAsyncMixin#asyncTransformCompletableFuture(CompletableFuture)}.
+     */
+    @Deprecated(forRemoval = true, since = "4.0.6")
     default <R> Future<R> asyncTransfromCompletableFuture(@Nonnull CompletableFuture<R> completableFuture) {
+        return asyncTransformCompletableFuture(completableFuture);
+    }
+
+    /**
+     * @since 4.0.6 fix naming mistake.
+     */
+    default <R> Future<R> asyncTransformCompletableFuture(@Nonnull CompletableFuture<R> completableFuture) {
         Promise<R> promise = Promise.promise();
         completableFuture.whenComplete((r, t) -> {
             if (t != null) {

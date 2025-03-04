@@ -5,6 +5,7 @@ import io.github.sinri.keel.core.cron.KeelCronExpression;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -21,6 +22,8 @@ public class KeelDateTimeHelper {
     public static final String MYSQL_DATE_PATTERN = "yyyy-MM-dd";
     public static final String MYSQL_TIME_PATTERN = "HH:mm:ss";
     public static final String GMT_PATTERN = "EEE, dd MMM yyyy HH:mm:ss z";
+    public static final String ISO8601_PATTERN = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+
     private static final KeelDateTimeHelper instance = new KeelDateTimeHelper();
 
     private KeelDateTimeHelper() {
@@ -32,8 +35,8 @@ public class KeelDateTimeHelper {
     }
 
     /**
-     * @since 3.0.10
      * @return current timestamp expressed in MySQL Date Time Format
+     * @since 3.0.10
      */
     public String getCurrentDatetime() {
         return getCurrentDateExpression(MYSQL_DATETIME_PATTERN);
@@ -85,7 +88,7 @@ public class KeelDateTimeHelper {
      */
     public String getMySQLFormatLocalDateTimeExpression(String localDateTimeExpression) {
         return LocalDateTime.parse(localDateTimeExpression)
-                .format(DateTimeFormatter.ofPattern(MYSQL_DATETIME_PATTERN));
+                            .format(DateTimeFormatter.ofPattern(MYSQL_DATETIME_PATTERN));
     }
 
     /**
@@ -94,10 +97,10 @@ public class KeelDateTimeHelper {
      */
     public String getGMTDateTimeExpression(ZoneId zoneId) {
         DateTimeFormatter gmt = DateTimeFormatter.ofPattern(
-                        GMT_PATTERN,
-                        Locale.ENGLISH
-                )
-                .withZone(ZoneId.of("GMT"));
+                                                         GMT_PATTERN,
+                                                         Locale.ENGLISH
+                                                 )
+                                                 .withZone(ZoneId.of("GMT"));
         return gmt.format(LocalDateTime.now(zoneId));
     }
 
@@ -156,6 +159,17 @@ public class KeelDateTimeHelper {
         } catch (Throwable e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    /**
+     * @param instant 时间戳（UTC 时间）
+     * @param zoneId  时区，如 {@code ZoneOffset.UTC}
+     * @param pattern 日期时间表述字符串的格式
+     * @return 指定时间戳在指定时区对应的日期时间表述字符串
+     * @since 4.0.6
+     */
+    public String getInstantExpression(Instant instant, ZoneId zoneId, String pattern) {
+        return DateTimeFormatter.ofPattern(pattern).withZone(zoneId).format(instant);
     }
 
     /**

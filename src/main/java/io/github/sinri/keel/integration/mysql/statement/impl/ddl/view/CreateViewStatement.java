@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
@@ -86,7 +87,7 @@ public class CreateViewStatement extends AbstractStatement {
         var columnsString = "";
         if (!columns.isEmpty()) {
             columnsString = "(" + Keel.stringHelper().joinStringArray(
-                    columns.stream().map(x -> "`" + x + "`").toList(),
+                    columns.stream().map(x -> "`" + x + "`").collect(Collectors.toList()),
                     ", "
             ) + ")";
         }

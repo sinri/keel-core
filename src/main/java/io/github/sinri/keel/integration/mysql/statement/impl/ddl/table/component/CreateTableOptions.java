@@ -3,6 +3,7 @@ package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.componen
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
@@ -24,7 +25,7 @@ public class CreateTableOptions {
         }
         List<String> list = options.entrySet().stream()
                                    .map(entry -> entry.getKey() + "=" + entry.getValue())
-                                   .toList();
+                                   .collect(Collectors.toList());
         return Keel.stringHelper().joinStringArray(list, ", ");
     }
 }

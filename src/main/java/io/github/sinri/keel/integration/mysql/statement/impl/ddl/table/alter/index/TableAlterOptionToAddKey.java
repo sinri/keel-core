@@ -6,6 +6,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
@@ -42,7 +43,7 @@ public final class TableAlterOptionToAddKey extends TableAlterOption {
 
     @Override
     public String toString() {
-        List<String> list = keyParts.stream().map(x -> "`" + x + "`").toList();
+        List<String> list = keyParts.stream().map(x -> "`" + x + "`").collect(Collectors.toList());
         return "ADD INDEX "
                 + (indexName != null ? ("`" + indexName + "`") : "") + " "
                 + (indexType != null ? (indexType) : "") + " "

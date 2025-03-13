@@ -17,6 +17,8 @@ import java.util.function.Supplier;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
+ * Handle customized tasks in order.
+ *
  * @since 3.0.0
  */
 public class KeelFunnel extends KeelVerticleImpl {

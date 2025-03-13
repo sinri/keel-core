@@ -1,38 +1,45 @@
 package io.github.sinri.keel.core.servant.intravenous;
 
+import io.github.sinri.keel.core.verticles.KeelVerticle;
 import io.vertx.core.Future;
 
+import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.function.Function;
 
 /**
- * @param <T> The type of drop
- * @since 3.0.1 became a sugar
+ * Handle tasks to process certain type of objects in order.
+ * <p>
+ * Extracted since 4.0.7.
+ * </p>
+ *
+ * @since 4.0.7
  */
-public class KeelIntravenous<T> extends KeelIntravenousBase<T> {
-    private final Function<List<T>, Future<Void>> processor;
-
-
-    public KeelIntravenous(Function<List<T>, Future<Void>> processor) {
-        super();
-        this.processor = processor;
+public interface KeelIntravenous<D> extends KeelVerticle {
+    static <T> KeelIntravenous<T> instant(@Nonnull SingleDropProcessor<T> itemProcessor) {
+        return new KeelIntravenousSingleImpl<T>(itemProcessor);
     }
 
-    public KeelIntravenous<T> setBatchSize(int batchSize) {
-        if (batchSize < 1) batchSize = 1;
-        this.batchSize = batchSize;
-        return this;
+    static <T> KeelIntravenous<T> instantBatch(@Nonnull MultiDropsProcessor<T> itemsProcessor) {
+        return new KeelIntravenousBatchImpl<T>(itemsProcessor);
     }
 
-    public KeelIntravenous<T> setSleepTime(long sleepTime) {
-        if (sleepTime < 1) sleepTime = 1;
-        this.sleepTime = sleepTime;
-        return this;
+    void add(D drop);
+
+    /**
+     * The exception occurred when handling drops, override this method to handle.
+     * By default, the exception would be omitted.
+     */
+    default void handleAllergy(Throwable throwable) {
+        // do nothing by default for the thrown exception
     }
 
-    @Override
-    protected Future<Void> process(List<T> list) {
-        return processor.apply(list);
+    void shutdown();
+
+    interface SingleDropProcessor<T> {
+        Future<Void> process(T drop);
     }
 
+    interface MultiDropsProcessor<T> {
+        Future<Void> process(List<T> drops);
+    }
 }

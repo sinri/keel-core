@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
@@ -58,7 +59,7 @@ public class CreateTableStatement extends CreateTableStatementBase<CreateTableSt
 
     @Override
     public String toString() {
-        var ds = definitions.stream().map(Object::toString).toList();
+        var ds = definitions.stream().map(Object::toString).collect(Collectors.toList());
         var sql = "CREATE " + (useTemporary() ? "TEMPORARY " : " ") + "TABLE "
                 + (useIfNotExists() ? "IF NOT EXISTS " : " ")
                 + getTableExpression() + " " + SQL_COMPONENT_SEPARATOR

@@ -3,6 +3,7 @@ package io.github.sinri.keel.integration.mysql.statement.impl.ddl.table.componen
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
@@ -29,7 +30,7 @@ public abstract class TableCreateIndexDefinition extends TableCreateDefinition {
 
     protected String getKeyPartsExpression() {
         String s = Keel.stringHelper().joinStringArray(
-                keyParts.stream().map(x -> "`" + x + "`").toList(),
+                keyParts.stream().map(x -> "`" + x + "`").collect(Collectors.toList()),
                 ", "
         );
         return "(" + s + ")";

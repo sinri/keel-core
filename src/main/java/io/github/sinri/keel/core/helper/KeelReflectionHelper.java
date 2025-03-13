@@ -65,7 +65,7 @@ public class KeelReflectionHelper {
 
     /**
      * @since 3.1.8
-     * For the repeatable annotations.
+     *         For the repeatable annotations.
      */
     @Nonnull
     public <T extends Annotation> T[] getAnnotationsOfClass(@Nonnull Class<?> anyClass, @Nonnull Class<T> classOfAnnotation) {
@@ -81,8 +81,8 @@ public class KeelReflectionHelper {
      * @since 3.2.12.1 rewrite
      */
     public <R> Set<Class<? extends R>> seekClassDescendantsInPackage(@Nonnull String packageName, @Nonnull Class<R> baseClass) {
-//        Reflections reflections = new Reflections(packageName);
-//        return reflections.getSubTypesOf(baseClass);
+        //        Reflections reflections = new Reflections(packageName);
+        //        return reflections.getSubTypesOf(baseClass);
 
         Set<Class<? extends R>> set = new HashSet<>();
 
@@ -127,9 +127,10 @@ public class KeelReflectionHelper {
                                 // if (clazzAny instanceof Class<? extends R> clazzR) {
                                 //    // 在这里可以安全地使用 clazzR
                                 // }
-                                Class<? extends R> clazz = (Class<? extends R>) classLoader.loadClass(className);
+                                //Class<? extends R> clazz = (Class<? extends R>) classLoader.loadClass(className);
+                                var clazz = classLoader.loadClass(className);
                                 if (baseClass.isAssignableFrom(clazz)) {
-                                    descendantClasses.add(clazz);
+                                    descendantClasses.add((Class<? extends R>) clazz);
                                 }
                             } catch (Throwable e) {
                                 Keel.getLogger()

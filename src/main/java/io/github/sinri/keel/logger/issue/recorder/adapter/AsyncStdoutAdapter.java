@@ -1,6 +1,6 @@
 package io.github.sinri.keel.logger.issue.recorder.adapter;
 
-import io.github.sinri.keel.core.servant.intravenous.KeelIntravenous;
+import io.github.sinri.keel.core.servant.intravenous.legacy.KeelIntravenous;
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.github.sinri.keel.logger.issue.recorder.render.KeelIssueRecordRender;
 import io.vertx.core.Future;

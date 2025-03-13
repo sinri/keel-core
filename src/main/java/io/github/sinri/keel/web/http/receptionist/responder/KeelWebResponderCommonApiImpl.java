@@ -23,7 +23,6 @@ public class KeelWebResponderCommonApiImpl extends AbstractKeelWebResponder {
     @Override
     public void respondOnSuccess(@Nullable Object data) {
         JsonObject resp = buildResponseBody(Code.OK, data);
-        respondOnSuccess(resp);
         getRoutingContext().json(resp);
     }
 

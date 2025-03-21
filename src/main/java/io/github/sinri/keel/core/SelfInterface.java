@@ -2,10 +2,13 @@ package io.github.sinri.keel.core;
 
 import javax.annotation.Nonnull;
 
+
 /**
- * For the "return self" trick, let the interface could define a self return method to make chain call available.
+ * A generic interface that provides a method to get the implementation instance.
+ * This is useful for fluent interfaces or mixins where the implementing class
+ * needs to return `this` to allow method chaining.
  *
- * @param <T> The final implementation class.
+ * @param <T> the type of the implementing class
  * @since 3.1.10
  */
 public interface SelfInterface<T> {

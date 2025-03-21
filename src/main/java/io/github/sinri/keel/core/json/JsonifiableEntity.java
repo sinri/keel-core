@@ -12,11 +12,25 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
 
+
 /**
+ * The JsonifiableEntity interface defines a contract for entities that can be converted to and from a JSON object.
+ * It extends the UnmodifiableJsonifiableEntity and ClusterSerializable interfaces, providing additional methods
+ * for working with JSON data and buffer serialization.
+ *
+ * <p>This interface is designed to work seamlessly with JSON objects, allowing for easy conversion between
+ * the entity and its JSON representation. It also provides methods for reading specific values from the JSON
+ * object and for serializing and deserializing the entity to and from a buffer.
+ *
+ * <p>
+ * As of 2.8:
+ * extended ClusterSerializable for EventBus Messaging;
+ * extended Shareable for LocalMap;
+ * extended Iterable for FOREACH.
+ * </p>
+ *
+ * @param <E> the type of the entity implementing this interface
  * @since 1.14
- * @since 2.8 ClusterSerializable: Safe with EventBus Messaging.
- * @since 2.8 Shareable: allows you to put into a LocalMap.
- * @since 2.8 Iterable: you can run forEach with it.
  */
 public interface JsonifiableEntity<E> extends UnmodifiableJsonifiableEntity, ClusterSerializable {
 
@@ -27,19 +41,39 @@ public interface JsonifiableEntity<E> extends UnmodifiableJsonifiableEntity, Clu
         return new SimpleJsonifiableEntity(jsonObject);
     }
 
+    /**
+     * Converts the current state of this entity into a {@link JsonObject}.
+     *
+     * @return a non-null {@link JsonObject} representing the current state of the entity
+     */
     @Nonnull
     JsonObject toJsonObject();
 
+    /**
+     * Reloads the data of this entity from the provided {@link JsonObject}.
+     *
+     * @param jsonObject a non-null {@link JsonObject} containing the new data to be loaded into the entity
+     * @return the current instance of the entity, updated with the new data
+     */
     @Nonnull
     E reloadDataFromJsonObject(@Nonnull JsonObject jsonObject);
 
     @Override
     String toString();
 
+
     /**
+     * Reads a value from the JSON representation of this entity, using the provided function to determine the path and
+     * type.
+     *
+     * <p>As of 2.8, If java.lang.ClassCastException occurred, return null instead.</p>
+     * <p>As of 3.1.10, moved here from UnmodifiableJsonifiableEntity.</p>
+     *
+     * @param <T>  the type of the value to be read
+     * @param func a function that takes a {@link JsonPointer} and returns the class type of the value to be read
+     * @return the value at the specified JSON path, cast to the specified type, or null if the value is not found or
+     *         cannot be cast
      * @since 2.7
-     * @since 2.8 If java.lang.ClassCastException occurred, return null instead.
-     * @since 3.1.10 moved here from UnmodifiableJsonifiableEntity
      */
     default <T> @Nullable T read(@Nonnull Function<JsonPointer, Class<T>> func) {
         try {
@@ -56,7 +90,20 @@ public interface JsonifiableEntity<E> extends UnmodifiableJsonifiableEntity, Clu
     }
 
     /**
-     * @param <B> an implementation class of JsonifiableEntity, with constructor B() or B(JsonObject).
+     * Attempts to read and convert a JSON object into an instance of the specified class that implements
+     * {@link JsonifiableEntity}.
+     *
+     * <p>This method first tries to create an instance of the provided class using its no-argument constructor and
+     * then
+     * loads the data from the JSON object. If the no-argument constructor is not available, it tries to use a
+     * constructor
+     * that takes a {@link JsonObject} as an argument. If neither constructor is found or an exception occurs during
+     * instantiation, the method returns null.</p>
+     *
+     * @param bClass the class of the entity to be created, which must extend or implement {@link JsonifiableEntity}
+     * @param args   the arguments used to form a JSON pointer for locating the JSON object within a larger structure
+     * @param <B>    the type of the entity to be created
+     * @return an instance of the specified class with data loaded from the JSON object, or null if the operation fails
      * @since 2.7
      */
     default @Nullable <B extends JsonifiableEntity<?>> B readJsonifiableEntity(@Nonnull Class<B> bClass, String... args) {

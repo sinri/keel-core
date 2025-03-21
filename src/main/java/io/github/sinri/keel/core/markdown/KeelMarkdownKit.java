@@ -8,7 +8,11 @@ import org.commonmark.renderer.html.HtmlRenderer;
 
 import java.util.List;
 
+
 /**
+ * A utility class for parsing and rendering Markdown content. It allows customization through a list of extensions,
+ * providing flexibility in how the Markdown is parsed and rendered.
+ *
  * @see <a href="https://github.com/commonmark/commonmark-java">commonmark java readme</a>
  * @since 1.12 based on `org.commonmark`
  */
@@ -20,42 +24,42 @@ public class KeelMarkdownKit {
     public KeelMarkdownKit() {
         extensions = List.of(TablesExtension.create());
         markdownParser = Parser.builder()
-                .extensions(extensions)
-                .build();
+                               .extensions(extensions)
+                               .build();
         htmlRenderer = HtmlRenderer.builder()
-                .extensions(extensions)
-                .build();
+                                   .extensions(extensions)
+                                   .build();
     }
 
     public KeelMarkdownKit(List<Extension> extensions) {
         this.extensions = extensions;
         markdownParser = Parser.builder()
-                .extensions(extensions)
-                .build();
+                               .extensions(extensions)
+                               .build();
         htmlRenderer = HtmlRenderer.builder()
-                .extensions(extensions)
-                .build();
+                                   .extensions(extensions)
+                                   .build();
     }
 
     public KeelMarkdownKit resetExtensions(List<Extension> extensions) {
         this.extensions = extensions;
         markdownParser = Parser.builder()
-                .extensions(extensions)
-                .build();
+                               .extensions(extensions)
+                               .build();
         htmlRenderer = HtmlRenderer.builder()
-                .extensions(extensions)
-                .build();
+                                   .extensions(extensions)
+                                   .build();
         return this;
     }
 
     public KeelMarkdownKit appendExtensions(Extension extension) {
         this.extensions.add(extension);
         markdownParser = Parser.builder()
-                .extensions(extensions)
-                .build();
+                               .extensions(extensions)
+                               .build();
         htmlRenderer = HtmlRenderer.builder()
-                .extensions(extensions)
-                .build();
+                                   .extensions(extensions)
+                                   .build();
         return this;
     }
 

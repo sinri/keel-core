@@ -18,8 +18,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
- * @since 3.0.10 Used for universal testing scenario, which could be run in IDE(A).
- * @since 4.0.0 renamed from KeelTest
+ * Abstract class designed to facilitate the execution of test units in a development environment, such as an IDE.
+ * This class is intended to be extended by subclasses that define specific test units using the {@code @InstantRunUnit}
+ * annotation.
+ * The main method orchestrates the setup, execution, and teardown of these test units, logging the results and handling
+ * asynchronous operations.
+ *
+ * @since 4.0.0
  */
 abstract public class KeelInstantRunner {
     /**

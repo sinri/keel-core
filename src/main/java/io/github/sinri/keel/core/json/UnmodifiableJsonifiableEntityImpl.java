@@ -10,9 +10,20 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
 
+
 /**
+ * An implementation of the UnmodifiableJsonifiableEntity interface that provides a read-only
+ * wrapper around a JsonObject. This class ensures that the underlying JSON object cannot be
+ * modified, providing a safe and immutable representation.
+ *
+ * <p>The class supports converting the JSON object to a string, reading values from the JSON
+ * object using a provided function, converting the JSON object to a buffer, and iterating over
+ * the entries in the JSON object. It also provides a method to create a copy of the current
+ * instance.
+ *
+ * <p>As of 3.2.15, it is public.</p>
+ *
  * @since 3.1.10
- * @since 3.2.15 be public
  */
 public class UnmodifiableJsonifiableEntityImpl implements UnmodifiableJsonifiableEntity {
     private final @Nonnull JsonObject jsonObject;
@@ -70,6 +81,9 @@ public class UnmodifiableJsonifiableEntityImpl implements UnmodifiableJsonifiabl
     }
 
     /**
+     * Creates and returns a deep copy of the current instance.
+     *
+     * @return A new {@link UnmodifiableJsonifiableEntityImpl} instance that is a deep copy of this object.
      * @since 4.0.0
      */
     @Override

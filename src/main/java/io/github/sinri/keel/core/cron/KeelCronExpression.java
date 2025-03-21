@@ -6,8 +6,13 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 /**
- * since 2.9.3 moved from io.github.sinri.keel.servant.sundial to here.
+ * Represents a cron expression and provides methods to match it against a given date and time.
+ * The cron expression is parsed into sets of valid values for each field (minute, hour, day, month, weekday).
+ * This class supports the standard cron syntax, including ranges, lists, and increments.
+ *
+ * @since 2.9.3 moved from io.github.sinri.keel.servant.sundial to here.
  */
 public class KeelCronExpression {
     final Set<Integer> minuteOptions = new HashSet<>();
@@ -17,6 +22,22 @@ public class KeelCronExpression {
     final Set<Integer> weekdayOptions = new HashSet<>();
     private final @Nonnull String rawCronExpression;
 
+    /**
+     * Constructs a new KeelCronExpression from the given raw cron expression.
+     *
+     * @param rawCronExpression the raw cron expression to parse and validate
+     *                          The expression should consist of 5 space-separated fields:
+     *                          - Minute (0-59)
+     *                          - Hour (0-23)
+     *                          - Day of the month (1-31)
+     *                          - Month (1-12)
+     *                          - Day of the week (0-6, where 0 is Sunday)
+     *                          Each field can be a specific value, a range, a list of values, or an asterisk (*).
+     *                          Examples: "0 0 1 1 0" (every first day of January at midnight), "0 0 * * *" (midnight
+     *                          every day)
+     * @throws RuntimeException if the provided cron expression is invalid (e.g., incorrect number of fields or invalid
+     *                          values)
+     */
     public KeelCronExpression(@Nonnull String rawCronExpression) {
         this.rawCronExpression = rawCronExpression;
 
@@ -38,11 +59,35 @@ public class KeelCronExpression {
         parseField(weekdayExpression, weekdayOptions, 0, 6);
     }
 
+    /**
+     * Parses the given Calendar object and returns a ParsedCalenderElements instance.
+     *
+     * @param currentCalendar the Calendar object to parse, must not be null
+     * @return a ParsedCalenderElements instance containing the parsed date and time components
+     * @since 3.2.4
+     */
+    public static ParsedCalenderElements parseCalenderToElements(@Nonnull Calendar currentCalendar) {
+        return new ParsedCalenderElements(currentCalendar);
+    }
+
+    /**
+     * Determines if the given Calendar object matches the cron expression.
+     *
+     * @param currentCalendar the Calendar object to match against the cron expression, must not be null
+     * @return true if the Calendar object matches the cron expression, false otherwise
+     */
     public boolean match(@Nonnull Calendar currentCalendar) {
         ParsedCalenderElements parsedCalenderElements = new ParsedCalenderElements(currentCalendar);
         return match(parsedCalenderElements);
     }
 
+    /**
+     * Determines if the given parsed calendar elements match the cron expression.
+     *
+     * @param parsedCalenderElements the ParsedCalenderElements instance to match against the cron expression, must not
+     *                               be null
+     * @return true if the ParsedCalenderElements match the cron expression, false otherwise
+     */
     public boolean match(@Nonnull ParsedCalenderElements parsedCalenderElements) {
         return minuteOptions.contains(parsedCalenderElements.minute)
                 && hourOptions.contains(parsedCalenderElements.hour)
@@ -51,6 +96,15 @@ public class KeelCronExpression {
                 && weekdayOptions.contains(parsedCalenderElements.weekday);
     }
 
+    /**
+     * Parses the given raw component of a cron expression and populates the option set with valid values.
+     *
+     * @param rawComponent the raw component of the cron expression to parse
+     * @param optionSet the set to populate with the parsed values
+     * @param min the minimum allowed value for the component
+     * @param max the maximum allowed value for the component
+     * @throws IllegalArgumentException if the raw component is invalid or contains out-of-range values
+     */
     private void parseField(@Nonnull String rawComponent, @Nonnull Set<Integer> optionSet, int min, int max) {
         if (rawComponent.equals("*")) {
             for (int i = min; i <= max; i++) {
@@ -105,17 +159,20 @@ public class KeelCronExpression {
     }
 
     /**
-     * @since 3.2.4
+     * Returns the raw cron expression that was used to initialize this KeelCronExpression instance.
+     *
+     * @return the raw cron expression as a non-null String
      */
-    public static ParsedCalenderElements parseCalenderToElements(@Nonnull Calendar currentCalendar) {
-        return new ParsedCalenderElements(currentCalendar);
-    }
-
     @Nonnull
     public String getRawCronExpression() {
         return rawCronExpression;
     }
 
+    /**
+     * Returns a string representation of this KeelCronExpression, which is the raw cron expression used to initialize the instance.
+     *
+     * @return the raw cron expression as a non-null String
+     */
     @Override
     public String toString() {
         return getRawCronExpression();

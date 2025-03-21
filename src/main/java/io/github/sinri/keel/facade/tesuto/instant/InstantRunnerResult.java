@@ -3,7 +3,11 @@ package io.github.sinri.keel.facade.tesuto.instant;
 import javax.annotation.Nonnull;
 
 /**
- * @since 3.0.14 add skip.
+ * Represents the result of a test unit executed by the {@link KeelInstantRunner}.
+ * This class encapsulates the outcome, including whether the test was completed, failed, or skipped,
+ * and provides methods to query these states.
+ *
+ * @since 3.0.14
  */
 public class InstantRunnerResult {
     private final @Nonnull String testName;

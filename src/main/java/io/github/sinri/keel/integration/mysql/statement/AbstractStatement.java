@@ -28,6 +28,10 @@ abstract public class AbstractStatement implements AnyStatement {
 
     protected final @Nonnull String statement_uuid;
     private @Nonnull String remarkAsComment = "";
+    /**
+     * @since 4.0.7
+     */
+    private boolean withoutPrepare = false;
 
     public AbstractStatement() {
         this.statement_uuid = UUID.randomUUID().toString();
@@ -83,24 +87,51 @@ abstract public class AbstractStatement implements AnyStatement {
     public Future<ResultMatrix> execute(@Nonnull NamedMySQLConnection namedSqlConnection) {
         AtomicReference<String> theSql = new AtomicReference<>();
         return Future.succeededFuture(this.toString())
-                .compose(sql -> {
-                    theSql.set(sql);
-                    getSqlAuditIssueRecorder().info(r -> r.setPreparation(statement_uuid, sql));
-                    return namedSqlConnection.getSqlConnection().preparedQuery(sql).execute()
-                            .compose(rows -> {
-                                ResultMatrix resultMatrix = ResultMatrix.create(rows);
-                                return Future.succeededFuture(resultMatrix);
-                            });
-                })
-                .compose(resultMatrix -> {
-                    getSqlAuditIssueRecorder().info(r -> r.setForDone(statement_uuid, theSql.get(), resultMatrix.getTotalAffectedRows(), resultMatrix.getTotalFetchedRows()));
-                    return Future.succeededFuture(resultMatrix);
-                }, throwable -> {
-                    getSqlAuditIssueRecorder().exception(throwable, r -> r.setForFailed(statement_uuid, theSql.get()));
-                    return Future.failedFuture(throwable);
-                });
+                     .compose(sql -> {
+                         theSql.set(sql);
+
+                         if (isWithoutPrepare()) {
+                             getSqlAuditIssueRecorder().info(r -> r.setQuery(statement_uuid, sql));
+                             return namedSqlConnection.getSqlConnection().query(sql).execute();
+                         } else {
+                             getSqlAuditIssueRecorder().info(r -> r.setPreparation(statement_uuid, sql));
+                             return namedSqlConnection.getSqlConnection().preparedQuery(sql).execute();
+                         }
+                     })
+                     .compose(rows -> {
+                         ResultMatrix resultMatrix = ResultMatrix.create(rows);
+                         return Future.succeededFuture(resultMatrix);
+                     })
+                     .compose(resultMatrix -> {
+                         getSqlAuditIssueRecorder().info(r -> r.setForDone(statement_uuid, theSql.get(), resultMatrix.getTotalAffectedRows(), resultMatrix.getTotalFetchedRows()));
+                         return Future.succeededFuture(resultMatrix);
+                     }, throwable -> {
+                         getSqlAuditIssueRecorder().exception(throwable, r -> r.setForFailed(statement_uuid, theSql.get()));
+                         return Future.failedFuture(throwable);
+                     });
     }
 
+    /**
+     * @since 4.0.7
+     */
+    @Override
+    public boolean isWithoutPrepare() {
+        return withoutPrepare;
+    }
+
+    /**
+     * @since 4.0.7
+     */
+    public AbstractStatement setWithoutPrepare(boolean withoutPrepare) {
+        this.withoutPrepare = withoutPrepare;
+        return this;
+    }
+
+    /**
+     * A specialized implementation of {@link KeelIssueRecord} for recording MySQL audit issues.
+     * This class provides methods to set the state of a MySQL query, including preparation, execution, and failure,
+     * along with relevant attributes such as the SQL statement, statement UUID, and affected/fetched rows.
+     */
     public static final class MySQLAuditIssueRecord extends KeelIssueRecord<MySQLAuditIssueRecord> {
         public static final String TopicMysqlAudit = "MysqlAudit";
         public static final String AttributeMysqlAudit = "MysqlAudit";
@@ -119,15 +150,50 @@ abstract public class AbstractStatement implements AnyStatement {
             return this;
         }
 
+
+        /**
+         * Sets the preparation state for a MySQL query, including the statement UUID and the SQL query.
+         *
+         * @param statement_uuid The unique identifier for the prepared statement.
+         * @param sql            The SQL query that was prepared.
+         * @return The current instance of {@link MySQLAuditIssueRecord} for method chaining.
+         */
         public MySQLAuditIssueRecord setPreparation(@Nonnull String statement_uuid, @Nonnull String sql) {
             this.message("MySQL query prepared.")
-                    .attribute(AttributeMysqlAudit, new JsonObject()
-                            .put(KeyStatementUuid, statement_uuid)
-                            .put(KeySql, sql)
-                    );
+                .attribute(AttributeMysqlAudit, new JsonObject()
+                        .put(KeyStatementUuid, statement_uuid)
+                        .put(KeySql, sql)
+                );
             return this;
         }
 
+        /**
+         * Sets the query details for a MySQL audit issue, including the statement UUID and the SQL query.
+         *
+         * @param statement_uuid The unique identifier for the statement.
+         * @param sql            The SQL query that was executed.
+         * @return The current instance of {@link MySQLAuditIssueRecord} for method chaining.
+         */
+        public MySQLAuditIssueRecord setQuery(@Nonnull String statement_uuid, @Nonnull String sql) {
+            this.message("MySQL query without preparation.")
+                .attribute(AttributeMysqlAudit, new JsonObject()
+                        .put(KeyStatementUuid, statement_uuid)
+                        .put(KeySql, sql)
+                );
+            return this;
+        }
+
+
+        /**
+         * Sets the completion state for a MySQL query, including the statement UUID, SQL query, total affected rows,
+         * and total fetched rows.
+         *
+         * @param statement_uuid    The unique identifier for the executed statement.
+         * @param sql               The SQL query that was executed.
+         * @param totalAffectedRows The number of rows affected by the query.
+         * @param totalFetchedRows  The number of rows fetched by the query.
+         * @return The current instance of {@link MySQLAuditIssueRecord} for method chaining.
+         */
         public MySQLAuditIssueRecord setForDone(
                 @Nonnull String statement_uuid,
                 @Nonnull String sql,
@@ -135,21 +201,28 @@ abstract public class AbstractStatement implements AnyStatement {
                 int totalFetchedRows
         ) {
             this.message("MySQL query executed.")
-                    .attribute(AttributeMysqlAudit, new JsonObject()
-                            .put(KeyStatementUuid, statement_uuid)
-                            .put(KeySql, sql)
-                            .put(KeyTotalFetchedRows, totalFetchedRows)
-                            .put(KeyTotalAffectedRows, totalAffectedRows)
-                    );
+                .attribute(AttributeMysqlAudit, new JsonObject()
+                        .put(KeyStatementUuid, statement_uuid)
+                        .put(KeySql, sql)
+                        .put(KeyTotalFetchedRows, totalFetchedRows)
+                        .put(KeyTotalAffectedRows, totalAffectedRows)
+                );
             return this;
         }
 
+        /**
+         * Sets the failed state for a MySQL query, including the statement UUID and the SQL query.
+         *
+         * @param statement_uuid The unique identifier for the statement that failed.
+         * @param sql            The SQL query that was executed and failed.
+         * @return The current instance of {@link MySQLAuditIssueRecord} for method chaining.
+         */
         public MySQLAuditIssueRecord setForFailed(@Nonnull String statement_uuid, @Nonnull String sql) {
             this.message("MySQL query failed.")
-                    .attribute(AttributeMysqlAudit, new JsonObject()
-                            .put(KeyStatementUuid, statement_uuid)
-                            .put(KeySql, sql)
-                    );
+                .attribute(AttributeMysqlAudit, new JsonObject()
+                        .put(KeyStatementUuid, statement_uuid)
+                        .put(KeySql, sql)
+                );
             return this;
         }
     }

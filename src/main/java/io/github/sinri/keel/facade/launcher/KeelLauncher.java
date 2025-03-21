@@ -13,8 +13,12 @@ import javax.annotation.Nonnull;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
+ * A specialized launcher for the Keel framework, extending the basic {@link Launcher} with additional logging and
+ * lifecycle management capabilities.
+ * This class is designed to work in conjunction with a {@link KeelLauncherAdapter}, which provides customization points
+ * for the application's startup and shutdown processes.
+ *
  * @since 3.0.10 Technical Preview
- * @since 3.0.18 Finished Technical Preview.
  */
 public final class KeelLauncher extends Launcher {
 

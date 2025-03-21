@@ -12,27 +12,13 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 /**
+ * This interface provides a shortcut to create an instance of {@link ClusterManager} for SAE (Serverless Application
+ * Environment).
+ * It includes methods to obtain the cluster manager, and to retrieve the network address and ID of the Vert.x node.
+ *
  * @since 3.0.0
- * This interface provides a shortcut to create an instance of ClusterManager for SAE.
  */
 public interface KeelClusterKit {
-
-    @TechnicalPreview(since = "3.1.0")
-    @Nullable
-    ClusterManager getClusterManager();
-
-    @TechnicalPreview(since = "3.1.0")
-    default @Nonnull String getVertxNodeNetAddress() {
-        if (getClusterManager() == null) return "";
-        NodeInfo nodeInfo = getClusterManager().getNodeInfo();
-        return nodeInfo.host() + ":" + nodeInfo.port();
-    }
-
-    @TechnicalPreview(since = "3.1.0")
-    default @Nonnull String getVertxNodeID() {
-        if (getClusterManager() == null) return "";
-        return getClusterManager().getNodeId();
-    }
 
     static ClusterManager createClusterManagerForSAE(
             @Nonnull String clusterName,
@@ -56,9 +42,26 @@ public interface KeelClusterKit {
                 .setOutboundPorts(List.of(0));
 
         Config hazelcastConfig = ConfigUtil.loadConfig()
-                .setClusterName(clusterName)
-                .setNetworkConfig(networkConfig);
+                                           .setClusterName(clusterName)
+                                           .setNetworkConfig(networkConfig);
 
         return new HazelcastClusterManager(hazelcastConfig);
+    }
+
+    @TechnicalPreview(since = "3.1.0")
+    @Nullable
+    ClusterManager getClusterManager();
+
+    @TechnicalPreview(since = "3.1.0")
+    default @Nonnull String getVertxNodeNetAddress() {
+        if (getClusterManager() == null) return "";
+        NodeInfo nodeInfo = getClusterManager().getNodeInfo();
+        return nodeInfo.host() + ":" + nodeInfo.port();
+    }
+
+    @TechnicalPreview(since = "3.1.0")
+    default @Nonnull String getVertxNodeID() {
+        if (getClusterManager() == null) return "";
+        return getClusterManager().getNodeId();
     }
 }

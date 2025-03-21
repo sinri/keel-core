@@ -32,10 +32,28 @@ public interface AnyStatement {
      * @since 3.0.9
      */
     static AbstractStatement raw(@Nonnull String sql) {
+        return raw(sql, false);
+    }
+
+
+    /**
+     * Creates an AbstractStatement with the provided SQL and a flag indicating whether to use prepared statements.
+     *
+     * @param sql            the raw SQL statement
+     * @param withoutPrepare a boolean value indicating whether to execute the statement without preparing it
+     * @return an instance of AbstractStatement
+     * @since 4.0.7
+     */
+    static AbstractStatement raw(@Nonnull String sql, boolean withoutPrepare) {
         return new AbstractStatement() {
             @Override
             public String toString() {
                 return sql;
+            }
+
+            @Override
+            public boolean isWithoutPrepare() {
+                return withoutPrepare;
             }
         };
     }
@@ -197,4 +215,6 @@ public interface AnyStatement {
      * @since 3.0.18 Finished Technical Preview.
      */
     Future<ResultMatrix> execute(@Nonnull NamedMySQLConnection namedSqlConnection);
+
+    boolean isWithoutPrepare();
 }

@@ -28,11 +28,13 @@ public class KeelRuntimeHelper {
     static {
         ignorableCallStackPackage = Set.of(
                 "io.github.sinri.keel.facade.async.",
-                "io.github.sinri.keel.tesuto.",
+                "io.github.sinri.keel.facade.tesuto.",
                 "io.vertx.core.",
                 "io.netty.",
                 "java.lang.",
-                "jdk.internal."
+                "jdk.internal.",
+                "io.vertx.mysqlclient",
+                "io.vertx.sqlclient"
         );
     }
 

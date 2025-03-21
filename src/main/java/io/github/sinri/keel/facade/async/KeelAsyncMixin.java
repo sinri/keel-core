@@ -18,10 +18,21 @@ import java.util.function.Supplier;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
+ * KeelAsyncMixin is a mixin interface that provides utility methods for performing asynchronous operations in a more
+ * structured and convenient manner. It includes methods for processing collections and iterators, handling repeated
+ * and iterative tasks, and managing exclusive access to resources.
+ *
  * @since 4.0.0
  */
 public interface KeelAsyncMixin {
     /**
+     * Executes a given function in parallel for all items in the provided collection, returning a future that completes
+     * when all individual futures produced by the function have successfully completed.
+     *
+     * @param <T>           the type of elements in the collection
+     * @param collection    the iterable collection of items to process
+     * @param itemProcessor the function to apply to each item, which returns a future
+     * @return a Future that completes with Void when all the futures returned by the itemProcessor have succeeded
      * @since 4.0.2
      */
     default <T> Future<Void> parallelForAllSuccess(@Nonnull Iterable<T> collection, @Nonnull Function<T,
@@ -30,6 +41,13 @@ public interface KeelAsyncMixin {
     }
 
     /**
+     * Executes a given function in parallel for all items in the provided iterator, returning a future that completes
+     * when all individual futures produced by the function have successfully completed.
+     *
+     * @param <T>           the type of elements in the iterator
+     * @param iterator      the iterator of items to process
+     * @param itemProcessor the function to apply to each item, which returns a future
+     * @return a Future that completes with Void when all the futures returned by the itemProcessor have succeeded
      * @since 4.0.2
      */
     default <T> Future<Void> parallelForAllSuccess(@Nonnull Iterator<T> iterator,
@@ -44,6 +62,13 @@ public interface KeelAsyncMixin {
     }
 
     /**
+     * Executes a given function in parallel for all items in the provided collection, returning a future that completes
+     * when any of the individual futures produced by the function has successfully completed.
+     *
+     * @param <T>           the type of elements in the collection
+     * @param collection    the iterable collection of items to process
+     * @param itemProcessor the function to apply to each item, which returns a future
+     * @return a Future that completes with Void when any of the futures returned by the itemProcessor have succeeded
      * @since 4.0.2
      */
     default <T> Future<Void> parallelForAnySuccess(@Nonnull Iterable<T> collection, @Nonnull Function<T,
@@ -52,6 +77,13 @@ public interface KeelAsyncMixin {
     }
 
     /**
+     * Executes a given function in parallel for all items in the provided iterator, returning a future that completes
+     * when any of the individual futures produced by the function has successfully completed.
+     *
+     * @param <T>           the type of elements in the iterator
+     * @param iterator      the iterator of items to process
+     * @param itemProcessor the function to apply to each item, which returns a future
+     * @return a Future that completes with Void when any of the futures returned by the itemProcessor have succeeded
      * @since 4.0.2
      */
     default <T> Future<Void> parallelForAnySuccess(@Nonnull Iterator<T> iterator,
@@ -66,6 +98,13 @@ public interface KeelAsyncMixin {
     }
 
     /**
+     * Executes a given function in parallel for all items in the provided collection, returning a future that completes
+     * when all individual futures produced by the function have completed, regardless of success or failure.
+     *
+     * @param <T>           the type of elements in the collection
+     * @param collection    the iterable collection of items to process
+     * @param itemProcessor the function to apply to each item, which returns a future
+     * @return a Future that completes with Void when all the futures returned by the itemProcessor have completed
      * @since 4.0.2
      */
     default <T> Future<Void> parallelForAllComplete(@Nonnull Iterable<T> collection, @Nonnull Function<T,
@@ -74,6 +113,13 @@ public interface KeelAsyncMixin {
     }
 
     /**
+     * Executes a given function in parallel for all items in the provided iterator, returning a future that completes
+     * when all individual futures produced by the function have completed, regardless of success or failure.
+     *
+     * @param <T>           the type of elements in the iterator
+     * @param iterator      the iterator of items to process
+     * @param itemProcessor the function to apply to each item, which returns a future
+     * @return a Future that completes with Void when all the futures returned by the itemProcessor have completed
      * @since 4.0.2
      */
     default <T> Future<Void> parallelForAllComplete(@Nonnull Iterator<T> iterator,
@@ -87,16 +133,46 @@ public interface KeelAsyncMixin {
                      .compose(v -> Future.succeededFuture());
     }
 
+    /**
+     * Initiates a task that will be called repeatedly until the task itself signals to stop.
+     *
+     * @param repeatedlyCallTask the task to be executed repeatedly, which includes a processor function and a stopping
+     *                           condition
+     * @return a Future that completes with Void when the repeatedly called task has finished its execution
+     */
     private Future<Void> asyncCallRepeatedly(@Nonnull RepeatedlyCallTask repeatedlyCallTask) {
         Promise<Void> promise = Promise.promise();
         RepeatedlyCallTask.start(repeatedlyCallTask, promise);
         return promise.future();
     }
 
+
+    /**
+     * Initiates a task that will be called repeatedly until the task itself signals to stop.
+     *
+     * @param processor the function that defines the task to be executed and returns a future. The function is provided
+     *                  with
+     *                  a {@link RepeatedlyCallTask} instance, which can be used to signal the task to stop by calling
+     *                  its
+     *                  {@code stop()} method.
+     * @return a Future that completes with Void when the repeatedly called task has finished its execution.
+     */
     default Future<Void> asyncCallRepeatedly(@Nonnull Function<RepeatedlyCallTask, Future<Void>> processor) {
         return asyncCallRepeatedly(new RepeatedlyCallTask(processor));
     }
 
+    /**
+     * Processes items from the given iterator in batches, invoking a provided processor function for each batch.
+     * The method continues to process items until the iterator is exhausted. The size of each batch is determined
+     * by the batchSize parameter. If the iterator has fewer items than the specified batch size, the remaining items
+     * are processed as the final batch.
+     *
+     * @param <T>            the type of elements in the iterator
+     * @param iterator       the iterator of items to process
+     * @param itemsProcessor the function to apply to each batch of items, which returns a future
+     * @param batchSize      the number of items to process in each batch
+     * @return a Future that completes with Void when all the futures returned by the itemsProcessor have completed
+     */
     default <T> Future<Void> asyncCallIteratively(
             @Nonnull Iterator<T> iterator,
             @Nonnull BiFunction<List<T>, RepeatedlyCallTask, Future<Void>> itemsProcessor,
@@ -124,6 +200,15 @@ public interface KeelAsyncMixin {
         });
     }
 
+    /**
+     * Asynchronously processes items from the provided iterator in batches.
+     *
+     * @param iterator       the iterator that provides the items to be processed
+     * @param itemsProcessor a function that takes a list of items and returns a future representing the asynchronous
+     *                       processing of these items
+     * @param batchSize      the number of items to process in each batch
+     * @return a future that completes when all items have been processed
+     */
     default <T> Future<Void> asyncCallIteratively(
             @Nonnull Iterator<T> iterator,
             @Nonnull Function<List<T>, Future<Void>> itemsProcessor,
@@ -136,6 +221,15 @@ public interface KeelAsyncMixin {
         );
     }
 
+    /**
+     * Asynchronously processes items from the given iterable in batches.
+     *
+     * @param <T>            the type of elements in the iterable
+     * @param iterable       the iterable containing items to be processed
+     * @param itemsProcessor a function that takes a list of items and a task, and returns a Future<Void>
+     * @param batchSize      the size of each batch to process
+     * @return a Future representing the completion of the processing
+     */
     default <T> Future<Void> asyncCallIteratively(
             @Nonnull Iterable<T> iterable,
             @Nonnull BiFunction<List<T>, RepeatedlyCallTask, Future<Void>> itemsProcessor,
@@ -144,6 +238,17 @@ public interface KeelAsyncMixin {
         return asyncCallIteratively(iterable.iterator(), itemsProcessor, batchSize);
     }
 
+    /**
+     * Asynchronously processes items from an iterator using a provided item processor function.
+     * The processing continues until the iterator is exhausted.
+     *
+     * @param <T>           the type of elements in the iterator
+     * @param iterator      the iterator to process items from
+     * @param itemProcessor a function that takes an item from the iterator and a RepeatedlyCallTask,
+     *                      and returns a {@link Future<Void>} representing the asynchronous processing of the item
+     * @return a {@link Future<Void>} that completes when all items have been processed or fails if any processing step
+     *         fails
+     */
     default <T> Future<Void> asyncCallIteratively(
             @Nonnull Iterator<T> iterator,
             @Nonnull BiFunction<T, RepeatedlyCallTask, Future<Void>> itemProcessor
@@ -161,6 +266,15 @@ public interface KeelAsyncMixin {
         });
     }
 
+    /**
+     * Processes each item in the given iterator asynchronously and iteratively.
+     *
+     * @param <T>           the type of elements in the iterator
+     * @param iterator      the iterator containing items to be processed
+     * @param itemProcessor a function that takes an item from the iterator and returns a Future representing the
+     *                      asynchronous processing of that item
+     * @return a Future that completes when all items have been processed, or fails if any item processing fails
+     */
     default <T> Future<Void> asyncCallIteratively(
             @Nonnull Iterator<T> iterator,
             @Nonnull Function<T, Future<Void>> itemProcessor
@@ -171,6 +285,16 @@ public interface KeelAsyncMixin {
         );
     }
 
+    /**
+     * Asynchronously processes each item in the provided iterable using the specified item processor function.
+     * The items are processed sequentially, ensuring that the next item is only processed after the current one has
+     * completed.
+     *
+     * @param iterator      an iterable containing the items to be processed
+     * @param itemProcessor a function that takes an item from the iterable and returns a Future representing the
+     *                      asynchronous processing of the item
+     * @return a Future that completes when all items in the iterable have been processed
+     */
     default <T> Future<Void> asyncCallIteratively(
             @Nonnull Iterable<T> iterator,
             @Nonnull Function<T, Future<Void>> itemProcessor
@@ -178,6 +302,15 @@ public interface KeelAsyncMixin {
         return asyncCallIteratively(iterator.iterator(), itemProcessor);
     }
 
+    /**
+     * Asynchronously processes each item in the given iterable using the provided item processor function.
+     *
+     * @param <T>           the type of elements in the iterable
+     * @param iterable      the iterable containing items to be processed
+     * @param itemProcessor a function that takes an item and a task, and returns a Future representing the asynchronous
+     *                      processing of the item
+     * @return a Future that completes when all items have been processed
+     */
     default <T> Future<Void> asyncCallIteratively(
             @Nonnull Iterable<T> iterable,
             @Nonnull BiFunction<T, RepeatedlyCallTask, Future<Void>> itemProcessor
@@ -185,6 +318,17 @@ public interface KeelAsyncMixin {
         return asyncCallIteratively(iterable.iterator(), itemProcessor);
     }
 
+    /**
+     * Executes a series of asynchronous calls in a stepwise manner, from the start value to the end value, with a
+     * specified step.
+     *
+     * @param start     the starting value for the stepwise execution
+     * @param end       the ending value for the stepwise execution
+     * @param step      the step size to increment or decrement at each call
+     * @param processor a function that processes the current value and a task, returning a Future
+     * @return a Future that completes when all stepwise calls have been processed
+     * @throws IllegalArgumentException if the step is 0
+     */
     default Future<Void> asyncCallStepwise(long start, long end, long step, BiFunction<Long, RepeatedlyCallTask,
             Future<Void>> processor) {
         if (step == 0) throw new IllegalArgumentException("step must not be 0");
@@ -204,16 +348,36 @@ public interface KeelAsyncMixin {
         });
     }
 
+    /**
+     * Executes a given processor function stepwise for a specified number of times.
+     *
+     * @param times     the total number of times to execute the processor function
+     * @param processor the function to be executed, which takes the current step and a task as arguments and returns a
+     *                  Future
+     * @return a Future that completes when all steps have been processed
+     */
     default Future<Void> asyncCallStepwise(long times, BiFunction<Long, RepeatedlyCallTask, Future<Void>> processor) {
         return asyncCallStepwise(0, times, 1, processor);
     }
 
+    /**
+     * Executes a given asynchronous task multiple times in a stepwise manner.
+     *
+     * @param times     the number of times to execute the task
+     * @param processor the function that returns a future, representing the asynchronous task to be executed
+     * @return a Future that completes when all invocations of the processor have completed
+     */
     default Future<Void> asyncCallStepwise(long times, Function<Long, Future<Void>> processor) {
         return asyncCallStepwise(0, times, 1, (aLong, repeatedlyCallTask) -> processor.apply(aLong));
     }
 
     /**
-     * @param supplier An async job handler, results a Void Future.
+     * Repeatedly calls the given supplier to execute an asynchronous job.
+     * The job is executed in a loop until it is manually stopped.
+     * Each call to the supplier should return a {@code Future<Void>} which
+     * represents the completion of the asynchronous task.
+     *
+     * @param supplier An async job handler that provides a {@code Future<Void>}.
      * @since 3.0.1
      */
     default void asyncCallEndlessly(@Nonnull Supplier<Future<Void>> supplier) {
@@ -225,10 +389,25 @@ public interface KeelAsyncMixin {
     }
 
 
+    /**
+     * Asynchronously sleeps for a specified amount of time.
+     *
+     * @param time the duration to sleep in milliseconds
+     * @return a Future that completes after the specified time has elapsed
+     */
     default Future<Void> asyncSleep(long time) {
         return asyncSleep(time, null);
     }
 
+
+    /**
+     * Asynchronously sleeps for a specified amount of time, with an optional interrupter.
+     *
+     * @param time        the duration to sleep in milliseconds. If less than 1, it will be set to 1.
+     * @param interrupter an optional Promise that, when completed, will cancel the sleep and complete the returned
+     *                    Future.
+     * @return a Future that completes after the specified time has elapsed, or is interrupted by the interrupter.
+     */
     default Future<Void> asyncSleep(long time, @Nullable Promise<Void> interrupter) {
         Promise<Void> promise = Promise.promise();
         if (time < 1) time = 1;
@@ -244,6 +423,15 @@ public interface KeelAsyncMixin {
         return promise.future();
     }
 
+    /**
+     * Executes a supplier asynchronously while ensuring exclusive access to a given lock.
+     *
+     * @param <T> the type of the result returned by the supplier
+     * @param lockName the name of the lock to be used for ensuring exclusivity
+     * @param waitTimeForLock the maximum time in milliseconds to wait for acquiring the lock
+     * @param exclusiveSupplier the supplier that provides a future, which will be executed exclusively
+     * @return a future representing the asynchronous computation result
+     */
     default <T> Future<T> asyncCallExclusively(@Nonnull String lockName, long waitTimeForLock,
                                                @Nonnull Supplier<Future<T>> exclusiveSupplier) {
         return Keel.getVertx().sharedData()
@@ -254,6 +442,14 @@ public interface KeelAsyncMixin {
                    );
     }
 
+    /**
+     * Executes the given supplier asynchronously with an exclusive lock.
+     *
+     * @param <T> the type of the result produced by the supplier
+     * @param lockName the name of the lock to be used for exclusivity
+     * @param exclusiveSupplier the supplier that produces a future, which will be executed exclusively
+     * @return a future representing the asynchronous computation
+     */
     default <T> Future<T> asyncCallExclusively(@Nonnull String lockName,
                                                @Nonnull Supplier<Future<T>> exclusiveSupplier) {
         return asyncCallExclusively(lockName, 1_000L, exclusiveSupplier);
@@ -268,6 +464,10 @@ public interface KeelAsyncMixin {
     }
 
     /**
+     * Transforms a given CompletableFuture into a Vert.x Future.
+     *
+     * @param completableFuture the CompletableFuture to be transformed, must not be null
+     * @return a Future that completes or fails based on the completion of the provided CompletableFuture
      * @since 4.0.6 fix naming mistake.
      */
     default <R> Future<R> asyncTransformCompletableFuture(@Nonnull CompletableFuture<R> completableFuture) {
@@ -282,6 +482,14 @@ public interface KeelAsyncMixin {
         return promise.future();
     }
 
+    /**
+     * Transforms a raw Java Future into a Vert.x Future, with an asynchronous polling mechanism to check the completion of the raw Future.
+     *
+     * @param rawFuture the raw Java Future to be transformed
+     * @param sleepTime the time in milliseconds to wait between each poll
+     * @param <R> the type of the result
+     * @return a Vert.x Future that will complete or fail based on the outcome of the raw Future
+     */
     default <R> Future<R> asyncTransformRawFuture(@Nonnull java.util.concurrent.Future<R> rawFuture, long sleepTime) {
         Promise<R> promise = Promise.promise();
         return asyncCallRepeatedly(repeatedlyCallTask -> {
@@ -318,6 +526,17 @@ public interface KeelAsyncMixin {
                 });
     }
 
+    /**
+     * Executes the provided blocking code handler in a separate worker verticle to avoid blocking the event loop.
+     * The method ensures that the blocking operation is performed in a non-blocking manner, allowing the event loop to
+     * continue processing other tasks. Once the blocking operation is complete, the result or any failure is propagated
+     * back to the caller through the returned Future.
+     *
+     * @param <T> the type of the result
+     * @param blockingCodeHandler the handler that contains the blocking code to be executed. It receives a Promise
+     *                            which should be completed with the result or failed with an error.
+     * @return a Future that will be completed with the result of the blocking operation, or failed if an error occurs.
+     */
     default <T> Future<T> executeBlocking(@Nonnull Handler<Promise<T>> blockingCodeHandler) {
         Promise<T> promise = Promise.promise();
 
@@ -332,6 +551,13 @@ public interface KeelAsyncMixin {
                        });
     }
 
+    /**
+     * Creates a {@link CompletableFuture} that will be completed based on the result of the provided blocking code handler.
+     *
+     * @param <T> the type of the result
+     * @param blockingCodeHandler the handler containing the blocking code to be executed, which returns a promise
+     * @return a new {@link CompletableFuture} that will be completed with the result of the blocking code or exceptionally if an error occurs
+     */
     private <T> CompletableFuture<T> createPseudoAwaitCompletableFuture(Handler<Promise<T>> blockingCodeHandler) {
         CompletableFuture<T> completableFuture = new CompletableFuture<>();
         executeBlocking(blockingCodeHandler)
@@ -345,6 +571,14 @@ public interface KeelAsyncMixin {
         return completableFuture;
     }
 
+    /**
+     * Executes the provided blocking code handler and waits for its completion.
+     *
+     * @param <T> the type of the result
+     * @param blockingCodeHandler a handler that receives a Promise and performs some blocking operations
+     * @return the result of the blocking operation
+     * @throws RuntimeException if an InterruptedException or ExecutionException occurs during the execution
+     */
     default <T> T pseudoAwait(Handler<Promise<T>> blockingCodeHandler) {
         CompletableFuture<T> completableFuture = createPseudoAwaitCompletableFuture(blockingCodeHandler);
         try {
@@ -354,6 +588,15 @@ public interface KeelAsyncMixin {
         }
     }
 
+    /**
+     * A utility class designed to repeatedly execute a task until it is explicitly stopped.
+     * The task is represented by a {@link Function} that takes an instance of this class and
+     * returns a {@link Future<Void>}. The task will continue to be executed with a delay of 1 millisecond
+     * between each execution, unless the stop method is called or the task itself fails.
+     *
+     * @see #start(RepeatedlyCallTask, Promise)
+     * @see #stop()
+     */
     final class RepeatedlyCallTask {
         @Nonnull
         private final Function<RepeatedlyCallTask, Future<Void>> processor;

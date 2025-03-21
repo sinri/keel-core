@@ -15,7 +15,18 @@ import java.util.function.Supplier;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
- * @since 3.2.19 A base class for `mvn test`, each method named like `void test*()` would be executed.
+ * A base class for {@code mvn test}where each method named like {@code void test*()} would be executed. This class
+ * initializes
+ * the testing environment, including Vertx (if configured), and loads configuration properties. It also provides a
+ * logger to write to STDOUT, which can be customized.
+ *
+ * <p>Subclasses should override methods such as {@link #setUp()} and {@link #tearDown()} to perform setup and cleanup
+ * tasks before and
+ * after each test method, respectively. Additionally, subclasses can override {@link #buildVertxOptions()} to configure
+ * Vertx
+ * and {@link #buildUnitTestLogger()} to provide a custom logger.</p>
+ *
+ * @since 3.2.19
  */
 public class KeelUnitTest {
     private KeelIssueRecorder<KeelEventLog> unitTestLogger;

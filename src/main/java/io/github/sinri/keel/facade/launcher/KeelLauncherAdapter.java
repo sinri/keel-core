@@ -11,8 +11,10 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
+ * Adapter for the KeelLauncher, providing lifecycle hooks and a method to launch the application.
+ * This interface is designed to be implemented by classes that need to customize the behavior of the KeelLauncher.
+ *
  * @since 3.0.10 Technical Preview
- * @since 3.0.18 Finished Technical Preview.
  */
 public interface KeelLauncherAdapter extends VertxLifecycleHooks {
 

@@ -7,6 +7,10 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 
 /**
+ * A wrapper class for methods annotated with {@link InstantRunUnit} and optionally with {@link InstantRunUnitSkipped}.
+ * This class is responsible for managing the execution of a test unit, including skipping the test if necessary,
+ * and recording the result of the test.
+ *
  * @since 3.0.10
  */
 class InstantRunUnitWrapper {

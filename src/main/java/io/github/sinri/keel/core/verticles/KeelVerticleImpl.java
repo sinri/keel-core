@@ -14,7 +14,8 @@ import io.vertx.core.Promise;
  * to be executed when the verticle starts.
  * <p>
  * Subclasses should focus on implementing the `startVerticle` method to define their specific behavior.
- * The `start` method is overridden to ensure that it is not used directly, and the `start(Promise<Void> startPromise)`
+ * The `start` method is overridden to ensure that it is not used directly, and the
+ * {@code start(Promise<Void> startPromise)}
  * method is implemented to handle the asynchronous startup process, including calling the `startVerticle` method
  * and handling the completion or failure of the startup process.
  *

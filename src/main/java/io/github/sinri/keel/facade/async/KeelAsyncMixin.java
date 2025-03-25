@@ -226,7 +226,7 @@ public interface KeelAsyncMixin {
      *
      * @param <T>            the type of elements in the iterable
      * @param iterable       the iterable containing items to be processed
-     * @param itemsProcessor a function that takes a list of items and a task, and returns a Future<Void>
+     * @param itemsProcessor a function that takes a list of items and a task, and returns a {@code Future<Void>}
      * @param batchSize      the size of each batch to process
      * @return a Future representing the completion of the processing
      */

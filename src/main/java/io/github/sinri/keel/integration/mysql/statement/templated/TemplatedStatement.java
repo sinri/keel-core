@@ -7,8 +7,18 @@ import java.util.regex.Matcher;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
+
 /**
- * @since 3.0.8 Technical Preview
+ * Represents a SQL statement that can be constructed from a template and arguments.
+ * <p>
+ * This interface provides methods to load SQL templates from a file, retrieve the SQL template,
+ * get the argument mapping, and build the final SQL string by replacing placeholders in the template
+ * with their corresponding values.
+ * </p>
+ *
+ * @see TemplatedReadStatement
+ * @see TemplatedModifyStatement
+ * @since 3.0.8
  */
 public interface TemplatedStatement {
     static TemplatedReadStatement loadTemplateToRead(@Nonnull String templatePath) {
@@ -39,7 +49,8 @@ public interface TemplatedStatement {
         AtomicReference<String> sqlRef = new AtomicReference<>(getSqlTemplate());
 
         getArguments().forEach((argumentName, argumentValue) -> {
-            String s = sqlRef.get().replaceAll("\\{" + argumentName + "\\}", Matcher.quoteReplacement(argumentValue.toString()));
+            String s = sqlRef.get()
+                             .replaceAll("\\{" + argumentName + "}", Matcher.quoteReplacement(argumentValue.toString()));
             sqlRef.set(s);
         });
 

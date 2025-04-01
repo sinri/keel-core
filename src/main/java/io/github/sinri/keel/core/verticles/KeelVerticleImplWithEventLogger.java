@@ -11,7 +11,7 @@ import javax.annotation.Nonnull;
  * @since 3.2.0
  * @deprecated use {@link KeelVerticleImpl} instead.
  */
-@Deprecated(since = "4.0.0")
+@Deprecated(since = "4.0.0", forRemoval = true)
 abstract public class KeelVerticleImplWithEventLogger extends AbstractVerticle implements KeelVerticle {
     private @Nonnull KeelEventLogger logger;
 

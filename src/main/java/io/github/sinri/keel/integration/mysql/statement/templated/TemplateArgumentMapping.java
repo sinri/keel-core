@@ -4,7 +4,12 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.HashMap;
 
+
 /**
+ * A specialized HashMap for mapping template argument names to their corresponding {@link TemplateArgument} instances.
+ * This class provides convenience methods to bind different types of values (null, number, string, expression) to a
+ * given argument name.
+ *
  * @since 3.0.8
  */
 public class TemplateArgumentMapping extends HashMap<String, TemplateArgument> {
@@ -19,7 +24,7 @@ public class TemplateArgumentMapping extends HashMap<String, TemplateArgument> {
     }
 
     /**
-     * @param numbers      Ensure not empty or use with bindLineCommentStarting
+     * @param numbers Ensure not empty or use with bindLineCommentStarting
      */
     public TemplateArgumentMapping bindNumbers(@Nonnull String argumentName, @Nonnull Collection<? extends Number> numbers) {
         this.put(argumentName, TemplateArgument.forNumbers(numbers));
@@ -32,7 +37,7 @@ public class TemplateArgumentMapping extends HashMap<String, TemplateArgument> {
     }
 
     /**
-     * @param strings      Ensure not empty or use with bindLineCommentStarting
+     * @param strings Ensure not empty or use with bindLineCommentStarting
      */
     public TemplateArgumentMapping bindStrings(@Nonnull String argumentName, @Nonnull Collection<String> strings) {
         this.put(argumentName, TemplateArgument.forStrings(strings));
@@ -45,7 +50,7 @@ public class TemplateArgumentMapping extends HashMap<String, TemplateArgument> {
     }
 
     /**
-     * @param expressions  Ensure not empty or use with bindLineCommentStarting
+     * @param expressions Ensure not empty or use with bindLineCommentStarting
      */
     public TemplateArgumentMapping bindExpressions(@Nonnull String argumentName, @Nonnull Collection<String> expressions) {
         this.put(argumentName, TemplateArgument.forExpressions(expressions));

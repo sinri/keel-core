@@ -68,7 +68,7 @@ public interface KeelIssueRecordCenter {
      *         java.util.function.Supplier)} instead.
      */
     @Nonnull
-    @Deprecated(since = "4.0.0")
+    @Deprecated(since = "4.0.0", forRemoval = true)
     default KeelEventLogger generateEventLogger(@Nonnull String topic) {
         return KeelEventLogger.from(generateIssueRecorderForEventLogger(topic));
     }
@@ -80,7 +80,7 @@ public interface KeelIssueRecordCenter {
      *         java.util.function.Supplier)} instead.
      */
     @Nonnull
-    @Deprecated(since = "4.0.0")
+    @Deprecated(since = "4.0.0", forRemoval = true)
     default KeelEventLogger generateEventLogger(@Nonnull String topic,
                                                 @Nullable Handler<KeelEventLog> templateEventLogEditor) {
         return KeelEventLogger.from(generateIssueRecorderForEventLogger(topic), templateEventLogEditor);
@@ -93,7 +93,7 @@ public interface KeelIssueRecordCenter {
      *         java.util.function.Supplier)} instead.
      */
     @Nonnull
-    @Deprecated(since = "4.0.0")
+    @Deprecated(since = "4.0.0", forRemoval = true)
     default KeelIssueRecorder<KeelEventLog> generateIssueRecorderForEventLogger(@Nonnull String topic) {
         return generateIssueRecorder(topic, KeelEventLog::new);
     }

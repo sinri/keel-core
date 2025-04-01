@@ -3,6 +3,7 @@ package io.github.sinri.keel.integration.mysql.statement.mixin;
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonObject;
 
 /**
  * @since 3.2.21
@@ -37,6 +38,15 @@ public interface SelectStatementMixin extends ReadStatementMixin {
 
         public ResultMatrix getResultMatrix() {
             return resultMatrix;
+        }
+
+        /**
+         * @since 4.0.8
+         */
+        public JsonObject toJsonObject() {
+            return new JsonObject()
+                    .put("total", total)
+                    .put("list", resultMatrix.toJsonArray());
         }
     }
 }

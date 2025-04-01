@@ -13,9 +13,10 @@ import java.util.function.Supplier;
 
 /**
  * @since 3.2.0 The brand new KeelEventLogger based on KeelIssueRecorder.
- * @deprecated 4.0.0 shrink to a class, and prefer to use {@code KeelIssueRecorder<KeelEventLog>} directly.
+ * @deprecated 4.0.0 shrink to a class, and prefer to use {@code KeelIssueRecorder<KeelEventLog>} directly. Would be
+ *         removed later without warning.
  */
-@Deprecated(since = "4.0.0")
+@Deprecated(since = "4.0.0", forRemoval = true)
 public final class KeelEventLogger implements KeelIssueRecorder<KeelEventLog> {
     private final @Nonnull KeelIssueRecordCenter issueRecordCenter;
     private final @Nonnull String topic;

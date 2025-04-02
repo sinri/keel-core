@@ -359,6 +359,9 @@ public interface KeelAsyncMixin {
      * @return a Future that completes when all steps have been processed
      */
     default Future<Void> asyncCallStepwise(long times, BiFunction<Long, RepeatedlyCallTask, Future<Void>> processor) {
+        if (times <= 0) {
+            return Future.succeededFuture();
+        }
         return asyncCallStepwise(0, times, 1, processor);
     }
 
@@ -370,6 +373,9 @@ public interface KeelAsyncMixin {
      * @return a Future that completes when all invocations of the processor have completed
      */
     default Future<Void> asyncCallStepwise(long times, Function<Long, Future<Void>> processor) {
+        if (times <= 0) {
+            return Future.succeededFuture();
+        }
         return asyncCallStepwise(0, times, 1, (aLong, repeatedlyCallTask) -> processor.apply(aLong));
     }
 

@@ -321,17 +321,19 @@ public interface KeelAsyncMixin {
     /**
      * Executes a series of asynchronous calls in a stepwise manner, from the start value to the end value, with a
      * specified step.
+     * As of 4.0.9, fix the bug about range break.
      *
      * @param start     the starting value for the stepwise execution
-     * @param end       the ending value for the stepwise execution
-     * @param step      the step size to increment or decrement at each call
+     * @param end       the ending value for the stepwise execution, must be equal to or greater than `start`
+     * @param step      the step size to increment or decrement at each call, must be greater than 0.
      * @param processor a function that processes the current value and a task, returning a Future
      * @return a Future that completes when all stepwise calls have been processed
      * @throws IllegalArgumentException if the step is 0
      */
     default Future<Void> asyncCallStepwise(long start, long end, long step, BiFunction<Long, RepeatedlyCallTask,
             Future<Void>> processor) {
-        if (step == 0) throw new IllegalArgumentException("step must not be 0");
+        if (step <= 0) throw new IllegalArgumentException("step must be greater than 0");
+        if (start > end) throw new IllegalArgumentException("start must not be greater than end");
         AtomicLong ptr = new AtomicLong(start);
         return asyncCallRepeatedly(task -> {
             return Future.succeededFuture()
@@ -426,9 +428,9 @@ public interface KeelAsyncMixin {
     /**
      * Executes a supplier asynchronously while ensuring exclusive access to a given lock.
      *
-     * @param <T> the type of the result returned by the supplier
-     * @param lockName the name of the lock to be used for ensuring exclusivity
-     * @param waitTimeForLock the maximum time in milliseconds to wait for acquiring the lock
+     * @param <T>               the type of the result returned by the supplier
+     * @param lockName          the name of the lock to be used for ensuring exclusivity
+     * @param waitTimeForLock   the maximum time in milliseconds to wait for acquiring the lock
      * @param exclusiveSupplier the supplier that provides a future, which will be executed exclusively
      * @return a future representing the asynchronous computation result
      */
@@ -445,8 +447,8 @@ public interface KeelAsyncMixin {
     /**
      * Executes the given supplier asynchronously with an exclusive lock.
      *
-     * @param <T> the type of the result produced by the supplier
-     * @param lockName the name of the lock to be used for exclusivity
+     * @param <T>               the type of the result produced by the supplier
+     * @param lockName          the name of the lock to be used for exclusivity
      * @param exclusiveSupplier the supplier that produces a future, which will be executed exclusively
      * @return a future representing the asynchronous computation
      */
@@ -483,11 +485,12 @@ public interface KeelAsyncMixin {
     }
 
     /**
-     * Transforms a raw Java Future into a Vert.x Future, with an asynchronous polling mechanism to check the completion of the raw Future.
+     * Transforms a raw Java Future into a Vert.x Future, with an asynchronous polling mechanism to check the completion
+     * of the raw Future.
      *
      * @param rawFuture the raw Java Future to be transformed
      * @param sleepTime the time in milliseconds to wait between each poll
-     * @param <R> the type of the result
+     * @param <R>       the type of the result
      * @return a Vert.x Future that will complete or fail based on the outcome of the raw Future
      */
     default <R> Future<R> asyncTransformRawFuture(@Nonnull java.util.concurrent.Future<R> rawFuture, long sleepTime) {
@@ -532,7 +535,7 @@ public interface KeelAsyncMixin {
      * continue processing other tasks. Once the blocking operation is complete, the result or any failure is propagated
      * back to the caller through the returned Future.
      *
-     * @param <T> the type of the result
+     * @param <T>                 the type of the result
      * @param blockingCodeHandler the handler that contains the blocking code to be executed. It receives a Promise
      *                            which should be completed with the result or failed with an error.
      * @return a Future that will be completed with the result of the blocking operation, or failed if an error occurs.
@@ -552,11 +555,13 @@ public interface KeelAsyncMixin {
     }
 
     /**
-     * Creates a {@link CompletableFuture} that will be completed based on the result of the provided blocking code handler.
+     * Creates a {@link CompletableFuture} that will be completed based on the result of the provided blocking code
+     * handler.
      *
-     * @param <T> the type of the result
+     * @param <T>                 the type of the result
      * @param blockingCodeHandler the handler containing the blocking code to be executed, which returns a promise
-     * @return a new {@link CompletableFuture} that will be completed with the result of the blocking code or exceptionally if an error occurs
+     * @return a new {@link CompletableFuture} that will be completed with the result of the blocking code or
+     *         exceptionally if an error occurs
      */
     private <T> CompletableFuture<T> createPseudoAwaitCompletableFuture(Handler<Promise<T>> blockingCodeHandler) {
         CompletableFuture<T> completableFuture = new CompletableFuture<>();
@@ -574,7 +579,7 @@ public interface KeelAsyncMixin {
     /**
      * Executes the provided blocking code handler and waits for its completion.
      *
-     * @param <T> the type of the result
+     * @param <T>                 the type of the result
      * @param blockingCodeHandler a handler that receives a Promise and performs some blocking operations
      * @return the result of the blocking operation
      * @throws RuntimeException if an InterruptedException or ExecutionException occurs during the execution

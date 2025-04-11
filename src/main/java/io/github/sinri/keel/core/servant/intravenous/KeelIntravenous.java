@@ -33,7 +33,26 @@ public interface KeelIntravenous<D> extends KeelVerticle {
         // do nothing by default for the thrown exception
     }
 
+    /**
+     * @since 4.0.11
+     */
+    boolean isNoDropsLeft();
+
+    /**
+     * When all the drops reported, i.e. no more drops would be accepted.
+     *
+     * @since 4.0.11
+     */
+    boolean isStopped();
+
     void shutdown();
+
+    /**
+     * When the verticle is undeployed.
+     *
+     * @since 4.0.11
+     */
+    boolean isUndeployed();
 
     interface SingleDropProcessor<T> {
         Future<Void> process(T drop);

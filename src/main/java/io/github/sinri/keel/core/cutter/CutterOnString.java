@@ -17,7 +17,9 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.2.18 greatly changed.
+ * @deprecated as of 4.0.11, use {@link IntravenouslyCutterOnString} instead.
  */
+@Deprecated(since = "4.0.11", forRemoval = true)
 public class CutterOnString implements Cutter<String> {
     final Queue<Buffer> writeBuffer = new LinkedList<>();
     private final ReentrantReadWriteLock lock;
@@ -76,46 +78,46 @@ public class CutterOnString implements Cutter<String> {
         AtomicReference<String> chunkRef = new AtomicReference<>();
         AtomicInteger counter = new AtomicInteger(this.retainRepeat);
         return Keel.asyncCallRepeatedly(routineResult -> {
-                    return Keel.asyncSleep(this.retainTime)
-                            .compose(v -> {
-                                return Keel.asyncCallRepeatedly(routineResultForRead -> {
-                                            doReadExclusively(vv -> {
-                                                var s = cutWithDelimiter(false);
-                                                chunkRef.set(s);
-                                            });
-                                            var s = chunkRef.get();
-                                            if (s != null) {
-                                                if (!s.isBlank()) {
-                                                    handleComponent(s);
-                                                }
-                                            } else {
-                                                routineResultForRead.stop();
-                                            }
-                                            return Future.succeededFuture();
-                                        })
-                                        .compose(vv -> {
-                                            if (writeBuffer.isEmpty()) {
-                                                counter.decrementAndGet();
-                                                if (counter.get() <= 0) {
-                                                    routineResult.stop();
-                                                }
-                                            }
-                                            return Future.succeededFuture();
-                                        });
-                            });
-                })
-                .compose(v -> {
-                    doReadExclusively(vv -> {
-                        var s = cutWithDelimiter(true);
-                        chunkRef.set(s);
-                    });
-                    var s = chunkRef.get();
-                    if (s != null && !s.isBlank()) {
-                        handleComponent(s);
-                    }
-                    //Keel.getLogger().info("finish io.github.sinri.keel.core.cutter.CutterOnStringBasedOnBytes.end");
-                    return Future.succeededFuture();
-                });
+                       return Keel.asyncSleep(this.retainTime)
+                                  .compose(v -> {
+                                      return Keel.asyncCallRepeatedly(routineResultForRead -> {
+                                                     doReadExclusively(vv -> {
+                                                         var s = cutWithDelimiter(false);
+                                                         chunkRef.set(s);
+                                                     });
+                                                     var s = chunkRef.get();
+                                                     if (s != null) {
+                                                         if (!s.isBlank()) {
+                                                             handleComponent(s);
+                                                         }
+                                                     } else {
+                                                         routineResultForRead.stop();
+                                                     }
+                                                     return Future.succeededFuture();
+                                                 })
+                                                 .compose(vv -> {
+                                                     if (writeBuffer.isEmpty()) {
+                                                         counter.decrementAndGet();
+                                                         if (counter.get() <= 0) {
+                                                             routineResult.stop();
+                                                         }
+                                                     }
+                                                     return Future.succeededFuture();
+                                                 });
+                                  });
+                   })
+                   .compose(v -> {
+                       doReadExclusively(vv -> {
+                           var s = cutWithDelimiter(true);
+                           chunkRef.set(s);
+                       });
+                       var s = chunkRef.get();
+                       if (s != null && !s.isBlank()) {
+                           handleComponent(s);
+                       }
+                       //Keel.getLogger().info("finish io.github.sinri.keel.core.cutter.CutterOnStringBasedOnBytes.end");
+                       return Future.succeededFuture();
+                   });
     }
 
     @Override

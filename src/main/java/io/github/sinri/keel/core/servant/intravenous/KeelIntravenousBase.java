@@ -16,12 +16,12 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 4.0.7
- * @param <D>
  */
 abstract class KeelIntravenousBase<D> extends KeelVerticleImpl implements KeelIntravenous<D> {
     private final Queue<D> queue;
     private final AtomicReference<Promise<Void>> interrupterRef = new AtomicReference<>();
     private final AtomicBoolean stoppedRef = new AtomicBoolean(false);
+    private final AtomicBoolean undeployedRef = new AtomicBoolean(false);
 
     public KeelIntravenousBase() {
         this.queue = new ConcurrentLinkedQueue<>();
@@ -46,12 +46,36 @@ abstract class KeelIntravenousBase<D> extends KeelVerticleImpl implements KeelIn
         stoppedRef.set(true);
     }
 
+    /**
+     * @since 4.0.11
+     */
+    @Override
+    public boolean isNoDropsLeft() {
+        return queue.isEmpty();
+    }
+
+    /**
+     * @since 4.0.11
+     */
+    @Override
+    public boolean isStopped() {
+        return stoppedRef.get();
+    }
+
+    @Override
+    public boolean isUndeployed() {
+        return undeployedRef.get();
+    }
+
     @Override
     protected Future<Void> startVerticle() {
         this.interrupterRef.set(null);
         Keel.asyncCallRepeatedly(this::handleRoutine)
             .onComplete(ar -> {
-                this.undeployMe();
+                this.undeployMe()
+                    .onSuccess(v -> {
+                        undeployedRef.set(true);
+                    });
             });
         return Future.succeededFuture();
     }

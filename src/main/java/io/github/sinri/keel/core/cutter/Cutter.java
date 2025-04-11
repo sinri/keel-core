@@ -10,8 +10,10 @@ import io.vertx.core.buffer.Buffer;
  *
  * @param <T> The type of the cut entity as component of a stream holds.
  * @since 3.0.19
- * @since 3.2.18 Add retain functions.
+ *         As of 3.2.18, Add retain functions.
+ * @deprecated as of 4.0.11, use {@link IntravenouslyCutter} instead.
  */
+@Deprecated(since = "4.0.11", forRemoval = true)
 public interface Cutter<T> {
     /**
      * Set the handler for the cut and parsed component.
@@ -30,6 +32,7 @@ public interface Cutter<T> {
 
     /**
      * Handle when the recently incoming buffer came.
+     *
      * @param piece the stream recently incoming buffer.
      */
     void handle(Buffer piece);

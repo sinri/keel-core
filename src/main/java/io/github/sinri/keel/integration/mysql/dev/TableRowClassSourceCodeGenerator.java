@@ -27,6 +27,7 @@ public class TableRowClassSourceCodeGenerator {
     private boolean provideConstSchemaAndTable = false;
     private @Nullable String strictEnumPackage = null;
     private @Nullable String envelopePackage = null;
+    private boolean usePureMode = false;
 
     public TableRowClassSourceCodeGenerator(NamedMySQLConnection namedMySQLConnection) {
         this.sqlConnection = namedMySQLConnection.getSqlConnection();
@@ -91,9 +92,19 @@ public class TableRowClassSourceCodeGenerator {
         return this;
     }
 
+    /**
+     * Do not add DDL and Update Timestamp to Generated Class Code.
+     *
+     * @since 4.0.11
+     */
+    public TableRowClassSourceCodeGenerator setUsePureMode(boolean usePureMode) {
+        this.usePureMode = usePureMode;
+        return this;
+    }
+
     public Future<Void> generate(String packageName, String packagePath) {
         return this.confirmTablesToGenerate()
-                .compose(tables -> generateForTables(packageName, packagePath, tables));
+                   .compose(tables -> generateForTables(packageName, packagePath, tables));
     }
 
     private Future<Set<String>> confirmTablesToGenerate() {
@@ -101,30 +112,30 @@ public class TableRowClassSourceCodeGenerator {
         if (this.tableSet.isEmpty()) {
             if (schema == null || schema.isEmpty() || schema.isBlank()) {
                 return this.sqlConnection.query("show tables")
-                        .execute()
-                        .compose(rows -> {
-                            rows.forEach(row -> {
-                                String tableName = row.getString(0);
-                                tables.add(tableName);
-                            });
-                            if (!this.excludedTableSet.isEmpty()) {
-                                tables.removeAll(this.excludedTableSet);
-                            }
-                            return Future.succeededFuture(tables);
-                        });
+                                         .execute()
+                                         .compose(rows -> {
+                                             rows.forEach(row -> {
+                                                 String tableName = row.getString(0);
+                                                 tables.add(tableName);
+                                             });
+                                             if (!this.excludedTableSet.isEmpty()) {
+                                                 tables.removeAll(this.excludedTableSet);
+                                             }
+                                             return Future.succeededFuture(tables);
+                                         });
             } else {
                 return this.sqlConnection.query("show tables in `" + this.schema + "`")
-                        .execute()
-                        .compose(rows -> {
-                            rows.forEach(row -> {
-                                String tableName = row.getString(0);
-                                tables.add(tableName);
-                            });
-                            if (!this.excludedTableSet.isEmpty()) {
-                                tables.removeAll(this.excludedTableSet);
-                            }
-                            return Future.succeededFuture(tables);
-                        });
+                                         .execute()
+                                         .compose(rows -> {
+                                             rows.forEach(row -> {
+                                                 String tableName = row.getString(0);
+                                                 tables.add(tableName);
+                                             });
+                                             if (!this.excludedTableSet.isEmpty()) {
+                                                 tables.removeAll(this.excludedTableSet);
+                                             }
+                                             return Future.succeededFuture(tables);
+                                         });
             }
         } else {
             tables.addAll(this.tableSet);
@@ -138,46 +149,50 @@ public class TableRowClassSourceCodeGenerator {
     private Future<Void> generateForTables(String packageName, String packagePath, Collection<String> tables) {
         Map<String, String> writeMap = new HashMap<>();
         return Keel.asyncCallIteratively(
-                        tables,
-                        table -> {
-                            String className = Keel.stringHelper().fromUnderScoreCaseToCamelCase(table) + "TableRow";
-                            String classFile = packagePath + "/" + className + ".java";
-                            return this.generateClassCodeForOneTable(schema, table, packageName, className)
-                                    .compose(code -> {
-                                        writeMap.put(classFile, code);
-                                        return Future.succeededFuture();
-                                    });
-                        })
-                .compose(v -> {
-                    return Keel.asyncCallIteratively(writeMap.entrySet(), entry -> {
-                        var classFile = entry.getKey();
-                        var code = entry.getValue();
-                        return Keel.getVertx().fileSystem().writeFile(classFile, Buffer.buffer(code));
-                    });
-                });
+                           tables,
+                           table -> {
+                               String className = Keel.stringHelper().fromUnderScoreCaseToCamelCase(table) + "TableRow";
+                               String classFile = packagePath + "/" + className + ".java";
+                               return this.generateClassCodeForOneTable(schema, table, packageName, className)
+                                          .compose(code -> {
+                                              writeMap.put(classFile, code);
+                                              return Future.succeededFuture();
+                                          });
+                           })
+                   .compose(v -> {
+                       return Keel.asyncCallIteratively(writeMap.entrySet(), entry -> {
+                           var classFile = entry.getKey();
+                           var code = entry.getValue();
+                           return Keel.getVertx().fileSystem().writeFile(classFile, Buffer.buffer(code));
+                       });
+                   });
     }
 
     private Future<String> generateClassCodeForOneTable(String schema, String table, String packageName, String className) {
         return Future.all(
-                        this.getCommentOfTable(table, schema),// comment of table
-                        this.getFieldsOfTable(table, schema),// fields
-                        this.getCreationOfTable(table, schema)// creation ddl
-                )
-                .compose(compositeFuture -> {
-                    String table_comment = compositeFuture.resultAt(0);
-                    List<TableRowClassField> fields = compositeFuture.resultAt(1);
-                    String creation = compositeFuture.resultAt(2);
+                             this.getCommentOfTable(table, schema),// comment of table
+                             this.getFieldsOfTable(table, schema),// fields
+                             this.getCreationOfTable(table, schema)// creation ddl
+                     )
+                     .compose(compositeFuture -> {
+                         String table_comment = compositeFuture.resultAt(0);
+                         List<TableRowClassField> fields = compositeFuture.resultAt(1);
+                         String creation = compositeFuture.resultAt(2);
 
-                    String code = new TableRowClassBuilder(table, schema, packageName)
-                            .setTableComment(table_comment)
-                            .setDdl(creation)
-                            .setProvideConstTable(provideConstTable)
-                            .setProvideConstSchema(provideConstSchema)
-                            .setProvideConstSchemaAndTable(provideConstSchemaAndTable)
-                            .addFields(fields)
-                            .build();
-                    return Future.succeededFuture(code);
-                });
+                         var builder = new TableRowClassBuilder(table, schema, packageName)
+                                 .setTableComment(table_comment)
+                                 .setProvideConstTable(provideConstTable)
+                                 .setProvideConstSchema(provideConstSchema)
+                                 .setProvideConstSchemaAndTable(provideConstSchemaAndTable)
+                                 .addFields(fields);
+                         if (usePureMode) {
+                             builder.setVcsFriendly(true);
+                         } else {
+                             builder.setDdl(creation);
+                         }
+                         String code = builder.build();
+                         return Future.succeededFuture(code);
+                     });
     }
 
     /**
@@ -189,13 +204,13 @@ public class TableRowClassSourceCodeGenerator {
                 "WHERE TABLE_NAME = '" + table + "' " +
                 (schema == null ? "" : ("AND TABLE_SCHEMA = '" + schema + "' "));
         return sqlConnection.query(sql_for_table_comment).execute()
-                .compose(rows -> {
-                    AtomicReference<String> comment = new AtomicReference<>();
-                    rows.forEach(row -> {
-                        comment.set(row.getString("TABLE_COMMENT"));
-                    });
-                    return Future.succeededFuture(comment.get());
-                });
+                            .compose(rows -> {
+                                AtomicReference<String> comment = new AtomicReference<>();
+                                rows.forEach(row -> {
+                                    comment.set(row.getString("TABLE_COMMENT"));
+                                });
+                                return Future.succeededFuture(comment.get());
+                            });
     }
 
     private Future<List<TableRowClassField>> getFieldsOfTable(@Nonnull String table, @Nullable String schema) {
@@ -206,25 +221,25 @@ public class TableRowClassSourceCodeGenerator {
         sql_for_columns += "`" + table + "`;";
 
         return sqlConnection.query(sql_for_columns)
-                .execute()
-                .compose(rows -> {
-                    List<TableRowClassField> fields = new ArrayList<>();
-                    rows.forEach(row -> {
-                        String field = row.getString("Field");
-                        String type = row.getString("Type");
-                        String comment = row.getString("Comment");
-                        if (comment == null || comment.isEmpty() || comment.isBlank()) {
-                            comment = null;
-                        }
+                            .execute()
+                            .compose(rows -> {
+                                List<TableRowClassField> fields = new ArrayList<>();
+                                rows.forEach(row -> {
+                                    String field = row.getString("Field");
+                                    String type = row.getString("Type");
+                                    String comment = row.getString("Comment");
+                                    if (comment == null || comment.isEmpty() || comment.isBlank()) {
+                                        comment = null;
+                                    }
 
-                        // since 3.1.10
-                        String nullability = row.getString("Null");
-                        boolean isNullable = "YES".equalsIgnoreCase(nullability);
+                                    // since 3.1.10
+                                    String nullability = row.getString("Null");
+                                    boolean isNullable = "YES".equalsIgnoreCase(nullability);
 
-                        fields.add(new TableRowClassField(field, type, isNullable, comment, strictEnumPackage, envelopePackage));
-                    });
-                    return Future.succeededFuture(fields);
-                });
+                                    fields.add(new TableRowClassField(field, type, isNullable, comment, strictEnumPackage, envelopePackage));
+                                });
+                                return Future.succeededFuture(fields);
+                            });
     }
 
     private Future<String> getCreationOfTable(@Nonnull String table, @Nullable String schema) {
@@ -234,13 +249,13 @@ public class TableRowClassSourceCodeGenerator {
         }
         sql_sct += "`" + table + "`;";
         return sqlConnection.query(sql_sct)
-                .execute()
-                .compose(rows -> {
-                    AtomicReference<String> creation = new AtomicReference<>();
-                    rows.forEach(row -> {
-                        creation.set(row.getString(1));
-                    });
-                    return Future.succeededFuture(creation.get());
-                });
+                            .execute()
+                            .compose(rows -> {
+                                AtomicReference<String> creation = new AtomicReference<>();
+                                rows.forEach(row -> {
+                                    creation.set(row.getString(1));
+                                });
+                                return Future.succeededFuture(creation.get());
+                            });
     }
 }

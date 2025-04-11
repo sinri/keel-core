@@ -10,7 +10,6 @@ import io.vertx.core.json.JsonObject;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
@@ -279,7 +278,7 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
     }
 
     public static class RowToWrite {
-        final Map<String, String> map = new ConcurrentHashMap<>();
+        final Map<String, String> map = new TreeMap<>();
 
         /**
          * @param jsonObject One row as a JsonObject

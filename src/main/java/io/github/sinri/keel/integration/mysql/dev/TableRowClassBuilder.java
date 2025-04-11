@@ -30,11 +30,25 @@ class TableRowClassBuilder {
      * @since 3.1.7
      */
     private boolean tableDeprecated = false;
+    /**
+     * @since 4.0.11
+     */
+    private boolean vcsFriendly = false;
 
     public TableRowClassBuilder(@Nonnull String table, @Nullable String schema, @Nonnull String packageName) {
         this.table = table;
         this.schema = schema;
         this.packageName = packageName;
+    }
+
+    /**
+     * Do not add update date time, auto-increment, etc. to class code generated, to let VCS know what actually changed.
+     *
+     * @since 4.0.11
+     */
+    public TableRowClassBuilder setVcsFriendly(boolean vcsFriendly) {
+        this.vcsFriendly = vcsFriendly;
+        return this;
     }
 
     public TableRowClassBuilder setProvideConstSchema(boolean provideConstSchema) {
@@ -52,6 +66,9 @@ class TableRowClassBuilder {
         return this;
     }
 
+    /**
+     * If set, it would be put into the generated class code.
+     */
     public TableRowClassBuilder setDdl(@Nullable String ddl) {
         this.ddl = ddl;
         return this;
@@ -117,10 +134,12 @@ class TableRowClassBuilder {
                 .append(" * TABLE: ").append(table).append("\n")
                 .append(" * (*￣∇￣*)\n")
                 .append(" * NOTICE BY KEEL:\n")
-                .append(" * \tTo avoid being rewritten, do not modify this file manually, unless editable confirmed.\n")
-                .append(" * \tIt was auto-generated on ").append(new Date()).append(".\n")
-                .append(" * @see ").append(TableRowClassSourceCodeGenerator.class.getName()).append("\n")
-                .append(" */\n");
+                .append(" * \tTo avoid being rewritten, do not modify this file manually, unless editable confirmed.\n");
+        if (!vcsFriendly) {
+            code.append(" * \tIt was auto-generated on ").append(new Date()).append(".\n");
+        }
+        code.append(" * @see ").append(TableRowClassSourceCodeGenerator.class.getName()).append("\n")
+            .append(" */\n");
         if (tableDeprecated) {
             code.append("@Deprecated\n");
         }
@@ -131,7 +150,8 @@ class TableRowClassBuilder {
                 code.append("\tpublic static final String SCHEMA = \"").append(schema).append("\";\n");
             }
             if (this.provideConstSchemaAndTable) {
-                code.append("\tpublic static final String SCHEMA_AND_TABLE = \"").append(schema).append(".").append(table).append("\";\n");
+                code.append("\tpublic static final String SCHEMA_AND_TABLE = \"").append(schema).append(".")
+                    .append(table).append("\";\n");
             }
         }
         if (this.provideConstTable) {
@@ -152,8 +172,8 @@ class TableRowClassBuilder {
                 .append("\n");
         if (this.schema != null) {
             code.append("\tpublic String sourceSchemaName(){\n")
-                    .append("\t\treturn ").append(this.provideConstSchema ? "SCHEMA" : "\"" + schema + "\"").append(";\n")
-                    .append("\t}\n");
+                .append("\t\treturn ").append(this.provideConstSchema ? "SCHEMA" : "\"" + schema + "\"").append(";\n")
+                .append("\t}\n");
         }
 
         fields.forEach(field -> {
@@ -162,7 +182,13 @@ class TableRowClassBuilder {
 
         code.append("\n}\n");
         if (ddl != null) {
-            code.append("\n/*\n").append(ddl).append("\n */\n");
+            if (vcsFriendly) {
+                // AUTO_INCREMENT=2395644
+                var cleanedDDL = ddl.replaceAll("\\s+AUTO_INCREMENT=\\d+\\s+", " AUTO_INCREMENT=_ ");
+                code.append("\n/*\n").append(cleanedDDL).append("\n */\n");
+            } else {
+                code.append("\n/*\n").append(ddl).append("\n */\n");
+            }
         }
 
         return code.toString();

@@ -21,19 +21,21 @@ public class KeelCacheUnitTest extends KeelUnitTest {
             var vw = new ValueWrapper<Long>(t1, 3);
 
             Keel.asyncCallStepwise(4, i -> {
-                        return Keel.asyncSleep(1_000L)
-                                .compose(v -> {
-                                    getUnitTestLogger().info("after " + (i + 1) + "s (" + System.currentTimeMillis() + "), vw = " + vw.getValue());
-                                    return Future.succeededFuture();
-                                });
-                    })
-                    .andThen(ar -> {
-                        if (ar.succeeded()) {
-                            promise.complete();
-                        } else {
-                            promise.fail(ar.cause());
-                        }
-                    });
+                    getUnitTestLogger().info("i=" + i + " start, to sleep 1s");
+                    return Keel.asyncSleep(1_000L)
+                               .compose(v -> {
+                                   Long value = vw.getValue();
+                                   getUnitTestLogger().info("after " + (i + 1) + "s (" + System.currentTimeMillis() + "), vw = " + value);
+                                   return Future.succeededFuture();
+                               });
+                })
+                .andThen(ar -> {
+                    if (ar.succeeded()) {
+                        promise.complete();
+                    } else {
+                        promise.fail(ar.cause());
+                    }
+                });
         });
     }
 
@@ -43,23 +45,23 @@ public class KeelCacheUnitTest extends KeelUnitTest {
             KeelCacheInterface<String, String> cache = KeelCacheInterface.createDefaultInstance();
             cache.save("a", "apple", 2);
             return Keel.asyncSleep(1_000L)
-                    .compose(v -> {
-                        try {
-                            getUnitTestLogger().info("read a and got " + cache.read("a"));
-                        } catch (NotCached e) {
-                            throw new RuntimeException(e);
-                        }
-                        return Keel.asyncSleep(1_000L);
-                    })
-                    .compose(v -> {
-                        try {
-                            getUnitTestLogger().info("read a and got " + cache.read("a"));
-                            Assertions.fail();
-                        } catch (NotCached e) {
-                            getUnitTestLogger().info("read a and not cached now.");
-                        }
-                        return Future.succeededFuture();
-                    });
+                       .compose(v -> {
+                           try {
+                               getUnitTestLogger().info("read a and got " + cache.read("a"));
+                           } catch (NotCached e) {
+                               throw new RuntimeException(e);
+                           }
+                           return Keel.asyncSleep(1_000L);
+                       })
+                       .compose(v -> {
+                           try {
+                               getUnitTestLogger().info("read a and got " + cache.read("a"));
+                               Assertions.fail();
+                           } catch (NotCached e) {
+                               getUnitTestLogger().info("read a and not cached now.");
+                           }
+                           return Future.succeededFuture();
+                       });
         });
     }
 
@@ -68,26 +70,26 @@ public class KeelCacheUnitTest extends KeelUnitTest {
         async(() -> {
             KeelAsyncCacheInterface<String, String> cache = KeelAsyncCacheInterface.createDefaultInstance();
             return cache.save("a", "apple", 2)
-                    .compose(v -> {
-                        return Keel.asyncSleep(1_000L);
-                    })
-                    .compose(v -> {
-                        return cache.read("a");
-                    })
-                    .compose(v -> {
-                        getUnitTestLogger().info("read a and got " + v);
-                        return Keel.asyncSleep(1_000L);
-                    })
-                    .compose(v -> {
-                        return cache.read("a");
-                    })
-                    .compose(v -> {
-                        Assertions.fail();
-                        return Future.succeededFuture();
-                    }, throwable -> {
-                        getUnitTestLogger().info("read a and not cached now.");
-                        return Future.succeededFuture();
-                    });
+                        .compose(v -> {
+                            return Keel.asyncSleep(1_000L);
+                        })
+                        .compose(v -> {
+                            return cache.read("a");
+                        })
+                        .compose(v -> {
+                            getUnitTestLogger().info("read a and got " + v);
+                            return Keel.asyncSleep(1_000L);
+                        })
+                        .compose(v -> {
+                            return cache.read("a");
+                        })
+                        .compose(v -> {
+                            Assertions.fail();
+                            return Future.succeededFuture();
+                        }, throwable -> {
+                            getUnitTestLogger().info("read a and not cached now.");
+                            return Future.succeededFuture();
+                        });
         });
     }
 }

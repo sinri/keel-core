@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns="http://maven.apache.org/POM/4.0.0"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.sinri</groupId>
@@ -65,12 +65,12 @@
             <artifactId>vertx-mysql-client</artifactId>
             <version>${vertxVersion}</version>
         </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-unit</artifactId>
-            <version>${vertxVersion}</version>
-            <scope>test</scope>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>io.vertx</groupId>-->
+        <!--            <artifactId>vertx-unit</artifactId>-->
+        <!--            <version>${vertxVersion}</version>-->
+        <!--            <scope>test</scope>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-client</artifactId>
@@ -182,12 +182,11 @@
             <artifactId>jol-core</artifactId>
             <version>${jolCoreVersion}</version>
         </dependency>
-
-
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-junit5</artifactId>
             <version>${vertxVersion}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

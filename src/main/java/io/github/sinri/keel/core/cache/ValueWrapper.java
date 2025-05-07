@@ -22,7 +22,7 @@ public class ValueWrapper<P> {
     /**
      * Creates a new ValueWrapper with the specified value and lifetime.
      *
-     * @param value The value to wrap
+     * @param value         The value to wrap
      * @param lifeInSeconds The lifetime of the value in seconds
      */
     public ValueWrapper(P value, long lifeInSeconds) {
@@ -59,18 +59,43 @@ public class ValueWrapper<P> {
         return Math.max(0, death - now);
     }
 
+    /**
+     * Checks if the current time is within the value's alive period.
+     *
+     * @return true if the current time is within the value's alive period, false otherwise
+     */
     private boolean isInAlivePeriod() {
         long now = System.currentTimeMillis();
-        boolean alive = now < this.death && now >= this.birth;
-        if (!alive) {
-            lock.writeLock().lock();
-            try {
-                value.clear();
-            } finally {
-                lock.writeLock().unlock();
-            }
+        return now < this.death && now >= this.birth;
+    }
+
+    /**
+     * @return the value read
+     * @since 4.0.12
+     */
+    private P readWithReadLock() {
+        lock.readLock().lock();
+        try {
+            return value.get();
+        } finally {
+            lock.readLock().unlock();
         }
-        return alive;
+    }
+
+    /**
+     * Clears the value if it's not in alive period, should be called when {@link ValueWrapper#isInAlivePeriod()} is
+     * checked as not true.
+     * This method acquires a write lock and should not be called while holding a read lock.
+     *
+     * @since 4.0.12
+     */
+    private void clearWithWriteLock() {
+        lock.writeLock().lock();
+        try {
+            value.clear();
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     /**
@@ -80,14 +105,13 @@ public class ValueWrapper<P> {
      */
     @Nullable
     public P getValue() {
-        lock.readLock().lock();
-        try {
-            if (isInAlivePeriod()) {
-                return value.get();
-            }
+        if (!isInAlivePeriod()) {
+            // with write lock if it needs
+            clearWithWriteLock();
             return null;
-        } finally {
-            lock.readLock().unlock();
+        } else {
+            // with read lock
+            return readWithReadLock();
         }
     }
 
@@ -98,15 +122,7 @@ public class ValueWrapper<P> {
      * @return true if the value is available, false otherwise
      */
     public boolean isAvailable() {
-        lock.readLock().lock();
-        try {
-            if (isInAlivePeriod()) {
-                return getValue() != null;
-            }
-            return false;
-        } finally {
-            lock.readLock().unlock();
-        }
+        return getValue() != null;
     }
 
     /**
@@ -132,4 +148,6 @@ public class ValueWrapper<P> {
     public int hashCode() {
         return Objects.hash(value.get(), death, birth);
     }
+
+
 }

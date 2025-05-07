@@ -302,7 +302,7 @@ public class KeelJsonHelper {
                     stackTraceItemConsumer.accept(stackTranceItem);
                 } else {
                     if (ignoringCount > 0) {
-                        if (ignoringClassPackage.equals(matchedClassPackage)) {
+                        if (Objects.equals(ignoringClassPackage, matchedClassPackage)) {
                             ignoringCount += 1;
                         } else {
                             ignoredStackTraceItemsConsumer.accept(ignoringClassPackage, ignoringCount);

@@ -236,7 +236,7 @@ public class KeelStringHelper {
                       .append(System.lineSeparator());
                 } else {
                     if (ignoringCount > 0) {
-                        if (ignoringClassPackage.equals(matchedClassPackage)) {
+                        if (Objects.equals(ignoringClassPackage, matchedClassPackage)) {
                             ignoringCount += 1;
                         } else {
                             sb.append("\t\t")

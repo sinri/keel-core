@@ -117,7 +117,7 @@ public class KeelReflectionHelper {
                 Files.walkFileTree(startPath, new SimpleFileVisitor<Path>() {
                     @Nonnull
                     @Override
-                    public FileVisitResult visitFile(Path file, @Nonnull BasicFileAttributes attrs) {
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
                         if (file.toString().endsWith(".class")) {
                             String className = file.toString().replace(".class", "").replace("/", ".");
                             className = className.substring(className.indexOf(packageName));
@@ -130,7 +130,9 @@ public class KeelReflectionHelper {
                                 //Class<? extends R> clazz = (Class<? extends R>) classLoader.loadClass(className);
                                 var clazz = classLoader.loadClass(className);
                                 if (baseClass.isAssignableFrom(clazz)) {
-                                    descendantClasses.add((Class<? extends R>) clazz);
+                                    @SuppressWarnings("unchecked")
+                                    Class<? extends R> castedClass = (Class<? extends R>) clazz;
+                                    descendantClasses.add(castedClass);
                                 }
                             } catch (Throwable e) {
                                 Keel.getLogger()
@@ -157,7 +159,9 @@ public class KeelReflectionHelper {
             try {
                 Class<?> aClass = Class.forName(s);
                 if (baseClass.isAssignableFrom(aClass)) {
-                    descendantClasses.add((Class<? extends R>) aClass);
+                    @SuppressWarnings("unchecked")
+                    Class<? extends R> castedClass = (Class<? extends R>) aClass;
+                    descendantClasses.add(castedClass);
                 }
             } catch (Throwable e) {
                 Keel.getLogger()
@@ -177,6 +181,7 @@ public class KeelReflectionHelper {
         classNames.forEach(className -> {
             if (className.startsWith(packageName + ".")) {
                 try {
+                    @SuppressWarnings("unchecked")
                     Class<? extends R> clazz = (Class<? extends R>) classLoader.loadClass(className);
                     if (baseClass.isAssignableFrom(clazz)) {
                         descendantClasses.add(clazz);

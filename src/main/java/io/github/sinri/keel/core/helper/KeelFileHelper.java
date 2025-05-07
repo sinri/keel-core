@@ -1,6 +1,7 @@
 package io.github.sinri.keel.core.helper;
 
 import io.vertx.core.Future;
+import io.vertx.core.file.FileSystem;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,17 +19,79 @@ import java.util.jar.JarFile;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
+ * A utility class for file operations in the Keel framework.
+ * Provides methods for file manipulation, JAR operations, and class path management.
+ * 
  * @since 2.6
  */
 public class KeelFileHelper {
     private static final KeelFileHelper instance = new KeelFileHelper();
+    private final FileSystem fileSystem;
 
     private KeelFileHelper() {
-
+        this.fileSystem = Keel.getVertx().fileSystem();
     }
 
     static KeelFileHelper getInstance() {
         return instance;
+    }
+
+    /**
+     * Checks if a file exists at the specified path.
+     *
+     * @param filePath the path to check
+     * @return Future containing true if the file exists, false otherwise
+     * @since 4.0.12
+     */
+    public Future<Boolean> exists(String filePath) {
+        return fileSystem.exists(filePath);
+    }
+
+    /**
+     * Creates a directory and all necessary parent directories.
+     *
+     * @param dirPath the directory path to create
+     * @return Future that completes when the directory is created
+     * @since 4.0.12
+     */
+    public Future<Void> mkdirs(String dirPath) {
+        return fileSystem.mkdirs(dirPath);
+    }
+
+    /**
+     * Deletes a file or directory.
+     *
+     * @param path the path to delete
+     * @param recursive if true, recursively deletes directories
+     * @return Future that completes when the deletion is done
+     * @since 4.0.12
+     */
+    public Future<Void> delete(String path, boolean recursive) {
+        return fileSystem.deleteRecursive(path, recursive);
+    }
+
+    /**
+     * Copies a file from source to destination.
+     *
+     * @param source the source file path
+     * @param destination the destination file path
+     * @return Future that completes when the copy is done
+     * @since 4.0.12
+     */
+    public Future<Void> copy(String source, String destination) {
+        return fileSystem.copy(source, destination);
+    }
+
+    /**
+     * Moves a file from source to destination.
+     *
+     * @param source the source file path
+     * @param destination the destination file path
+     * @return Future that completes when the move is done
+     * @since 4.0.12
+     */
+    public Future<Void> move(String source, String destination) {
+        return fileSystem.move(source, destination);
     }
 
     public @Nonnull byte[] readFileAsByteArray(@Nonnull String filePath, boolean seekInsideJarWhenNotFound) throws IOException {
@@ -209,5 +272,206 @@ public class KeelFileHelper {
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Lists the contents of a directory.
+     *
+     * @param dirPath the directory path to list
+     * @return Future containing list of file names in the directory
+     * @since 4.0.12
+     */
+    public Future<List<String>> listDir(String dirPath) {
+        return fileSystem.readDir(dirPath);
+    }
+
+    /**
+     * Gets file properties (size, creation time, last access time, last modified time).
+     *
+     * @param filePath the file path
+     * @return Future containing file properties
+     * @since 4.0.12
+     */
+    public Future<io.vertx.core.file.FileProps> getFileProps(String filePath) {
+        return fileSystem.props(filePath);
+    }
+
+    /**
+     * Creates a symbolic link.
+     *
+     * @param link the path of the symbolic link to create
+     * @param target the target of the symbolic link
+     * @return Future that completes when the link is created
+     * @since 4.0.12
+     */
+    public Future<Void> createSymLink(String link, String target) {
+        return fileSystem.link(link, target);
+    }
+
+    /**
+     * Reads a file as a string with a specific charset.
+     *
+     * @param filePath the file path
+     * @param charset the charset to use
+     * @return Future containing the file contents as a string
+     * @since 4.0.12
+     */
+    public Future<String> readFileAsString(String filePath, String charset) {
+        return fileSystem.readFile(filePath)
+            .map(buffer -> buffer.toString(java.nio.charset.Charset.forName(charset)));
+    }
+
+    /**
+     * Writes a string to a file with a specific charset.
+     *
+     * @param filePath the file path
+     * @param content the content to write
+     * @param charset the charset to use
+     * @return Future that completes when the write is done
+     * @since 4.0.12
+     */
+    public Future<Void> writeFile(String filePath, String content, String charset) {
+        return fileSystem.writeFile(
+            filePath,
+            io.vertx.core.buffer.Buffer.buffer(content.getBytes(java.nio.charset.Charset.forName(charset)))
+        );
+    }
+
+    /**
+     * Appends content to a file.
+     *
+     * @param filePath the file path
+     * @param content the content to append
+     * @return Future that completes when the append is done
+     * @since 4.0.12
+     */
+    public Future<Void> appendFile(String filePath, String content) {
+        return fileSystem.open(filePath, new io.vertx.core.file.OpenOptions().setAppend(true))
+            .compose(file -> file.write(io.vertx.core.buffer.Buffer.buffer(content))
+                .compose(v -> file.close()));
+    }
+
+    /**
+     * Extracts a JAR file to a directory.
+     *
+     * @param jarPath the path to the JAR file
+     * @param targetDir the target directory
+     * @return Future that completes when the extraction is done
+     * @since 4.0.12
+     */
+    public Future<Void> extractJar(String jarPath, String targetDir) {
+        return Future.succeededFuture()
+            .compose(v -> {
+                try (JarFile jar = new JarFile(jarPath)) {
+                    Enumeration<JarEntry> entries = jar.entries();
+                    while (entries.hasMoreElements()) {
+                        JarEntry entry = entries.nextElement();
+                        File file = new File(targetDir, entry.getName());
+                        if (entry.isDirectory()) {
+                            file.mkdirs();
+                        } else {
+                            file.getParentFile().mkdirs();
+                            try (InputStream in = jar.getInputStream(entry);
+                                 java.io.FileOutputStream out = new java.io.FileOutputStream(file)) {
+                                in.transferTo(out);
+                            }
+                        }
+                    }
+                    return Future.succeededFuture();
+                } catch (IOException e) {
+                    return Future.failedFuture(e);
+                }
+            });
+    }
+
+    /**
+     * Creates a new JAR file from a directory.
+     *
+     * @param sourceDir the source directory
+     * @param jarPath the path where the JAR file will be created
+     * @return Future that completes when the JAR is created
+     * @since 4.0.12
+     */
+    public Future<Void> createJar(String sourceDir, String jarPath) {
+        return Future.succeededFuture()
+            .compose(v -> {
+                try (java.util.jar.JarOutputStream jos = new java.util.jar.JarOutputStream(
+                    new java.io.FileOutputStream(jarPath))) {
+                    File source = new File(sourceDir);
+                    addToJar(source, source, jos);
+                    return Future.succeededFuture();
+                } catch (IOException e) {
+                    return Future.failedFuture(e);
+                }
+            });
+    }
+
+    private void addToJar(File root, File source, java.util.jar.JarOutputStream jos) throws IOException {
+        if (source.isDirectory()) {
+            String dirPath = source.getPath().substring(root.getPath().length() + 1).replace('\\', '/');
+            if (!dirPath.isEmpty()) {
+                if (!dirPath.endsWith("/")) {
+                    dirPath += "/";
+                }
+                JarEntry entry = new JarEntry(dirPath);
+                jos.putNextEntry(entry);
+                jos.closeEntry();
+            }
+            for (File file : source.listFiles()) {
+                addToJar(root, file, jos);
+            }
+        } else {
+            String entryPath = source.getPath().substring(root.getPath().length() + 1).replace('\\', '/');
+            JarEntry entry = new JarEntry(entryPath);
+            jos.putNextEntry(entry);
+            try (java.io.FileInputStream fis = new java.io.FileInputStream(source)) {
+                fis.transferTo(jos);
+            }
+            jos.closeEntry();
+        }
+    }
+
+    /**
+     * Gets the size of a file.
+     *
+     * @param filePath the file path
+     * @return Future containing the file size in bytes
+     * @since 4.0.12
+     */
+    public Future<Long> getFileSize(String filePath) {
+        return fileSystem.props(filePath).map(props -> props.size());
+    }
+
+    /**
+     * Checks if a path is a directory.
+     *
+     * @param path the path to check
+     * @return Future containing true if the path is a directory
+     * @since 4.0.12
+     */
+    public Future<Boolean> isDirectory(String path) {
+        return fileSystem.props(path).map(props -> props.isDirectory());
+    }
+
+    /**
+     * Gets the last modified time of a file.
+     *
+     * @param filePath the file path
+     * @return Future containing the last modified time
+     * @since 4.0.12
+     */
+    public Future<Long> getLastModifiedTime(String filePath) {
+        return fileSystem.props(filePath).map(props -> props.lastModifiedTime());
+    }
+
+    /**
+     * Gets the creation time of a file.
+     *
+     * @param filePath the file path
+     * @return Future containing the creation time
+     * @since 4.0.12
+     */
+    public Future<Long> getCreatedTime(String filePath) {
+        return fileSystem.props(filePath).map(props -> props.creationTime());
     }
 }

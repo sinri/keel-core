@@ -2,10 +2,12 @@ package io.github.sinri.keel.core.verticles;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.Verticle;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
@@ -27,6 +29,18 @@ public interface KeelVerticle extends Verticle {
      */
     static KeelVerticle instant(@Nonnull Supplier<Future<Void>> startFutureSupplier) {
         return new KeelVerticleWrap(startFutureSupplier);
+    }
+
+    /**
+     * Creates a new instance of {@link KeelVerticle} that wraps the provided starter function.
+     * The starter function accepts a Promise that can be used to trigger the verticle's undeployment.
+     * 
+     * @param starter a function that takes a stop promise and returns a future representing the start operation
+     * @return a new instance of {@link KeelVerticle} wrapping the provided starter function
+     * @since 4.0.12
+     */
+    static KeelVerticle instant(@Nonnull Function<Promise<Void>, Future<Void>> starter) {
+        return new KeelVerticleWrap(starter);
     }
 
     /**

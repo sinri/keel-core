@@ -38,7 +38,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vertxVersion>4.5.11</vertxVersion>
+        <vertxVersion>4.5.12</vertxVersion>
         <commonmarkVersion>0.21.0</commonmarkVersion>
         <jacksonVersion>2.16.1</jacksonVersion>
         <!--        <poiVersion>5.2.5</poiVersion>-->

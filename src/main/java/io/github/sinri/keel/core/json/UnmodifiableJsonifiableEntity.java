@@ -50,7 +50,7 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
      * @since 2.8 If java.lang.ClassCastException occurred, return null instead.
      * @since 3.1.10 make it abstract.
      */
-    <T> @Nullable T read(@Nonnull Function<JsonPointer, Class<T>> func);
+    @Nullable <T> T read(@Nonnull Function<JsonPointer, Class<T>> func);
 
     /**
      * @since 2.7

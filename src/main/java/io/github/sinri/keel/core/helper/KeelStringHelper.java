@@ -414,4 +414,186 @@ public class KeelStringHelper {
         }
         return URLDecoder.decode(new String(buffer), StandardCharsets.UTF_8);
     }
+
+    /**
+     * Truncates a string to the specified length and adds an ellipsis if truncated.
+     *
+     * @param str the string to truncate
+     * @param maxLength the maximum length of the string
+     * @return the truncated string
+     * @since 4.0.12
+     */
+    @Nonnull
+    public String truncateWithEllipsis(@Nullable String str, int maxLength) {
+        if (str == null) return "";
+        if (str.length() <= maxLength) return str;
+        return str.substring(0, maxLength) + "...";
+    }
+
+    /**
+     * Checks if a string is null, empty, or contains only whitespace.
+     *
+     * @param str the string to check
+     * @return true if the string is null, empty, or contains only whitespace
+     * @since 4.0.12
+     */
+    public boolean isNullOrBlank(@Nullable String str) {
+        return str == null || str.trim().isEmpty();
+    }
+
+    /**
+     * Reverses a string.
+     *
+     * @param str the string to reverse
+     * @return the reversed string
+     * @since 4.0.12
+     */
+    @Nonnull
+    public String reverse(@Nullable String str) {
+        if (str == null) return "";
+        return new StringBuilder(str).reverse().toString();
+    }
+
+    /**
+     * Counts the occurrences of a substring within a string.
+     *
+     * @param str the string to search in
+     * @param subStr the substring to search for
+     * @return the number of occurrences
+     * @since 4.0.12
+     */
+    public int countOccurrences(@Nullable String str, @Nullable String subStr) {
+        if (str == null || subStr == null || subStr.isEmpty()) return 0;
+        return (str.length() - str.replace(subStr, "").length()) / subStr.length();
+    }
+
+    /**
+     * Removes all whitespace from a string.
+     *
+     * @param str the string to remove whitespace from
+     * @return the string with all whitespace removed
+     * @since 4.0.12
+     */
+    @Nonnull
+    public String removeWhitespace(@Nullable String str) {
+        if (str == null) return "";
+        return str.replaceAll("\\s+", "");
+    }
+
+    /**
+     * Checks if a string contains only digits.
+     *
+     * @param str the string to check
+     * @return true if the string contains only digits
+     * @since 4.0.12
+     */
+    public boolean isNumericAsIntegralNumber(@Nullable String str) {
+        if (str == null || str.isEmpty()) return false;
+        return str.chars().allMatch(Character::isDigit);
+    }
+
+    /**
+     * Checks if a string represents a valid number (including negative numbers and decimals).
+     * Examples of valid numbers:
+     * - "123" (positive integer)
+     * - "-123" (negative integer)
+     * - "123.456" (positive decimal)
+     * - "-123.456" (negative decimal)
+     * - "0.123" (decimal less than 1)
+     * - "-0.123" (negative decimal less than 1)
+     *
+     * @param str the string to check
+     * @return true if the string represents a valid number
+     * @since 4.0.12
+     */
+    public boolean isNumericAsRealNumber(@Nullable String str) {
+        if (str == null || str.isEmpty()) return false;
+        return str.matches("-?\\d+(\\.\\d+)?");
+    }
+
+    /**
+     * Capitalizes the first letter of each word in a string.
+     *
+     * @param str the string to capitalize
+     * @return the capitalized string
+     * @since 4.0.12
+     */
+    @Nonnull
+    public String capitalizeWords(@Nullable String str) {
+        if (str == null || str.isEmpty()) return "";
+        StringBuilder result = new StringBuilder();
+        boolean capitalizeNext = true;
+        
+        for (char c : str.toCharArray()) {
+            if (Character.isSpaceChar(c)) {
+                capitalizeNext = true;
+            } else if (capitalizeNext) {
+                c = Character.toUpperCase(c);
+                capitalizeNext = false;
+            }
+            result.append(c);
+        }
+        return result.toString();
+    }
+
+    /**
+     * Removes all non-alphanumeric characters from a string.
+     *
+     * @param str the string to clean
+     * @return the cleaned string
+     * @since 4.0.12
+     */
+    @Nonnull
+    public String removeNonAlphanumeric(@Nullable String str) {
+        if (str == null) return "";
+        return str.replaceAll("[^a-zA-Z0-9]", "");
+    }
+
+    /**
+     * Checks if a string is a valid email address.
+     *
+     * @param email the email address to validate
+     * @return true if the email address is valid
+     * @since 4.0.12
+     */
+    public boolean isValidEmail(@Nullable String email) {
+        if (email == null) return false;
+        String emailRegex = "^[A-Za-z0-9+_.-]+@(.+)$";
+        return Pattern.compile(emailRegex).matcher(email).matches();
+    }
+
+    
+    /**
+     * Generates a random string of specified length.
+     *
+     * @param length the length of the random string
+     * @return the random string
+     * @since 4.0.12
+     */
+    @Nonnull
+    public String generateRandomString(int length) {
+        return generateRandomString(length, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
+    }
+
+    /**
+     * Generates a random string of specified length using custom character set.
+     *
+     * @param length the length of the random string
+     * @param charSet the character set to use for generating the random string
+     * @return the random string
+     * @since 4.0.12
+     */
+    @Nonnull
+    public String generateRandomString(int length, @Nonnull String charSet) {
+        if (charSet == null || charSet.isEmpty()) {
+            throw new IllegalArgumentException("Character set cannot be null or empty");
+        }
+        StringBuilder sb = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(charSet.length());
+            sb.append(charSet.charAt(index));
+        }
+        return sb.toString();
+    }
 }

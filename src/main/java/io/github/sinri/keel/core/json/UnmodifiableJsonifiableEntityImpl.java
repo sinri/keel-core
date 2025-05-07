@@ -46,7 +46,7 @@ public class UnmodifiableJsonifiableEntityImpl implements UnmodifiableJsonifiabl
      * @since 3.1.10 make it abstract.
      */
     @Override
-    public <T> @Nullable T read(@Nonnull Function<JsonPointer, Class<T>> func) {
+    public @Nullable <T> T read(@Nonnull Function<JsonPointer, Class<T>> func) {
         try {
             JsonPointer jsonPointer = JsonPointer.create();
             Class<T> tClass = func.apply(jsonPointer);

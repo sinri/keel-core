@@ -14,7 +14,7 @@ import java.util.List;
  * @since 3.1.10
  * @since 4.0.0 let it be an abstract class
  */
-public abstract class KeelIssueRecord<T> implements KeelIssueRecordCore<T>, IssueRecordMessageMixin<T>, IssueRecordContextMixin<T> {
+public abstract class KeelIssueRecord<T> implements IssueRecordMessageMixin<T>, IssueRecordContextMixin<T> {
     private final @Nonnull JsonObject attributes;
     private final @Nonnull List<String> classification;
     private long timestamp;

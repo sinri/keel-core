@@ -32,7 +32,7 @@ public class KeelFileHelper {
         this.fileSystem = Keel.getVertx().fileSystem();
     }
 
-    static KeelFileHelper getInstance() {
+    public static synchronized KeelFileHelper getInstance() {
         return instance;
     }
 
@@ -95,21 +95,24 @@ public class KeelFileHelper {
     }
 
     public @Nonnull byte[] readFileAsByteArray(@Nonnull String filePath, boolean seekInsideJarWhenNotFound) throws IOException {
+        if (!isValidPath(filePath)) {
+            throw new IllegalArgumentException("Invalid file path: " + filePath);
+        }
+        
         try {
             return Files.readAllBytes(Path.of(filePath));
         } catch (IOException e) {
-            if (seekInsideJarWhenNotFound) {
-                try (
-                        InputStream resourceAsStream = KeelFileHelper.class.getClassLoader().getResourceAsStream(filePath)
-                ) {
-                    if (resourceAsStream == null) {
-                        // not found resource
-                        throw new IOException("file also not in jar", e);
-                    }
-                    return resourceAsStream.readAllBytes();
+            if (!seekInsideJarWhenNotFound) {
+                throw new IOException("Failed to read file: " + filePath, e);
+            }
+            
+            try (InputStream resourceAsStream = KeelFileHelper.class.getClassLoader().getResourceAsStream(filePath)) {
+                if (resourceAsStream == null) {
+                    throw new IOException("File not found in filesystem or JAR: " + filePath, e);
                 }
-            } else {
-                throw e;
+                return resourceAsStream.readAllBytes();
+            } catch (IOException ex) {
+                throw new IOException("Failed to read file from JAR: " + filePath, ex);
             }
         }
     }
@@ -170,10 +173,14 @@ public class KeelFileHelper {
     }
 
     /**
-     * @return absolute created Temp File path
+     * Creates a temporary file with the specified prefix and suffix.
+     *
+     * @param prefix the prefix for the temporary file name
+     * @param suffix the suffix for the temporary file name
+     * @return Future containing the absolute path of the created temporary file
      * @since 3.0.0
      */
-    public Future<String> crateTempFile(@Nullable String prefix, @Nullable String suffix) {
+    public Future<String> createTempFile(@Nullable String prefix, @Nullable String suffix) {
         return Keel.getVertx().fileSystem().createTempFile(prefix, suffix);
     }
 
@@ -314,11 +321,17 @@ public class KeelFileHelper {
      * @param filePath the file path
      * @param charset the charset to use
      * @return Future containing the file contents as a string
+     * @throws IllegalArgumentException if charset is invalid
      * @since 4.0.12
      */
     public Future<String> readFileAsString(String filePath, String charset) {
-        return fileSystem.readFile(filePath)
-            .map(buffer -> buffer.toString(java.nio.charset.Charset.forName(charset)));
+        try {
+            java.nio.charset.Charset.forName(charset); // Validate charset
+            return fileSystem.readFile(filePath)
+                .map(buffer -> buffer.toString(java.nio.charset.Charset.forName(charset)));
+        } catch (java.nio.charset.IllegalCharsetNameException | java.nio.charset.UnsupportedCharsetException e) {
+            return Future.failedFuture(new IllegalArgumentException("Invalid charset: " + charset, e));
+        }
     }
 
     /**
@@ -328,13 +341,19 @@ public class KeelFileHelper {
      * @param content the content to write
      * @param charset the charset to use
      * @return Future that completes when the write is done
+     * @throws IllegalArgumentException if charset is invalid
      * @since 4.0.12
      */
     public Future<Void> writeFile(String filePath, String content, String charset) {
-        return fileSystem.writeFile(
-            filePath,
-            io.vertx.core.buffer.Buffer.buffer(content.getBytes(java.nio.charset.Charset.forName(charset)))
-        );
+        try {
+            java.nio.charset.Charset.forName(charset); // Validate charset
+            return fileSystem.writeFile(
+                filePath,
+                io.vertx.core.buffer.Buffer.buffer(content.getBytes(java.nio.charset.Charset.forName(charset)))
+            );
+        } catch (java.nio.charset.IllegalCharsetNameException | java.nio.charset.UnsupportedCharsetException e) {
+            return Future.failedFuture(new IllegalArgumentException("Invalid charset: " + charset, e));
+        }
     }
 
     /**
@@ -343,12 +362,17 @@ public class KeelFileHelper {
      * @param filePath the file path
      * @param content the content to append
      * @return Future that completes when the append is done
+     * @throws IllegalArgumentException if filePath is null or empty
      * @since 4.0.12
      */
     public Future<Void> appendFile(String filePath, String content) {
+        if (filePath == null || filePath.trim().isEmpty()) {
+            return Future.failedFuture(new IllegalArgumentException("File path cannot be null or empty"));
+        }
         return fileSystem.open(filePath, new io.vertx.core.file.OpenOptions().setAppend(true))
             .compose(file -> file.write(io.vertx.core.buffer.Buffer.buffer(content))
-                .compose(v -> file.close()));
+                .compose(v -> file.close())
+                .onFailure(err -> file.close())); // Ensure file is closed even on failure
     }
 
     /**
@@ -474,4 +498,285 @@ public class KeelFileHelper {
     public Future<Long> getCreatedTime(String filePath) {
         return fileSystem.props(filePath).map(props -> props.creationTime());
     }
+
+    /**
+     * Creates a ZIP file from a directory or file.
+     *
+     * @param sourcePath the source file or directory path
+     * @param zipPath the path where the ZIP file will be created
+     * @return Future that completes when the ZIP is created
+     * @throws IllegalArgumentException if sourcePath or zipPath is null or empty
+     * @since 4.0.12
+     */
+    public Future<Void> createZip(String sourcePath, String zipPath) {
+        if (!isValidPath(sourcePath)) {
+            return Future.failedFuture(new IllegalArgumentException("Source path cannot be null or empty"));
+        }
+        if (!isValidPath(zipPath)) {
+            return Future.failedFuture(new IllegalArgumentException("ZIP path cannot be null or empty"));
+        }
+        File source = new File(sourcePath);
+        if (!source.exists()) {
+            return Future.failedFuture(new IllegalArgumentException("Source path does not exist: " + sourcePath));
+        }
+        return Future.succeededFuture()
+            .compose(v -> {
+                try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(
+                    new java.io.FileOutputStream(zipPath))) {
+                    addToZip(source, source, zos);
+                    return Future.succeededFuture();
+                } catch (IOException e) {
+                    return Future.failedFuture(e);
+                }
+            });
+    }
+
+    /**
+     * Extracts a ZIP file to a directory.
+     *
+     * @param zipPath the path to the ZIP file
+     * @param targetDir the target directory
+     * @return Future that completes when the extraction is done
+     * @throws IllegalArgumentException if zipPath or targetDir is null or empty
+     * @since 4.0.12
+     */
+    public Future<Void> extractZip(String zipPath, String targetDir) {
+        if (!isValidPath(zipPath)) {
+            return Future.failedFuture(new IllegalArgumentException("ZIP path cannot be null or empty"));
+        }
+        if (!isValidPath(targetDir)) {
+            return Future.failedFuture(new IllegalArgumentException("Target directory cannot be null or empty"));
+        }
+        File zipFile = new File(zipPath);
+        if (!zipFile.exists()) {
+            return Future.failedFuture(new IllegalArgumentException("ZIP file does not exist: " + zipPath));
+        }
+        File baseDir = new File(targetDir);
+        return Future.succeededFuture()
+            .compose(v -> {
+                try (java.util.zip.ZipFile zip = new java.util.zip.ZipFile(zipPath)) {
+                    Enumeration<? extends java.util.zip.ZipEntry> entries = zip.entries();
+                    while (entries.hasMoreElements()) {
+                        java.util.zip.ZipEntry entry = entries.nextElement();
+                        File file = resolvePath(baseDir, entry.getName());
+                        if (entry.isDirectory()) {
+                            if (!file.mkdirs() && !file.exists()) {
+                                return Future.failedFuture(new IOException("Failed to create directory: " + file.getPath()));
+                            }
+                        } else {
+                            file.getParentFile().mkdirs();
+                            try (InputStream in = zip.getInputStream(entry);
+                                 java.io.FileOutputStream out = new java.io.FileOutputStream(file)) {
+                                in.transferTo(out);
+                            }
+                        }
+                    }
+                    return Future.succeededFuture();
+                } catch (IOException e) {
+                    return Future.failedFuture(e);
+                }
+            });
+    }
+
+    private void addToZip(File root, File source, java.util.zip.ZipOutputStream zos) throws IOException {
+        if (source.isDirectory()) {
+            String dirPath = source.getPath().substring(root.getPath().length() + 1).replace('\\', '/');
+            if (!dirPath.isEmpty()) {
+                if (!dirPath.endsWith("/")) {
+                    dirPath += "/";
+                }
+                java.util.zip.ZipEntry entry = new java.util.zip.ZipEntry(dirPath);
+                zos.putNextEntry(entry);
+                zos.closeEntry();
+            }
+            for (File file : source.listFiles()) {
+                addToZip(root, file, zos);
+            }
+        } else {
+            String entryPath = source.getPath().substring(root.getPath().length() + 1).replace('\\', '/');
+            java.util.zip.ZipEntry entry = new java.util.zip.ZipEntry(entryPath);
+            zos.putNextEntry(entry);
+            try (java.io.FileInputStream fis = new java.io.FileInputStream(source)) {
+                fis.transferTo(zos);
+            }
+            zos.closeEntry();
+        }
+    }
+
+    /**
+     * Lists the contents of a ZIP file.
+     *
+     * @param zipPath the path to the ZIP file
+     * @return Future containing list of entry names in the ZIP file
+     * @throws IllegalArgumentException if zipPath is null or empty
+     * @since 4.0.12
+     */
+    public Future<List<String>> listZipContents(String zipPath) {
+        if (!isValidPath(zipPath)) {
+            return Future.failedFuture(new IllegalArgumentException("ZIP path cannot be null or empty"));
+        }
+        File zipFile = new File(zipPath);
+        if (!zipFile.exists()) {
+            return Future.failedFuture(new IllegalArgumentException("ZIP file does not exist: " + zipPath));
+        }
+        return Future.succeededFuture()
+            .map(v -> {
+                List<String> entries = new ArrayList<>();
+                try (java.util.zip.ZipFile zip = new java.util.zip.ZipFile(zipPath)) {
+                    Enumeration<? extends java.util.zip.ZipEntry> zipEntries = zip.entries();
+                    while (zipEntries.hasMoreElements()) {
+                        entries.add(zipEntries.nextElement().getName());
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to read ZIP file: " + e.getMessage(), e);
+                }
+                return entries;
+            });
+    }
+
+    /**
+     * Extracts a specific file from a ZIP archive.
+     *
+     * @param zipPath the path to the ZIP file
+     * @param entryName the name of the entry to extract
+     * @param targetPath the path where the file will be extracted
+     * @return Future that completes when the extraction is done
+     * @throws IllegalArgumentException if any parameter is null or empty
+     * @since 4.0.12
+     */
+    public Future<Void> extractZipEntry(String zipPath, String entryName, String targetPath) {
+        if (!isValidPath(zipPath)) {
+            return Future.failedFuture(new IllegalArgumentException("ZIP path cannot be null or empty"));
+        }
+        if (!isValidPath(entryName)) {
+            return Future.failedFuture(new IllegalArgumentException("Entry name cannot be null or empty"));
+        }
+        if (!isValidPath(targetPath)) {
+            return Future.failedFuture(new IllegalArgumentException("Target path cannot be null or empty"));
+        }
+        File zipFile = new File(zipPath);
+        if (!zipFile.exists()) {
+            return Future.failedFuture(new IllegalArgumentException("ZIP file does not exist: " + zipPath));
+        }
+        File baseDir = new File(targetPath).getParentFile();
+        return Future.succeededFuture()
+            .compose(v -> {
+                try (java.util.zip.ZipFile zip = new java.util.zip.ZipFile(zipPath)) {
+                    java.util.zip.ZipEntry entry = zip.getEntry(entryName);
+                    if (entry == null) {
+                        return Future.failedFuture("Entry not found: " + entryName);
+                    }
+                    File targetFile = resolvePath(baseDir, new File(targetPath).getName());
+                    if (!targetFile.getParentFile().mkdirs() && !targetFile.getParentFile().exists()) {
+                        return Future.failedFuture(new IOException("Failed to create parent directory: " + targetFile.getParent()));
+                    }
+                    try (InputStream in = zip.getInputStream(entry);
+                         java.io.FileOutputStream out = new java.io.FileOutputStream(targetFile)) {
+                        in.transferTo(out);
+                    }
+                    return Future.succeededFuture();
+                } catch (IOException e) {
+                    return Future.failedFuture(e);
+                }
+            });
+    }
+
+    /**
+     * Validates a file path for security concerns.
+     * Checks for:
+     * - Null or empty paths
+     * - Null bytes
+     * - Path traversal attempts using ".."
+     * - Maximum path length
+     * - Invalid characters
+     * 
+     * Examples:
+     * isValidPath("file.txt") -> true
+     * isValidPath("dir/file.txt") -> true
+     * isValidPath("../file.txt") -> false
+     * isValidPath("file?.txt") -> false
+     * isValidPath(null) -> false
+     * isValidPath("") -> false
+     *
+     * @param path the path to validate
+     * @return true if the path is valid, false otherwise
+     * @since 4.0.12
+     */
+    private boolean isValidPath(String path) {
+        if (path == null || path.trim().isEmpty()) {
+            return false;
+        }
+        
+        // Check for null bytes
+        if (path.contains("\0")) {
+            return false;
+        }
+        
+        // Normalize path
+        Path normalizedPath;
+        try {
+            normalizedPath = Path.of(path).normalize();
+        } catch (Exception e) {
+            return false;
+        }
+        
+        // Check for path traversal attempts
+        if (normalizedPath.toString().contains("..")) {
+            return false;
+        }
+        
+        // Check for maximum path length
+        if (normalizedPath.toString().length() > 4096) { // Common max path length
+            return false;
+        }
+        
+        // Check for invalid characters
+        String invalidChars = "<>:\"|?*";
+        for (char c : invalidChars.toCharArray()) {
+            if (path.indexOf(c) != -1) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    /**
+     * Safely resolves a path against a base directory to prevent path traversal attacks.
+     *
+     * @param baseDir the base directory
+     * @param path the path to resolve
+     * @return the resolved path
+     * @throws IllegalArgumentException if the resolved path is outside the base directory
+     * @since 4.0.12
+     */
+    private File resolvePath(File baseDir, String path) {
+        if (!isValidPath(path)) {
+            throw new IllegalArgumentException("Invalid path: " + path);
+        }
+        
+        try {
+            // Convert to absolute paths
+            File baseDirAbs = baseDir.getAbsoluteFile();
+            File resolved = new File(baseDirAbs, path).getAbsoluteFile();
+            
+            // Check for symbolic links
+            Path basePath = baseDirAbs.toPath();
+            Path resolvedPath = resolved.toPath();
+            
+            // Resolve any symbolic links
+            Path realBasePath = basePath.toRealPath();
+            Path realResolvedPath = resolvedPath.toRealPath();
+            
+            // Check if the resolved path is within the base directory
+            if (!realResolvedPath.startsWith(realBasePath)) {
+                throw new IllegalArgumentException("Path traversal attempt detected: " + path);
+            }
+            
+            return resolved;
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Failed to resolve path: " + path, e);
+        }
+    }
 }
+

@@ -20,17 +20,29 @@ public class IntravenouslyCutterOnString implements IntravenouslyCutter<String> 
     private final AtomicBoolean readStopRef = new AtomicBoolean(false);
     private final KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor;
 
+    /**
+     * Constructor to initialize the IntravenouslyCutterOnString instance.
+     * @param stringSingleDropProcessor The processor for handling individual strings.
+     */
     public IntravenouslyCutterOnString(KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor) {
         this.stringSingleDropProcessor = stringSingleDropProcessor;
         intravenous = KeelIntravenous.instant(getSingleDropProcessor());
         intravenous.deployMe(new DeploymentOptions());
     }
 
+    /**
+     * Retrieves the single drop processor for strings.
+     * @return The single drop processor for strings.
+     */
     @Override
     public KeelIntravenous.SingleDropProcessor<String> getSingleDropProcessor() {
         return stringSingleDropProcessor;
     }
 
+    /**
+     * Accepts data from the stream and processes it.
+     * @param s The Buffer data read from the stream.
+     */
     @Override
     public void acceptFromStream(Buffer s) {
         synchronized (buffer) {
@@ -46,7 +58,8 @@ public class IntravenouslyCutterOnString implements IntravenouslyCutter<String> 
     }
 
     /**
-     * @return the cut-off head, null if the buffer is not able to cut.
+     * Cuts the data in the buffer using a delimiter.
+     * @return The cut-off head string, or null if the buffer cannot be cut.
      */
     private String cutWithDelimiter() {
         String s0 = buffer.get().toString(StandardCharsets.UTF_8);
@@ -59,6 +72,9 @@ public class IntravenouslyCutterOnString implements IntravenouslyCutter<String> 
         return s1;
     }
 
+    /**
+     * Stops reading from the stream and processes any remaining data in the buffer.
+     */
     @Override
     public void stopHere() {
         synchronized (buffer) {
@@ -75,6 +91,10 @@ public class IntravenouslyCutterOnString implements IntravenouslyCutter<String> 
         readStopRef.set(true);
     }
 
+    /**
+     * Waits for all data processing to complete.
+     * @return A Future indicating that all data processing is complete.
+     */
     @Override
     public Future<Void> waitForAllHandled() {
         return Keel.asyncCallRepeatedly(repeatedlyCallTask -> {

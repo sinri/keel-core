@@ -24,7 +24,7 @@ public interface RedisListMixin extends RedisApiMixin {
      * @return 执行 push 操作后的列表长度。
      */
     default Future<Integer> pushToListTail(String key, List<String> elements) {
-        return api().compose(api -> {
+        return api(api -> {
             List<String> list = new ArrayList<>();
             list.add(key);
             list.addAll(elements);
@@ -41,7 +41,7 @@ public interface RedisListMixin extends RedisApiMixin {
      * @return RPUSHX 命令执行之后列表的长度。
      */
     default Future<Integer> pushToExistedListTail(String key, List<String> elements) {
-        return api().compose(api -> {
+        return api(api -> {
             List<String> list = new ArrayList<>();
             list.add(key);
             list.addAll(elements);
@@ -67,7 +67,7 @@ public interface RedisListMixin extends RedisApiMixin {
      * 如果 key 对应的值不是 list 类型，那么会返回一个错误。
      */
     default Future<Integer> pushToListHead(String key, List<String> elements) {
-        return api().compose(api -> {
+        return api(api -> {
             List<String> list = new ArrayList<>();
             list.add(key);
             list.addAll(elements);
@@ -86,7 +86,7 @@ public interface RedisListMixin extends RedisApiMixin {
      * REDIS &gt;= 4.0: 支持一次插入多个值。老版本一次只能插入一个值。
      */
     default Future<Integer> pushToExistedListHead(String key, List<String> elements) {
-        return api().compose(api -> {
+        return api(api -> {
             List<String> list = new ArrayList<>();
             list.add(key);
             list.addAll(elements);
@@ -109,7 +109,7 @@ public interface RedisListMixin extends RedisApiMixin {
      * @return 用于返回存储在 key 中的列表长度。
      */
     default Future<Integer> getListLength(String key) {
-        return api().compose(api -> {
+        return api(api -> {
             return api.llen(key).compose(response -> {
                 return Future.succeededFuture(response.toInteger());
             });
@@ -123,7 +123,7 @@ public interface RedisListMixin extends RedisApiMixin {
      * @return 列表的首元素，key 不存在的时候返回 nil 。
      */
     default Future<String> popFromListHead(String key) {
-        return api().compose(api -> {
+        return api(api -> {
             return api.lpop(List.of(key)).compose(response -> {
                 if (response == null) {
                     return Future.succeededFuture(null);
@@ -140,7 +140,7 @@ public interface RedisListMixin extends RedisApiMixin {
      * @return 最后一个元素的值，key 不存在时返回 nil 。
      */
     default Future<String> popFromListTail(String key) {
-        return api().compose(api -> {
+        return api(api -> {
             return api.rpop(List.of(key)).compose(response -> {
                 if (response == null) {
                     return Future.succeededFuture(null);
@@ -157,7 +157,7 @@ public interface RedisListMixin extends RedisApiMixin {
      * 超过范围的下标并不会产生错误：如果 start 超过列表尾部，或者 start &gt; end，结果会是列表变成空表（即该 key 会被移除）。 如果 end 超过列表尾部，Redis 会将其当作列表的最后一个元素。
      */
     default Future<Void> trimList(String key, int start, int stop) {
-        return api().compose(api -> {
+        return api(api -> {
             return api.ltrim(key, String.valueOf(start), String.valueOf(stop))
                     .compose(response -> {
                         Objects.requireNonNull(response);
@@ -178,7 +178,7 @@ public interface RedisListMixin extends RedisApiMixin {
      * @return 一个列表，包含指定区间内的元素。
      */
     default Future<List<String>> fetchListWithRange(String key, int start, int stop) {
-        return api().compose(api -> {
+        return api(api -> {
             return api.lrange(key, String.valueOf(start), String.valueOf(stop))
                     .compose(response -> {
                         List<String> list = new ArrayList<>();
@@ -199,7 +199,7 @@ public interface RedisListMixin extends RedisApiMixin {
      * @return 查询的元素，index 超出索引范围时返回 nil 。
      */
     default Future<String> getElementInList(String key, int index) {
-        return api().compose(api -> {
+        return api(api -> {
             return api.lindex(key, String.valueOf(index))
                     .compose(response -> {
                         if (response == null) {
@@ -219,7 +219,7 @@ public interface RedisListMixin extends RedisApiMixin {
      * @return 执行操作后的列表长度，列表中pivot参考值不存在的时候返回 -1。
      */
     default Future<Integer> insertIntoListBefore(String key, String pivot, String element) {
-        return api().compose(api -> {
+        return api(api -> {
             return api.linsert(key, "BEFORE", pivot, element).compose(response -> {
                 return Future.succeededFuture(response.toInteger());
             });
@@ -243,7 +243,7 @@ public interface RedisListMixin extends RedisApiMixin {
             Integer count,
             Integer maxLen
     ) {
-        return api().compose(api -> {
+        return api(api -> {
             List<String> args = new ArrayList<>();
 
             args.add(key);
@@ -303,13 +303,13 @@ public interface RedisListMixin extends RedisApiMixin {
      * count &gt; 0: 从头到尾删除值为 value 的元素。
      * count &lt; 0: 从尾到头删除值为 value 的元素。
      * count = 0: 移除所有值为 value 的元素。
-     * 比如， LREM list -2 “hello” 会从列表key中删除最后两个出现的 “hello”。
+     * 比如， LREM list -2 "hello" 会从列表key中删除最后两个出现的 "hello"。
      * 需要注意的是，不存在key会被当作空list处理，所以当 key 不存在的时候，这个命令会返回 0。
      *
      * @return 删除元素个数。
      */
     default Future<Integer> removeSomeMatchedElementsFromList(String key, int count, String element) {
-        return api().compose(api -> {
+        return api(api -> {
             return api.lrem(key, String.valueOf(count), element)
                     .compose(response -> {
                         return Future.succeededFuture(response.toInteger());
@@ -323,7 +323,7 @@ public interface RedisListMixin extends RedisApiMixin {
      * 当 index 超出列表索引范围时会返回错误ERR ERR index out of range。
      */
     default Future<Void> setElementInList(String key, int index, String element) {
-        return api().compose(api -> {
+        return api(api -> {
             return api.lset(key, String.valueOf(index), element)
                     .compose(response -> {
                         if ("OK".equals(response.toString())) {

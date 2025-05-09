@@ -335,11 +335,151 @@ public interface RedisListMixin extends RedisApiMixin {
         });
     }
 
-    // TODO
-    //  BLMOVE source destination LEFT|RIGHT LEFT|RIGHT timeout
-    //  BLPOP key [key ...] timeout
-    //  BRPOP key [key ...] timeout
-    //  BRPOPLPUSH source destination timeout
-    //  LMOVE source destination LEFT|RIGHT LEFT|RIGHT
-    //  RPOPLPUSH source destination
+    /**
+     * BLMOVE source destination LEFT|RIGHT LEFT|RIGHT timeout
+     * Redis BLMOVE 是 LMOVE 命令的阻塞版本。
+     * 当 source 包含元素时，这个命令表现得和 LMOVE 一样。
+     * 当 source 为空时， Redis 将会阻塞这个连接，直到另一个客户端 push 元素进入这个列表或者达到 timeout 时限。
+     * timeout 为 0 表示无限阻塞。
+     *
+     * @param source      源列表
+     * @param destination 目标列表
+     * @param from        从哪里移出元素，可以是 "LEFT" 或 "RIGHT"
+     * @param to          移动到哪里，可以是 "LEFT" 或 "RIGHT"
+     * @param timeout     超时时间（秒），0 表示无限等待
+     * @return 被移动的元素；如果超时返回 null
+     */
+    default Future<String> blockingMoveElementBetweenLists(String source, String destination, String from, String to, long timeout) {
+        return api(api -> {
+            return api.blmove(source, destination, from, to, String.valueOf(timeout))
+                      .compose(response -> {
+                          if (response == null) {
+                              return Future.succeededFuture(null);
+                          }
+                          return Future.succeededFuture(response.toString());
+                      });
+        });
+    }
+
+    /**
+     * BLPOP key [key ...] timeout
+     * Redis BLPOP 是 LPOP 命令的阻塞版本。
+     * 当给定列表内没有任何元素可供弹出时，连接将被 BLPOP 命令阻塞，直到等待超时或发现可弹出元素为止。
+     * 当给定多个 key 参数时，按参数 key 的先后顺序依次检查各个列表，弹出第一个非空列表的头元素。
+     *
+     * @param keys    一个或多个列表键
+     * @param timeout 超时时间（秒），0 表示无限等待
+     * @return 如果列表为空，返回 null；否则返回一个包含两个元素的 List，第一个是键名，第二个是弹出的元素
+     */
+    default Future<List<String>> blockingPopFromListsHead(List<String> keys, long timeout) {
+        return api(api -> {
+            List<String> args = new ArrayList<>(keys);
+            args.add(String.valueOf(timeout));
+            return api.blpop(args).compose(response -> {
+                if (response == null) {
+                    return Future.succeededFuture(null);
+                }
+                List<String> result = new ArrayList<>();
+                response.forEach(item -> result.add(item.toString()));
+                return Future.succeededFuture(result);
+            });
+        });
+    }
+
+    /**
+     * BRPOP key [key ...] timeout
+     * Redis BRPOP 是 RPOP 命令的阻塞版本。
+     * 当给定列表内没有任何元素可供弹出时，连接将被 BRPOP 命令阻塞，直到等待超时或发现可弹出元素为止。
+     * 当给定多个 key 参数时，按参数 key 的先后顺序依次检查各个列表，弹出第一个非空列表的尾元素。
+     *
+     * @param keys    一个或多个列表键
+     * @param timeout 超时时间（秒），0 表示无限等待
+     * @return 如果列表为空，返回 null；否则返回一个包含两个元素的 List，第一个是键名，第二个是弹出的元素
+     */
+    default Future<List<String>> blockingPopFromListsTail(List<String> keys, long timeout) {
+        return api(api -> {
+            List<String> args = new ArrayList<>(keys);
+            args.add(String.valueOf(timeout));
+            return api.brpop(args).compose(response -> {
+                if (response == null) {
+                    return Future.succeededFuture(null);
+                }
+                List<String> result = new ArrayList<>();
+                response.forEach(item -> result.add(item.toString()));
+                return Future.succeededFuture(result);
+            });
+        });
+    }
+
+    /**
+     * BRPOPLPUSH source destination timeout
+     * Redis BRPOPLPUSH 是 RPOPLPUSH 的阻塞版本。
+     * 当 source 中没有元素时，BRPOPLPUSH 命令会阻塞连接，直到超时或有元素可以被弹出。
+     * 超时设置为 0 表示无限期阻塞。
+     *
+     * @param source      源列表
+     * @param destination 目标列表
+     * @param timeout     超时时间（秒），0 表示无限等待
+     * @return 弹出并推入的元素；如果超时返回 null
+     * @deprecated use {@link RedisListMixin#blockingMoveElementBetweenLists(String, String, String, String, long)}
+     */
+    default Future<String> blockingPopTailAndPushHead(String source, String destination, long timeout) {
+        return api(api -> {
+            return api.brpoplpush(source, destination, String.valueOf(timeout))
+                      .compose(response -> {
+                          if (response == null) {
+                              return Future.succeededFuture(null);
+                          }
+                          return Future.succeededFuture(response.toString());
+                      });
+        });
+    }
+
+    /**
+     * LMOVE source destination LEFT|RIGHT LEFT|RIGHT
+     * Redis LMOVE 用于原子性地将元素从一个列表移动到另一个列表。
+     * LMOVE 会从 source 列表的头部（LEFT）或尾部（RIGHT）弹出一个元素，
+     * 并将这个元素推入到 destination 列表的头部（LEFT）或尾部（RIGHT）。
+     *
+     * @param source      源列表
+     * @param destination 目标列表
+     * @param from        从哪里移出元素，可以是 "LEFT" 或 "RIGHT"
+     * @param to          移动到哪里，可以是 "LEFT" 或 "RIGHT"
+     * @return 被移动的元素；如果 source 为空，返回 null
+     */
+    default Future<String> moveElementBetweenLists(String source, String destination, String from, String to) {
+        return api(api -> {
+            return api.lmove(source, destination, from, to)
+                      .compose(response -> {
+                          if (response == null) {
+                              return Future.succeededFuture(null);
+                          }
+                          return Future.succeededFuture(response.toString());
+                      });
+        });
+    }
+
+    /**
+     * RPOPLPUSH source destination
+     * Redis RPOPLPUSH 命令用于移除列表 source 的最后一个元素，并将该元素添加到列表 destination 的头部，
+     * 并返回这个被移除的元素。
+     * 如果 source 不存在，那么会返回 nil，并且不会执行其他操作。
+     * 如果 source 和 destination 相同，则相当于将列表中的最后一个元素移到列表头部。
+     *
+     * @param source      源列表
+     * @param destination 目标列表
+     * @return 被移除和添加的元素；如果列表 source 为空，返回 null
+     * @deprecated use {@link RedisListMixin#moveElementBetweenLists(String, String, String, String)}
+     */
+    default Future<String> popTailAndPushHead(String source, String destination) {
+        return api(api -> {
+            return api.rpoplpush(source, destination)
+                      .compose(response -> {
+                          if (response == null) {
+                              return Future.succeededFuture(null);
+                          }
+                          return Future.succeededFuture(response.toString());
+                      });
+        });
+    }
 }

@@ -9,6 +9,7 @@ import io.vertx.redis.client.RedisOptions;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
+import java.util.function.Function;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
@@ -35,9 +36,9 @@ public class RedisKit implements RedisScalarMixin, RedisListMixin, RedisBitMixin
      * 1. 自动创建新的连接
      * 2. 执行完Redis命令后自动关闭连接
      * 3. 即使命令执行失败也能确保连接被正确关闭
-     * 
-     * @deprecated do not use this method, use {@link RedisApiMixin#api(Function)} instead.
+     *
      * @return RedisAPI实例，但不推荐使用
+     * @deprecated do not use this method, use {@link RedisApiMixin#api(Function)} instead.
      */
     @Deprecated(since = "4.0.12", forRemoval = true)
     public Future<RedisAPI> api() {

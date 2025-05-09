@@ -344,16 +344,945 @@ public interface RedisApiMixin {
         string, list, set, zset, hash, stream, none
     }
 
-    // todo
-    // DUMP key
-    // RESTORE key ttl serialized-value [REPLACE] [ABSTTL] [IDLETIME seconds] [FREQ
-    // frequency]
-    // MIGRATE host port key|"" destination-db timeout [COPY] [REPLACE] [AUTH
-    // password] [AUTH2 username password] [KEYS key [key ...]]
-    // MOVE key db
-    // OBJECT subcommand [arguments [arguments ...]]
-    // SCAN cursor [MATCH pattern] [COUNT count] [TYPE type]
-    // SORT key [BY pattern] [LIMIT offset count] [GET pattern [GET pattern ...]]
-    // [ASC|DESC] [ALPHA] [STORE destination]
-    // WAIT numreplicas timeout
+    /**
+     * DUMP key
+     * Redis DUMP 命令用于序列化给定 key ，并返回被序列化的值。
+     *
+     * @return 序列化后的值，使用 RDB 格式
+     */
+    default Future<byte[]> dump(String key) {
+        return api(api -> {
+            return api.dump(key)
+                      .compose(response -> {
+                          if (response == null) {
+                              return Future.succeededFuture(null);
+                          }
+                          return Future.succeededFuture(response.toBytes());
+                      });
+        });
+    }
+
+    /**
+     * RESTORE key ttl serialized-value [REPLACE] [ABSTTL] [IDLETIME seconds] [FREQ frequency]
+     * Redis RESTORE 命令用于反序列化给定的序列化值，并将它和给定的 key 关联。
+     *
+     * @param key             目标键名
+     * @param ttl             过期时间（毫秒），0 表示永不过期
+     * @param serializedValue 使用 DUMP 命令序列化的值
+     * @param replace         是否替换已有的键
+     * @return 成功返回 OK
+     */
+    default Future<Void> restore(String key, long ttl, byte[] serializedValue, boolean replace) {
+        return api(api -> {
+            List<String> args = new ArrayList<>();
+            args.add(key);
+            args.add(String.valueOf(ttl));
+            args.add(new String(serializedValue));
+            if (replace) {
+                args.add("REPLACE");
+            }
+
+            return api.restore(args)
+                      .compose(response -> {
+                          if ("OK".equals(response.toString())) {
+                              return Future.succeededFuture();
+                          } else {
+                              return Future.failedFuture(new RuntimeException(response.toString()));
+                          }
+                      });
+        });
+    }
+
+    /**
+     * MIGRATE host port &lt;key|""&gt; destination-db timeout [COPY] [REPLACE] [AUTH password] [AUTH2 username
+     * password] [KEYS key [key ...]]
+     * Redis MIGRATE 命令用于将 key 原子性地从当前实例传送到目标实例的指定数据库上。
+     *
+     * @param host          目标 Redis 主机
+     * @param port          目标 Redis 端口
+     * @param keys          要迁移的键列表
+     * @param destinationDb 目标数据库索引
+     * @param timeout       超时时间（毫秒）
+     * @param copy          为 true 则不删除源实例上的 key
+     * @param replace       为 true 则替换目标实例上已存在的 key
+     * @return 成功返回 "OK"
+     */
+    default Future<Void> migrate(String host, int port, List<String> keys, int destinationDb, int timeout, boolean copy, boolean replace) {
+        return api(api -> {
+            List<String> args = new ArrayList<>();
+            args.add(host);
+            args.add(String.valueOf(port));
+            args.add(""); // 使用 KEYS 选项时为空字符串
+            args.add(String.valueOf(destinationDb));
+            args.add(String.valueOf(timeout));
+
+            if (copy) {
+                args.add("COPY");
+            }
+            if (replace) {
+                args.add("REPLACE");
+            }
+
+            args.add("KEYS");
+            args.addAll(keys);
+
+            return api.migrate(args)
+                      .compose(response -> {
+                          if ("OK".equals(response.toString())) {
+                              return Future.succeededFuture();
+                          } else {
+                              return Future.failedFuture(new RuntimeException(response.toString()));
+                          }
+                      });
+        });
+    }
+
+    /**
+     * MOVE key db
+     * Redis MOVE 命令用于将当前数据库的 key 移动到给定的数据库 db 当中。
+     *
+     * @param key 要移动的键
+     * @param db  目标数据库索引
+     * @return 移动成功返回 1，否则返回 0
+     */
+    default Future<Boolean> move(String key, int db) {
+        return api(api -> {
+            return api.move(key, String.valueOf(db))
+                      .compose(response -> {
+                          return Future.succeededFuture(response.toInteger() == 1);
+                      });
+        });
+    }
+
+    /**
+     * OBJECT subcommand [arguments [arguments ...]]
+     * Redis OBJECT 命令用于从内部察看给定 key 的 Redis 对象。
+     * <p>
+     * 支持的子命令:
+     * - REFCOUNT: 返回引用计数
+     * - ENCODING: 返回对象编码
+     * - IDLETIME: 返回空闲时间（秒）
+     * - FREQ: 返回访问频率计数器（仅 LFU 模式）
+     */
+    default Future<String> objectEncoding(String key) {
+        return api(api -> {
+            return api.object(List.of("ENCODING", key))
+                      .compose(response -> {
+                          if (response == null) {
+                              return Future.succeededFuture(null);
+                          }
+                          return Future.succeededFuture(response.toString());
+                      });
+        });
+    }
+
+    default Future<Long> objectRefcount(String key) {
+        return api(api -> {
+            return api.object(List.of("REFCOUNT", key))
+                      .compose(response -> {
+                          if (response == null) {
+                              return Future.succeededFuture(null);
+                          }
+                          return Future.succeededFuture(response.toLong());
+                      });
+        });
+    }
+
+    default Future<Long> objectIdletime(String key) {
+        return api(api -> {
+            return api.object(List.of("IDLETIME", key))
+                      .compose(response -> {
+                          if (response == null) {
+                              return Future.succeededFuture(null);
+                          }
+                          return Future.succeededFuture(response.toLong());
+                      });
+        });
+    }
+
+    default Future<Long> objectFreq(String key) {
+        return api(api -> {
+            return api.object(List.of("FREQ", key))
+                      .compose(response -> {
+                          if (response == null) {
+                              return Future.succeededFuture(null);
+                          }
+                          return Future.succeededFuture(response.toLong());
+                      });
+        });
+    }
+
+    /**
+     * SCAN cursor [MATCH pattern] [COUNT count] [TYPE type]
+     * Redis SCAN 命令用于迭代数据库中的键。
+     *
+     * @param cursor  游标
+     * @param pattern 匹配模式
+     * @param count   单次迭代返回的元素数量
+     * @param type    筛选指定类型的键
+     * @return 包含下一个游标和匹配的键列表
+     */
+    default Future<ScanResult> scan(String cursor, String pattern, Integer count, String type) {
+        return api(api -> {
+            List<String> args = new ArrayList<>();
+            args.add(cursor);
+
+            if (pattern != null && !pattern.isEmpty()) {
+                args.add("MATCH");
+                args.add(pattern);
+            }
+
+            if (count != null) {
+                args.add("COUNT");
+                args.add(count.toString());
+            }
+
+            if (type != null && !type.isEmpty()) {
+                args.add("TYPE");
+                args.add(type);
+            }
+
+            return api.scan(args)
+                      .compose(response -> {
+                          String nextCursor = response.get(0).toString();
+                          List<String> keys = new ArrayList<>();
+                          response.get(1).forEach(item -> keys.add(item.toString()));
+                          return Future.succeededFuture(new ScanResult(nextCursor, keys));
+                      });
+        });
+    }
+
+    /**
+     * SORT key [BY pattern] [LIMIT offset count] [GET pattern [GET pattern ...]] [ASC|DESC] [ALPHA] [STORE destination]
+     * Redis SORT 命令用于对列表、集合或有序集合中的元素进行排序。
+     */
+    default Future<List<String>> sort(String key, String byPattern, Integer offset, Integer count,
+                                      List<String> getPatterns, boolean desc, boolean alpha, String storeDestination) {
+        return api(api -> {
+            List<String> args = new ArrayList<>();
+            args.add(key);
+
+            if (byPattern != null && !byPattern.isEmpty()) {
+                args.add("BY");
+                args.add(byPattern);
+            }
+
+            if (offset != null && count != null) {
+                args.add("LIMIT");
+                args.add(offset.toString());
+                args.add(count.toString());
+            }
+
+            if (getPatterns != null && !getPatterns.isEmpty()) {
+                for (String pattern : getPatterns) {
+                    args.add("GET");
+                    args.add(pattern);
+                }
+            }
+
+            if (desc) {
+                args.add("DESC");
+            }
+
+            if (alpha) {
+                args.add("ALPHA");
+            }
+
+            if (storeDestination != null && !storeDestination.isEmpty()) {
+                args.add("STORE");
+                args.add(storeDestination);
+            }
+
+            return api.sort(args)
+                      .compose(response -> {
+                          List<String> result = new ArrayList<>();
+                          response.forEach(item -> result.add(item.toString()));
+                          return Future.succeededFuture(result);
+                      });
+        });
+    }
+
+    /**
+     * WAIT numreplicas timeout
+     * Redis WAIT 命令用于阻塞当前客户端，直到所有先前的写命令都成功传输并且至少在指定数量的从节点中得到确认。
+     *
+     * @param numReplicas 至少需要同步的从节点数量
+     * @param timeout     最大等待时间（毫秒）
+     * @return 实际同步的从节点数量
+     */
+    default Future<Integer> wait(int numReplicas, int timeout) {
+        return api(api -> {
+            return api.wait(String.valueOf(numReplicas), String.valueOf(timeout))
+                      .compose(response -> {
+                          return Future.succeededFuture(response.toInteger());
+                      });
+        });
+    }
+
+    /**
+     * COPY source destination [DB destination-db] [REPLACE]
+     * Redis COPY 命令用于复制源键的值到目标键。
+     *
+     * @param source        源键名
+     * @param destination   目标键名
+     * @param destinationDb 目标数据库索引，默认为当前数据库
+     * @param replace       是否替换已有的目标键
+     * @return 复制成功返回 true，如果源键不存在则返回 false
+     */
+    default Future<Boolean> copy(String source, String destination, Integer destinationDb, boolean replace) {
+        return api(api -> {
+            List<String> args = new ArrayList<>();
+            args.add(source);
+            args.add(destination);
+
+            if (destinationDb != null) {
+                args.add("DB");
+                args.add(destinationDb.toString());
+            }
+
+            if (replace) {
+                args.add("REPLACE");
+            }
+
+            return api.copy(args)
+                      .compose(response -> {
+                          return Future.succeededFuture(response.toInteger() == 1);
+                      });
+        });
+    }
+
+    /**
+     * GETDEL key
+     * Redis GETDEL 命令用于获取指定键的值，然后删除该键。
+     * 这是原子操作。等效于执行 GET 和 DEL 两个命令，但本命令是原子的。
+     *
+     * @param key 键名
+     * @return 指定键的值，如果键不存在则返回 null
+     */
+    default Future<String> getdel(String key) {
+        return api(api -> {
+            return api.getdel(key)
+                      .compose(response -> {
+                          if (response == null) {
+                              return Future.succeededFuture(null);
+                          }
+                          return Future.succeededFuture(response.toString());
+                      });
+        });
+    }
+
+    /**
+     * GETEX key [EX seconds|PX milliseconds|EXAT unix-time-seconds|PXAT unix-time-milliseconds|PERSIST]
+     * Redis GETEX 命令用于获取指定键的值，并设置该键的过期时间。
+     * 这是原子操作。等效于执行 GET 和 EXPIRE 两个命令，但本命令是原子的。
+     *
+     * @param key          键名
+     * @param expireOption 过期选项，可以是 EX（秒）、PX（毫秒）、EXAT（Unix时间戳，秒）、PXAT（Unix时间戳，毫秒）或 PERSIST
+     * @param expireValue  过期值，当使用 PERSIST 时可为 null
+     * @return 指定键的值，如果键不存在则返回 null
+     */
+    default Future<String> getex(String key, String expireOption, Long expireValue) {
+        return api(api -> {
+            List<String> args = new ArrayList<>();
+            args.add(key);
+
+            if (expireOption != null && !expireOption.isEmpty()) {
+                args.add(expireOption);
+                if (expireValue != null && !"PERSIST".equalsIgnoreCase(expireOption)) {
+                    args.add(expireValue.toString());
+                }
+            }
+
+            return api.getex(args)
+                      .compose(response -> {
+                          if (response == null) {
+                              return Future.succeededFuture(null);
+                          }
+                          return Future.succeededFuture(response.toString());
+                      });
+        });
+    }
+
+    /**
+     * GETSET key value
+     * Redis GETSET 命令用于设置指定键的值，并返回该键的旧值。
+     * 如果键不存在，则返回 null。
+     *
+     * @param key   键名
+     * @param value 新值
+     * @return 指定键的旧值，如果键不存在则返回 null
+     */
+    default Future<String> getset(String key, String value) {
+        return api(api -> {
+            return api.getset(key, value)
+                      .compose(response -> {
+                          if (response == null) {
+                              return Future.succeededFuture(null);
+                          }
+                          return Future.succeededFuture(response.toString());
+                      });
+        });
+    }
+
+    /**
+     * HSCAN key cursor [MATCH pattern] [COUNT count]
+     * Redis HSCAN 命令用于迭代哈希表中的键值对。
+     *
+     * @param key     哈希表的键名
+     * @param cursor  游标
+     * @param pattern 匹配模式
+     * @param count   单次迭代返回的元素数量
+     * @return 包含下一个游标和匹配的字段-值对的列表
+     */
+    default Future<HScanResult> hscan(String key, String cursor, String pattern, Integer count) {
+        return api(api -> {
+            List<String> args = new ArrayList<>();
+            args.add(key);
+            args.add(cursor);
+
+            if (pattern != null && !pattern.isEmpty()) {
+                args.add("MATCH");
+                args.add(pattern);
+            }
+
+            if (count != null) {
+                args.add("COUNT");
+                args.add(count.toString());
+            }
+
+            return api.hscan(args)
+                      .compose(response -> {
+                          String nextCursor = response.get(0).toString();
+                          List<String> items = new ArrayList<>();
+                          response.get(1).forEach(item -> items.add(item.toString()));
+
+                          // Convert flat list to field-value pairs
+                          final int size = items.size();
+                          List<FieldValuePair> pairs = new ArrayList<>();
+                          for (int i = 0; i < size; i += 2) {
+                              if (i + 1 < size) {
+                                  pairs.add(new FieldValuePair(items.get(i), items.get(i + 1)));
+                              }
+                          }
+
+                          return Future.succeededFuture(new HScanResult(nextCursor, pairs));
+                      });
+        });
+    }
+
+    /**
+     * SSCAN key cursor [MATCH pattern] [COUNT count]
+     * Redis SSCAN 命令用于迭代集合中的元素。
+     *
+     * @param key     集合的键名
+     * @param cursor  游标
+     * @param pattern 匹配模式
+     * @param count   单次迭代返回的元素数量
+     * @return 包含下一个游标和匹配的元素列表
+     */
+    default Future<SScanResult> sscan(String key, String cursor, String pattern, Integer count) {
+        return api(api -> {
+            List<String> args = new ArrayList<>();
+            args.add(key);
+            args.add(cursor);
+
+            if (pattern != null && !pattern.isEmpty()) {
+                args.add("MATCH");
+                args.add(pattern);
+            }
+
+            if (count != null) {
+                args.add("COUNT");
+                args.add(count.toString());
+            }
+
+            return api.sscan(args)
+                      .compose(response -> {
+                          String nextCursor = response.get(0).toString();
+                          List<String> members = new ArrayList<>();
+                          response.get(1).forEach(item -> members.add(item.toString()));
+                          return Future.succeededFuture(new SScanResult(nextCursor, members));
+                      });
+        });
+    }
+
+    /**
+     * ZSCAN key cursor [MATCH pattern] [COUNT count]
+     * Redis ZSCAN 命令用于迭代有序集合中的元素。
+     *
+     * @param key     有序集合的键名
+     * @param cursor  游标
+     * @param pattern 匹配模式
+     * @param count   单次迭代返回的元素数量
+     * @return 包含下一个游标和匹配的成员-分数对的列表
+     */
+    default Future<ZScanResult> zscan(String key, String cursor, String pattern, Integer count) {
+        return api(api -> {
+            List<String> args = new ArrayList<>();
+            args.add(key);
+            args.add(cursor);
+
+            if (pattern != null && !pattern.isEmpty()) {
+                args.add("MATCH");
+                args.add(pattern);
+            }
+
+            if (count != null) {
+                args.add("COUNT");
+                args.add(count.toString());
+            }
+
+            return api.zscan(args)
+                      .compose(response -> {
+                          String nextCursor = response.get(0).toString();
+                          List<String> items = new ArrayList<>();
+                          response.get(1).forEach(item -> items.add(item.toString()));
+
+                          // Convert flat list to member-score pairs
+                          final int size = items.size();
+                          List<MemberScorePair> pairs = new ArrayList<>();
+                          for (int i = 0; i < size; i += 2) {
+                              if (i + 1 < size) {
+                                  pairs.add(new MemberScorePair(items.get(i), Double.parseDouble(items.get(i + 1))));
+                              }
+                          }
+
+                          return Future.succeededFuture(new ZScanResult(nextCursor, pairs));
+                      });
+        });
+    }
+
+    /**
+     * CLIENT ID
+     * Redis CLIENT ID 命令返回当前连接的唯一 ID。
+     *
+     * @return 客户端 ID
+     */
+    default Future<Long> clientId() {
+        return api(api -> {
+            return api.client(List.of("ID"))
+                      .compose(response -> {
+                          return Future.succeededFuture(response.toLong());
+                      });
+        });
+    }
+
+    /**
+     * CLIENT INFO
+     * Redis CLIENT INFO 命令返回当前客户端连接的相关信息。
+     *
+     * @return 客户端连接信息
+     */
+    default Future<String> clientInfo() {
+        return api(api -> {
+            return api.client(List.of("INFO"))
+                      .compose(response -> {
+                          return Future.succeededFuture(response.toString());
+                      });
+        });
+    }
+
+    /**
+     * CLIENT LIST [TYPE normal|master|replica|pubsub]
+     * Redis CLIENT LIST 命令返回所有连接到服务器的客户端信息和统计数据。
+     *
+     * @param type 客户端类型，可选值为 normal、master、replica、pubsub
+     * @return 客户端列表信息
+     */
+    default Future<String> clientList(String type) {
+        return api(api -> {
+            if (type == null || type.isEmpty()) {
+                return api.client(List.of("LIST"))
+                          .compose(response -> {
+                              return Future.succeededFuture(response.toString());
+                          });
+            } else {
+                return api.client(List.of("LIST", "TYPE", type))
+                          .compose(response -> {
+                              return Future.succeededFuture(response.toString());
+                          });
+            }
+        });
+    }
+
+    /**
+     * CLIENT SETNAME connection-name
+     * Redis CLIENT SETNAME 命令用于为当前连接分配一个名字。
+     *
+     * @param connectionName 连接名
+     * @return 设置成功返回 OK
+     */
+    default Future<Void> clientSetname(String connectionName) {
+        return api(api -> {
+            return api.client(List.of("SETNAME", connectionName))
+                      .compose(response -> {
+                          if ("OK".equals(response.toString())) {
+                              return Future.succeededFuture();
+                          } else {
+                              return Future.failedFuture(new RuntimeException(response.toString()));
+                          }
+                      });
+        });
+    }
+
+    /**
+     * CLIENT GETNAME
+     * Redis CLIENT GETNAME 命令用于获取当前连接的名字。
+     *
+     * @return 连接名，如果没有设置则返回 null
+     */
+    default Future<String> clientGetname() {
+        return api(api -> {
+            return api.client(List.of("GETNAME"))
+                      .compose(response -> {
+                          if (response == null) {
+                              return Future.succeededFuture(null);
+                          }
+                          return Future.succeededFuture(response.toString());
+                      });
+        });
+    }
+
+    /**
+     * DBSIZE
+     * Redis DBSIZE 命令返回当前数据库的 key 的数量。
+     *
+     * @return 当前数据库的 key 数量
+     */
+    default Future<Long> dbsize() {
+        return api(api -> {
+            return api.dbsize()
+                      .compose(response -> {
+                          return Future.succeededFuture(response.toLong());
+                      });
+        });
+    }
+
+    /**
+     * FLUSHDB [ASYNC]
+     * Redis FLUSHDB 命令清空当前数据库中的所有 key。
+     *
+     * @param async 是否异步执行
+     * @return 成功返回 OK
+     */
+    default Future<Void> flushdb(boolean async) {
+        return api(api -> {
+            if (async) {
+                return api.flushdb(List.of("ASYNC"))
+                          .compose(response -> {
+                              if ("OK".equals(response.toString())) {
+                                  return Future.succeededFuture();
+                              } else {
+                                  return Future.failedFuture(new RuntimeException(response.toString()));
+                              }
+                          });
+            } else {
+                return api.flushdb(List.of())
+                          .compose(response -> {
+                              if ("OK".equals(response.toString())) {
+                                  return Future.succeededFuture();
+                              } else {
+                                  return Future.failedFuture(new RuntimeException(response.toString()));
+                              }
+                          });
+            }
+        });
+    }
+
+    /**
+     * FLUSHALL [ASYNC]
+     * Redis FLUSHALL 命令清空整个 Redis 服务器的数据（删除所有数据库的所有 key）。
+     *
+     * @param async 是否异步执行
+     * @return 成功返回 OK
+     */
+    default Future<Void> flushall(boolean async) {
+        return api(api -> {
+            if (async) {
+                return api.flushall(List.of("ASYNC"))
+                          .compose(response -> {
+                              if ("OK".equals(response.toString())) {
+                                  return Future.succeededFuture();
+                              } else {
+                                  return Future.failedFuture(new RuntimeException(response.toString()));
+                              }
+                          });
+            } else {
+                return api.flushall(List.of())
+                          .compose(response -> {
+                              if ("OK".equals(response.toString())) {
+                                  return Future.succeededFuture();
+                              } else {
+                                  return Future.failedFuture(new RuntimeException(response.toString()));
+                              }
+                          });
+            }
+        });
+    }
+
+    /**
+     * SAVE
+     * Redis SAVE 命令执行一个同步保存操作，将当前 Redis 实例的所有数据快照以 RDB 文件的形式保存到硬盘。
+     *
+     * @return 成功返回 OK
+     */
+    default Future<Void> save() {
+        return api(api -> {
+            return api.save()
+                      .compose(response -> {
+                          if ("OK".equals(response.toString())) {
+                              return Future.succeededFuture();
+                          } else {
+                              return Future.failedFuture(new RuntimeException(response.toString()));
+                          }
+                      });
+        });
+    }
+
+    /**
+     * BGSAVE [SCHEDULE]
+     * Redis BGSAVE 命令在后台异步保存当前数据库的数据到磁盘。
+     *
+     * @param schedule 是否只在没有正在执行的 BGSAVE 时安排一个 BGSAVE 操作
+     * @return 成功返回 OK
+     */
+    default Future<String> bgsave(boolean schedule) {
+        return api(api -> {
+            if (schedule) {
+                return api.bgsave(List.of("SCHEDULE"))
+                          .compose(response -> {
+                              return Future.succeededFuture(response.toString());
+                          });
+            } else {
+                return api.bgsave(List.of())
+                          .compose(response -> {
+                              return Future.succeededFuture(response.toString());
+                          });
+            }
+        });
+    }
+
+    /**
+     * MULTI
+     * Redis MULTI 命令用于标记一个事务块的开始。
+     * 事务块内的命令将在 EXEC 命令被调用时按顺序执行。
+     *
+     * @return 成功返回 OK
+     */
+    default Future<Void> multi() {
+        return api(api -> {
+            return api.multi()
+                      .compose(response -> {
+                          if ("OK".equals(response.toString())) {
+                              return Future.succeededFuture();
+                          } else {
+                              return Future.failedFuture(new RuntimeException(response.toString()));
+                          }
+                      });
+        });
+    }
+
+    /**
+     * EXEC
+     * Redis EXEC 命令用于执行事务块内的所有命令。
+     * 被打断的事务会返回错误。
+     *
+     * @return 事务块内所有命令的返回值，按命令执行的先后顺序排列
+     */
+    default Future<List<Object>> exec() {
+        return api(api -> {
+            return api.exec()
+                      .compose(response -> {
+                          if (response == null) {
+                              // 事务被打断
+                              return Future.failedFuture(new RuntimeException("事务被打断"));
+                          }
+
+                          List<Object> results = new ArrayList<>();
+                          response.forEach(item -> {
+                              if (item == null) {
+                                  results.add(null);
+                              } else if (item.type() == io.vertx.redis.client.ResponseType.NUMBER) {
+                                  results.add(item.toLong());
+                              } else if (item.type() == io.vertx.redis.client.ResponseType.BULK) {
+                                  results.add(item.toString());
+                              } else if (item.type() == io.vertx.redis.client.ResponseType.MULTI) {
+                                  List<String> multiResults = new ArrayList<>();
+                                  item.forEach(subItem -> multiResults.add(subItem.toString()));
+                                  results.add(multiResults);
+                              } else {
+                                  results.add(item.toString());
+                              }
+                          });
+
+                          return Future.succeededFuture(results);
+                      });
+        });
+    }
+
+    /**
+     * DISCARD
+     * Redis DISCARD 命令用于取消事务，放弃执行事务块内的所有命令。
+     *
+     * @return 成功返回 OK
+     */
+    default Future<Void> discard() {
+        return api(api -> {
+            return api.discard()
+                      .compose(response -> {
+                          if ("OK".equals(response.toString())) {
+                              return Future.succeededFuture();
+                          } else {
+                              return Future.failedFuture(new RuntimeException(response.toString()));
+                          }
+                      });
+        });
+    }
+
+    /**
+     * WATCH key [key ...]
+     * Redis WATCH 命令用于监视一个或多个 key，如果在事务执行之前这些 key 被其他命令所改动，那么事务将被打断。
+     *
+     * @param keys 要监视的键
+     * @return 成功返回 OK
+     */
+    default Future<Void> watch(List<String> keys) {
+        return api(api -> {
+            return api.watch(keys)
+                      .compose(response -> {
+                          if ("OK".equals(response.toString())) {
+                              return Future.succeededFuture();
+                          } else {
+                              return Future.failedFuture(new RuntimeException(response.toString()));
+                          }
+                      });
+        });
+    }
+
+    /**
+     * UNWATCH
+     * Redis UNWATCH 命令用于取消 WATCH 命令对所有 key 的监视。
+     *
+     * @return 成功返回 OK
+     */
+    default Future<Void> unwatch() {
+        return api(api -> {
+            return api.unwatch()
+                      .compose(response -> {
+                          if ("OK".equals(response.toString())) {
+                              return Future.succeededFuture();
+                          } else {
+                              return Future.failedFuture(new RuntimeException(response.toString()));
+                          }
+                      });
+        });
+    }
+
+    class ScanResult {
+        private final String cursor;
+        private final List<String> keys;
+
+        public ScanResult(String cursor, List<String> keys) {
+            this.cursor = cursor;
+            this.keys = keys;
+        }
+
+        public String getCursor() {
+            return cursor;
+        }
+
+        public List<String> getKeys() {
+            return keys;
+        }
+    }
+
+    class HScanResult {
+        private final String cursor;
+        private final List<FieldValuePair> fieldValuePairs;
+
+        public HScanResult(String cursor, List<FieldValuePair> fieldValuePairs) {
+            this.cursor = cursor;
+            this.fieldValuePairs = fieldValuePairs;
+        }
+
+        public String getCursor() {
+            return cursor;
+        }
+
+        public List<FieldValuePair> getFieldValuePairs() {
+            return fieldValuePairs;
+        }
+    }
+
+    class FieldValuePair {
+        private final String field;
+        private final String value;
+
+        public FieldValuePair(String field, String value) {
+            this.field = field;
+            this.value = value;
+        }
+
+        public String getField() {
+            return field;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
+    class SScanResult {
+        private final String cursor;
+        private final List<String> members;
+
+        public SScanResult(String cursor, List<String> members) {
+            this.cursor = cursor;
+            this.members = members;
+        }
+
+        public String getCursor() {
+            return cursor;
+        }
+
+        public List<String> getMembers() {
+            return members;
+        }
+    }
+
+    class ZScanResult {
+        private final String cursor;
+        private final List<MemberScorePair> memberScorePairs;
+
+        public ZScanResult(String cursor, List<MemberScorePair> memberScorePairs) {
+            this.cursor = cursor;
+            this.memberScorePairs = memberScorePairs;
+        }
+
+        public String getCursor() {
+            return cursor;
+        }
+
+        public List<MemberScorePair> getMemberScorePairs() {
+            return memberScorePairs;
+        }
+    }
+
+    class MemberScorePair {
+        private final String member;
+        private final double score;
+
+        public MemberScorePair(String member, double score) {
+            this.member = member;
+            this.score = score;
+        }
+
+        public String getMember() {
+            return member;
+        }
+
+        public double getScore() {
+            return score;
+        }
+    }
 }

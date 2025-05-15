@@ -19,6 +19,12 @@ public class IntravenouslyCutterOnString implements IntravenouslyCutter<String> 
     private final KeelIntravenous<String> intravenous;
     private final AtomicBoolean readStopRef = new AtomicBoolean(false);
     private final KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor;
+    /**
+     * A reference to preserve the cause to stop, if exists.
+     *
+     * @since 4.0.12
+     */
+    private final AtomicReference<Throwable> stopCause = new AtomicReference<>();
 
     /**
      * Constructor to initialize the IntravenouslyCutterOnString instance.
@@ -80,7 +86,7 @@ public class IntravenouslyCutterOnString implements IntravenouslyCutter<String> 
      * Stops reading from the stream and processes any remaining data in the buffer.
      */
     @Override
-    public void stopHere() {
+    public void stopHere(Throwable throwable) {
         if (!readStopRef.get()) {
             synchronized (buffer) {
                 if (buffer.get().length() > 0) {
@@ -95,6 +101,7 @@ public class IntravenouslyCutterOnString implements IntravenouslyCutter<String> 
                     buffer.set(Buffer.buffer());
                 }
             }
+            stopCause.set(throwable);
             readStopRef.set(true);
         }
     }
@@ -102,23 +109,31 @@ public class IntravenouslyCutterOnString implements IntravenouslyCutter<String> 
     /**
      * Waits for all data processing to complete.
      *
-     * @return A Future indicating that all data processing is complete.
+     * @return A Future indicating that all data processing is complete; if stop cause declared, it would be put into
+     *         the failure future to return.
      */
     @Override
     public Future<Void> waitForAllHandled() {
         return Keel.asyncCallRepeatedly(repeatedlyCallTask -> {
-            if (!this.readStopRef.get()) {
-                return Keel.asyncSleep(200L);
-            }
-            if (!intravenous.isNoDropsLeft()) {
-                return Keel.asyncSleep(100L);
-            }
-            intravenous.shutdown();
-            if (!intravenous.isUndeployed()) {
-                return Keel.asyncSleep(100L);
-            }
-            repeatedlyCallTask.stop();
-            return Future.succeededFuture();
-        });
+                       if (!this.readStopRef.get()) {
+                           return Keel.asyncSleep(200L);
+                       }
+                       if (!intravenous.isNoDropsLeft()) {
+                           return Keel.asyncSleep(100L);
+                       }
+                       intravenous.shutdown();
+                       if (!intravenous.isUndeployed()) {
+                           return Keel.asyncSleep(100L);
+                       }
+                       repeatedlyCallTask.stop();
+                       return Future.succeededFuture();
+                   })
+                   .compose(v -> {
+                       Throwable throwable = stopCause.get();
+                       if (throwable != null) {
+                           return Future.failedFuture(throwable);
+                       }
+                       return Future.succeededFuture();
+                   });
     }
 }

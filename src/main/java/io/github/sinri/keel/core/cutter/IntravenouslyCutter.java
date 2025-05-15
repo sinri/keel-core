@@ -16,7 +16,28 @@ public interface IntravenouslyCutter<T> {
 
     void acceptFromStream(Buffer t);
 
-    void stopHere();
+    /**
+     * Notify the cutter to stop accept chunks, handle out the existed buffer, and then stop.
+     * Use this method, means no throwable met during buffer receiving and accepting.
+     * As of 4.0.12, rely on {@link IntravenouslyCutter#stopHere(Throwable)}.
+     */
+    default void stopHere() {
+        stopHere(null);
+    }
 
+    /**
+     * Notify the cutter to stop accept chunks, handle out the existed buffer, and then stop.
+     * If the throwable is set as a Non-Null value, such as network error or generator failure, it would result in a
+     * failure future be returned in {@link IntravenouslyCutter#waitForAllHandled()}.
+     *
+     * @param throwable Any exception met during cutter working. It is nullable.
+     * @since 4.0.12
+     */
+    void stopHere(Throwable throwable);
+
+    /**
+     * @return a future as cutter finished work and all given buffer handled; it would be a failure future when stop
+     *         with throwable.
+     */
     Future<Void> waitForAllHandled();
 }

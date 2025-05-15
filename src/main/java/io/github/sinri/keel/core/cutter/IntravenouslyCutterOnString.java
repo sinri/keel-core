@@ -25,16 +25,41 @@ public class IntravenouslyCutterOnString implements IntravenouslyCutter<String> 
      * @since 4.0.12
      */
     private final AtomicReference<Throwable> stopCause = new AtomicReference<>();
+    private Long timeoutTimer;
 
     /**
      * Constructor to initialize the IntravenouslyCutterOnString instance.
+     * As of 4.0.12 add timeout function.
+     *
+     * @param stringSingleDropProcessor The processor for handling individual strings.
+     * @param timeout                   the timeout in millisecond, enabled when its value is greater than zero.
+     */
+    public IntravenouslyCutterOnString(
+            KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor,
+            long timeout
+    ) {
+        this.stringSingleDropProcessor = stringSingleDropProcessor;
+        intravenous = KeelIntravenous.instant(getSingleDropProcessor());
+        intravenous.deployMe(new DeploymentOptions());
+
+        // as of 4.0.12 add timeout support
+        if (timeout > 0) {
+            timeoutTimer = Keel.getVertx().setTimer(timeout, timer -> {
+                this.timeoutTimer = timer;
+                this.stopHere(new Timeout());
+            });
+        }
+    }
+
+    /**
+     * Constructor to initialize the IntravenouslyCutterOnString instance without a timeout.
+     * This constructor internally calls the main constructor with a timeout value of 0,
+     * effectively disabling the timeout functionality.
      *
      * @param stringSingleDropProcessor The processor for handling individual strings.
      */
     public IntravenouslyCutterOnString(KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor) {
-        this.stringSingleDropProcessor = stringSingleDropProcessor;
-        intravenous = KeelIntravenous.instant(getSingleDropProcessor());
-        intravenous.deployMe(new DeploymentOptions());
+        this(stringSingleDropProcessor, 0);
     }
 
     /**
@@ -100,9 +125,13 @@ public class IntravenouslyCutterOnString implements IntravenouslyCutter<String> 
                     // since 4.0.12
                     buffer.set(Buffer.buffer());
                 }
+                if (timeoutTimer != null) {
+                    Keel.getVertx().cancelTimer(timeoutTimer);
+                    timeoutTimer = null;
+                }
+                stopCause.set(throwable);
+                readStopRef.set(true);
             }
-            stopCause.set(throwable);
-            readStopRef.set(true);
         }
     }
 

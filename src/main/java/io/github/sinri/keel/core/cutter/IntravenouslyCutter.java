@@ -40,4 +40,15 @@ public interface IntravenouslyCutter<T> {
      *         with throwable.
      */
     Future<Void> waitForAllHandled();
+
+    /**
+     * The exception that shows the cutter is still running, but timeout occurs so cutter stopped with this exception.
+     *
+     * @since 4.0.12
+     */
+    final class Timeout extends Exception {
+        public Timeout() {
+            super("This IntravenouslyCutter instance met timeout");
+        }
+    }
 }

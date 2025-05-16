@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.json;
 
+import io.github.sinri.keel.core.SelfInterface;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -33,11 +34,15 @@ import java.util.function.Function;
  * extended Shareable for LocalMap;
  * extended Iterable for FOREACH.
  * </p>
+ * <p>
+ * As of 4.0.12, extends {@link SelfInterface}.
+ * </p>
  *
  * @param <E> the type of the entity implementing this interface
  * @since 1.14
  */
-public interface JsonifiableEntity<E> extends UnmodifiableJsonifiableEntity, ClusterSerializable {
+public interface JsonifiableEntity<E>
+        extends UnmodifiableJsonifiableEntity, ClusterSerializable, SelfInterface<E> {
 
     /**
      * @since 3.2.11
@@ -239,5 +244,15 @@ public interface JsonifiableEntity<E> extends UnmodifiableJsonifiableEntity, Clu
             this.toJsonObject().put(key, x);
         }
         return x;
+    }
+
+    /**
+     * Create or replace the Key-Value pair in this class wrapped JSON Object.
+     *
+     * @since 4.0.12
+     */
+    default E write(String key, Object value) {
+        this.toJsonObject().put(key, value);
+        return getImplementation();
     }
 }

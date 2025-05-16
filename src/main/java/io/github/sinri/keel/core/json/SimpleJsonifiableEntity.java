@@ -80,4 +80,10 @@ public class SimpleJsonifiableEntity implements JsonifiableEntity<SimpleJsonifia
     public SimpleJsonifiableEntity copy() {
         return new SimpleJsonifiableEntity(cloneAsJsonObject());
     }
+
+    @Nonnull
+    @Override
+    public SimpleJsonifiableEntity getImplementation() {
+        return this;
+    }
 }

@@ -26,4 +26,10 @@ public class SimpleResultRow implements ResultRow {
         this.row = jsonObject;
         return this;
     }
+
+    @Nonnull
+    @Override
+    public ResultRow getImplementation() {
+        return this;
+    }
 }

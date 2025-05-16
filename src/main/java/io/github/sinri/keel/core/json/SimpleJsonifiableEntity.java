@@ -5,7 +5,6 @@ import io.vertx.core.shareddata.ClusterSerializable;
 import io.vertx.core.shareddata.Shareable;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
 
 /**
  * A simple implementation of the {@link JsonifiableEntity} interface that provides basic functionality for
@@ -18,9 +17,7 @@ import java.util.Objects;
  *
  * @since 2.7
  */
-public class SimpleJsonifiableEntity implements JsonifiableEntity<SimpleJsonifiableEntity> {
-    @Nonnull
-    protected JsonObject jsonObject;
+public class SimpleJsonifiableEntity extends JsonifiableEntityImpl<SimpleJsonifiableEntity> {
 
     /**
      * Constructs a new instance of {@code SimpleJsonifiableEntity} and initializes the internal JSON object to an
@@ -32,7 +29,7 @@ public class SimpleJsonifiableEntity implements JsonifiableEntity<SimpleJsonifia
      * created and can be populated with data using other methods provided by this class.</p>
      */
     public SimpleJsonifiableEntity() {
-        this.jsonObject = new JsonObject();
+        super();
     }
 
     /**
@@ -46,34 +43,7 @@ public class SimpleJsonifiableEntity implements JsonifiableEntity<SimpleJsonifia
      * @param jsonObject a non-null {@link JsonObject} containing the initial data for the entity
      */
     public SimpleJsonifiableEntity(@Nonnull JsonObject jsonObject) {
-        this.jsonObject = jsonObject;
-    }
-
-    /**
-     * Converts the current state of this entity into a {@link JsonObject}.
-     *
-     * @return a non-null {@link JsonObject} representing the current state of the entity
-     */
-    @Override
-    public @Nonnull JsonObject toJsonObject() {
-        return jsonObject;
-    }
-
-    /**
-     * @since 2.8 allow jsonObject as null (treated as empty json object)
-     */
-    @Override
-    public @Nonnull SimpleJsonifiableEntity reloadDataFromJsonObject(@Nonnull JsonObject jsonObject) {
-        this.jsonObject = Objects.requireNonNullElseGet(jsonObject, JsonObject::new);
-        return this;
-    }
-
-    /**
-     * @since 2.8
-     */
-    @Override
-    public String toString() {
-        return toJsonObject().toString();
+        super(jsonObject);
     }
 
     @Override

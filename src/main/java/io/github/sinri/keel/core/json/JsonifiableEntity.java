@@ -1,6 +1,7 @@
 package io.github.sinri.keel.core.json;
 
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.pointer.JsonPointer;
 import io.vertx.core.shareddata.ClusterSerializable;
@@ -129,7 +130,7 @@ public interface JsonifiableEntity<E> extends UnmodifiableJsonifiableEntity, Clu
      * @since 2.7
      */
     default @Nullable <B extends JsonifiableEntity<?>> B readJsonifiableEntity(@Nonnull Class<B> bClass,
-            String... args) {
+                                                                               String... args) {
         JsonObject jsonObject = readJsonObject(args);
         if (jsonObject == null)
             return null;
@@ -138,11 +139,11 @@ public interface JsonifiableEntity<E> extends UnmodifiableJsonifiableEntity, Clu
             x.reloadDataFromJsonObject(jsonObject);
             return x;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
-                | NoSuchMethodException ignored1) {
+                 | NoSuchMethodException ignored1) {
             try {
                 return bClass.getConstructor(JsonObject.class).newInstance(jsonObject);
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException
-                    | NoSuchMethodException ignored2) {
+                     | NoSuchMethodException ignored2) {
                 return null;
             }
         }
@@ -156,8 +157,8 @@ public interface JsonifiableEntity<E> extends UnmodifiableJsonifiableEntity, Clu
     }
 
     /**
-     * @since 2.8
      * @param buffer the buffer to write to, should not be null
+     * @since 2.8
      */
     default void writeToBuffer(Buffer buffer) {
         JsonObject jsonObject = this.toJsonObject();
@@ -165,9 +166,9 @@ public interface JsonifiableEntity<E> extends UnmodifiableJsonifiableEntity, Clu
     }
 
     /**
-     * @since 2.8
      * @param pos    the position to read from, should be non-negative
      * @param buffer the buffer to read from, should not be null
+     * @since 2.8
      */
     default int readFromBuffer(int pos, Buffer buffer) {
         JsonObject jsonObject = new JsonObject();
@@ -180,7 +181,7 @@ public interface JsonifiableEntity<E> extends UnmodifiableJsonifiableEntity, Clu
      * <p>
      * As of 3.1.10, moved here from UnmodifiableJsonifiableEntity.
      * </p>
-     * 
+     *
      * @since 2.8
      */
     default Buffer toBuffer() {
@@ -202,5 +203,41 @@ public interface JsonifiableEntity<E> extends UnmodifiableJsonifiableEntity, Clu
     @Override
     default boolean isEmpty() {
         return toJsonObject().isEmpty();
+    }
+
+    /**
+     * Retrieves the JSON object associated with the specified key from the entity's JSON representation.
+     * If no JSON object exists for the given key, a new empty JSON object is created, associated with the key,
+     * and added to the entity's JSON representation. This ensures that the key always maps to a valid JSON object.
+     *
+     * @param key the key for which the JSON object is to be retrieved or created
+     * @return the existing or newly created JSON object associated with the specified key
+     * @since 4.0.12
+     */
+    default JsonObject ensureJsonObject(String key) {
+        JsonObject x = this.readJsonObject(key);
+        if (x == null) {
+            x = new JsonObject();
+            this.toJsonObject().put(key, x);
+        }
+        return x;
+    }
+
+    /**
+     * Retrieves the JSON array associated with the specified key from the entity's JSON representation.
+     * If no JSON array exists for the given key, a new empty JSON array is created, associated with the key,
+     * and added to the entity's JSON representation. This ensures that the key always maps to a valid JSON array.
+     *
+     * @param key the key for which the JSON array is to be retrieved or created
+     * @return the existing or newly created JSON array associated with the specified key
+     * @since 4.0.12
+     */
+    default JsonArray ensureJsonArray(String key) {
+        JsonArray x = this.readJsonArray(key);
+        if (x == null) {
+            x = new JsonArray();
+            this.toJsonObject().put(key, x);
+        }
+        return x;
     }
 }

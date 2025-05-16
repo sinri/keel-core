@@ -7,7 +7,6 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.VertxOptions;
-import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nullable;
 import java.util.function.Supplier;
@@ -79,16 +78,16 @@ public class KeelUnitTest {
      * Override this method to be executed before each `test*` method.
      */
     public void setUp() {
-        JsonObject env = new JsonObject();
-        System.getenv().forEach(env::put);
-        getUnitTestLogger().info(x -> x.message("env").context(env));
-        for (var e : Thread.currentThread().getStackTrace()) {
-            getUnitTestLogger().info("stack: " + e.getClassName() + "::" + e.getMethodName());
-        }
-
-        System.getProperties().forEach((k, v) -> {
-            getUnitTestLogger().info("property: " + k + "=" + v);
-        });
+        //        JsonObject env = new JsonObject();
+        //        System.getenv().forEach(env::put);
+        //        getUnitTestLogger().info(x -> x.message("env").context(env));
+        //        for (var e : Thread.currentThread().getStackTrace()) {
+        //            getUnitTestLogger().info("stack: " + e.getClassName() + "::" + e.getMethodName());
+        //        }
+        //
+        //        System.getProperties().forEach((k, v) -> {
+        //            getUnitTestLogger().info("property: " + k + "=" + v);
+        //        });
     }
 
     /**

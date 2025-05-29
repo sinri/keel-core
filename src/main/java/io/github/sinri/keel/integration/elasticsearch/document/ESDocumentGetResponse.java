@@ -1,9 +1,9 @@
 package io.github.sinri.keel.integration.elasticsearch.document;
 
-import io.github.sinri.keel.core.json.SimpleJsonifiableEntity;
+import io.github.sinri.keel.core.json.UnmodifiableJsonifiableEntityImpl;
 import io.vertx.core.json.JsonObject;
 
-public class ESDocumentGetResponse extends SimpleJsonifiableEntity {
+public class ESDocumentGetResponse extends UnmodifiableJsonifiableEntityImpl {
     public ESDocumentGetResponse(JsonObject jsonObject) {
         super(jsonObject);
     }

@@ -18,34 +18,6 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 public class KeelRSA extends KeelRSAKeyPair {
     public static final String SIGN_ALGORITHMS = "SHA1WithRSA";
 
-    //    public static void main(String[] args) {
-    //        try {
-    //            String path = "/Users/leqee/code/Keel/log/rsa";
-    //            KeelRSAKeyPair.generateKeyPairToDir(path);
-    //            KeelRSA rsa = new KeelRSA();
-    //            rsa.loadPublicKeyByKeyStoreFile(path + "/publicKey.keystore");
-    //            rsa.loadPrivateKeyByKeyStoreFile(path + "/privateKey.keystore");
-    //
-    //            byte[] encryptedByPrivateKey = rsa.encryptWithPrivateKey("HelloMe!".getBytes());
-    //            byte[] decryptedByPublicKey = rsa.decryptWithPublicKey(encryptedByPrivateKey);
-    //            System.out.println("encryptedByPrivateKey and decryptedByPublicKey: " + new String
-    //            (decryptedByPublicKey));
-    //
-    //            byte[] encryptedByPublicKey = rsa.encryptWithPublicKey("HelloMe!".getBytes());
-    //            byte[] decryptedByPrivateKey = rsa.decryptWithPrivateKey(encryptedByPublicKey);
-    //            System.out.println("encryptedByPublicKey and decryptedByPrivateKey: " + new String
-    //            (decryptedByPrivateKey));
-    //
-    //            String content = "GodJudgesAll";
-    //            String sign = rsa.signWithPrivateKey(content.getBytes());
-    //            System.out.println("sign: " + sign);
-    //            boolean verified = rsa.verifySignWithPublicKey(content.getBytes(), sign);
-    //            System.out.println("verified: " + verified);
-    //        } catch (Throwable e) {
-    //            e.printStackTrace();
-    //        }
-    //    }
-
     /**
      * @param plainTextData data to encrypt
      * @return encrypted data

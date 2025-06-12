@@ -46,9 +46,9 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
         MySQLConnectOptions mySQLConnectOptions = new MySQLConnectOptions()
                 .setUseAffectedRows(true);
         mySQLConnectOptions.setHost(getHost())
-                .setPort(getPort())
-                .setUser(getUsername())
-                .setPassword(getPassword());
+                           .setPort(getPort())
+                           .setUser(getUsername())
+                           .setPassword(getPassword());
         String charset = getCharset();
         if (charset != null) mySQLConnectOptions.setCharset(charset);
         String schema = getDatabase();
@@ -149,7 +149,8 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
      * If the time is exceeded without a connection available, an exception is provided.
      * TimeUnit would be set by `setConnectionTimeoutUnit`
      *
-     * @see <a href="https://vertx.io/docs/apidocs/io/vertx/sqlclient/PoolOptions.html#setConnectionTimeout-int-">...</a>
+     * @see <a
+     *         href="https://vertx.io/docs/apidocs/io/vertx/sqlclient/PoolOptions.html#setConnectionTimeout-int-">...</a>
      */
     public Integer getPoolConnectionTimeout() {
         KeelConfigElement keelConfigElement = extract("poolConnectionTimeout");
@@ -161,9 +162,9 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
 
     /**
      * @since 3.0.9
-     * You can share a pool between multiple verticles or instances of the same verticle.
-     * Such pool should be created outside a verticle otherwise it will be closed when the verticle
-     * that created it is undeployed.
+     *         You can share a pool between multiple verticles or instances of the same verticle.
+     *         Such pool should be created outside a verticle otherwise it will be closed when the verticle
+     *         that created it is undeployed.
      */
     public boolean getPoolShared() {
         return readBoolean("poolShared", true);
@@ -180,17 +181,17 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
     @TechnicalPreview(since = "3.1.6")
     public Future<ResultMatrix> instantQuery(String sql) {
         var sqlClient = MySQLBuilder.client()
-                .with(this.getPoolOptions())
-                .connectingTo(this.getConnectOptions())
-                .using(Keel.getVertx())
-                .build();
+                                    .with(this.getPoolOptions())
+                                    .connectingTo(this.getConnectOptions())
+                                    .using(Keel.getVertx())
+                                    .build();
         // System.out.println("sqlClient: "+sqlClient.getClass()); // class io.vertx.mysqlclient.impl.MySQLPoolImpl
         return Future.succeededFuture()
-                .compose(v -> sqlClient.preparedQuery(sql).execute()
-                        .compose(rows -> {
-                            return Future.succeededFuture(ResultMatrix.create(rows));
-                        }))
-                .andThen(ar -> sqlClient.close());
+                     .compose(v -> sqlClient.preparedQuery(sql).execute()
+                                            .compose(rows -> {
+                                                return Future.succeededFuture(ResultMatrix.create(rows));
+                                            }))
+                     .andThen(ar -> sqlClient.close());
     }
 
     /**
@@ -200,39 +201,41 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
      * @param sql                a sql to be executed and read its result in stream.
      * @param readWindowSize     how many rows read once
      * @param readWindowFunction the async handler of the read rows
-     * @since 3.2.21
+     * @since 4.0.13
      */
-    @TechnicalPreview(since = "3.2.21")
     public Future<Void> instantQueryForStream(String sql, int readWindowSize, Function<RowSet<Row>, Future<Void>> readWindowFunction) {
         return Future.succeededFuture()
-                .compose(v -> {
-                    Pool pool = MySQLBuilder.pool()
-                            .with(this.getPoolOptions())
-                            .connectingTo(this.getConnectOptions())
-                            .using(Keel.getVertx())
-                            .build();
-                    return Future.succeededFuture(pool);
-                })
-                .compose(pool -> {
-                    return pool.getConnection()
-                            .compose(sqlConnection -> {
-                                return sqlConnection.prepare(sql)
-                                        .compose(preparedStatement -> {
-                                            Cursor cursor = preparedStatement.cursor();
+                     .compose(v -> {
+                         Pool pool = MySQLBuilder.pool()
+                                                 .with(this.getPoolOptions())
+                                                 .connectingTo(this.getConnectOptions())
+                                                 .using(Keel.getVertx())
+                                                 .build();
+                         return Future.succeededFuture(pool);
+                     })
+                     .compose(pool -> {
+                         return pool.getConnection()
+                                    .compose(sqlConnection -> {
+                                        return sqlConnection.prepare(sql)
+                                                            .compose(preparedStatement -> {
+                                                                Cursor cursor = preparedStatement.cursor();
 
-                                            return Keel.asyncCallRepeatedly(routineResult -> {
-                                                        if (!cursor.hasMore()) {
-                                                            routineResult.stop();
-                                                            return Future.succeededFuture();
-                                                        }
-
-                                                        return cursor.read(readWindowSize).compose(readWindowFunction);
-                                                    })
-                                                    .eventually(() -> cursor.close());
-                                        })
-                                        .eventually(() -> sqlConnection.close());
-                            })
-                            .eventually(() -> pool.close());
-                });
+                                                                return Keel.asyncCallRepeatedly(routineResult -> {
+                                                                               return cursor.read(readWindowSize)
+                                                                                            .compose(readWindowFunction)
+                                                                                            .compose(v -> {
+                                                                                                if (!cursor.hasMore()) {
+                                                                                                    routineResult.stop();
+                                                                                                    return Future.succeededFuture();
+                                                                                                }
+                                                                                                return Future.succeededFuture();
+                                                                                            });
+                                                                           })
+                                                                           .eventually(() -> cursor.close());
+                                                            })
+                                                            .eventually(() -> sqlConnection.close());
+                                    })
+                                    .eventually(() -> pool.close());
+                     });
     }
 }

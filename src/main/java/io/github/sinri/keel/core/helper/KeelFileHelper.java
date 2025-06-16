@@ -65,9 +65,33 @@ public class KeelFileHelper {
      * @param recursive if true, recursively deletes directories
      * @return Future that completes when the deletion is done
      * @since 4.0.12
+     * @deprecated since 4.0.13, use {@link #delete(String)} and {@link #deleteRecursive(String)} instead.
      */
+    @Deprecated(since = "4.0.13", forRemoval = true)
     public Future<Void> delete(String path, boolean recursive) {
         return fileSystem.deleteRecursive(path, recursive);
+    }
+
+    /**
+     * Deletes a file or directory.
+     *
+     * @param path the path to delete
+     * @return Future that completes when the deletion is done
+     * @since 4.0.13
+     */
+    public Future<Void> delete(String path) {
+        return fileSystem.delete(path);
+    }
+
+    /**
+     * Deletes a file or directory recursively.
+     *
+     * @param path the path to delete
+     * @return Future that completes when the deletion is done
+     * @since 4.0.13
+     */
+    public Future<Void> deleteRecursive(String path) {
+        return fileSystem.deleteRecursive(path);
     }
 
     /**

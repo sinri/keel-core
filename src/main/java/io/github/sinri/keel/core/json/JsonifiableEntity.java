@@ -45,6 +45,10 @@ public interface JsonifiableEntity<E>
         extends UnmodifiableJsonifiableEntity, ClusterSerializable, SelfInterface<E> {
 
     /**
+     * Wrap a JsonObject into a JsonifiableEntity.
+     * 
+     * @param jsonObject The JsonObject to wrap.
+     * @return A JsonifiableEntity wraps the JsonObject.
      * @since 3.2.11
      */
     static SimpleJsonifiableEntity wrap(@Nonnull JsonObject jsonObject) {
@@ -55,7 +59,8 @@ public interface JsonifiableEntity<E>
      * Converts the current state of this entity into a {@link JsonObject}.
      *
      * @return a non-null {@link JsonObject} representing the current state of the
-     *         entity
+     *         entity.
+     * @since 1.14
      */
     @Nonnull
     JsonObject toJsonObject();
@@ -66,10 +71,17 @@ public interface JsonifiableEntity<E>
      * @param jsonObject a non-null {@link JsonObject} containing the new data to be
      *                   loaded into the entity
      * @return the current instance of the entity, updated with the new data
+     * @since 1.14
      */
     @Nonnull
     E reloadDataFromJsonObject(@Nonnull JsonObject jsonObject);
 
+    /**
+     * It should be the same as {@link #toJsonObject()}.toString().
+     * 
+     * @return The JsonObject expression.
+     * @since 1.14
+     */
     @Override
     String toString();
 
@@ -135,7 +147,7 @@ public interface JsonifiableEntity<E>
      * @since 2.7
      */
     default @Nullable <B extends JsonifiableEntity<?>> B readJsonifiableEntity(@Nonnull Class<B> bClass,
-                                                                               String... args) {
+            String... args) {
         JsonObject jsonObject = readJsonObject(args);
         if (jsonObject == null)
             return null;
@@ -144,17 +156,41 @@ public interface JsonifiableEntity<E>
             x.reloadDataFromJsonObject(jsonObject);
             return x;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
-                 | NoSuchMethodException ignored1) {
+                | NoSuchMethodException ignored1) {
             try {
                 return bClass.getConstructor(JsonObject.class).newInstance(jsonObject);
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException
-                     | NoSuchMethodException ignored2) {
+                    | NoSuchMethodException ignored2) {
                 return null;
             }
         }
     }
 
     /**
+     * Read an entity from a JSON Object with Jackson
+     * {@link JsonObject#mapTo(Class)}.
+     * 
+     * @param cClass The class of the entity to be read.
+     * @param args   The arguments used to form a JSON pointer for locating the JSON
+     *               object within a larger structure.
+     * @param <C>    The type of the entity to be read.
+     * @return The entity read from the JSON Object.
+     * @since 4.0.13
+     */
+    default @Nullable <C> C readEntity(@Nonnull Class<C> cClass, String... args) {
+        JsonObject jsonObject = readJsonObject(args);
+        if (jsonObject == null) {
+            return null;
+        }
+        try {
+            return jsonObject.mapTo(cClass);
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    /**
+     * 
      * @since 2.8
      */
     default void fromBuffer(@Nonnull Buffer buffer) {
@@ -183,9 +219,7 @@ public interface JsonifiableEntity<E>
     }
 
     /**
-     * <p>
      * As of 3.1.10, moved here from UnmodifiableJsonifiableEntity.
-     * </p>
      *
      * @since 2.8
      */
@@ -211,12 +245,16 @@ public interface JsonifiableEntity<E>
     }
 
     /**
-     * Retrieves the JSON object associated with the specified key from the entity's JSON representation.
-     * If no JSON object exists for the given key, a new empty JSON object is created, associated with the key,
-     * and added to the entity's JSON representation. This ensures that the key always maps to a valid JSON object.
+     * Retrieves the JSON object associated with the specified key from the entity's
+     * JSON representation.
+     * If no JSON object exists for the given key, a new empty JSON object is
+     * created, associated with the key,
+     * and added to the entity's JSON representation. This ensures that the key
+     * always maps to a valid JSON object.
      *
      * @param key the key for which the JSON object is to be retrieved or created
-     * @return the existing or newly created JSON object associated with the specified key
+     * @return the existing or newly created JSON object associated with the
+     *         specified key
      * @since 4.0.12
      */
     default JsonObject ensureJsonObject(String key) {
@@ -229,12 +267,16 @@ public interface JsonifiableEntity<E>
     }
 
     /**
-     * Retrieves the JSON array associated with the specified key from the entity's JSON representation.
-     * If no JSON array exists for the given key, a new empty JSON array is created, associated with the key,
-     * and added to the entity's JSON representation. This ensures that the key always maps to a valid JSON array.
+     * Retrieves the JSON array associated with the specified key from the entity's
+     * JSON representation.
+     * If no JSON array exists for the given key, a new empty JSON array is created,
+     * associated with the key,
+     * and added to the entity's JSON representation. This ensures that the key
+     * always maps to a valid JSON array.
      *
      * @param key the key for which the JSON array is to be retrieved or created
-     * @return the existing or newly created JSON array associated with the specified key
+     * @return the existing or newly created JSON array associated with the
+     *         specified key
      * @since 4.0.12
      */
     default JsonArray ensureJsonArray(String key) {

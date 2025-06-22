@@ -95,7 +95,7 @@ public class KeelDigestHelper {
     public String MD5(@Nonnull byte[] raw) {
         MessageDigest digest = KeelDigestHelper.getMD5MessageDigest();
         byte[] digested = digest.digest(raw);
-        return Keel.binaryHelper().encodeHexWithLowerDigits(digested);
+        return Keel.binaryHelper().encodeHexWithUpperDigits(digested);
     }
 
     /**

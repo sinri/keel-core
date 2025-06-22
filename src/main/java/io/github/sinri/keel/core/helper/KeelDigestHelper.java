@@ -23,6 +23,9 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  */
 public class KeelDigestHelper {
 
+    public static final String DIGEST_ALGO_SHA_512 = "SHA-512";
+    public static final String DIGEST_ALGO_MD5 = "MD5";
+    public static final String DIGEST_ALGO_SHA_1 = "SHA";
     private static final KeelDigestHelper instance = new KeelDigestHelper();
 
     private KeelDigestHelper() {
@@ -34,82 +37,101 @@ public class KeelDigestHelper {
     }
 
     /**
-     * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal #22</a>
+     * As of 4.0.14, it is open to the world.
+     *
+     * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal
+     *         #22</a>
      */
-    private static MessageDigest getMD5MessageDigest() {
+    public static MessageDigest getMD5MessageDigest() {
         return MD5.HOLDER.get();
     }
 
     /**
      * 获取raw对应的以数字和小写字母描述的MD5摘要值。
+     * As of 4.0.14, be realized by {@link KeelDigestHelper#md5(byte[])}
      *
      * @param raw raw string
      * @return md5 with lower digits
      * @since 1.1
-     * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal #22</a>
+     * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal
+     *         #22</a>
      */
     @Nonnull
     public String md5(@Nonnull String raw) {
-//        try {
-//            MessageDigest md = MessageDigest.getInstance("MD5");
-//            md.update(raw.getBytes());
-//            return Keel.binaryHelper().encodeHexWithLowerDigits(md.digest());
-//        } catch (NoSuchAlgorithmException e) {
-//            throw new RuntimeException(e);
-//        }
+        return md5(raw.getBytes());
+    }
 
+    /**
+     * 获取raw对应的以数字和小写字母描述的MD5摘要值。
+     *
+     * @since 4.0.14
+     */
+    public String md5(@Nonnull byte[] raw) {
         MessageDigest digest = KeelDigestHelper.getMD5MessageDigest();
-        byte[] digested = digest.digest(raw.getBytes());
+        byte[] digested = digest.digest(raw);
         return Keel.binaryHelper().encodeHexWithLowerDigits(digested);
     }
 
     /**
      * 获取raw对应的以数字和大写字母描述的MD5摘要值。
+     * As of 4.0.14, realized by {@link KeelDigestHelper#MD5(byte[])}.
      *
      * @param raw raw string
      * @return MD5 with upper digits
      * @since 1.1
-     * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal #22</a>
+     * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal
+     *         #22</a>
      */
     @Nonnull
     public String MD5(@Nonnull String raw) {
-//        try {
-//            MessageDigest md = MessageDigest.getInstance("MD5");
-//            md.update(raw.getBytes());
-//            return Keel.binaryHelper().encodeHexWithUpperDigits(md.digest());
-//        } catch (NoSuchAlgorithmException e) {
-//            throw new RuntimeException(e);
-//        }
-
-        MessageDigest digest = KeelDigestHelper.getMD5MessageDigest();
-        byte[] digested = digest.digest(raw.getBytes());
-        return Keel.binaryHelper().encodeHexWithUpperDigits(digested);
+        return MD5(raw.getBytes());
     }
 
     /**
-     * @param algorithm
-     * @param raw
-     * @return
-     * @throws NoSuchAlgorithmException
-     * @since 3.0.11
+     * 获取raw对应的以数字和大写字母描述的MD5摘要值。
+     *
+     * @since 4.0.14
      */
-    public String digestToLower(@Nonnull String algorithm, @Nonnull String raw) throws NoSuchAlgorithmException {
+    public String MD5(@Nonnull byte[] raw) {
+        MessageDigest digest = KeelDigestHelper.getMD5MessageDigest();
+        byte[] digested = digest.digest(raw);
+        return Keel.binaryHelper().encodeHexWithLowerDigits(digested);
+    }
+
+    /**
+     * @since 4.0.14
+     */
+    public String digestToLower(@Nonnull String algorithm, @Nonnull byte[] raw) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance(algorithm);
-        md.update(raw.getBytes());
+        md.update(raw);
         return Keel.binaryHelper().encodeHexWithLowerDigits(md.digest());
     }
 
     /**
-     * @param algorithm
-     * @param raw
-     * @return
-     * @throws NoSuchAlgorithmException
+     * As of 4.0.14, realized by {@link KeelDigestHelper#digestToLower(String, byte[])}.
+     *
+     * @since 3.0.11
+     */
+    public String digestToLower(@Nonnull String algorithm, @Nonnull String raw) throws NoSuchAlgorithmException {
+        return digestToLower(algorithm, raw.getBytes());
+    }
+
+    /**
+     * @since 4.0.14
+     */
+    public String digestToUpper(@Nonnull String algorithm, @Nonnull byte[] raw) throws NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance(algorithm);
+        md.update(raw);
+        return Keel.binaryHelper().encodeHexWithUpperDigits(md.digest());
+    }
+
+    /**
+     * As of 4.0.14, realized by {@link KeelDigestHelper#digestToUpper(String, byte[])}.
+     *
      * @since 3.0.11
      */
     public String digestToUpper(@Nonnull String algorithm, @Nonnull String raw) throws NoSuchAlgorithmException {
-        MessageDigest md = MessageDigest.getInstance(algorithm);
-        md.update(raw.getBytes());
-        return Keel.binaryHelper().encodeHexWithUpperDigits(md.digest());
+        return digestToUpper(algorithm, raw.getBytes());
     }
 
     /**
@@ -118,7 +140,7 @@ public class KeelDigestHelper {
     @Nonnull
     public String SHA512(@Nonnull String raw) {
         try {
-            return digestToUpper("SHA-512", raw);
+            return digestToUpper(DIGEST_ALGO_SHA_512, raw);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -130,7 +152,7 @@ public class KeelDigestHelper {
     @Nonnull
     public String sha512(@Nonnull String raw) {
         try {
-            return digestToLower("SHA-512", raw);
+            return digestToLower(DIGEST_ALGO_SHA_512, raw);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -142,7 +164,7 @@ public class KeelDigestHelper {
     @Nonnull
     public String SHA1(@Nonnull String raw) {
         try {
-            return digestToUpper("SHA", raw);
+            return digestToUpper(DIGEST_ALGO_SHA_1, raw);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -154,7 +176,7 @@ public class KeelDigestHelper {
     @Nonnull
     public String sha1(@Nonnull String raw) {
         try {
-            return digestToLower("SHA", raw);
+            return digestToLower(DIGEST_ALGO_SHA_1, raw);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
@@ -223,14 +245,15 @@ public class KeelDigestHelper {
     }
 
     /**
-     * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal #22</a>
+     * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal
+     *         #22</a>
      */
     private static class MD5 {
 
         private static final FastThreadLocal<MessageDigest> HOLDER = new FastThreadLocal<>() {
             @Override
             protected MessageDigest initialValue() throws Exception {
-                return MessageDigest.getInstance("MD5");
+                return MessageDigest.getInstance(DIGEST_ALGO_MD5);
             }
         };
     }

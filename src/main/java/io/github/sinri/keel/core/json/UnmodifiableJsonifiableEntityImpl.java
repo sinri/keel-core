@@ -38,7 +38,7 @@ public class UnmodifiableJsonifiableEntityImpl implements UnmodifiableJsonifiabl
     }
 
     /**
-     * As of 4.0.14, it is final.
+     * As of 4.1.0, it is final.
      *
      * @since 3.2.17
      */

@@ -250,4 +250,10 @@ String jsonString = entity.toString();
 3. **数组处理**: 数组中的 `null` 元素会被保留或转换为默认值（如数值类型的 0）
 4. **性能考虑**: 频繁的深层访问可能影响性能，建议缓存常用值
 5. **线程安全**: 虽然接口本身是线程安全的，但底层 `JsonObject` 的线程安全性取决于具体实现
+6. **Jackson序列化**: 如需要Jackson序列化支持，请参考 [JsonifiableSerializer](JsonifiableSerializer.md) 文档
+
+## 相关文档
+
+- [JsonifiableEntity](JsonifiableEntity.md) - 可修改的JSON实体接口
+- [JsonifiableSerializer](JsonifiableSerializer.md) - Jackson序列化器支持
 

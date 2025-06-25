@@ -42,13 +42,15 @@
 
 ### Concrete Classes
 
-#### SimpleJsonifiableEntity
+#### SimpleJsonifiableEntity ⚠️ 已弃用
 `JsonifiableEntity`接口的简单实现，提供了将实体与JSON对象相互转换的基本功能。
 
 **继承关系:**
 - `extends JsonifiableEntityImpl<SimpleJsonifiableEntity>` - 继承抽象实现类
 
 **功能:** 可以被其他类扩展以添加特定属性和方法，同时保持处理JSON数据的能力。
+
+> **弃用说明**: 自4.1.0版本起，此类已被标记为弃用。建议用户定义详细的实现类而不是使用这个通用实现。
 
 #### UnmodifiableJsonifiableEntityImpl
 `UnmodifiableJsonifiableEntity`接口的实现类，提供了围绕JsonObject的只读包装器。
@@ -57,6 +59,14 @@
 - `implements UnmodifiableJsonifiableEntity` - 实现不可修改JSON实体接口
 
 **功能:** 该类确保底层JSON对象不能被修改，提供了安全且不可变的表示。
+
+#### JsonifiableSerializer
+针对`UnmodifiableJsonifiableEntity`及其相关类的Jackson Databind序列化器。
+
+**继承关系:**
+- `extends JsonSerializer<UnmodifiableJsonifiableEntity>` - 继承Jackson序列化器
+
+**功能:** 提供自定义的JSON序列化逻辑，确保序列化结果的一致性和性能优化。
 
 ## 类层次结构图
 
@@ -80,4 +90,11 @@ UnmodifiableJsonifiableEntity (interface)
 - **集群支持**: 实现了ClusterSerializable接口，支持EventBus消息传递
 - **迭代支持**: 实现了Iterable接口，支持foreach操作
 - **不可变性**: 提供只读包装器确保数据安全
+- **Jackson序列化**: 通过JsonifiableSerializer提供自定义序列化支持
+
+## 相关文档
+
+- [JsonifiableEntity](./JsonifiableEntity.md) - 主要的JSON实体接口文档
+- [JsonifiableSerializer](./JsonifiableSerializer.md) - Jackson序列化器文档
+- [UnmodifiableJsonifiableEntity](./UnmodifiableJsonifiableEntity.md) - 只读JSON实体接口文档
 

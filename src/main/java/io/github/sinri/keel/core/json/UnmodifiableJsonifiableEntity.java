@@ -39,7 +39,7 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
 
     /**
      * @return The JSON Object expression.
-     * @since 4.0.14
+     * @since 4.1.0
      */
     default String toJsonExpression() {
         return cloneAsJsonObject().toString();

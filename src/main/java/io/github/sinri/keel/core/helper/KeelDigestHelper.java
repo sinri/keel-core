@@ -37,7 +37,7 @@ public class KeelDigestHelper {
     }
 
     /**
-     * As of 4.0.14, it is open to the world.
+     * As of 4.1.0, it is open to the world.
      *
      * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal
      *         #22</a>
@@ -48,7 +48,7 @@ public class KeelDigestHelper {
 
     /**
      * 获取raw对应的以数字和小写字母描述的MD5摘要值。
-     * As of 4.0.14, be realized by {@link KeelDigestHelper#md5(byte[])}
+     * As of 4.1.0, be realized by {@link KeelDigestHelper#md5(byte[])}
      *
      * @param raw raw string
      * @return md5 with lower digits
@@ -64,7 +64,7 @@ public class KeelDigestHelper {
     /**
      * 获取raw对应的以数字和小写字母描述的MD5摘要值。
      *
-     * @since 4.0.14
+     * @since 4.1.0
      */
     public String md5(@Nonnull byte[] raw) {
         MessageDigest digest = KeelDigestHelper.getMD5MessageDigest();
@@ -74,7 +74,7 @@ public class KeelDigestHelper {
 
     /**
      * 获取raw对应的以数字和大写字母描述的MD5摘要值。
-     * As of 4.0.14, realized by {@link KeelDigestHelper#MD5(byte[])}.
+     * As of 4.1.0, realized by {@link KeelDigestHelper#MD5(byte[])}.
      *
      * @param raw raw string
      * @return MD5 with upper digits
@@ -90,7 +90,7 @@ public class KeelDigestHelper {
     /**
      * 获取raw对应的以数字和大写字母描述的MD5摘要值。
      *
-     * @since 4.0.14
+     * @since 4.1.0
      */
     public String MD5(@Nonnull byte[] raw) {
         MessageDigest digest = KeelDigestHelper.getMD5MessageDigest();
@@ -99,7 +99,7 @@ public class KeelDigestHelper {
     }
 
     /**
-     * @since 4.0.14
+     * @since 4.1.0
      */
     public String digestToLower(@Nonnull String algorithm, @Nonnull byte[] raw) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance(algorithm);
@@ -108,7 +108,7 @@ public class KeelDigestHelper {
     }
 
     /**
-     * As of 4.0.14, realized by {@link KeelDigestHelper#digestToLower(String, byte[])}.
+     * As of 4.1.0, realized by {@link KeelDigestHelper#digestToLower(String, byte[])}.
      *
      * @since 3.0.11
      */
@@ -117,7 +117,7 @@ public class KeelDigestHelper {
     }
 
     /**
-     * @since 4.0.14
+     * @since 4.1.0
      */
     public String digestToUpper(@Nonnull String algorithm, @Nonnull byte[] raw) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance(algorithm);
@@ -126,7 +126,7 @@ public class KeelDigestHelper {
     }
 
     /**
-     * As of 4.0.14, realized by {@link KeelDigestHelper#digestToUpper(String, byte[])}.
+     * As of 4.1.0, realized by {@link KeelDigestHelper#digestToUpper(String, byte[])}.
      *
      * @since 3.0.11
      */

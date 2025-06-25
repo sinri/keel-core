@@ -17,13 +17,17 @@
 ### 继承体系
 
 ```
-UnmodifiableJsonifiableEntity (只读操作)
+UnmodifiableJsonifiableEntity (只读操作接口)
     ↑
-JsonifiableEntity (可修改操作)
+JsonifiableEntity (可修改操作接口)
     ↑
-JsonifiableEntityImpl (抽象实现)
+JsonifiableEntityImpl (抽象实现类)
     ↑
-SimpleJsonifiableEntity (一个具体实现)
+SimpleJsonifiableEntity (具体实现类，4.1.0起已弃用)
+
+UnmodifiableJsonifiableEntity (只读操作接口)
+    ↑
+UnmodifiableJsonifiableEntityImpl (只读具体实现类)
 ```
 
 ## 接口定义
@@ -110,6 +114,8 @@ default E write(String key, Object value);
 ## SimpleJsonifiableEntity 实现
 
 `SimpleJsonifiableEntity` 是 `JsonifiableEntity` 的简单具体实现，继承自 `JsonifiableEntityImpl`。
+
+> **重要提示**: 自4.1.0版本起，`SimpleJsonifiableEntity` 已被标记为弃用（@Deprecated）。建议用户定义详细的实现类而不是使用这个通用实现。对于只读场景，推荐使用 `UnmodifiableJsonifiableEntity.wrap(JsonObject)`。
 
 ### 类定义
 
@@ -300,6 +306,11 @@ AddressPojo addressPojo = person.readEntity(AddressPojo.class, "address");
   - 添加 ensure 方法
   - 添加 write 方法
 - **4.0.13**: 添加 readEntity 方法支持 Jackson
+- **4.1.0**: 
+  - 弃用 SimpleJsonifiableEntity 类
+  - 引入 JsonifiableSerializer 支持 Jackson 序列化
+  - 添加 toJsonExpression 方法
+  - 完善静态包装方法的弃用标记
 
 ## 最佳实践
 
@@ -309,6 +320,8 @@ AddressPojo addressPojo = person.readEntity(AddressPojo.class, "address");
 4. **异常处理**: 读取方法在类型转换失败时返回 null 而不是抛出异常
 5. **性能考虑**: 对于频繁访问的数据，考虑缓存读取结果
 6. **继承实现**: 对于复杂实体，建议继承 `JsonifiableEntityImpl` 而不是直接实现接口
+7. **避免使用弃用类**: 从4.1.0版本开始，避免使用 `SimpleJsonifiableEntity`，建议定义具体的实现类
+8. **序列化器注册**: 如果使用Jackson进行序列化，记得在应用启动时调用 `JsonifiableSerializer.register()`
 
 ## 注意事项
 
@@ -316,4 +329,10 @@ AddressPojo addressPojo = person.readEntity(AddressPojo.class, "address");
 2. `reloadDataFromJsonObject` 会完全替换内部的 JsonObject
 3. 实现类需要正确实现 `getImplementation()` 方法以支持链式调用
 4. 在集群环境中使用时，确保所有节点都有相同的类定义
+5. **弃用警告**: `SimpleJsonifiableEntity` 自4.1.0版本起已弃用，建议迁移到自定义实现类
+6. **序列化支持**: 如需要Jackson序列化支持，请参考 `JsonifiableSerializer` 类的文档
+
+## 相关文档
+
+- [JsonifiableSerializer](JsonifiableSerializer.md) - Jackson序列化器支持
 

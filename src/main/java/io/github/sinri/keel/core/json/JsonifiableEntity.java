@@ -50,10 +50,10 @@ public interface JsonifiableEntity<E>
      * @param jsonObject The JsonObject to wrap.
      * @return A JsonifiableEntity wraps the JsonObject.
      * @since 3.2.11
-     * @deprecated As of 4.0.14, {@link SimpleJsonifiableEntity} is deprecated. For read-only scenario, use
+     * @deprecated As of 4.1.0, {@link SimpleJsonifiableEntity} is deprecated. For read-only scenario, use
      *         {@link UnmodifiableJsonifiableEntity#wrap(JsonObject)}.
      */
-    @Deprecated(since = "4.0.14")
+    @Deprecated(since = "4.1.0")
     static SimpleJsonifiableEntity wrap(@Nonnull JsonObject jsonObject) {
         return new SimpleJsonifiableEntity(jsonObject);
     }
@@ -70,7 +70,7 @@ public interface JsonifiableEntity<E>
 
     /**
      * @return The JSON Object expression.
-     * @since 4.0.14
+     * @since 4.1.0
      */
     default String toJsonExpression() {
         return toJsonObject().toString();

@@ -5,6 +5,7 @@
 ## 版本信息
 
 - **引入版本**: 2.6
+- **当前版本**: 4.1.0-SNAPSHOT
 - **设计模式**: 单例模式
 - **线程安全**: 是
 - **异步支持**: 基于 Vert.x Future 的异步操作
@@ -15,6 +16,7 @@
 - 文件读写、复制、移动、删除
 - 目录创建和管理
 - 文件属性查询
+- 符号链接创建
 
 ### 2. JAR 文件处理
 - JAR 文件内容遍历和资源提取
@@ -26,7 +28,7 @@
 - 支持单个文件提取和批量操作
 
 ### 4. 临时文件管理
-- 临时文件和目录的创建与管理
+- 临时文件的创建与管理
 - 自动清理机制
 
 ### 5. 安全性保障
@@ -71,12 +73,12 @@ Keel.fileHelper().mkdirs("data/logs/2024")
 ### 文件删除
 
 ```java
-// 删除单个文件
+// 删除单个文件（4.1.0+）
 Keel.fileHelper().delete("temp.txt")
     .onSuccess(v -> System.out.println("文件删除成功"))
     .onFailure(e -> System.err.println("文件删除失败: " + e.getMessage()));
 
-// 递归删除目录
+// 递归删除目录（4.1.0+）
 Keel.fileHelper().deleteRecursive("temp_directory")
     .onSuccess(v -> System.out.println("目录删除成功"))
     .onFailure(e -> System.err.println("目录删除失败: " + e.getMessage()));
@@ -94,6 +96,15 @@ Keel.fileHelper().copy("source.txt", "destination.txt")
 Keel.fileHelper().move("old_location.txt", "new_location.txt")
     .onSuccess(v -> System.out.println("文件移动成功"))
     .onFailure(e -> System.err.println("文件移动失败: " + e.getMessage()));
+```
+
+### 符号链接创建
+
+```java
+// 创建符号链接
+Keel.fileHelper().createSymLink("link_name", "target_file")
+    .onSuccess(v -> System.out.println("符号链接创建成功"))
+    .onFailure(e -> System.err.println("符号链接创建失败: " + e.getMessage()));
 ```
 
 ## 文件读写操作
@@ -178,6 +189,13 @@ Keel.fileHelper().getLastModifiedTime("config.json")
         Date modifiedDate = new Date(time);
         System.out.println("最后修改时间: " + modifiedDate);
     });
+
+// 获取创建时间
+Keel.fileHelper().getCreatedTime("config.json")
+    .onSuccess(time -> {
+        Date createdDate = new Date(time);
+        System.out.println("创建时间: " + createdDate);
+    });
 ```
 
 ### 目录列表
@@ -248,6 +266,12 @@ entries.forEach(entry -> System.out.println("  " + entry.getName()));
 Set<String> classFiles = Keel.fileHelper().seekPackageClassFilesInRunningJar("io.github.sinri.keel.core.helper");
 System.out.println("Helper 包中的类:");
 classFiles.forEach(className -> System.out.println("  " + className));
+
+// 遍历 JAR 文件中的类
+File jarFile = new File("application.jar");
+List<String> classList = Keel.fileHelper().traversalInJarFile(jarFile);
+System.out.println("JAR 文件中的类:");
+classList.forEach(className -> System.out.println("  " + className));
 ```
 
 ## ZIP 文件操作
@@ -320,6 +344,7 @@ Keel.fileHelper().createJar("compiled_classes", "application.jar")
 4. **错误处理**: 文件操作可能失败，要做好异常处理
 5. **字符编码**: 文本文件操作时注意字符编码，建议使用 UTF-8
 6. **大文件处理**: 处理大文件时注意内存使用，考虑流式处理
+7. **版本兼容性**: 4.1.0 版本中删除操作方法进行了重构，分离了递归删除和普通删除
 
 ## 版本历史
 
@@ -329,4 +354,5 @@ Keel.fileHelper().createJar("compiled_classes", "application.jar")
 - **3.2.12.1**: 重构 JAR 和类路径处理逻辑
 - **4.0.12**: 大幅增强文件操作功能，添加 ZIP/JAR 处理、安全验证等
 - **4.0.13**: 优化删除操作，分离递归删除和普通删除
-- **当前版本**: 支持完整的文件系统操作和安全保障 
+- **4.1.0**: 重构删除方法，废弃带 recursive 参数的 delete 方法，新增独立的 deleteRecursive 方法；添加 getCreatedTime 和 createSymLink 方法
+- **当前版本**: 4.1.0-SNAPSHOT，支持完整的文件系统操作和安全保障 

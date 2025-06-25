@@ -12,7 +12,7 @@ import java.io.IOException;
  * 针对 {@link UnmodifiableJsonifiableEntity} 适用类进行 Jackson Databind Serialization。
  * 应当在程序入口，{@link UnmodifiableJsonifiableEntity}相关类未曾使用之先，调用 {@link JsonifiableSerializer#register()}注册。
  *
- * @since 4.0.14
+ * @since 4.1.0
  */
 public class JsonifiableSerializer extends JsonSerializer<UnmodifiableJsonifiableEntity> {
     public static void register() {

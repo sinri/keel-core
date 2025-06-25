@@ -23,9 +23,7 @@ public interface RedisHashMixin extends RedisApiMixin {
             List<String> args = new ArrayList<>();
             args.add(key);
             args.addAll(fields);
-            return api.hdel(args).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
+            return api.hdel(args).compose(response -> Future.succeededFuture(response.toInteger()));
         });
     }
 
@@ -40,11 +38,7 @@ public interface RedisHashMixin extends RedisApiMixin {
      * @return 如果存在返回 true，不存在返回 false。
      */
     default Future<Boolean> existsHashField(String key, String field) {
-        return api(api -> {
-            return api.hexists(key, field).compose(response -> {
-                return Future.succeededFuture(response.toInteger() == 1);
-            });
-        });
+        return api(api -> api.hexists(key, field).compose(response -> Future.succeededFuture(response.toInteger() == 1)));
     }
 
     /**
@@ -54,14 +48,12 @@ public interface RedisHashMixin extends RedisApiMixin {
      * @return 返回给定字段的值。如果给定的字段或 key 不存在时，返回 null。
      */
     default Future<String> getHashField(String key, String field) {
-        return api(api -> {
-            return api.hget(key, field).compose(response -> {
-                if (response == null) {
-                    return Future.succeededFuture(null);
-                }
-                return Future.succeededFuture(response.toString());
-            });
-        });
+        return api(api -> api.hget(key, field).compose(response -> {
+            if (response == null) {
+                return Future.succeededFuture(null);
+            }
+            return Future.succeededFuture(response.toString());
+        }));
     }
 
     /**
@@ -72,22 +64,20 @@ public interface RedisHashMixin extends RedisApiMixin {
      * @return 以Map形式返回哈希表的字段及字段值。若 key 不存在，返回空Map。
      */
     default Future<Map<String, String>> getAllHashFields(String key) {
-        return api(api -> {
-            return api.hgetall(key).compose(response -> {
-                Map<String, String> map = new HashMap<>();
-                if (response == null) {
-                    return Future.succeededFuture(map);
-                }
-
-                for (int i = 0; i < response.size(); i += 2) {
-                    if (i + 1 < response.size()) {
-                        map.put(response.get(i).toString(), response.get(i + 1).toString());
-                    }
-                }
-
+        return api(api -> api.hgetall(key).compose(response -> {
+            Map<String, String> map = new HashMap<>();
+            if (response == null) {
                 return Future.succeededFuture(map);
-            });
-        });
+            }
+
+            for (int i = 0; i < response.size(); i += 2) {
+                if (i + 1 < response.size()) {
+                    map.put(response.get(i).toString(), response.get(i + 1).toString());
+                }
+            }
+
+            return Future.succeededFuture(map);
+        }));
     }
 
     /**
@@ -101,11 +91,7 @@ public interface RedisHashMixin extends RedisApiMixin {
      * @return 执行 HINCRBY 命令之后，哈希表中字段的值。
      */
     default Future<Long> incrementHashField(String key, String field, long increment) {
-        return api(api -> {
-            return api.hincrby(key, field, String.valueOf(increment)).compose(response -> {
-                return Future.succeededFuture(response.toLong());
-            });
-        });
+        return api(api -> api.hincrby(key, field, String.valueOf(increment)).compose(response -> Future.succeededFuture(response.toLong())));
     }
 
     /**
@@ -116,11 +102,7 @@ public interface RedisHashMixin extends RedisApiMixin {
      * @return 执行 HINCRBYFLOAT 命令之后，哈希表中字段的值。
      */
     default Future<Double> incrementHashFieldByFloat(String key, String field, double increment) {
-        return api(api -> {
-            return api.hincrbyfloat(key, field, String.valueOf(increment)).compose(response -> {
-                return Future.succeededFuture(Double.parseDouble(response.toString()));
-            });
-        });
+        return api(api -> api.hincrbyfloat(key, field, String.valueOf(increment)).compose(response -> Future.succeededFuture(Double.parseDouble(response.toString()))));
     }
 
     /**
@@ -130,15 +112,13 @@ public interface RedisHashMixin extends RedisApiMixin {
      * @return 包含哈希表中所有字段的列表。当 key 不存在时，返回一个空列表。
      */
     default Future<List<String>> getHashKeys(String key) {
-        return api(api -> {
-            return api.hkeys(key).compose(response -> {
-                List<String> list = new ArrayList<>();
-                if (response != null) {
-                    response.forEach(item -> list.add(item.toString()));
-                }
-                return Future.succeededFuture(list);
-            });
-        });
+        return api(api -> api.hkeys(key).compose(response -> {
+            List<String> list = new ArrayList<>();
+            if (response != null) {
+                response.forEach(item -> list.add(item.toString()));
+            }
+            return Future.succeededFuture(list);
+        }));
     }
 
     /**
@@ -148,11 +128,7 @@ public interface RedisHashMixin extends RedisApiMixin {
      * @return 哈希表中字段的数量。当 key 不存在时，返回 0。
      */
     default Future<Integer> getHashLength(String key) {
-        return api(api -> {
-            return api.hlen(key).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
-        });
+        return api(api -> api.hlen(key).compose(response -> Future.succeededFuture(response.toInteger())));
     }
 
     /**
@@ -189,6 +165,7 @@ public interface RedisHashMixin extends RedisApiMixin {
      * 此命令会覆盖哈希表中已存在的字段。
      * 如果 key 不存在，会创建一个空哈希表，并执行 HMSET 操作。
      */
+    @Deprecated(since = "4.1.0")
     default Future<Void> setMultipleHashFields(String key, Map<String, String> fieldValues) {
         return api(api -> {
             List<String> args = new ArrayList<>();
@@ -260,9 +237,7 @@ public interface RedisHashMixin extends RedisApiMixin {
             args.add(key);
             args.add(field);
             args.add(value);
-            return api.hset(args).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
+            return api.hset(args).compose(response -> Future.succeededFuture(response.toInteger()));
         });
     }
 
@@ -282,9 +257,7 @@ public interface RedisHashMixin extends RedisApiMixin {
                 args.add(field);
                 args.add(value);
             });
-            return api.hset(args).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
+            return api.hset(args).compose(response -> Future.succeededFuture(response.toInteger()));
         });
     }
 
@@ -297,11 +270,7 @@ public interface RedisHashMixin extends RedisApiMixin {
      * @return 设置成功，返回 1。如果给定字段已经存在且没有操作被执行，返回 0。
      */
     default Future<Integer> setHashFieldIfNotExists(String key, String field, String value) {
-        return api(api -> {
-            return api.hsetnx(key, field, value).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
-        });
+        return api(api -> api.hsetnx(key, field, value).compose(response -> Future.succeededFuture(response.toInteger())));
     }
 
     /**
@@ -312,11 +281,7 @@ public interface RedisHashMixin extends RedisApiMixin {
      * @return 返回字段值的字符串长度。
      */
     default Future<Integer> getHashFieldValueLength(String key, String field) {
-        return api(api -> {
-            return api.hstrlen(key, field).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
-        });
+        return api(api -> api.hstrlen(key, field).compose(response -> Future.succeededFuture(response.toInteger())));
     }
 
     /**
@@ -326,14 +291,12 @@ public interface RedisHashMixin extends RedisApiMixin {
      * @return 一个包含哈希表中所有值的列表。当 key 不存在时，返回一个空列表。
      */
     default Future<List<String>> getHashValues(String key) {
-        return api(api -> {
-            return api.hvals(key).compose(response -> {
-                List<String> list = new ArrayList<>();
-                if (response != null) {
-                    response.forEach(item -> list.add(item.toString()));
-                }
-                return Future.succeededFuture(list);
-            });
-        });
+        return api(api -> api.hvals(key).compose(response -> {
+            List<String> list = new ArrayList<>();
+            if (response != null) {
+                response.forEach(item -> list.add(item.toString()));
+            }
+            return Future.succeededFuture(list);
+        }));
     }
 }

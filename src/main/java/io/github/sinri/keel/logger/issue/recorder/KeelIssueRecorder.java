@@ -28,7 +28,7 @@ public interface KeelIssueRecorder<T extends KeelIssueRecord<T>>
             @Nonnull Supplier<T> issueRecordBuilder,
             @Nonnull String topic
     ) {
-        return new KeelIssueRecorderImpl<T>(issueRecordCenter, issueRecordBuilder, topic);
+        return new KeelIssueRecorderImpl<>(issueRecordCenter, issueRecordBuilder, topic);
     }
 
     /**

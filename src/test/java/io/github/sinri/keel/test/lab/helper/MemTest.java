@@ -1,6 +1,7 @@
 package io.github.sinri.keel.test.lab.helper;
 
 import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnitSkipped;
 import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -19,7 +20,8 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 public class MemTest extends KeelInstantRunner {
     private final MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
 
-    @InstantRunUnit(skip = true)
+    @InstantRunUnit
+    @InstantRunUnitSkipped
     public Future<Void> test1() {
         List<MemoryBlock> list = new ArrayList<>();
         return Keel.asyncCallStepwise(100, i -> {
@@ -32,7 +34,8 @@ public class MemTest extends KeelInstantRunner {
         });
     }
 
-    @InstantRunUnit(skip = true)
+    @InstantRunUnit
+    @InstantRunUnitSkipped
     public Future<Void> test2() {
         double a = 1.3;
         double b = a * 2;

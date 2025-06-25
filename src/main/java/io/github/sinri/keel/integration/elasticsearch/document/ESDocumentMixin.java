@@ -19,9 +19,7 @@ public interface ESDocumentMixin extends ESApiMixin {
                         return callPost("/" + indexName + "/_create/" + documentId, queries, documentBody);
                     }
                 })
-                .compose(resp -> {
-                    return Future.succeededFuture(new ESDocumentCreateResponse(resp));
-                });
+                .compose(resp -> Future.succeededFuture(new ESDocumentCreateResponse(resp)));
     }
 
     /**
@@ -29,9 +27,7 @@ public interface ESDocumentMixin extends ESApiMixin {
      */
     default Future<ESDocumentGetResponse> documentGet(String indexName, String documentId, @Nullable ESApiQueries queries) {
         return call(HttpMethod.GET, "/" + indexName + "/_doc/" + documentId, queries, null)
-                .compose(resp -> {
-                    return Future.succeededFuture(new ESDocumentGetResponse(resp));
-                });
+                .compose(resp -> Future.succeededFuture(new ESDocumentGetResponse(resp)));
     }
 
     /**
@@ -39,9 +35,7 @@ public interface ESDocumentMixin extends ESApiMixin {
      */
     default Future<ESDocumentDeleteResponse> documentDelete(String indexName, String documentId, @Nullable ESApiQueries queries) {
         return call(HttpMethod.DELETE, "/" + indexName + "/_doc/" + documentId, queries, null)
-                .compose(resp -> {
-                    return Future.succeededFuture(new ESDocumentDeleteResponse(resp));
-                });
+                .compose(resp -> Future.succeededFuture(new ESDocumentDeleteResponse(resp)));
     }
 
     /**
@@ -49,9 +43,7 @@ public interface ESDocumentMixin extends ESApiMixin {
      */
     default Future<ESDocumentUpdateResponse> documentUpdate(String indexName, String documentId, @Nullable ESApiQueries queries, JsonObject requestBody) {
         return callPost("/" + indexName + "/_update/" + documentId, queries, requestBody)
-                .compose(resp -> {
-                    return Future.succeededFuture(new ESDocumentUpdateResponse(resp));
-                });
+                .compose(resp -> Future.succeededFuture(new ESDocumentUpdateResponse(resp)));
     }
 
     /**
@@ -70,12 +62,8 @@ public interface ESDocumentMixin extends ESApiMixin {
             endpoint = "/" + target + endpoint;
         }
         StringBuilder body = new StringBuilder();
-        requestBody.forEach(x -> {
-            body.append(x.toString()).append("\n");
-        });
+        requestBody.forEach(x -> body.append(x.toString()).append("\n"));
         return call(HttpMethod.POST, endpoint, queries, body.toString())
-                .compose(resp -> {
-                    return Future.succeededFuture(new ESDocumentBulkResponse(resp));
-                });
+                .compose(resp -> Future.succeededFuture(new ESDocumentBulkResponse(resp)));
     }
 }

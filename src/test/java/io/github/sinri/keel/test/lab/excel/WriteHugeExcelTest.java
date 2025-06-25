@@ -1,6 +1,7 @@
 package io.github.sinri.keel.test.lab.excel;
 
 import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnitSkipped;
 import io.github.sinri.keel.facade.tesuto.instant.InstantRunnerResult;
 import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.poi.excel.KeelSheet;
@@ -45,7 +46,8 @@ public class WriteHugeExcelTest extends KeelInstantRunner {
         });
     }
 
-    @InstantRunUnit(skip = true)
+    @InstantRunUnit
+    @InstantRunUnitSkipped
     public Future<Void> testWriteNotStream() {
         return KeelSheets.useSheets(new SheetsCreateOptions(), sheets -> {
             KeelSheet sheet = sheets.generateWriterForSheet("Huge");

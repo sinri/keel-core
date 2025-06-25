@@ -421,9 +421,7 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
                                     key.getVerificationCode(),
                                     key.getScratchCodes()
                             )
-                            .compose(v -> {
-                                return Future.succeededFuture(key);
-                            });
+                            .compose(v -> Future.succeededFuture(key));
                 });
     }
 
@@ -581,9 +579,7 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
     public Future<Boolean> authorizeUser(String userName, int verificationCode, long time) {
         AsyncICredentialRepository repository = getValidCredentialRepository();
         return repository.getSecretKey(userName)
-                .compose(secretKey -> {
-                    return authorize(secretKey, verificationCode, time);
-                });
+                .compose(secretKey -> authorize(secretKey, verificationCode, time));
     }
 
     /**

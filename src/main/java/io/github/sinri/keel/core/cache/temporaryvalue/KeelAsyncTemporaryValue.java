@@ -51,9 +51,7 @@ public class KeelAsyncTemporaryValue<P> {
     }
 
     public Future<P> getOrElse(P fallback) {
-        return rawGet().recover(throwable -> {
-            return Future.succeededFuture(fallback);
-        });
+        return rawGet().recover(throwable -> Future.succeededFuture(fallback));
     }
 
     public Future<P> getOrReload(@Nonnull Supplier<Future<P>> loader) {
@@ -67,15 +65,13 @@ public class KeelAsyncTemporaryValue<P> {
                     }
                     return Future.succeededFuture(pValueWrapper.getValue());
                 })
-                .recover(throwable -> {
-                    return loader.get()
-                            .compose(p -> {
-                                if (p == null) {
-                                    this.set(null);
-                                }
-                                return Future.succeededFuture(p);
-                            });
-                });
+                .recover(throwable -> loader.get()
+                                        .compose(p -> {
+                            if (p == null) {
+                                this.set(null);
+                            }
+                            return Future.succeededFuture(p);
+                        }));
     }
 
 }

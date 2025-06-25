@@ -64,12 +64,8 @@ public class KeelCacheBet<K, V> implements KeelAsyncCacheInterface<K, V> {
         }
 
         return generator.apply(key)
-                .compose(v -> {
-                    return save(key, v, lifeInSeconds)
-                            .compose(saved -> {
-                                return Future.succeededFuture(v);
-                            });
-                });
+                .compose(v -> save(key, v, lifeInSeconds)
+                        .compose(saved -> Future.succeededFuture(v)));
     }
 
     @Override

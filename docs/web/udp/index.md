@@ -32,6 +32,9 @@ public KeelUDPTransceiver setDatagramSocketConsumer(
     BiConsumer<SocketAddress, Buffer> datagramSocketConsumer
 )
 
+// 获取问题记录器
+public @Nonnull KeelIssueRecorder<DatagramIssueRecord> getIssueRecorder()
+
 // 开始监听
 public Future<Object> listen()
 
@@ -66,7 +69,7 @@ transceiver.setDatagramSocketConsumer((sender, buffer) -> {
     
     // 回复数据包
     Buffer response = Buffer.buffer("收到数据");
-    transceiver.send(response, sender.port(), sender.host());
+    transceiver.send(response, sender.port(), sender.hostAddress());
 });
 
 // 开始监听
@@ -74,6 +77,74 @@ transceiver.listen()
     .onSuccess(v -> System.out.println("UDP 服务器启动成功"))
     .onFailure(err -> System.err.println("启动失败: " + err.getMessage()));
 ```
+
+#### 高级用法示例
+
+```java
+import io.github.sinri.keel.web.udp.KeelUDPTransceiver;
+import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
+import io.github.sinri.keel.logger.KeelLogLevel;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
+
+public class UDPEchoServer {
+    public static void main(String[] args) {
+        Vertx vertx = Vertx.vertx();
+        
+        // 创建 DatagramSocket
+        var socket = vertx.createDatagramSocket();
+        
+        // 创建问题记录中心
+        var issueRecordCenter = KeelIssueRecordCenter.outputCenter();
+        
+        // 创建 UDP 传输器
+        var transceiver = new KeelUDPTransceiver(socket, 9999, issueRecordCenter);
+        
+        // 设置自定义日志级别
+        transceiver.getIssueRecorder().setVisibleLevel(KeelLogLevel.DEBUG);
+        
+        // 设置数据包处理器 - 实现回声服务器
+        transceiver.setDatagramSocketConsumer((sender, buffer) -> {
+            String receivedData = buffer.toString();
+            
+            // 记录收到的数据
+            transceiver.getIssueRecorder().info(r -> r
+                .message("Echo server received: " + receivedData)
+                .context("client", sender.hostAddress() + ":" + sender.port())
+            );
+            
+            // 回复相同的数据
+            Buffer echoResponse = Buffer.buffer("Echo: " + receivedData);
+            transceiver.send(echoResponse, sender.port(), sender.hostAddress())
+                .onSuccess(v -> System.out.println("回复发送成功"))
+                .onFailure(throwable -> System.err.println("回复发送失败: " + throwable.getMessage()));
+        });
+        
+        // 启动服务器
+        transceiver.listen()
+            .onSuccess(v -> {
+                System.out.println("UDP 回声服务器启动成功，端口: 9999");
+                
+                // 设置关闭钩子
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    System.out.println("正在关闭 UDP 服务器...");
+                    transceiver.close()
+                        .onComplete(ar -> {
+                            if (ar.succeeded()) {
+                                System.out.println("UDP 服务器已关闭");
+                            } else {
+                                System.err.println("关闭时出错: " + ar.cause().getMessage());
+                            }
+                            vertx.close();
+                        });
+                }));
+            })
+            .onFailure(err -> {
+                System.err.println("启动失败: " + err.getMessage());
+                vertx.close();
+            });
+    }
+}
 
 ### 2. DatagramIssueRecord
 

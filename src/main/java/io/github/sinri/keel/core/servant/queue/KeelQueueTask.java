@@ -66,9 +66,7 @@ public abstract class KeelQueueTask extends KeelVerticleImpl {
               .eventually(() -> {
                   getQueueTaskIssueRecorder().info(r -> r.message("KeelQueueTask to undeploy"));
                   notifyBeforeUndeploy();
-                  return undeployMe().onSuccess(done -> {
-                      this.queueWorkerPoolManager.whenOneWorkerEnds();
-                  });
+                  return undeployMe().onSuccess(done -> this.queueWorkerPoolManager.whenOneWorkerEnds());
               });
 
         return Future.succeededFuture();
@@ -77,10 +75,10 @@ public abstract class KeelQueueTask extends KeelVerticleImpl {
     abstract protected Future<Void> run();
 
     protected void notifyAfterDeployed() {
-        // do nothing by default
+        getQueueTaskIssueRecorder().debug("KeelQueueTask.notifyAfterDeployed");
     }
 
     protected void notifyBeforeUndeploy() {
-        // do nothing by default
+        getQueueTaskIssueRecorder().debug("KeelQueueTask.notifyBeforeUndeploy");
     }
 }

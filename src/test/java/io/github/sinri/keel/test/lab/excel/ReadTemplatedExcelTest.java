@@ -1,6 +1,7 @@
 package io.github.sinri.keel.test.lab.excel;
 
 import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnitSkipped;
 import io.github.sinri.keel.facade.tesuto.instant.InstantRunnerResult;
 import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.poi.excel.KeelSheet;
@@ -36,30 +37,32 @@ public class ReadTemplatedExcelTest extends KeelInstantRunner {
         return Future.succeededFuture();
     }
 
-    @InstantRunUnit(skip = true)
+    @InstantRunUnit
+    @InstantRunUnitSkipped
     public Future<Void> test1() {
         return KeelSheets.useSheets(new SheetsOpenOptions().setFile(file), keelSheets -> {
             KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
             KeelSheetMatrix keelSheetMatrix = keelSheet.blockReadAllRowsToMatrix(1, 6, null);
             keelSheetMatrix.getRawRowList().forEach(row -> {
                 getInstantLogger()
-                    .info(log -> log.message("BLOCK: " + Keel.stringHelper().joinStringArray(row, ", ")));
+                        .info(log -> log.message("BLOCK: " + Keel.stringHelper().joinStringArray(row, ", ")));
             });
 
             keelSheetMatrix.getRowIterator(KeelSheetMatrixRowExt.class).forEachRemaining(r -> {
                 getInstantLogger().info(log -> log.message("record")
                                                   .context(c -> c
-                                                        .put("record_id", r.recordId())
-                                                        .put("name", r.name())
-                                                        .put("age", r.age())
-                                                )
+                                                          .put("record_id", r.recordId())
+                                                          .put("name", r.name())
+                                                          .put("age", r.age())
+                                                  )
                 );
             });
             return Future.succeededFuture();
         });
     }
 
-    @InstantRunUnit(skip = false)
+    @InstantRunUnit
+    @InstantRunUnitSkipped
     public Future<Void> test2() {
         return KeelSheets.useSheets(new SheetsOpenOptions().setFile(file), keelSheets -> {
             KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
@@ -69,7 +72,7 @@ public class ReadTemplatedExcelTest extends KeelInstantRunner {
                                     getInstantLogger().info(log -> log.message("ASYNC: " + Keel.stringHelper()
                                                                                                .joinStringArray(row,
                                                                                                        "," +
-                                                                                                     " ")));
+                                                                                                               " ")));
                                 });
                                 return Future.succeededFuture();
                             })
@@ -79,7 +82,8 @@ public class ReadTemplatedExcelTest extends KeelInstantRunner {
         });
     }
 
-    @InstantRunUnit(skip = true)
+    @InstantRunUnit
+    @InstantRunUnitSkipped
     public Future<Void> test3() {
         return KeelSheets.useSheets(new SheetsOpenOptions().setFile(file), keelSheets -> {
             KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
@@ -91,7 +95,8 @@ public class ReadTemplatedExcelTest extends KeelInstantRunner {
         });
     }
 
-    @InstantRunUnit(skip = true)
+    @InstantRunUnit
+    @InstantRunUnitSkipped
     public Future<Void> test4() {
         return KeelSheets.useSheets(new SheetsOpenOptions().setFile(file), keelSheets -> {
             KeelSheet keelSheet = keelSheets.generateReaderForSheet(0);
@@ -99,7 +104,7 @@ public class ReadTemplatedExcelTest extends KeelInstantRunner {
                             .compose(templatedMatrix -> {
                                 templatedMatrix.getRows().forEach(row -> {
                                     getInstantLogger()
-                                        .info(log -> log.message("ASYNC TEMPLATED: " + row.toJsonObject()));
+                                            .info(log -> log.message("ASYNC TEMPLATED: " + row.toJsonObject()));
                                 });
 
                                 return Future.succeededFuture();
@@ -110,7 +115,8 @@ public class ReadTemplatedExcelTest extends KeelInstantRunner {
         });
     }
 
-    @InstantRunUnit(skip = true)
+    @InstantRunUnit
+    @InstantRunUnitSkipped
     public Future<Void> test5() {
         FileInputStream fileInputStream;
         try {
@@ -124,7 +130,7 @@ public class ReadTemplatedExcelTest extends KeelInstantRunner {
                             .compose(templatedMatrix -> {
                                 templatedMatrix.getRows().forEach(row -> {
                                     getInstantLogger()
-                                        .info(log -> log.message("ASYNC TEMPLATED: " + row.toJsonObject()));
+                                            .info(log -> log.message("ASYNC TEMPLATED: " + row.toJsonObject()));
                                 });
 
                                 return Future.succeededFuture();

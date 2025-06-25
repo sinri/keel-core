@@ -286,9 +286,7 @@ public class WriteIntoStatement extends AbstractStatement implements WriteIntoSt
          */
         public static RowToWrite fromJsonObject(@Nonnull JsonObject jsonObject) {
             RowToWrite rowToWrite = new RowToWrite();
-            jsonObject.forEach(entry -> {
-                rowToWrite.put(entry.getKey(), entry.getValue());
-            });
+            jsonObject.forEach(entry -> rowToWrite.put(entry.getKey(), entry.getValue()));
             return rowToWrite;
         }
 

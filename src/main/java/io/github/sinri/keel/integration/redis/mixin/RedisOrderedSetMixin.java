@@ -49,9 +49,7 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
             }
 
             return api.zadd(args)
-                      .compose(response -> {
-                          return Future.succeededFuture(response.toInteger());
-                      });
+                      .compose(response -> Future.succeededFuture(response.toInteger()));
         });
     }
 
@@ -79,12 +77,8 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
      * @return 有序集合的成员数量，当键不存在时返回0
      */
     default Future<Integer> getOrderedSetSize(String key) {
-        return api(api -> {
-            return api.zcard(key)
-                      .compose(response -> {
-                          return Future.succeededFuture(response.toInteger());
-                      });
-        });
+        return api(api -> api.zcard(key)
+                         .compose(response -> Future.succeededFuture(response.toInteger())));
     }
 
     /**
@@ -98,12 +92,8 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
      * @return 指定分数区间的成员数量
      */
     default Future<Integer> countOrderedSetElementsInScoreRange(String key, String min, String max) {
-        return api(api -> {
-            return api.zcount(key, min, max)
-                      .compose(response -> {
-                          return Future.succeededFuture(response.toInteger());
-                      });
-        });
+        return api(api -> api.zcount(key, min, max)
+                         .compose(response -> Future.succeededFuture(response.toInteger())));
     }
 
     /**
@@ -118,12 +108,8 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
      * @return 增加后的分数
      */
     default Future<Double> incrementOrderedSetMemberScore(String key, double increment, String member) {
-        return api(api -> {
-            return api.zincrby(key, String.valueOf(increment), member)
-                      .compose(response -> {
-                          return Future.succeededFuture(Double.parseDouble(response.toString()));
-                      });
-        });
+        return api(api -> api.zincrby(key, String.valueOf(increment), member)
+                         .compose(response -> Future.succeededFuture(Double.parseDouble(response.toString()))));
     }
 
     /**
@@ -198,9 +184,7 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
             }
 
             return api.zinterstore(args)
-                      .compose(response -> {
-                          return Future.succeededFuture(response.toInteger());
-                      });
+                      .compose(response -> Future.succeededFuture(response.toInteger()));
         });
     }
 
@@ -215,12 +199,8 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
      * @return 指定区间内的成员数量
      */
     default Future<Integer> countOrderedSetElementsInLexRange(String key, String min, String max) {
-        return api(api -> {
-            return api.zlexcount(key, min, max)
-                      .compose(response -> {
-                          return Future.succeededFuture(response.toInteger());
-                      });
-        });
+        return api(api -> api.zlexcount(key, min, max)
+                         .compose(response -> Future.succeededFuture(response.toInteger())));
     }
 
     /**
@@ -346,6 +326,7 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
      * @param count  可选的返回成员数量限制
      * @return 符合字典序范围的成员列表
      */
+    @Deprecated(since = "4.1.0")
     default Future<List<String>> getOrderedSetRangeByLex(String key, String min, String max, Integer offset, Integer count) {
         return api(api -> {
             List<String> args = new ArrayList<>();
@@ -381,6 +362,7 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
      * @param count      可选的返回成员数量限制
      * @return 符合分数范围的成员列表，如果withScores为true，则为成员和分数交替的列表
      */
+    @Deprecated(since = "4.1.0")
     default Future<List<String>> getOrderedSetRangeByScore(String key, String min, String max, boolean withScores, Integer offset, Integer count) {
         return api(api -> {
             List<String> args = new ArrayList<>();
@@ -416,15 +398,13 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
      * @return 排名，如果成员不存在则返回null
      */
     default Future<Integer> getOrderedSetMemberRank(String key, String member) {
-        return api(api -> {
-            return api.zrank(key, member)
-                      .compose(response -> {
-                          if (response == null) {
-                              return Future.succeededFuture(null);
-                          }
-                          return Future.succeededFuture(response.toInteger());
-                      });
-        });
+        return api(api -> api.zrank(key, member)
+                         .compose(response -> {
+                      if (response == null) {
+                          return Future.succeededFuture(null);
+                      }
+                      return Future.succeededFuture(response.toInteger());
+                  }));
     }
 
     /**
@@ -442,9 +422,7 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
             args.addAll(members);
 
             return api.zrem(args)
-                      .compose(response -> {
-                          return Future.succeededFuture(response.toInteger());
-                      });
+                      .compose(response -> Future.succeededFuture(response.toInteger()));
         });
     }
 
@@ -465,12 +443,8 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
      * @return 被移除的成员数量
      */
     default Future<Integer> removeOrderedSetRangeByLex(String key, String min, String max) {
-        return api(api -> {
-            return api.zremrangebylex(key, min, max)
-                      .compose(response -> {
-                          return Future.succeededFuture(response.toInteger());
-                      });
-        });
+        return api(api -> api.zremrangebylex(key, min, max)
+                         .compose(response -> Future.succeededFuture(response.toInteger())));
     }
 
     /**
@@ -484,12 +458,8 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
      * @return 被移除的成员数量
      */
     default Future<Integer> removeOrderedSetRangeByRank(String key, long start, long stop) {
-        return api(api -> {
-            return api.zremrangebyrank(key, String.valueOf(start), String.valueOf(stop))
-                      .compose(response -> {
-                          return Future.succeededFuture(response.toInteger());
-                      });
-        });
+        return api(api -> api.zremrangebyrank(key, String.valueOf(start), String.valueOf(stop))
+                         .compose(response -> Future.succeededFuture(response.toInteger())));
     }
 
     /**
@@ -502,12 +472,8 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
      * @return 被移除的成员数量
      */
     default Future<Integer> removeOrderedSetRangeByScore(String key, String min, String max) {
-        return api(api -> {
-            return api.zremrangebyscore(key, min, max)
-                      .compose(response -> {
-                          return Future.succeededFuture(response.toInteger());
-                      });
-        });
+        return api(api -> api.zremrangebyscore(key, min, max)
+                         .compose(response -> Future.succeededFuture(response.toInteger())));
     }
 
     /**
@@ -520,6 +486,7 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
      * @param withScores 是否返回成员的分数
      * @return 指定区间内的成员列表，如果withScores为true，则为成员和分数交替的列表
      */
+    @Deprecated(since = "4.1.0")
     default Future<List<String>> getOrderedSetReverseRange(String key, long start, long stop, boolean withScores) {
         return api(api -> {
             List<String> args = new ArrayList<>();
@@ -552,6 +519,7 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
      * @param count  可选的返回成员数量限制
      * @return 符合字典序范围的成员列表，按字典序递减排序
      */
+    @Deprecated(since = "4.1.0")
     default Future<List<String>> getOrderedSetReverseRangeByLex(String key, String max, String min, Integer offset, Integer count) {
         return api(api -> {
             List<String> args = new ArrayList<>();
@@ -586,6 +554,7 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
      * @param count      可选的返回成员数量限制
      * @return 符合分数范围的成员列表，按分数递减排序，如果withScores为true，则为成员和分数交替的列表
      */
+    @Deprecated(since = "4.1.0")
     default Future<List<String>> getOrderedSetReverseRangeByScore(String key, String max, String min, boolean withScores, Integer offset, Integer count) {
         return api(api -> {
             List<String> args = new ArrayList<>();
@@ -621,15 +590,13 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
      * @return 排名，如果成员不存在则返回null
      */
     default Future<Integer> getOrderedSetMemberReverseRank(String key, String member) {
-        return api(api -> {
-            return api.zrevrank(key, member)
-                      .compose(response -> {
-                          if (response == null) {
-                              return Future.succeededFuture(null);
-                          }
-                          return Future.succeededFuture(response.toInteger());
-                      });
-        });
+        return api(api -> api.zrevrank(key, member)
+                         .compose(response -> {
+                      if (response == null) {
+                          return Future.succeededFuture(null);
+                      }
+                      return Future.succeededFuture(response.toInteger());
+                  }));
     }
 
     /**
@@ -655,15 +622,13 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
      * @return 成员的分数值，如果成员不存在或键不存在则返回null
      */
     default Future<Double> getOrderedSetMemberScore(String key, String member) {
-        return api(api -> {
-            return api.zscore(key, member)
-                      .compose(response -> {
-                          if (response == null) {
-                              return Future.succeededFuture(null);
-                          }
-                          return Future.succeededFuture(Double.parseDouble(response.toString()));
-                      });
-        });
+        return api(api -> api.zscore(key, member)
+                         .compose(response -> {
+                      if (response == null) {
+                          return Future.succeededFuture(null);
+                      }
+                      return Future.succeededFuture(Double.parseDouble(response.toString()));
+                  }));
     }
 
     /**
@@ -737,9 +702,7 @@ public interface RedisOrderedSetMixin extends RedisApiMixin {
             }
 
             return api.zunionstore(args)
-                      .compose(response -> {
-                          return Future.succeededFuture(response.toInteger());
-                      });
+                      .compose(response -> Future.succeededFuture(response.toInteger()));
         });
     }
 

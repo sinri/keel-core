@@ -94,9 +94,7 @@ public abstract class KeelWebReceptionist {
      */
     protected final void respondOnSuccess(@Nullable Object data) {
         getResponder().respondOnSuccess(data);
-        getIssueRecorder().info(r -> {
-            r.message("SUCCESS, TO RESPOND.");
-        });
+        getIssueRecorder().info(r -> r.message("SUCCESS, TO RESPOND."));
     }
 
     /**
@@ -106,9 +104,7 @@ public abstract class KeelWebReceptionist {
      */
     protected final void respondOnFailure(@Nonnull Throwable throwable) {
         getResponder().respondOnFailure(throwable);
-        getIssueRecorder().exception(throwable, r -> {
-            r.message("FAILED, TO RESPOND.");
-        });
+        getIssueRecorder().exception(throwable, r -> r.message("FAILED, TO RESPOND."));
     }
 
     /**

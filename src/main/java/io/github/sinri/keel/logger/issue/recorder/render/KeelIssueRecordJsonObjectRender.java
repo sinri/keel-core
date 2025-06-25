@@ -36,9 +36,7 @@ public class KeelIssueRecordJsonObjectRender implements KeelIssueRecordRender<Js
         issueRecord.classification().forEach(classification::add);
         x.put("classification", classification);
 
-        issueRecord.attributes().forEach(entry -> {
-            x.put(entry.getKey(), entry.getValue());
-        });
+        issueRecord.attributes().forEach(entry -> x.put(entry.getKey(), entry.getValue()));
         Throwable exception = issueRecord.exception();
         if (exception != null) {
             x.put("exception", renderThrowable(exception));

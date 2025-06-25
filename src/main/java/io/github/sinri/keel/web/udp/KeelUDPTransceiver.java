@@ -65,33 +65,21 @@ public class KeelUDPTransceiver {
                                 );
                                 this.datagramSocketConsumer.accept(sender, data);
                             })
-                            .endHandler(end -> {
-                                getIssueRecorder().info(r -> r.message("read end"));
-                            })
-                            .exceptionHandler(throwable -> {
-                                getIssueRecorder().exception(throwable, r -> r.message("read error"));
-                            });
+                            //.endHandler(end -> getIssueRecorder().info(r -> r.message("read end")))
+                            .exceptionHandler(throwable -> getIssueRecorder().exception(throwable, r -> r.message("read error")));
                     return Future.succeededFuture();
                 });
     }
 
     public Future<Void> send(Buffer buffer, int targetPort, String targetAddress) {
         return udpServer.send(buffer, targetPort, targetAddress)
-                .onSuccess(done -> {
-                    getIssueRecorder().info(r -> r.bufferSent(buffer, targetAddress, targetPort));
-                })
-                .onFailure(throwable -> {
-                    getIssueRecorder().exception(throwable, r -> r.message("failed to send to " + targetAddress + ":" + targetPort));
-                });
+                .onSuccess(done -> getIssueRecorder().info(r -> r.bufferSent(buffer, targetAddress, targetPort)))
+                .onFailure(throwable -> getIssueRecorder().exception(throwable, r -> r.message("failed to send to " + targetAddress + ":" + targetPort)));
     }
 
     public Future<Void> close() {
         return udpServer.close()
-                .onSuccess(v -> {
-                    getIssueRecorder().info(r -> r.message("closed"));
-                })
-                .onFailure(throwable -> {
-                    getIssueRecorder().exception(throwable, r -> r.message("failed to close"));
-                });
+                .onSuccess(v -> getIssueRecorder().info(r -> r.message("closed")))
+                .onFailure(throwable -> getIssueRecorder().exception(throwable, r -> r.message("failed to close")));
     }
 }

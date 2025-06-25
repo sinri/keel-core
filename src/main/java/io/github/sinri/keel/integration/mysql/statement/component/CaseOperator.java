@@ -87,10 +87,8 @@ public class CaseOperator {
         if (!(Objects.requireNonNullElse(getCaseValueExpression(), "")).isBlank()) {
             sb.append(" ").append(getCaseValueExpression());
         }
-        getWhenThenPairs().forEach(pair -> {
-            sb.append(" WHEN ").append(pair.getWhenExpression())
-                    .append(" THEN ").append(pair.getThenExpression());
-        });
+        getWhenThenPairs().forEach(pair -> sb.append(" WHEN ").append(pair.getWhenExpression())
+                                         .append(" THEN ").append(pair.getThenExpression()));
         if (!(Objects.requireNonNullElse(getElseResultExpression(), "")).isBlank()) {
             sb.append(" ELSE ").append(getElseResultExpression());
         }

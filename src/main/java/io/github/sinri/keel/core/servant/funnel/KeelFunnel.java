@@ -87,9 +87,7 @@ public class KeelFunnel extends KeelVerticleImpl {
 
                            // got one job to do, no matter if done
                            return Future.succeededFuture()
-                                        .compose(v -> {
-                                            return supplier.get();
-                                        })
+                                        .compose(v -> supplier.get())
                                         .compose(v -> {
                                             //getLogger().debug("funnel done");
                                             return Future.succeededFuture();
@@ -103,9 +101,7 @@ public class KeelFunnel extends KeelVerticleImpl {
                            this.interruptRef.set(Promise.promise());
 
                            Keel.asyncSleep(this.sleepTimeRef.get(), getCurrentInterrupt())
-                               .andThen(slept -> {
-                                   repeatedlyCallTask.stop();
-                               });
+                               .andThen(slept -> repeatedlyCallTask.stop());
                        });
         });
 

@@ -52,7 +52,7 @@ public class KeelUnitTest implements KeelUnitTestCore {
      * Prepare the test environment.
      */
     protected void prepareEnvironment() {
-
+        getUnitTestLogger().debug("KeelUnitTest.prepareEnvironment is not detailed required.");
     }
 
     /**

@@ -26,7 +26,7 @@ public final class DatagramIssueRecord extends KeelIssueRecord<DatagramIssueReco
 
     private DatagramIssueRecord buffer(@Nonnull Buffer buffer, @Nonnull String address, int port, @Nonnull String action) {
         this.context(action, new JsonObject()
-                        .put("address", action)
+                        .put("address", address)
                         .put("port", port)
                 )
                 .context("buffer", new JsonObject()

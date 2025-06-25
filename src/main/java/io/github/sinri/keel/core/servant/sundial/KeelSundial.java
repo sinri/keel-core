@@ -95,28 +95,24 @@ public abstract class KeelSundial extends KeelVerticleImpl {
         Keel.asyncCallExclusively(
                     "io.github.sinri.keel.servant.sundial.KeelSundial.refreshPlans",
                     1000L,
-                    () -> {
-                        return fetchPlans()
-                                .compose(plans -> {
-                                    // treat null as NOT MODIFIED
-                                    if (plans != null) {
-                                        Set<String> toDelete = new HashSet<>(planMap.keySet());
-                                        plans.forEach(plan -> {
-                                            toDelete.remove(plan.key());
-                                            planMap.put(plan.key(), plan);
-                                        });
-                                        if (!toDelete.isEmpty()) {
-                                            toDelete.forEach(planMap::remove);
-                                        }
+                    () -> fetchPlans()
+                            .compose(plans -> {
+                                // treat null as NOT MODIFIED
+                                if (plans != null) {
+                                    Set<String> toDelete = new HashSet<>(planMap.keySet());
+                                    plans.forEach(plan -> {
+                                        toDelete.remove(plan.key());
+                                        planMap.put(plan.key(), plan);
+                                    });
+                                    if (!toDelete.isEmpty()) {
+                                        toDelete.forEach(planMap::remove);
                                     }
-                                    return Future.succeededFuture();
-                                });
-                    }
+                                }
+                                return Future.succeededFuture();
+                            })
             )
-            .onFailure(throwable -> {
-                getSundialIssueRecorder().exception(throwable, "io.github.sinri.keel.core.servant.sundial.KeelSundial" +
-                        ".refreshPlans exception");
-            });
+            .onFailure(throwable -> getSundialIssueRecorder().exception(throwable, "io.github.sinri.keel.core.servant.sundial.KeelSundial" +
+                    ".refreshPlans exception"));
     }
 
     /**
@@ -126,7 +122,7 @@ public abstract class KeelSundial extends KeelVerticleImpl {
     abstract protected Future<Collection<KeelSundialPlan>> fetchPlans();
 
     @Override
-    public void stop(Promise<Void> stopPromise) throws Exception {
+    public void stop(Promise<Void> stopPromise) {
         if (this.timerID != null) {
             Keel.getVertx().cancelTimer(this.timerID);
         }

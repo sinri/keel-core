@@ -93,11 +93,7 @@ public interface KeelAsyncCacheInterface<K, V> {
      * @since 3.0.4
      */
     default void startEndlessCleanUp(long sleepTime) {
-        Keel.asyncCallEndlessly(() -> {
-            return cleanUp().compose(cleaned -> {
-                return Keel.asyncSleep(sleepTime);
-            });
-        });
+        Keel.asyncCallEndlessly(() -> cleanUp().compose(cleaned -> Keel.asyncSleep(sleepTime)));
     }
 
 }

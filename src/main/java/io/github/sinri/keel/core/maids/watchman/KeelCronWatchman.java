@@ -97,32 +97,30 @@ public class KeelCronWatchman extends KeelWatchmanImpl {
                     .put("handler", classItem));
         }));
         return operateCronTab(asyncMapName, () -> Keel.getVertx().sharedData().getAsyncMap(asyncMapName)
-                                                      .compose(asyncMap -> {
-                                                          return asyncMap.keys()
-                                                                         .compose(oldKeys -> {
-                                                                             Set<Object> newKeys = hashMap.keySet();
+                                                      .compose(asyncMap -> asyncMap.keys()
+                                                                               .compose(oldKeys -> {
+                                                                         Set<Object> newKeys = hashMap.keySet();
 
-                                                                             HashSet<Object> toDeleteHashSet =
-                                                                                     new HashSet<>(oldKeys);
-                                                                             toDeleteHashSet.removeAll(newKeys);
+                                                                         HashSet<Object> toDeleteHashSet =
+                                                                                 new HashSet<>(oldKeys);
+                                                                         toDeleteHashSet.removeAll(newKeys);
 
-                                                                             HashSet<Object> toAddHashSet =
-                                                                                     new HashSet<>(newKeys);
-                                                                             toAddHashSet.removeAll(oldKeys);
+                                                                         HashSet<Object> toAddHashSet =
+                                                                                 new HashSet<>(newKeys);
+                                                                         toAddHashSet.removeAll(oldKeys);
 
-                                                                             return Future.all(
-                                                                                     Keel.asyncCallIteratively(
-                                                                                             toDeleteHashSet,
-                                                                                             (hash, task) -> asyncMap.remove(String.valueOf(hash))
-                                                                                                                     .compose(v -> Future.succeededFuture())),
-                                                                                     Keel.asyncCallIteratively(
-                                                                                             toAddHashSet,
-                                                                                             (hash, task) -> asyncMap.put(hash, hashMap.get(hash))
-                                                                                                                     .compose(v -> Future.succeededFuture()))
-                                                                             );
-                                                                         })
-                                                                         .compose(v -> Future.succeededFuture());
-                                                      })
+                                                                         return Future.all(
+                                                                                 Keel.asyncCallIteratively(
+                                                                                         toDeleteHashSet,
+                                                                                         (hash, task) -> asyncMap.remove(String.valueOf(hash))
+                                                                                                                 .compose(v -> Future.succeededFuture())),
+                                                                                 Keel.asyncCallIteratively(
+                                                                                         toAddHashSet,
+                                                                                         (hash, task) -> asyncMap.put(hash, hashMap.get(hash))
+                                                                                                                 .compose(v -> Future.succeededFuture()))
+                                                                         );
+                                                                     })
+                                                                               .compose(v -> Future.succeededFuture()))
         );
     }
 

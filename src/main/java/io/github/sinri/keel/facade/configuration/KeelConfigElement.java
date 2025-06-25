@@ -97,9 +97,7 @@ public class KeelConfigElement {
                                   KeelConfigElement element = fromJsonObject(jsonObject);
                                   return Future.succeededFuture(element);
                               })
-                              .andThen(ar -> {
-                                  configRetriever.close();
-                              });
+                              .andThen(ar -> configRetriever.close());
     }
 
     /**

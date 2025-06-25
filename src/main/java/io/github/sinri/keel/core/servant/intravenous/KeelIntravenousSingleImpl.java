@@ -21,15 +21,11 @@ class KeelIntravenousSingleImpl<D> extends KeelIntravenousBase<D> {
     }
 
     protected Future<Void> handleDrops(List<D> drops) {
-        return Keel.asyncCallIteratively(drops, drop -> {
-            return Future.succeededFuture()
-                         .compose(v -> {
-                             return this.itemProcessor.process(drop);
-                         })
-                         .recover(throwable -> {
-                             this.handleAllergy(throwable);
-                             return Future.succeededFuture();
-                         });
-        });
+        return Keel.asyncCallIteratively(drops, drop -> Future.succeededFuture()
+                                                          .compose(v -> this.itemProcessor.process(drop))
+                                                          .recover(throwable -> {
+                         this.handleAllergy(throwable);
+                         return Future.succeededFuture();
+                     }));
     }
 }

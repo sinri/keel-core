@@ -159,13 +159,11 @@ public class TableRowClassSourceCodeGenerator {
                                               return Future.succeededFuture();
                                           });
                            })
-                   .compose(v -> {
-                       return Keel.asyncCallIteratively(writeMap.entrySet(), entry -> {
-                           var classFile = entry.getKey();
-                           var code = entry.getValue();
-                           return Keel.getVertx().fileSystem().writeFile(classFile, Buffer.buffer(code));
-                       });
-                   });
+                   .compose(v -> Keel.asyncCallIteratively(writeMap.entrySet(), entry -> {
+                       var classFile = entry.getKey();
+                       var code = entry.getValue();
+                       return Keel.getVertx().fileSystem().writeFile(classFile, Buffer.buffer(code));
+                   }));
     }
 
     private Future<String> generateClassCodeForOneTable(String schema, String table, String packageName, String className) {
@@ -206,9 +204,7 @@ public class TableRowClassSourceCodeGenerator {
         return sqlConnection.query(sql_for_table_comment).execute()
                             .compose(rows -> {
                                 AtomicReference<String> comment = new AtomicReference<>();
-                                rows.forEach(row -> {
-                                    comment.set(row.getString("TABLE_COMMENT"));
-                                });
+                                rows.forEach(row -> comment.set(row.getString("TABLE_COMMENT")));
                                 return Future.succeededFuture(comment.get());
                             });
     }
@@ -228,7 +224,7 @@ public class TableRowClassSourceCodeGenerator {
                                     String field = row.getString("Field");
                                     String type = row.getString("Type");
                                     String comment = row.getString("Comment");
-                                    if (comment == null || comment.isEmpty() || comment.isBlank()) {
+                                    if (comment == null || comment.isBlank()) {
                                         comment = null;
                                     }
 
@@ -252,9 +248,7 @@ public class TableRowClassSourceCodeGenerator {
                             .execute()
                             .compose(rows -> {
                                 AtomicReference<String> creation = new AtomicReference<>();
-                                rows.forEach(row -> {
-                                    creation.set(row.getString(1));
-                                });
+                                rows.forEach(row -> creation.set(row.getString(1)));
                                 return Future.succeededFuture(creation.get());
                             });
     }

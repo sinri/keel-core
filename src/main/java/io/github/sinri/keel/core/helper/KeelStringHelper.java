@@ -381,9 +381,7 @@ public class KeelStringHelper {
      */
     public String escapeForHttpEntity(String raw) {
         AtomicReference<String> x = new AtomicReference<>(raw);
-        HttpEntityEscapeDictionary.forEach((k, v) -> {
-            x.set(x.get().replace(k, v));
-        });
+        HttpEntityEscapeDictionary.forEach((k, v) -> x.set(x.get().replace(k, v)));
         return x.get();
     }
 
@@ -585,7 +583,7 @@ public class KeelStringHelper {
      */
     @Nonnull
     public String generateRandomString(int length, @Nonnull String charSet) {
-        if (charSet == null || charSet.isEmpty()) {
+        if (charSet.isEmpty()) {
             throw new IllegalArgumentException("Character set cannot be null or empty");
         }
         StringBuilder sb = new StringBuilder();

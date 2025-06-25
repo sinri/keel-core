@@ -1,6 +1,7 @@
 package io.github.sinri.keel.test.lab.excel;
 
 import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnitSkipped;
 import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.poi.excel.KeelSheet;
 import io.github.sinri.keel.integration.poi.excel.KeelSheets;
@@ -17,7 +18,8 @@ public class ReadWriteExcelTest extends KeelInstantRunner {
     private static final String file = "/Users/leqee/code/Keel/src/test/resources/runtime/excel/excel_6.xlsx";
 
 
-    @InstantRunUnit(skip = true)
+    @InstantRunUnit
+    @InstantRunUnitSkipped
     public Future<Void> write() {
         return KeelSheets.useSheets(new SheetsCreateOptions().setUseXlsx(true),
                 keelSheets -> {
@@ -39,7 +41,7 @@ public class ReadWriteExcelTest extends KeelInstantRunner {
                 });
     }
 
-    @InstantRunUnit(skip = false)
+    @InstantRunUnit
     public Future<Void> read() {
         return KeelSheets.useSheets(
                 new SheetsOpenOptions().setFile(file),

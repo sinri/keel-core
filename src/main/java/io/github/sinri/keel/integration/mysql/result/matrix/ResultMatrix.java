@@ -140,9 +140,7 @@ public interface ResultMatrix {
     ) {
         Map<K, V> map = new HashMap<>();
         var list = getRowList();
-        list.forEach(item -> {
-            rowToMapHandler.accept(map, item);
-        });
+        list.forEach(item -> rowToMapHandler.accept(map, item));
         return Future.succeededFuture(map);
     }
 
@@ -188,9 +186,7 @@ public interface ResultMatrix {
         new TreeMap<>(bodyMap).forEach((k, v) -> {
             JsonObject x = new JsonObject();
             JsonObject keyEntity = keyMap.get(k);
-            keyEntity.forEach(e -> {
-                x.put(e.getKey(), e.getValue());
-            });
+            keyEntity.forEach(e -> x.put(e.getKey(), e.getValue()));
             List<JsonObject> jsonObjects = bodyMap.get(k);
             x.put(shrinkBodyListKey, jsonObjects);
         });

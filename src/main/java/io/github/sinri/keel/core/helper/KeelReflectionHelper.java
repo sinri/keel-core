@@ -114,10 +114,10 @@ public class KeelReflectionHelper {
             if (resource != null) {
                 URI uri = resource.toURI();
                 Path startPath = Paths.get(uri);
-                Files.walkFileTree(startPath, new SimpleFileVisitor<Path>() {
+                Files.walkFileTree(startPath, new SimpleFileVisitor<>() {
                     @Nonnull
                     @Override
-                    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    public FileVisitResult visitFile(@Nonnull Path file, @Nonnull BasicFileAttributes attrs) {
                         if (file.toString().endsWith(".class")) {
                             String className = file.toString().replace(".class", "").replace("/", ".");
                             className = className.substring(className.indexOf(packageName));

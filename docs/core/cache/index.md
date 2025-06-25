@@ -18,40 +18,42 @@ Keel 缓存包提供了多种缓存接口和实现，支持同步/异步操作�
 **典型用法：**
 
 ```java
-// 创建缓存实例
-KeelCacheInterface<String, String> cache = KeelCacheInterface.createDefaultInstance();
+void sample() {
+    // 创建缓存实例
+    KeelCacheInterface<String, String> cache = KeelCacheInterface.createDefaultInstance();
 
-// 设置默认生存时间为60秒
-cache.setDefaultLifeInSeconds(60);
+    // 设置默认生存时间为60秒
+    cache.setDefaultLifeInSeconds(60);
 
-// 保存缓存项（使用默认生存时间）
-cache.save("user:123", "John Doe");
+    // 保存缓存项（使用默认生存时间）
+    cache.save("user:123", "John Doe");
 
-// 保存缓存项（指定生存时间为300秒）
-cache.save("session:abc", "active", 300);
+    // 保存缓存项（指定生存时间为300秒）
+    cache.save("session:abc", "active", 300);
 
-// 读取缓存项（未找到时返回null）
-try {
-    String user = cache.read("user:123");
-    System.out.println("User: " + user);
-} catch (NotCached e) {
-    System.out.println("User not found in cache");
+    // 读取缓存项（未找到时返回null）
+    try {
+        String user = cache.read("user:123");
+        System.out.println("User: " + user);
+    } catch (NotCached e) {
+        System.out.println("User not found in cache");
+    }
+
+    // 读取缓存项（未找到时返回默认值）
+    String status = cache.read("session:xyz", "inactive");
+
+    // 使用生成器模式（缓存未命中时自动生成并缓存）
+    String userData = cache.read("user:456", () -> {
+        // 从数据库加载用户数据
+        return loadUserFromDatabase("456");
+    }, 120);
+
+    // 手动清理过期缓存项
+    cache.cleanUp();
+
+    // 启动自动清理（每30秒清理一次）
+    cache.startEndlessCleanUp(30000);
 }
-
-// 读取缓存项（未找到时返回默认值）
-String status = cache.read("session:xyz", "inactive");
-
-// 使用生成器模式（缓存未命中时自动生成并缓存）
-String userData = cache.read("user:456", () -> {
-    // 从数据库加载用户数据
-    return loadUserFromDatabase("456");
-}, 120);
-
-// 手动清理过期缓存项
-cache.cleanUp();
-
-// 启动自动清理（每30秒清理一次）
-cache.startEndlessCleanUp(30000);
 ```
 
 ### 2. KeelAsyncCacheInterface<K, V> - 异步缓存接口

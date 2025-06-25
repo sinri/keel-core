@@ -56,7 +56,7 @@ public abstract class Pleiades<T> extends KeelVerticleImpl {
     }
 
     @Override
-    public void stop(Promise<Void> stopPromise) throws Exception {
+    public void stop(Promise<Void> stopPromise) {
         if (consumer != null) {
             consumer.unregister()
                     .onSuccess(unused -> stopPromise.complete())

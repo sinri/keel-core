@@ -37,9 +37,7 @@ public class TemplateArgument {
 
     public static TemplateArgument forNumbers(@Nonnull Collection<? extends Number> numbers) {
         List<String> list = new ArrayList<>();
-        numbers.forEach(number -> {
-            list.add(String.valueOf(number));
-        });
+        numbers.forEach(number -> list.add(String.valueOf(number)));
         return forExpressions(list);
     }
 
@@ -53,9 +51,7 @@ public class TemplateArgument {
 
     public static TemplateArgument forStrings(@Nonnull Collection<String> strings) {
         List<String> list = new ArrayList<>();
-        strings.forEach(string -> {
-            list.add(Quoter.quoteEscapedString(Quoter.escapeString(string)));
-        });
+        strings.forEach(string -> list.add(Quoter.quoteEscapedString(Quoter.escapeString(string))));
         return forExpressions(list);
     }
 

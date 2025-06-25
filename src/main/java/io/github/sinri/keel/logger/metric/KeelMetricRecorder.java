@@ -35,36 +35,34 @@ abstract public class KeelMetricRecorder {
     }
 
     public void start() {
-        Keel.asyncCallRepeatedly(routineResult -> {
-            return Future.succeededFuture()
-                    .compose(v -> {
-                        List<KeelMetricRecord> buffer = new ArrayList<>();
+        Keel.asyncCallRepeatedly(routineResult -> Future.succeededFuture()
+                                                    .compose(v -> {
+                    List<KeelMetricRecord> buffer = new ArrayList<>();
 
-                        while (true) {
-                            KeelMetricRecord metricRecord = metricRecordQueue.poll();
-                            if (metricRecord == null) break;
+                    while (true) {
+                        KeelMetricRecord metricRecord = metricRecordQueue.poll();
+                        if (metricRecord == null) break;
 
-                            buffer.add(metricRecord);
-                            if (buffer.size() >= bufferSize()) break;
+                        buffer.add(metricRecord);
+                        if (buffer.size() >= bufferSize()) break;
+                    }
+
+                    if (buffer.isEmpty()) {
+                        if (endSwitch.get()) {
+                            routineResult.stop();
+                            return Future.succeededFuture();
                         }
-
-                        if (buffer.isEmpty()) {
-                            if (endSwitch.get()) {
-                                routineResult.stop();
-                                return Future.succeededFuture();
-                            }
-                            return Keel.asyncSleep(1000L);
-                        } else {
-                            // since 4.0.0 no various topics supported.
+                        return Keel.asyncSleep(1000L);
+                    } else {
+                        // since 4.0.0 no various topics supported.
 //                            Map<String, List<KeelMetricRecord>> map = groupByTopic(buffer);
 //                            return Keel.asyncCallIteratively(map.keySet(), topic -> {
 //                                return handleForTopic(topic, map.get(topic));
 //                            });
 
-                            return handleForTopic(topic(), buffer);
-                        }
-                    });
-        });
+                        return handleForTopic(topic(), buffer);
+                    }
+                }));
     }
 
     public void end() {

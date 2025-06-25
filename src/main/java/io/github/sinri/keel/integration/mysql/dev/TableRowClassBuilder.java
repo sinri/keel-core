@@ -176,9 +176,7 @@ class TableRowClassBuilder {
                 .append("\t}\n");
         }
 
-        fields.forEach(field -> {
-            code.append(field.toString()).append("\n");
-        });
+        fields.forEach(field -> code.append(field.toString()).append("\n"));
 
         code.append("\n}\n");
         if (ddl != null) {

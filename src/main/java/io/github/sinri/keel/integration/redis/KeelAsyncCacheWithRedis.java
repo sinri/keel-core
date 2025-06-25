@@ -38,11 +38,7 @@ public class KeelAsyncCacheWithRedis implements KeelAsyncCacheInterface<String, 
     @Override
     public Future<String> read(@Nonnull String key, String fallbackValue) {
         return this.read(key)
-                .compose(s -> {
-                    return Future.succeededFuture(Objects.requireNonNullElse(s, fallbackValue));
-                }, throwable -> {
-                    return Future.succeededFuture(fallbackValue);
-                });
+                .compose(s -> Future.succeededFuture(Objects.requireNonNullElse(s, fallbackValue)), throwable -> Future.succeededFuture(fallbackValue));
     }
 
     @Override
@@ -51,25 +47,15 @@ public class KeelAsyncCacheWithRedis implements KeelAsyncCacheInterface<String, 
                     Objects.requireNonNull(s);
                     return Future.succeededFuture(s);
                 })
-                .recover(throwable -> {
-                    return generator.apply(key)
-                            .compose(v -> {
-                                return save(key, v, lifeInSeconds)
-                                        .recover(saveFailed -> {
-                                            return Future.succeededFuture();
-                                        })
-                                        .compose(anyway -> {
-                                            return Future.succeededFuture(v);
-                                        });
-                            });
-                });
+                .recover(throwable -> generator.apply(key)
+                                           .compose(v -> save(key, v, lifeInSeconds)
+                                .recover(saveFailed -> Future.succeededFuture())
+                                .compose(anyway -> Future.succeededFuture(v))));
     }
 
     @Override
     public Future<Void> remove(@Nonnull String key) {
-        return redisKit.deleteKey(key).compose(x -> {
-            return Future.succeededFuture();
-        });
+        return redisKit.deleteKey(key).compose(x -> Future.succeededFuture());
     }
 
     @Override

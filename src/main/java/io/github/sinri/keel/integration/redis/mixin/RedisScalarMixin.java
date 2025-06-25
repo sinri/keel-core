@@ -63,15 +63,13 @@ public interface RedisScalarMixin extends RedisApiMixin {
         if (setMode != SetMode.None) {
             args.add(setMode.name());
         }
-        return api(api -> {
-            return api.set(args).compose(response -> {
-                if (Objects.equals(response.toString(), "OK")) {
-                    return Future.succeededFuture();
-                } else {
-                    return Future.failedFuture(new RuntimeException("SET Response is not OK but " + response));
-                }
-            });
-        });
+        return api(api -> api.set(args).compose(response -> {
+            if (Objects.equals(response.toString(), "OK")) {
+                return Future.succeededFuture();
+            } else {
+                return Future.failedFuture(new RuntimeException("SET Response is not OK but " + response));
+            }
+        }));
     }
 
     /**
@@ -82,14 +80,12 @@ public interface RedisScalarMixin extends RedisApiMixin {
      *         如果键 key 的值不是字符串类型， 返回错误， 因为 GET 命令只能用于字符串值。
      */
     default Future<String> getString(String key) {
-        return api(api -> {
-            return api.get(key).compose(response -> {
-                if (response == null) {
-                    return Future.succeededFuture();
-                }
-                return Future.succeededFuture(response.toString());
-            });
-        });
+        return api(api -> api.get(key).compose(response -> {
+            if (response == null) {
+                return Future.succeededFuture();
+            }
+            return Future.succeededFuture(response.toString());
+        }));
     }
 
     /**
@@ -101,11 +97,8 @@ public interface RedisScalarMixin extends RedisApiMixin {
      * @return 截取得到的子字符串。
      */
     default Future<String> getSubstring(String key, int start, int end) {
-        return api(api -> {
-            return api.getrange(key, String.valueOf(start), String.valueOf(end)).compose(response -> {
-                return Future.succeededFuture(response.toString());
-            });
-        });
+        return api(api -> api.getrange(key, String.valueOf(start), String.valueOf(end))
+                             .compose(response -> Future.succeededFuture(response.toString())));
     }
 
     /**
@@ -117,15 +110,14 @@ public interface RedisScalarMixin extends RedisApiMixin {
      *
      * @return the old value stored at key, or nil when key did not exist.
      */
+    @Deprecated(since = "4.1.0")
     default Future<String> replaceString(String key, String newValue) {
-        return api(api -> {
-            return api.getset(key, newValue).compose(response -> {
-                if (response == null) {
-                    return Future.succeededFuture();
-                }
-                return Future.succeededFuture(response.toString());
-            });
-        });
+        return api(api -> api.getset(key, newValue).compose(response -> {
+            if (response == null) {
+                return Future.succeededFuture();
+            }
+            return Future.succeededFuture(response.toString());
+        }));
     }
 
     /**
@@ -139,11 +131,7 @@ public interface RedisScalarMixin extends RedisApiMixin {
      * @return 执行 INCR 命令之后 key 的值。
      */
     default Future<Long> increment(String key) {
-        return api(api -> {
-            return api.incr(key).compose(response -> {
-                return Future.succeededFuture(response.toLong());
-            });
-        });
+        return api(api -> api.incr(key).compose(response -> Future.succeededFuture(response.toLong())));
     }
 
     /**
@@ -157,11 +145,8 @@ public interface RedisScalarMixin extends RedisApiMixin {
      * @return 命令执行之后 key 中 存储的值。
      */
     default Future<Long> increment(String key, long x) {
-        return api(api -> {
-            return api.incrby(key, String.valueOf(x)).compose(response -> {
-                return Future.succeededFuture(response.toLong());
-            });
-        });
+        return api(api -> api.incrby(key, String.valueOf(x))
+                             .compose(response -> Future.succeededFuture(response.toLong())));
     }
 
     /**
@@ -180,11 +165,8 @@ public interface RedisScalarMixin extends RedisApiMixin {
      * @return 在加上增量 increment 之后， 键 key 的值。
      */
     default Future<Double> increment(String key, double x) {
-        return api(api -> {
-            return api.incrbyfloat(key, String.valueOf(x)).compose(response -> {
-                return Future.succeededFuture(response.toDouble());
-            });
-        });
+        return api(api -> api.incrbyfloat(key, String.valueOf(x))
+                             .compose(response -> Future.succeededFuture(response.toDouble())));
     }
 
     /**
@@ -197,11 +179,7 @@ public interface RedisScalarMixin extends RedisApiMixin {
      * @return 执行操作之后key中的值
      */
     default Future<Long> decrement(String key) {
-        return api(api -> {
-            return api.decr(key).compose(response -> {
-                return Future.succeededFuture(response.toLong());
-            });
-        });
+        return api(api -> api.decr(key).compose(response -> Future.succeededFuture(response.toLong())));
     }
 
     /**
@@ -214,11 +192,8 @@ public interface RedisScalarMixin extends RedisApiMixin {
      * @return 键在执行减法操作之后的值。
      */
     default Future<Long> decrement(String key, long x) {
-        return api(api -> {
-            return api.decrby(key, String.valueOf(x)).compose(response -> {
-                return Future.succeededFuture(response.toLong());
-            });
-        });
+        return api(api -> api.decrby(key, String.valueOf(x))
+                             .compose(response -> Future.succeededFuture(response.toLong())));
     }
 
     /**
@@ -229,11 +204,7 @@ public interface RedisScalarMixin extends RedisApiMixin {
      * @return 追加指定值之后， key 中字符串的长度。
      */
     default Future<Integer> appendForKey(String key, String tail) {
-        return api(api -> {
-            return api.append(key, tail).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
-        });
+        return api(api -> api.append(key, tail).compose(response -> Future.succeededFuture(response.toInteger())));
     }
 
     /**
@@ -243,11 +214,7 @@ public interface RedisScalarMixin extends RedisApiMixin {
      * @return 1 如果key被设置了 ; 0 如果key没有被设置.
      */
     default Future<Integer> setStringIfKeyNotExists(String key, String value) {
-        return api(api -> {
-            return api.setnx(key, value).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
-        });
+        return api(api -> api.setnx(key, value).compose(response -> Future.succeededFuture(response.toInteger())));
     }
 
     /**
@@ -264,11 +231,8 @@ public interface RedisScalarMixin extends RedisApiMixin {
      * @return 被修改之后的字符串长度。
      */
     default Future<Integer> setSubstring(String key, int offset, String value) {
-        return api(api -> {
-            return api.setrange(key, String.valueOf(offset), value).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
-        });
+        return api(api -> api.setrange(key, String.valueOf(offset), value)
+                             .compose(response -> Future.succeededFuture(response.toInteger())));
     }
 
     /**
@@ -278,11 +242,7 @@ public interface RedisScalarMixin extends RedisApiMixin {
      * @return 字符串的长度，key 不存在时，返回 0.
      */
     default Future<Integer> getStringLength(String key) {
-        return api(api -> {
-            return api.strlen(key).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
-        });
+        return api(api -> api.strlen(key).compose(response -> Future.succeededFuture(response.toInteger())));
     }
 
     /**
@@ -294,21 +254,19 @@ public interface RedisScalarMixin extends RedisApiMixin {
      * @return 按顺序返回指定 key 的值的列表
      */
     default Future<List<String>> getMultipleStrings(List<String> keys) {
-        return api(api -> {
-            return api.mget(keys).compose(response -> {
-                List<String> values = new ArrayList<>();
-                if (response != null) {
-                    response.forEach(item -> {
-                        if (item == null) {
-                            values.add(null);
-                        } else {
-                            values.add(item.toString());
-                        }
-                    });
-                }
-                return Future.succeededFuture(values);
-            });
-        });
+        return api(api -> api.mget(keys).compose(response -> {
+            List<String> values = new ArrayList<>();
+            if (response != null) {
+                response.forEach(item -> {
+                    if (item == null) {
+                        values.add(null);
+                    } else {
+                        values.add(item.toString());
+                    }
+                });
+            }
+            return Future.succeededFuture(values);
+        }));
     }
 
     /**
@@ -351,9 +309,7 @@ public interface RedisScalarMixin extends RedisApiMixin {
                 args.add(key);
                 args.add(value);
             });
-            return api.msetnx(args).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
+            return api.msetnx(args).compose(response -> Future.succeededFuture(response.toInteger()));
         });
     }
 
@@ -371,15 +327,13 @@ public interface RedisScalarMixin extends RedisApiMixin {
      * @return 成功返回 OK
      */
     default Future<Void> setStringWithExpireTime(String key, int seconds, String value) {
-        return api(api -> {
-            return api.setex(key, String.valueOf(seconds), value).compose(response -> {
-                if ("OK".equals(response.toString())) {
-                    return Future.succeededFuture();
-                } else {
-                    return Future.failedFuture(new RuntimeException("SETEX failed with: " + response));
-                }
-            });
-        });
+        return api(api -> api.setex(key, String.valueOf(seconds), value).compose(response -> {
+            if ("OK".equals(response.toString())) {
+                return Future.succeededFuture();
+            } else {
+                return Future.failedFuture(new RuntimeException("SETEX failed with: " + response));
+            }
+        }));
     }
 
     /**
@@ -396,15 +350,13 @@ public interface RedisScalarMixin extends RedisApiMixin {
      * @return 成功返回 OK
      */
     default Future<Void> setStringWithExpireTimeMillis(String key, long milliseconds, String value) {
-        return api(api -> {
-            return api.psetex(key, String.valueOf(milliseconds), value).compose(response -> {
-                if ("OK".equals(response.toString())) {
-                    return Future.succeededFuture();
-                } else {
-                    return Future.failedFuture(new RuntimeException("PSETEX failed with: " + response));
-                }
-            });
-        });
+        return api(api -> api.psetex(key, String.valueOf(milliseconds), value).compose(response -> {
+            if ("OK".equals(response.toString())) {
+                return Future.succeededFuture();
+            } else {
+                return Future.failedFuture(new RuntimeException("PSETEX failed with: " + response));
+            }
+        }));
     }
 
     /**
@@ -434,9 +386,7 @@ public interface RedisScalarMixin extends RedisApiMixin {
 
             if (returnLength) {
                 args.add("LEN");
-                return api.command(args).compose(response -> {
-                    return Future.succeededFuture(response.toLong());
-                });
+                return api.command(args).compose(response -> Future.succeededFuture(response.toLong()));
             } else {
                 return api.command(args).compose(response -> {
                     if (response == null) {
@@ -549,12 +499,8 @@ public interface RedisScalarMixin extends RedisApiMixin {
      * @return 最长公共子序列
      */
     default Future<String> getLCS(String key1, String key2) {
-        return api(api -> {
-            return api.lcs(List.of(key1, key2))
-                      .compose(response -> {
-                          return Future.succeededFuture(response.toString());
-                      });
-        });
+        return api(api -> api.lcs(List.of(key1, key2))
+                             .compose(response -> Future.succeededFuture(response.toString())));
     }
 
     /**
@@ -566,12 +512,8 @@ public interface RedisScalarMixin extends RedisApiMixin {
      * @return 最长公共子序列的长度
      */
     default Future<Long> getLCSLength(String key1, String key2) {
-        return api(api -> {
-            return api.lcs(List.of(key1, key2, "LEN"))
-                      .compose(response -> {
-                          return Future.succeededFuture(response.toLong());
-                      });
-        });
+        return api(api -> api.lcs(List.of(key1, key2, "LEN"))
+                             .compose(response -> Future.succeededFuture(response.toLong())));
     }
 
     enum SetMode {

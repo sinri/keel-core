@@ -21,7 +21,7 @@ public class KeelRSA extends KeelRSAKeyPair {
     /**
      * @param plainTextData data to encrypt
      * @return encrypted data
-     * @throws NoSuchPaddingException
+     * @throws NoSuchPaddingException 没有这种补全之术
      * @throws NoSuchAlgorithmException  无此加密算法
      * @throws InvalidKeyException       加密公钥非法
      * @throws IllegalBlockSizeException 明文长度非法
@@ -38,7 +38,7 @@ public class KeelRSA extends KeelRSAKeyPair {
     /**
      * @param plainTextData data to encrypt
      * @return encrypted data
-     * @throws NoSuchPaddingException
+     * @throws NoSuchPaddingException 没有这种补全之术
      * @throws NoSuchAlgorithmException  无此加密算法
      * @throws InvalidKeyException       加密私钥非法
      * @throws IllegalBlockSizeException 明文长度非法
@@ -53,7 +53,7 @@ public class KeelRSA extends KeelRSAKeyPair {
     /**
      * @param cipherData encrypted data
      * @return decrypted data
-     * @throws NoSuchPaddingException
+     * @throws NoSuchPaddingException    没有这种补全之术
      * @throws NoSuchAlgorithmException  无此解密算法
      * @throws InvalidKeyException       解密私钥非法
      * @throws IllegalBlockSizeException 密文长度非法
@@ -70,7 +70,7 @@ public class KeelRSA extends KeelRSAKeyPair {
     /**
      * @param cipherData encrypted data
      * @return decrypted data
-     * @throws NoSuchPaddingException
+     * @throws NoSuchPaddingException    没有这种补全之术
      * @throws NoSuchAlgorithmException  无此解密算法
      * @throws InvalidKeyException       解密公钥非法
      * @throws IllegalBlockSizeException 密文长度非法
@@ -89,10 +89,10 @@ public class KeelRSA extends KeelRSAKeyPair {
      *
      * @param content 待签名的数据块
      * @return RSA签名结果
-     * @throws NoSuchAlgorithmException
-     * @throws InvalidKeySpecException
-     * @throws InvalidKeyException
-     * @throws SignatureException
+     * @throws NoSuchAlgorithmException 无此加密算法
+     * @throws InvalidKeySpecException 不对劲的密钥特性
+     * @throws InvalidKeyException 不对劲的密钥
+     * @throws SignatureException 签名异常
      */
     public String signWithPrivateKey(byte[] content) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, SignatureException {
         byte[] bytesOfPrivateKey = this.getPrivateKey().getEncoded();
@@ -112,10 +112,10 @@ public class KeelRSA extends KeelRSAKeyPair {
      * @param content 被签名的数据块
      * @param sign    RSA签名
      * @return 校验结果
-     * @throws NoSuchAlgorithmException
-     * @throws InvalidKeySpecException
-     * @throws InvalidKeyException
-     * @throws SignatureException
+     * @throws NoSuchAlgorithmException 没有这种算法
+     * @throws InvalidKeySpecException 不对劲的密钥特性
+     * @throws InvalidKeyException 不对劲的密钥
+     * @throws SignatureException 签名不对劲
      */
     public boolean verifySignWithPublicKey(byte[] content, String sign) throws NoSuchAlgorithmException, InvalidKeySpecException, InvalidKeyException, SignatureException {
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");

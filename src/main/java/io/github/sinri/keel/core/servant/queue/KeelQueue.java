@@ -81,9 +81,7 @@ public abstract class KeelQueue extends KeelVerticleImpl
         this.queueWorkerPoolManager = getQueueWorkerPoolManager();
 
         Future.succeededFuture()
-              .compose(v -> {
-                  return this.readSignal();
-              })
+              .compose(v -> this.readSignal())
               .recover(throwable -> {
                   getQueueManageIssueRecorder().debug(r -> r.message("AS IS. Failed to read signal: " + throwable.getMessage()));
                   if (getQueueStatus() == KeelQueueStatus.STOPPED) {
@@ -177,7 +175,7 @@ public abstract class KeelQueue extends KeelVerticleImpl
     }
 
     @Override
-    public void stop(Promise<Void> stopPromise) throws Exception {
+    public void stop(Promise<Void> stopPromise) {
         this.queueStatus = KeelQueueStatus.STOPPED;
         stopPromise.complete();
     }

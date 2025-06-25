@@ -12,9 +12,7 @@ import java.util.function.Function;
  * @since 2.8
  */
 public class KeelBasicSocketWrapper extends KeelAbstractSocketWrapper {
-    private Function<Buffer, Future<Void>> incomingBufferProcessor = buffer -> {
-        return Future.succeededFuture();
-    };
+    private Function<Buffer, Future<Void>> incomingBufferProcessor = buffer -> Future.succeededFuture();
     private Handler<Void> readToEndHandler = event -> {
     };
     private Handler<Void> drainHandler = event -> {

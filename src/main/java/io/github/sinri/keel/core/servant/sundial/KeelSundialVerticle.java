@@ -30,12 +30,8 @@ final class KeelSundialVerticle extends KeelVerticleImpl {
     @Override
     protected Future<Void> startVerticle() {
         Future.succeededFuture()
-              .compose(v -> {
-                  return sundialPlan.execute(now, sundialIssueRecorder);
-              })
-              .onComplete(ar -> {
-                  undeployMe();
-              });
+              .compose(v -> sundialPlan.execute(now, sundialIssueRecorder))
+              .onComplete(ar -> undeployMe());
         return Future.succeededFuture();
     }
 }

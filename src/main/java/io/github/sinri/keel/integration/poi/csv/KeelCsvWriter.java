@@ -59,9 +59,7 @@ public class KeelCsvWriter {
 
     public void blockWriteRow(@Nonnull List<String> list) throws IOException {
         List<String> components = new ArrayList<>();
-        list.forEach(item -> {
-            components.add(quote(item));
-        });
+        list.forEach(item -> components.add(quote(item)));
         var line = Keel.stringHelper().joinStringArray(components, separator) + "\n";
         //System.out.println(line);
         outputStream.write(line.getBytes(charset));

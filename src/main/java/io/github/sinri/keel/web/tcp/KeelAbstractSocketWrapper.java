@@ -46,9 +46,7 @@ abstract public class KeelAbstractSocketWrapper {
                             .buffer(buffer)
                     );
 
-                    this.funnel.add(() -> {
-                        return whenBufferComes(buffer);
-                    });
+                    this.funnel.add(() -> whenBufferComes(buffer));
                 })
                 .endHandler(end -> {
                     /*

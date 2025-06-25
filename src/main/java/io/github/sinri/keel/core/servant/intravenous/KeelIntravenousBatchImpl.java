@@ -19,9 +19,7 @@ class KeelIntravenousBatchImpl<D> extends KeelIntravenousBase<D> {
 
     protected Future<Void> handleDrops(List<D> drops) {
         return Future.succeededFuture()
-                     .compose(v -> {
-                         return this.itemsProcessor.process(drops);
-                     })
+                     .compose(v -> this.itemsProcessor.process(drops))
                      .recover(throwable -> {
                          handleAllergy(throwable);
                          return Future.succeededFuture();

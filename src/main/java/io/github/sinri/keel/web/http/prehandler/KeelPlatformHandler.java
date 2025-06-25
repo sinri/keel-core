@@ -28,9 +28,7 @@ public class KeelPlatformHandler implements PlatformHandler {
         Keel.getVertx().sharedData()
                 .getCounter("KeelPlatformHandler-RequestID-Counter")
                 .compose(Counter::incrementAndGet)
-                .recover(throwable -> {
-                    return Future.succeededFuture(new Random().nextLong() * -1);
-                })
+                .recover(throwable -> Future.succeededFuture(new Random().nextLong() * -1))
                 .compose(id -> {
                     routingContext.put(KEEL_REQUEST_ID, Keel.netHelper().getLocalHostAddress() + "-" + id + "-" + UUID.randomUUID());
 

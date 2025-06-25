@@ -301,8 +301,9 @@ public class CataloguePageBuilder implements FastDocsContentResponder {
         // options.eventLogger.debug(r -> r.message("buildTreeNodeOutsideJar " + item.getAbsolutePath()));
         String base = new File(actualFileRootOutsideJAR).getAbsolutePath();
         TreeNode treeNode = new TreeNode();
+        String baseUrlPath = item.getAbsolutePath().substring(base.length());
         if (item.isDirectory()) {
-            treeNode.href = (item.getAbsolutePath().substring(base.length()) + "/index.md");
+            treeNode.href = (baseUrlPath + "/index.md");
             treeNode.level = Path.of(treeNode.href).getNameCount() - 1;
             treeNode.href = (options.rootURLPath + treeNode.href).replaceAll("/+", "/");
 
@@ -320,7 +321,7 @@ public class CataloguePageBuilder implements FastDocsContentResponder {
             if (item.getName().equalsIgnoreCase("index.md")) {
                 return null;
             }
-            treeNode.href = (options.rootURLPath + item.getAbsolutePath().substring(base.length()))
+            treeNode.href = (options.rootURLPath + baseUrlPath)
                     .replaceAll("/+", "/");
             treeNode.level = Path.of(treeNode.href).getNameCount();
         }

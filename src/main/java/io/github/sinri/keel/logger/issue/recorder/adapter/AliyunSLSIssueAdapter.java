@@ -58,9 +58,7 @@ abstract public class AliyunSLSIssueAdapter implements KeelIssueRecorderAdapter 
                                           });
                            });
             })
-            .onFailure(throwable -> {
-                Keel.getLogger().exception(throwable, "AliyunSLSIssueAdapter routine exception");
-            });
+            .onFailure(throwable -> Keel.getLogger().exception(throwable, "AliyunSLSIssueAdapter routine exception"));
     }
 
     protected int bufferSize() {

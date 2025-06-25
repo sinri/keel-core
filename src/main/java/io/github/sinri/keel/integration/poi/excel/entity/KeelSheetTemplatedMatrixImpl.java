@@ -38,9 +38,7 @@ public class KeelSheetTemplatedMatrixImpl implements KeelSheetTemplatedMatrix {
     @Override
     public List<KeelSheetMatrixTemplatedRow> getRows() {
         List<KeelSheetMatrixTemplatedRow> templatedRows = new ArrayList<>();
-        this.rawRows.forEach(rawRow -> {
-            templatedRows.add(KeelSheetMatrixTemplatedRow.create(getTemplate(), rawRow));
-        });
+        this.rawRows.forEach(rawRow -> templatedRows.add(KeelSheetMatrixTemplatedRow.create(getTemplate(), rawRow)));
         return templatedRows;
     }
 

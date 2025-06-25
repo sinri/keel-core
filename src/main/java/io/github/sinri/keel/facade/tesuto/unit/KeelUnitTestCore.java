@@ -33,14 +33,12 @@ public interface KeelUnitTestCore {
     }
 
     default void async(Supplier<Future<Void>> testSupplier) {
-        Keel.pseudoAwait(p -> {
-            testSupplier.get().andThen(ar -> {
-                if (ar.succeeded()) {
-                    p.complete();
-                } else {
-                    p.fail(ar.cause());
-                }
-            });
-        });
+        Keel.pseudoAwait(p -> testSupplier.get().andThen(ar -> {
+            if (ar.succeeded()) {
+                p.complete();
+            } else {
+                p.fail(ar.cause());
+            }
+        }));
     }
 }

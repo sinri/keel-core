@@ -25,9 +25,7 @@ public interface RedisSetMixin extends RedisApiMixin {
             List<String> args = new ArrayList<>();
             args.add(key);
             args.addAll(members);
-            return api.sadd(args).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
+            return api.sadd(args).compose(response -> Future.succeededFuture(response.toInteger()));
         });
     }
 
@@ -43,11 +41,7 @@ public interface RedisSetMixin extends RedisApiMixin {
      * @return 集合的基数(集合中元素的数量)。
      */
     default Future<Integer> getSetCardinality(String key) {
-        return api(api -> {
-            return api.scard(key).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
-        });
+        return api(api -> api.scard(key).compose(response -> Future.succeededFuture(response.toInteger())));
     }
 
     /**
@@ -58,15 +52,13 @@ public interface RedisSetMixin extends RedisApiMixin {
      * @return 包含差集成员的列表。
      */
     default Future<Set<String>> getSetDifference(List<String> keys) {
-        return api(api -> {
-            return api.sdiff(keys).compose(response -> {
-                Set<String> result = new HashSet<>();
-                if (response != null) {
-                    response.forEach(item -> result.add(item.toString()));
-                }
-                return Future.succeededFuture(result);
-            });
-        });
+        return api(api -> api.sdiff(keys).compose(response -> {
+            Set<String> result = new HashSet<>();
+            if (response != null) {
+                response.forEach(item -> result.add(item.toString()));
+            }
+            return Future.succeededFuture(result);
+        }));
     }
 
     /**
@@ -81,9 +73,7 @@ public interface RedisSetMixin extends RedisApiMixin {
             List<String> args = new ArrayList<>();
             args.add(destination);
             args.addAll(keys);
-            return api.sdiffstore(args).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
+            return api.sdiffstore(args).compose(response -> Future.succeededFuture(response.toInteger()));
         });
     }
 
@@ -96,15 +86,13 @@ public interface RedisSetMixin extends RedisApiMixin {
      * @return 交集成员的列表。
      */
     default Future<Set<String>> getSetIntersection(List<String> keys) {
-        return api(api -> {
-            return api.sinter(keys).compose(response -> {
-                Set<String> result = new HashSet<>();
-                if (response != null) {
-                    response.forEach(item -> result.add(item.toString()));
-                }
-                return Future.succeededFuture(result);
-            });
-        });
+        return api(api -> api.sinter(keys).compose(response -> {
+            Set<String> result = new HashSet<>();
+            if (response != null) {
+                response.forEach(item -> result.add(item.toString()));
+            }
+            return Future.succeededFuture(result);
+        }));
     }
 
     /**
@@ -119,9 +107,7 @@ public interface RedisSetMixin extends RedisApiMixin {
             List<String> args = new ArrayList<>();
             args.add(destination);
             args.addAll(keys);
-            return api.sinterstore(args).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
+            return api.sinterstore(args).compose(response -> Future.succeededFuture(response.toInteger()));
         });
     }
 
@@ -132,11 +118,7 @@ public interface RedisSetMixin extends RedisApiMixin {
      * @return 如果成员元素是集合的成员，返回 true；如果成员元素不是集合的成员，或 key 不存在，返回 false。
      */
     default Future<Boolean> isSetMember(String key, String member) {
-        return api(api -> {
-            return api.sismember(key, member).compose(response -> {
-                return Future.succeededFuture(response.toInteger() == 1);
-            });
-        });
+        return api(api -> api.sismember(key, member).compose(response -> Future.succeededFuture(response.toInteger() == 1)));
     }
 
     /**
@@ -147,15 +129,13 @@ public interface RedisSetMixin extends RedisApiMixin {
      * @return 集合中的所有成员。
      */
     default Future<Set<String>> getSetMembers(String key) {
-        return api(api -> {
-            return api.smembers(key).compose(response -> {
-                Set<String> result = new HashSet<>();
-                if (response != null) {
-                    response.forEach(item -> result.add(item.toString()));
-                }
-                return Future.succeededFuture(result);
-            });
-        });
+        return api(api -> api.smembers(key).compose(response -> {
+            Set<String> result = new HashSet<>();
+            if (response != null) {
+                response.forEach(item -> result.add(item.toString()));
+            }
+            return Future.succeededFuture(result);
+        }));
     }
 
     /**
@@ -191,11 +171,7 @@ public interface RedisSetMixin extends RedisApiMixin {
      * @return 如果成员元素被成功移除，返回 true；如果成员元素不是 source 集合的成员，并且没有任何操作对 destination 集合执行，返回 false。
      */
     default Future<Boolean> moveSetMember(String source, String destination, String member) {
-        return api(api -> {
-            return api.smove(source, destination, member).compose(response -> {
-                return Future.succeededFuture(response.toInteger() == 1);
-            });
-        });
+        return api(api -> api.smove(source, destination, member).compose(response -> Future.succeededFuture(response.toInteger() == 1)));
     }
 
     /**
@@ -287,9 +263,7 @@ public interface RedisSetMixin extends RedisApiMixin {
             List<String> args = new ArrayList<>();
             args.add(key);
             args.addAll(members);
-            return api.srem(args).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
+            return api.srem(args).compose(response -> Future.succeededFuture(response.toInteger()));
         });
     }
 
@@ -339,15 +313,13 @@ public interface RedisSetMixin extends RedisApiMixin {
      * @return 并集成员的列表。
      */
     default Future<Set<String>> getSetUnion(List<String> keys) {
-        return api(api -> {
-            return api.sunion(keys).compose(response -> {
-                Set<String> result = new HashSet<>();
-                if (response != null) {
-                    response.forEach(item -> result.add(item.toString()));
-                }
-                return Future.succeededFuture(result);
-            });
-        });
+        return api(api -> api.sunion(keys).compose(response -> {
+            Set<String> result = new HashSet<>();
+            if (response != null) {
+                response.forEach(item -> result.add(item.toString()));
+            }
+            return Future.succeededFuture(result);
+        }));
     }
 
     /**
@@ -362,9 +334,7 @@ public interface RedisSetMixin extends RedisApiMixin {
             List<String> args = new ArrayList<>();
             args.add(destination);
             args.addAll(keys);
-            return api.sunionstore(args).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
+            return api.sunionstore(args).compose(response -> Future.succeededFuture(response.toInteger()));
         });
     }
 }

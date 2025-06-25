@@ -38,9 +38,7 @@ public interface ESIndexMixin extends ESApiMixin {
      */
     default Future<ESIndexGetResponse> indexGet(String indexName, ESApiQueries queries) {
         return call(HttpMethod.GET, "/" + indexName, queries, null)
-                .compose(resp -> {
-                    return Future.succeededFuture(new ESIndexGetResponse(resp));
-                });
+                .compose(resp -> Future.succeededFuture(new ESIndexGetResponse(resp)));
     }
 
     /**
@@ -48,9 +46,7 @@ public interface ESIndexMixin extends ESApiMixin {
      */
     default Future<ESIndexCreateResponse> indexCreate(String indexName, ESApiQueries queries, JsonObject requestBody) {
         return call(HttpMethod.PUT, "/" + indexName, queries, requestBody.toString())
-                .compose(resp -> {
-                    return Future.succeededFuture(new ESIndexCreateResponse(resp));
-                });
+                .compose(resp -> Future.succeededFuture(new ESIndexCreateResponse(resp)));
     }
 
     /**
@@ -58,8 +54,6 @@ public interface ESIndexMixin extends ESApiMixin {
      */
     default Future<ESIndexDeleteResponse> indexDelete(String indexName, ESApiQueries queries) {
         return call(HttpMethod.DELETE, "/" + indexName, queries, null)
-                .compose(resp -> {
-                    return Future.succeededFuture(new ESIndexDeleteResponse(resp));
-                });
+                .compose(resp -> Future.succeededFuture(new ESIndexDeleteResponse(resp)));
     }
 }

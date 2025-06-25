@@ -25,9 +25,7 @@ public interface RedisBitMixin extends RedisApiMixin {
         return api(api -> {
             List<String> args = new ArrayList<>();
             args.add(key);
-            return api.bitcount(args).compose(response -> {
-                return Future.succeededFuture(response.toLong());
-            });
+            return api.bitcount(args).compose(response -> Future.succeededFuture(response.toLong()));
         });
     }
 
@@ -49,9 +47,7 @@ public interface RedisBitMixin extends RedisApiMixin {
             args.add(key);
             args.add(String.valueOf(start));
             args.add(String.valueOf(end));
-            return api.bitcount(args).compose(response -> {
-                return Future.succeededFuture(response.toLong());
-            });
+            return api.bitcount(args).compose(response -> Future.succeededFuture(response.toLong()));
         });
     }
 
@@ -130,9 +126,7 @@ public interface RedisBitMixin extends RedisApiMixin {
             args.add(operation);
             args.add(destkey);
             args.addAll(keys);
-            return api.bitop(args).compose(response -> {
-                return Future.succeededFuture(response.toLong());
-            });
+            return api.bitop(args).compose(response -> Future.succeededFuture(response.toLong()));
         });
     }
 
@@ -199,9 +193,7 @@ public interface RedisBitMixin extends RedisApiMixin {
             List<String> args = new ArrayList<>();
             args.add(key);
             args.add(String.valueOf(bit));
-            return api.bitpos(args).compose(response -> {
-                return Future.succeededFuture(response.toLong());
-            });
+            return api.bitpos(args).compose(response -> Future.succeededFuture(response.toLong()));
         });
     }
 
@@ -221,9 +213,7 @@ public interface RedisBitMixin extends RedisApiMixin {
             args.add(key);
             args.add(String.valueOf(bit));
             args.add(String.valueOf(start));
-            return api.bitpos(args).compose(response -> {
-                return Future.succeededFuture(response.toLong());
-            });
+            return api.bitpos(args).compose(response -> Future.succeededFuture(response.toLong()));
         });
     }
 
@@ -245,9 +235,7 @@ public interface RedisBitMixin extends RedisApiMixin {
             args.add(String.valueOf(bit));
             args.add(String.valueOf(start));
             args.add(String.valueOf(end));
-            return api.bitpos(args).compose(response -> {
-                return Future.succeededFuture(response.toLong());
-            });
+            return api.bitpos(args).compose(response -> Future.succeededFuture(response.toLong()));
         });
     }
 
@@ -260,11 +248,7 @@ public interface RedisBitMixin extends RedisApiMixin {
      * @return 字符串在 offset 处的bit，当 offset 超出了字符串长度的时候，这个字符串就被假定为由0比特填充的连续空间
      */
     default Future<Integer> getBit(String key, long offset) {
-        return api(api -> {
-            return api.getbit(key, String.valueOf(offset)).compose(response -> {
-                return Future.succeededFuture(response.toInteger());
-            });
-        });
+        return api(api -> api.getbit(key, String.valueOf(offset)).compose(response -> Future.succeededFuture(response.toInteger())));
     }
 
     /**
@@ -277,11 +261,7 @@ public interface RedisBitMixin extends RedisApiMixin {
      * @return 原来位于 offset 处的bit值
      */
     default Future<Integer> setBit(String key, long offset, int value) {
-        return api(api -> {
-            return api.setbit(key, String.valueOf(offset), String.valueOf(value))
-                      .compose(response -> {
-                          return Future.succeededFuture(response.toInteger());
-                      });
-        });
+        return api(api -> api.setbit(key, String.valueOf(offset), String.valueOf(value))
+                         .compose(response -> Future.succeededFuture(response.toInteger())));
     }
 }

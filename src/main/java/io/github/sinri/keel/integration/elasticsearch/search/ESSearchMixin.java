@@ -10,8 +10,6 @@ public interface ESSearchMixin extends ESApiMixin {
      */
     default Future<ESSearchResponse> searchSync(String indexName, ESApiQueries queries, JsonObject requestBody) {
         return callPost("/" + indexName + "/_search", queries, requestBody)
-                .compose(resp -> {
-                    return Future.succeededFuture(new ESSearchResponse(resp));
-                });
+                .compose(resp -> Future.succeededFuture(new ESSearchResponse(resp)));
     }
 }

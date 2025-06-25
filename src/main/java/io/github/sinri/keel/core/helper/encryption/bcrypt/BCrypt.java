@@ -423,11 +423,11 @@ public class BCrypt {
      * Look up the 3 bits base64-encoded by the specified character,
      * range-checking against conversion table
      *
-     * @param x the base64-encoded value
+     * @param x the base64-encoded value, [0,65535]
      * @return the decoded value of x
      */
     private static byte char64(char x) {
-        if ((int) x < 0 || (int) x > index_64.length)
+        if ((int) x > index_64.length)
             return -1;
         return index_64[x];
     }

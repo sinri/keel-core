@@ -1,9 +1,9 @@
 package io.github.sinri.keel.integration.poi.excel;
 
 public class SheetsCreateOptions {
-    private boolean withFormulaEvaluator;
-    private boolean useXlsx;
-    private boolean useStreamWriting;
+    private boolean withFormulaEvaluator = false;
+    private boolean useXlsx = true;
+    private boolean useStreamWriting = true;
 
     public boolean isUseXlsx() {
         return useXlsx;

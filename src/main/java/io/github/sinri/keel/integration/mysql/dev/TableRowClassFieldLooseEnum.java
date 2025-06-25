@@ -30,9 +30,7 @@ public class TableRowClassFieldLooseEnum {
                 .append("\t * Enum for Field `").append(fieldName).append("` \n")
                 .append("\t */\n")
                 .append("\tpublic enum ").append(looseEnumName()).append(" {\n");
-        enumElements.forEach(enumValue -> {
-            code.append("\t\t").append(enumValue).append(",\n");
-        });
+        enumElements.forEach(enumValue -> code.append("\t\t").append(enumValue).append(",\n"));
         code.append("\t}\n");
 
         return code.toString();

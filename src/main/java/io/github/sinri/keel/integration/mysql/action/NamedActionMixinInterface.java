@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 
 /**
  * Class that defines the interface for named MySQL actions in a mixin style.
- *
+ * <p>
  * This interface extends {@link SelfInterface} to provide a method to retrieve
  * the named MySQL connection associated with the action,
  * with this connection, you can execute SQL statements.

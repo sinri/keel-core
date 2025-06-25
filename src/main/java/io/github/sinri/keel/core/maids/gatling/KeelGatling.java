@@ -56,9 +56,7 @@ abstract public class KeelGatling extends KeelVerticleImpl {
     protected Future<Void> startVerticle() {
         this.gatlingLogger = buildGatlingLogger();
         barrelUsed.set(0);
-        Keel.asyncCallRepeatedly(routineResult -> {
-            return fireOnce();
-        });
+        Keel.asyncCallRepeatedly(routineResult -> fireOnce());
         return Future.succeededFuture();
     }
 

@@ -68,8 +68,8 @@ abstract class KeelWatchmanImpl extends KeelVerticleImpl implements KeelWatchman
         getWatchmanLogger().debug(r -> r.message(watchmanName() + " TRIGGERED FOR " + timestamp));
 
         long x = timestamp / interval();
-        Keel.getVertx().sharedData()
-            .getLockWithTimeout(eventBusAddress() + "@" + x, Math.min(3_000L, interval() - 1), lockAR -> {
+        Keel.getVertx().sharedData().getLockWithTimeout(eventBusAddress() + "@" + x, Math.min(3_000L, interval() - 1))
+            .onComplete(lockAR -> {
                 if (lockAR.failed()) {
                     getWatchmanLogger().warning(r -> r.message("LOCK ACQUIRE FAILED FOR " + timestamp + " i.e. " + x));
                 } else {
@@ -85,7 +85,7 @@ abstract class KeelWatchmanImpl extends KeelVerticleImpl implements KeelWatchman
     }
 
     @Override
-    public void stop(Promise<Void> stopPromise) throws Exception {
+    public void stop(Promise<Void> stopPromise) {
         consumer.unregister();
         stopPromise.complete();
     }

@@ -5,6 +5,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.AuthenticationHandler;
+import io.vertx.ext.web.impl.UserContextInternal;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -22,26 +23,26 @@ abstract public class KeelAuthenticationHandler implements AuthenticationHandler
         // BEFORE ASYNC PAUSE
         routingContext.request().pause();
         Future.succeededFuture()
-                .compose(v -> handleRequest(routingContext))
-                .andThen(ar -> {
-                    if (ar.failed()) {
-                        routingContext.fail(ar.cause());
-                        return;
-                    }
+              .compose(v -> handleRequest(routingContext))
+              .andThen(ar -> {
+                  if (ar.failed()) {
+                      routingContext.fail(ar.cause());
+                      return;
+                  }
 
-                    AuthenticateResult authenticateResult = ar.result();
-                    if (!authenticateResult.isLegalRequest()) {
-                        authenticateResult.failRequest(routingContext);
-                        return;
-                    }
+                  AuthenticateResult authenticateResult = ar.result();
+                  if (!authenticateResult.isLegalRequest()) {
+                      authenticateResult.failRequest(routingContext);
+                      return;
+                  }
 
-                    routingContext.setUser(authenticateResult.authenticatedUser());
+                  ((UserContextInternal) routingContext.userContext()).setUser(authenticateResult.authenticatedUser());
 
-                    // RESUME
-                    routingContext.request().resume();
-                    // NEXT
-                    routingContext.next();
-                });
+                  // RESUME
+                  routingContext.request().resume();
+                  // NEXT
+                  routingContext.next();
+              });
     }
 
     abstract protected Future<AuthenticateResult> handleRequest(RoutingContext routingContext);
@@ -86,15 +87,15 @@ abstract public class KeelAuthenticationHandler implements AuthenticationHandler
             return User.create(authenticatedPrinciple());
         }
 
-//        default AuthenticateResult setSessionExpire(long expireTimestamp) {
-//            // exp is expected as (System.currentTimeMillis() / 1000);
-//            //  or new Date().getTime() / 1000
-//            if (expireTimestamp > 1660000000000L) {
-//                expireTimestamp = expireTimestamp / 1000;
-//            }
-//            this.authenticatedUser().attributes().put("exp", expireTimestamp);
-//            return this;
-//        }
+        //        default AuthenticateResult setSessionExpire(long expireTimestamp) {
+        //            // exp is expected as (System.currentTimeMillis() / 1000);
+        //            //  or new Date().getTime() / 1000
+        //            if (expireTimestamp > 1660000000000L) {
+        //                expireTimestamp = expireTimestamp / 1000;
+        //            }
+        //            this.authenticatedUser().attributes().put("exp", expireTimestamp);
+        //            return this;
+        //        }
     }
 
     private static class AuthenticateResultImpl implements AuthenticateResult {

@@ -117,12 +117,10 @@ public interface ReadStatementMixin extends AnyStatement {
                                 }
 
                                 return cursor.read(1)
-                                        .compose(rows -> {
-                                            return Keel.asyncCallIteratively(rows, resultStreamReader::read);
-                                        });
+                                        .compose(rows -> Keel.asyncCallIteratively(rows, resultStreamReader::read));
                             })
-                            .eventually(() -> cursor.close())
-                            .eventually(() -> preparedStatement.close());
+                            .eventually(cursor::close)
+                            .eventually(preparedStatement::close);
                 });
     }
 

@@ -5,6 +5,7 @@ import io.github.sinri.keel.core.helper.authenticator.googleauth.GoogleAuthentic
 import io.github.sinri.keel.core.helper.authenticator.googleauth.async.AsyncGoogleAuthenticator;
 import io.github.sinri.keel.core.helper.authenticator.googleauth.async.AsyncICredentialRepository;
 import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnitSkipped;
 import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
@@ -25,7 +26,8 @@ public class GoogleTotpTest extends KeelInstantRunner {
         return Future.succeededFuture();
     }
 
-    @InstantRunUnit(skip = true)
+    @InstantRunUnit
+    @InstantRunUnitSkipped
     public Future<Void> createAnonymousKey() {
         GoogleAuthenticatorKey authenticatorKey = asyncGoogleAuthenticator.createCredentials();
         getInstantLogger().info(x -> x
@@ -48,7 +50,8 @@ public class GoogleTotpTest extends KeelInstantRunner {
          */
     }
 
-    @InstantRunUnit(skip = true)
+    @InstantRunUnit
+    @InstantRunUnitSkipped
     public Future<Void> authAnonymousTotp() {
         String key = "C4TQUWLWMJ7SB3TY5EIKJIFDEOEHDEHX";
         int totpPassword = asyncGoogleAuthenticator.getTotpPassword(key);// or copy from Google Authenticator
@@ -64,7 +67,8 @@ public class GoogleTotpTest extends KeelInstantRunner {
                 });
     }
 
-    @InstantRunUnit(skip = true)
+    @InstantRunUnit
+    @InstantRunUnitSkipped
     public Future<Void> createNamedKey() {
         asyncGoogleAuthenticator.setCredentialRepository(new CredentialRepositoryImpl());
         return asyncGoogleAuthenticator.createCredentials("testor")
@@ -80,7 +84,8 @@ public class GoogleTotpTest extends KeelInstantRunner {
                 });
     }
 
-    @InstantRunUnit(skip = true)
+    @InstantRunUnit
+    @InstantRunUnitSkipped
     public Future<Void> authNamedTotp() {
         asyncGoogleAuthenticator.setCredentialRepository(new CredentialRepositoryImpl());
 //        String key = "EHC5TIME4XL4ERZBTLWEZOK37KCHDO4J";
@@ -97,7 +102,7 @@ public class GoogleTotpTest extends KeelInstantRunner {
                 });
     }
 
-    @InstantRunUnit(skip = false)
+    @InstantRunUnit
     public Future<Void> qrForNamed() {
         String otpAuthTotpURL = GoogleAuthenticatorQRGenerator.getOtpAuthTotpURL(
                 "Keel",

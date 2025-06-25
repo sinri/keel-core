@@ -95,16 +95,12 @@ abstract public class KeelCacheDalet extends KeelVerticleImpl implements KeelEve
         return fullyUpdate()
                 .compose(updated -> {
                     if (regularUpdatePeriod() >= 0) {
-                        Keel.asyncCallEndlessly(() -> {
-                            return Future.succeededFuture()
-                                         .compose(v -> {
-                                             if (regularUpdatePeriod() == 0) return Future.succeededFuture();
-                                             else return Keel.asyncSleep(regularUpdatePeriod());
-                                         })
-                                         .compose(v -> {
-                                             return fullyUpdate();
-                                         });
-                        });
+                        Keel.asyncCallEndlessly(() -> Future.succeededFuture()
+                                                        .compose(v -> {
+                                         if (regularUpdatePeriod() == 0) return Future.succeededFuture();
+                                         else return Keel.asyncSleep(regularUpdatePeriod());
+                                     })
+                                                        .compose(v -> fullyUpdate()));
                     }
                     return Future.succeededFuture();
                 });

@@ -2,6 +2,7 @@ package io.github.sinri.keel.integration.poi.excel;
 
 import io.github.sinri.keel.core.ValueBox;
 import io.vertx.core.Closeable;
+import io.vertx.core.Completable;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -133,12 +134,12 @@ public class KeelSheets implements Closeable {
                      .compose(v -> {
                          KeelSheets keelSheets;
                          if (sheetsCreateOptions.isUseXlsx()) {
-                             keelSheets = KeelSheets.autoGenerateXLSX(sheetsCreateOptions.isWithFormulaEvaluator());
+                             keelSheets = new KeelSheets(new XSSFWorkbook(), sheetsCreateOptions.isWithFormulaEvaluator());
                              if (sheetsCreateOptions.isUseStreamWriting()) {
                                  keelSheets.useStreamWrite();
                              }
                          } else {
-                             keelSheets = KeelSheets.autoGenerateXLS(sheetsCreateOptions.isWithFormulaEvaluator());
+                             keelSheets = new KeelSheets(new HSSFWorkbook(), sheetsCreateOptions.isWithFormulaEvaluator());
                          }
 
                          return usage.apply(keelSheets)
@@ -147,66 +148,6 @@ public class KeelSheets implements Closeable {
                                          keelSheets.close(promise);
                                      });
                      });
-    }
-
-    /**
-     * @since 3.0.20 The great DAN and HONG discovered an issue with POI Factory Mode.
-     */
-    @Deprecated(since = "4.0.2", forRemoval = true)
-    public static KeelSheets autoGenerate(@Nonnull InputStream inputStream) {
-        return autoGenerate(inputStream, false);
-    }
-
-    /**
-     * @since 3.1.4
-     */
-    @Deprecated(since = "4.0.2", forRemoval = true)
-    public static KeelSheets autoGenerate(@Nonnull InputStream inputStream, boolean withFormulaEvaluator) {
-        Workbook workbook;
-        try {
-            // XLSX
-            workbook = new XSSFWorkbook(inputStream);
-        } catch (IOException e) {
-            try {
-                // XLS
-                workbook = new HSSFWorkbook(inputStream);
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        }
-        return new KeelSheets(workbook, withFormulaEvaluator);
-    }
-
-    /**
-     * @since 3.1.1
-     */
-    @Deprecated(since = "4.0.2", forRemoval = true)
-    public static KeelSheets autoGenerateXLSX() {
-        return new KeelSheets(new XSSFWorkbook());
-    }
-
-    /**
-     * @since 3.1.4
-     */
-    @Deprecated(since = "4.0.2", forRemoval = true)
-    public static KeelSheets autoGenerateXLSX(boolean withFormulaEvaluator) {
-        return new KeelSheets(new XSSFWorkbook(), withFormulaEvaluator);
-    }
-
-    /**
-     * @since 3.1.1
-     */
-    @Deprecated(since = "4.0.2", forRemoval = true)
-    public static KeelSheets autoGenerateXLS() {
-        return new KeelSheets(new HSSFWorkbook());
-    }
-
-    /**
-     * @since 3.1.4
-     */
-    @Deprecated(since = "4.0.2", forRemoval = true)
-    public static KeelSheets autoGenerateXLS(boolean withFormulaEvaluator) {
-        return new KeelSheets(new HSSFWorkbook(), withFormulaEvaluator);
     }
 
     /**
@@ -298,16 +239,16 @@ public class KeelSheets implements Closeable {
     }
 
     /**
-     * @param completion the promise to signal when close has completed
-     * @since 4.0.2
+     * @param completable the promise to signal when close has completed
+     * @since 4.1.0
      */
     @Override
-    public void close(Promise<Void> completion) {
+    public void close(Completable<Void> completable) {
         try {
             autoWorkbook.close();
-            completion.complete();
+            completable.succeed();
         } catch (IOException e) {
-            completion.fail(e);
+            completable.fail(e);
         }
     }
 }

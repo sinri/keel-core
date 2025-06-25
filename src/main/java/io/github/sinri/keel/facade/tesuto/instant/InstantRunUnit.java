@@ -13,13 +13,4 @@ import java.lang.annotation.RetentionPolicy;
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface InstantRunUnit {
-    /**
-     * If it is set to true, the test method would be skipped.
-     *
-     * @see InstantRunUnitSkipped
-     * @since 3.0.14
-     * @deprecated Since 4.0.0 use Annotation {@code InstantRunUnitSkipped} instead.
-     */
-    @Deprecated(since = "4.0.0")
-    boolean skip() default false;
 }

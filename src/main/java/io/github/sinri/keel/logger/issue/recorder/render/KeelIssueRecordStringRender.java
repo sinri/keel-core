@@ -29,9 +29,7 @@ public class KeelIssueRecordStringRender implements KeelIssueRecordRender<String
         s.append(" [").append(issueRecord.level().name()).append("]");
         s.append(" ").append(topic).append(" (").append(Keel.stringHelper().joinStringArray(issueRecord.classification(), ",")).append(")");
         if (!issueRecord.attributes().isEmpty()) {
-            issueRecord.attributes().forEach(attribute -> {
-                s.append("\n ▪ ").append(attribute.getKey()).append(": ").append(attribute.getValue());
-            });
+            issueRecord.attributes().forEach(attribute -> s.append("\n ▪ ").append(attribute.getKey()).append(": ").append(attribute.getValue()));
         }
         Throwable exception = issueRecord.exception();
         if (exception != null) {

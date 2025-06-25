@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.InputStream;
+import java.util.Objects;
 
 /**
  * @since 3.2.11
@@ -49,6 +50,7 @@ public class SheetsOpenOptions {
         return this;
     }
 
+    @Nullable
     public File getFile() {
         return this.file;
     }
@@ -63,6 +65,7 @@ public class SheetsOpenOptions {
         return this;
     }
 
+    @Nullable
     public InputStream getInputStream() {
         return inputStream;
     }
@@ -76,7 +79,14 @@ public class SheetsOpenOptions {
         return this.hugeXlsxStreamingReaderBuilder != null;
     }
 
+    /**
+     * Check with method {@link SheetsOpenOptions#isUseHugeXlsxStreamReading()} before use this to get builder.
+     *
+     * @return the {@link SheetsOpenOptions#hugeXlsxStreamingReaderBuilder}.
+     */
+    @Nonnull
     public StreamingReader.Builder getHugeXlsxStreamingReaderBuilder() {
+        Objects.requireNonNull(this.hugeXlsxStreamingReaderBuilder);
         return hugeXlsxStreamingReaderBuilder;
     }
 

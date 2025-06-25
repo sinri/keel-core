@@ -71,12 +71,8 @@ abstract class KeelIntravenousBase<D> extends KeelVerticleImpl implements KeelIn
     protected Future<Void> startVerticle() {
         this.interrupterRef.set(null);
         Keel.asyncCallRepeatedly(this::handleRoutine)
-            .onComplete(ar -> {
-                this.undeployMe()
-                    .onSuccess(v -> {
-                        undeployedRef.set(true);
-                    });
-            });
+            .onComplete(ar -> this.undeployMe()
+                              .onSuccess(v -> undeployedRef.set(true)));
         return Future.succeededFuture();
     }
 
@@ -116,9 +112,7 @@ abstract class KeelIntravenousBase<D> extends KeelVerticleImpl implements KeelIn
                                                   Keel.asyncSleep(1000L),
                                                   this.interrupterRef.get().future()
                                           )
-                                          .compose(compositeFuture -> {
-                                              return Future.succeededFuture();
-                                          });
+                                          .compose(compositeFuture -> Future.succeededFuture());
                          }
                      });
     }

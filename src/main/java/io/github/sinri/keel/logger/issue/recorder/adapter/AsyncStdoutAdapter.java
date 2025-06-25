@@ -1,10 +1,12 @@
 package io.github.sinri.keel.logger.issue.recorder.adapter;
 
-import io.github.sinri.keel.core.servant.intravenous.legacy.KeelIntravenous;
+import io.github.sinri.keel.core.servant.intravenous.KeelIntravenous;
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.github.sinri.keel.logger.issue.recorder.render.KeelIssueRecordRender;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.ThreadingModel;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -21,12 +23,8 @@ public class AsyncStdoutAdapter implements KeelIssueRecorderAdapter {
     private volatile boolean closed;
 
     private AsyncStdoutAdapter() {
-        this.intravenous = new KeelIntravenous<>(items -> {
-            return Keel.asyncCallIteratively(items, item -> {
-                return this.writeOneIssueRecord(item.topic, item.issueRecord);
-            });
-        });
-        this.intravenous.start();
+        this.intravenous = KeelIntravenous.instantBatch(items -> Keel.asyncCallIteratively(items, item -> this.writeOneIssueRecord(item.topic, item.issueRecord)));
+        this.intravenous.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));
         closed = false;
     }
 
@@ -55,15 +53,9 @@ public class AsyncStdoutAdapter implements KeelIssueRecorderAdapter {
     @Override
     public void close(@Nonnull Promise<Void> promise) {
         this.stopped = true;
-        this.intravenous.shutdown()
-                        .andThen(ar -> {
-                            if (ar.failed()) {
-                                promise.fail(ar.cause());
-                            } else {
-                                this.closed = true;
-                                promise.complete();
-                            }
-                        });
+        this.intravenous.shutdown();
+        promise.complete();
+        // todo add a watcher to see if this.intravenous is undeployed
     }
 
     @Override

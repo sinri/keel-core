@@ -16,11 +16,11 @@ import java.util.List;
  */
 public interface KeelIntravenous<D> extends KeelVerticle {
     static <T> KeelIntravenous<T> instant(@Nonnull SingleDropProcessor<T> itemProcessor) {
-        return new KeelIntravenousSingleImpl<T>(itemProcessor);
+        return new KeelIntravenousSingleImpl<>(itemProcessor);
     }
 
     static <T> KeelIntravenous<T> instantBatch(@Nonnull MultiDropsProcessor<T> itemsProcessor) {
-        return new KeelIntravenousBatchImpl<T>(itemsProcessor);
+        return new KeelIntravenousBatchImpl<>(itemsProcessor);
     }
 
     void add(D drop);

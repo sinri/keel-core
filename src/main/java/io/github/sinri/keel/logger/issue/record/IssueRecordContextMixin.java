@@ -25,9 +25,8 @@ interface IssueRecordContextMixin<T> extends KeelIssueRecordCore<T> {
         var context = attributes().readJsonObject(AttributeContext);
         if (context == null) {
             context = new JsonObject();
-            context(context);
         }
         context.put(name, item);
-        return getImplementation();
+        return context(context);
     }
 }

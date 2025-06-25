@@ -16,7 +16,7 @@ A Java framework with VERT.X eco, for projects for web, job and more.
 
 ## Third Party Integration
 
-* [Vert.x](https://vertx.io) 4.5.11
+* [Vert.x](https://vertx.io) 5.0.1
 * [org.commonmark:commonmark](https://github.com/commonmark/commonmark-java) ![GitHub](https://img.shields.io/github/license/commonmark/commonmark-java)
   0.21.0
 * [com.warrenstrange:googleauth](https://github.com/wstrange/GoogleAuth) ![GitHub](https://img.shields.io/github/license/wstrange/GoogleAuth)

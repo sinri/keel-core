@@ -1,25 +1,23 @@
 package io.github.sinri.keel.integration.elasticsearch.index;
 
-import io.github.sinri.keel.core.json.SimpleJsonifiableEntity;
+import io.github.sinri.keel.core.json.UnmodifiableJsonifiableEntityImpl;
 import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class ESIndexGetResponse extends SimpleJsonifiableEntity {
+public class ESIndexGetResponse extends UnmodifiableJsonifiableEntityImpl {
     public ESIndexGetResponse(JsonObject jsonObject) {
         super(jsonObject);
     }
 
     public Map<String, ESIndexMeta> indexMetaMap() {
         Map<String, ESIndexMeta> map = new HashMap<>();
-        this.toJsonObject().forEach(entry -> {
-            map.put(entry.getKey(), new ESIndexMeta((JsonObject) entry.getValue()));
-        });
+        this.forEach(entry -> map.put(entry.getKey(), new ESIndexMeta((JsonObject) entry.getValue())));
         return map;
     }
 
-    public static class ESIndexMeta extends SimpleJsonifiableEntity {
+    public static class ESIndexMeta extends UnmodifiableJsonifiableEntityImpl {
         public ESIndexMeta(JsonObject jsonObject) {
             super(jsonObject);
         }

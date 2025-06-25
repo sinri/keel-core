@@ -56,10 +56,10 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
             mySQLConnectOptions.setDatabase(schema);
         }
 
-        Integer connectionTimeout = getConnectionTimeout();
-        if (connectionTimeout != null) {
-            mySQLConnectOptions.setConnectTimeout(connectionTimeout);
-        }
+        //        Integer connectionTimeout = getConnectionTimeout();
+        //        if (connectionTimeout != null) {
+        //            mySQLConnectOptions.setConnectTimeout(connectionTimeout);
+        //        }
 
         return mySQLConnectOptions;
     }
@@ -130,19 +130,19 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
         return getName();
     }
 
-    /**
-     * The default value of connect timeout = 60000 ms
-     *
-     * @return connectTimeout - connect timeout, in ms
-     * @since 3.0.1 let it be its original setting!
-     */
-    private Integer getConnectionTimeout() {
-        var x = getChild("connectionTimeout");
-        if (x == null) {
-            return null;
-        }
-        return x.getValueAsInteger();
-    }
+    //    /**
+    //     * The default value of connect timeout = 60000 ms
+    //     *
+    //     * @return connectTimeout - connect timeout, in ms
+    //     * @since 3.0.1 let it be its original setting!
+    //     */
+    //    private Integer getConnectionTimeout() {
+    //        var x = getChild("connectionTimeout");
+    //        if (x == null) {
+    //            return null;
+    //        }
+    //        return x.getValueAsInteger();
+    //    }
 
     /**
      * Set the amount of time a client will wait for a connection from the pool.
@@ -176,6 +176,7 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
      * The client is to be created, and then soon closed after the sql queried.
      * To use this method safely, remember to enable POOL SHARING and set a unique name for the pool.
      *
+     * @param sql Here we just believe the application would give a confirmed and filtered SQL when call this method.
      * @since 3.1.6
      */
     @TechnicalPreview(since = "3.1.6")
@@ -185,12 +186,9 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
                                     .connectingTo(this.getConnectOptions())
                                     .using(Keel.getVertx())
                                     .build();
-        // System.out.println("sqlClient: "+sqlClient.getClass()); // class io.vertx.mysqlclient.impl.MySQLPoolImpl
         return Future.succeededFuture()
                      .compose(v -> sqlClient.preparedQuery(sql).execute()
-                                            .compose(rows -> {
-                                                return Future.succeededFuture(ResultMatrix.create(rows));
-                                            }))
+                                            .compose(rows -> Future.succeededFuture(ResultMatrix.create(rows))))
                      .andThen(ar -> sqlClient.close());
     }
 
@@ -198,7 +196,8 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
      * Handle every batch of rows read, or throw any exceptions in rows handler to stop the process.
      * All dynamic resources would be closed inside this function.
      *
-     * @param sql                a sql to be executed and read its result in stream.
+     * @param sql                Here we just believe the application would give a confirmed and filtered SQL when call
+     *                           this method.
      * @param readWindowSize     how many rows read once
      * @param readWindowFunction the async handler of the read rows
      * @since 4.0.13
@@ -213,29 +212,23 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
                                                  .build();
                          return Future.succeededFuture(pool);
                      })
-                     .compose(pool -> {
-                         return pool.getConnection()
-                                    .compose(sqlConnection -> {
-                                        return sqlConnection.prepare(sql)
-                                                            .compose(preparedStatement -> {
-                                                                Cursor cursor = preparedStatement.cursor();
+                     .compose(pool -> pool.getConnection()
+                                          .compose(sqlConnection -> sqlConnection.prepare(sql)
+                                                                                 .compose(preparedStatement -> {
+                                                                                     Cursor cursor = preparedStatement.cursor();
 
-                                                                return Keel.asyncCallRepeatedly(routineResult -> {
-                                                                               return cursor.read(readWindowSize)
-                                                                                            .compose(readWindowFunction)
-                                                                                            .compose(v -> {
-                                                                                                if (!cursor.hasMore()) {
-                                                                                                    routineResult.stop();
-                                                                                                    return Future.succeededFuture();
-                                                                                                }
-                                                                                                return Future.succeededFuture();
-                                                                                            });
-                                                                           })
-                                                                           .eventually(() -> cursor.close());
-                                                            })
-                                                            .eventually(() -> sqlConnection.close());
-                                    })
-                                    .eventually(() -> pool.close());
-                     });
+                                                                                     return Keel.asyncCallRepeatedly(routineResult -> cursor.read(readWindowSize)
+                                                                                                                                            .compose(readWindowFunction)
+                                                                                                                                            .compose(v -> {
+                                                                                                                                                if (!cursor.hasMore()) {
+                                                                                                                                                    routineResult.stop();
+                                                                                                                                                    return Future.succeededFuture();
+                                                                                                                                                }
+                                                                                                                                                return Future.succeededFuture();
+                                                                                                                                            }))
+                                                                                                .eventually(cursor::close);
+                                                                                 })
+                                                                                 .eventually(sqlConnection::close))
+                                          .eventually(pool::close));
     }
 }

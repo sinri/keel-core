@@ -132,9 +132,7 @@ public class UpdateStatement extends AbstractStatement implements ModifyStatemen
 
         // since 3.0.19
         List<String> setPairs = new ArrayList<>();
-        assignments.forEach(assignment -> {
-            setPairs.add(assignment.toString());
-        });
+        assignments.forEach(assignment -> setPairs.add(assignment.toString()));
         sql += AbstractStatement.SQL_COMPONENT_SEPARATOR + "SET " + Keel.stringHelper().joinStringArray(setPairs, ", ");
 
         if (!whereConditionsComponent.isEmpty()) {

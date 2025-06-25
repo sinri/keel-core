@@ -4,7 +4,6 @@ import io.github.sinri.keel.core.helper.KeelHelpersInterface;
 import io.github.sinri.keel.facade.async.KeelAsyncMixin;
 import io.github.sinri.keel.facade.cluster.KeelClusterKit;
 import io.github.sinri.keel.facade.configuration.KeelConfigElement;
-import io.github.sinri.keel.facade.launcher.KeelLauncher;
 import io.github.sinri.keel.logger.KeelLogLevel;
 import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
@@ -63,20 +62,6 @@ public final class KeelInstance implements KeelHelpersInterface, KeelClusterKit,
         return vertx;
     }
 
-    /**
-     * Used in {@link KeelLauncher#afterStartingVertx(Vertx)}. Do not use in other way without completely tests.
-     */
-    public void setVertx(@Nonnull Vertx outsideVertx) {
-        getLogger().debug(r -> r
-                .message("KeelInstance::setVertx is called with outsideVertx " + outsideVertx + " while currently " +
-                        "vertx is " + vertx));
-        if (vertx == null) {
-            vertx = outsideVertx;
-        } else {
-            throw new IllegalStateException("Vertx Already Initialized");
-        }
-    }
-
     @Nullable
     public ClusterManager getClusterManager() {
         return clusterManager;
@@ -91,9 +76,6 @@ public final class KeelInstance implements KeelHelpersInterface, KeelClusterKit,
             @Nullable ClusterManager clusterManager
     ) {
         this.clusterManager = clusterManager;
-        if (clusterManager == null && vertxOptions.getClusterManager() != null) {
-            this.clusterManager = vertxOptions.getClusterManager();
-        }
         if (this.clusterManager == null) {
             this.vertx = Vertx.builder().with(vertxOptions).withClusterManager(null).build();
             return Future.succeededFuture();

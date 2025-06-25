@@ -29,31 +29,33 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 通过 `io.github.sinri.keel.facade.KeelInstance#Keel` 来调用本接口的方法：
 
 ```java
-// 示例：并行处理集合
-List<String> items = Arrays.asList("item1", "item2", "item3");
-Keel.parallelForAllSuccess(items, item -> {
-    return processItem(item);
-}).onSuccess(v -> {
-    System.out.println("所有项目处理完成");
-});
+import java.util.Arrays;
+import java.util.List;
 
-// 示例：异步睡眠
-Keel.asyncSleep(1000)
-    .compose(v -> {
-        System.out.println("睡眠结束，继续执行");
-        return Future.succeededFuture();
-    });
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
-// 示例：重复执行任务
-Keel.asyncCallRepeatedly(task -> {
-    return checkCondition()
-        .compose(shouldContinue -> {
-            if (!shouldContinue) {
-                task.stop();
-            }
+void sample(){
+    // 示例：并行处理集合
+    List<String> items = Arrays.asList("item1", "item2", "item3");
+    Keel.parallelForAllSuccess(items, item -> processItem(item))
+        .onSuccess(v -> System.out.println("所有项目处理完成"));
+    
+    // 示例：异步睡眠
+    Keel.asyncSleep(1000)
+        .compose(v -> {
+            System.out.println("睡眠结束，继续执行");
             return Future.succeededFuture();
         });
-});
+    
+    // 示例：重复执行任务
+    Keel.asyncCallRepeatedly(task -> checkCondition()
+            .compose(shouldContinue -> {
+                if (!shouldContinue) {
+                    task.stop();
+                }
+                return Future.succeededFuture();
+            }));
+}
 ```
 
 ## 方法分类

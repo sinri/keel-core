@@ -1,16 +1,12 @@
 package io.github.sinri.keel.logger.issue.center;
 
-import io.github.sinri.keel.logger.event.KeelEventLog;
-import io.github.sinri.keel.logger.event.KeelEventLogger;
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.github.sinri.keel.logger.issue.recorder.adapter.KeelIssueRecorderAdapter;
 import io.github.sinri.keel.logger.issue.recorder.adapter.SilentAdapter;
 import io.github.sinri.keel.logger.issue.recorder.adapter.SyncStdoutAdapter;
-import io.vertx.core.Handler;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 /**
@@ -38,13 +34,7 @@ public interface KeelIssueRecordCenter {
      * @since 4.0.0
      */
     static KeelIssueRecordCenter build(@Nonnull KeelIssueRecorderAdapter adapter) {
-        return new KeelIssueRecordCenter() {
-            @Nonnull
-            @Override
-            public KeelIssueRecorderAdapter getAdapter() {
-                return adapter;
-            }
-        };
+        return () -> adapter;
     }
 
     @Nonnull
@@ -58,44 +48,6 @@ public interface KeelIssueRecordCenter {
             @Nonnull String topic, @Nonnull Supplier<T> issueRecordBuilder
     ) {
         return KeelIssueRecorder.build(this, issueRecordBuilder, topic);
-    }
-
-
-    /**
-     * @deprecated use
-     *         {@link
-     *         io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter#generateIssueRecorder(java.lang.String,
-     *         java.util.function.Supplier)} instead.
-     */
-    @Nonnull
-    @Deprecated(since = "4.0.0", forRemoval = true)
-    default KeelEventLogger generateEventLogger(@Nonnull String topic) {
-        return KeelEventLogger.from(generateIssueRecorderForEventLogger(topic));
-    }
-
-    /**
-     * @deprecated use
-     *         {@link
-     *         io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter#generateIssueRecorder(java.lang.String,
-     *         java.util.function.Supplier)} instead.
-     */
-    @Nonnull
-    @Deprecated(since = "4.0.0", forRemoval = true)
-    default KeelEventLogger generateEventLogger(@Nonnull String topic,
-                                                @Nullable Handler<KeelEventLog> templateEventLogEditor) {
-        return KeelEventLogger.from(generateIssueRecorderForEventLogger(topic), templateEventLogEditor);
-    }
-
-    /**
-     * @deprecated use
-     *         {@link
-     *         io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter#generateIssueRecorder(java.lang.String,
-     *         java.util.function.Supplier)} instead.
-     */
-    @Nonnull
-    @Deprecated(since = "4.0.0", forRemoval = true)
-    default KeelIssueRecorder<KeelEventLog> generateIssueRecorderForEventLogger(@Nonnull String topic) {
-        return generateIssueRecorder(topic, KeelEventLog::new);
     }
 
     class Holder {

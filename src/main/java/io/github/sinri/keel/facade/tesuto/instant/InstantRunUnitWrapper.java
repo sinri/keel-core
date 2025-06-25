@@ -71,9 +71,7 @@ class InstantRunUnitWrapper {
                                           });
                          }
                      })
-                     .compose(v -> {
-                         return Future.succeededFuture(testUnitResult);
-                     });
+                     .compose(v -> Future.succeededFuture(testUnitResult));
     }
 
     public String getName() {
@@ -81,7 +79,6 @@ class InstantRunUnitWrapper {
     }
 
     public boolean isSkip() {
-        // todo: later remove deprecated `InstantRunUnit::skip`.
-        return (this.skipAnnotated != null) || this.annotation.skip();
+        return this.skipAnnotated != null;
     }
 }

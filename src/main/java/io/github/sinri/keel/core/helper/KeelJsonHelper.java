@@ -380,11 +380,9 @@ public class KeelJsonHelper {
         }
         if (object instanceof JsonObject) {
             subBlock.append("\n");
-            ((JsonObject) object).forEach(entry -> {
-                subBlock.append(
-                        renderJsonItem(entry.getKey(), entry.getValue(), indentation + 2, "+")
-                );
-            });
+            ((JsonObject) object).forEach(entry -> subBlock.append(
+                    renderJsonItem(entry.getKey(), entry.getValue(), indentation + 2, "+")
+            ));
         } else if (object instanceof JsonArray) {
             subBlock.append("\n");
             for (int i = 0; i < ((JsonArray) object).size(); i++) {

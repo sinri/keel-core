@@ -253,17 +253,15 @@ public interface KeelAsyncMixin {
             @Nonnull Iterator<T> iterator,
             @Nonnull BiFunction<T, RepeatedlyCallTask, Future<Void>> itemProcessor
     ) {
-        return asyncCallRepeatedly(routineResult -> {
-            return Future.succeededFuture()
-                         .compose(v -> {
-                             if (iterator.hasNext()) {
-                                 return itemProcessor.apply(iterator.next(), routineResult);
-                             } else {
-                                 routineResult.stop();
-                                 return Future.succeededFuture();
-                             }
-                         });
-        });
+        return asyncCallRepeatedly(routineResult -> Future.succeededFuture()
+                                                      .compose(v -> {
+                         if (iterator.hasNext()) {
+                             return itemProcessor.apply(iterator.next(), routineResult);
+                         } else {
+                             routineResult.stop();
+                             return Future.succeededFuture();
+                         }
+                     }));
     }
 
     /**
@@ -335,19 +333,15 @@ public interface KeelAsyncMixin {
         if (step <= 0) throw new IllegalArgumentException("step must be greater than 0");
         if (start > end) throw new IllegalArgumentException("start must not be greater than end");
         AtomicLong ptr = new AtomicLong(start);
-        return asyncCallRepeatedly(task -> {
-            return Future.succeededFuture()
-                         .compose(vv -> {
-                             return processor.apply(ptr.get(), task)
-                                             .compose(v -> {
-                                                 long y = ptr.addAndGet(step);
-                                                 if (y >= end) {
-                                                     task.stop();
-                                                 }
-                                                 return Future.succeededFuture();
-                                             });
-                         });
-        });
+        return asyncCallRepeatedly(task -> Future.succeededFuture()
+                                             .compose(vv -> processor.apply(ptr.get(), task)
+                                         .compose(v -> {
+                                         long y = ptr.addAndGet(step);
+                                         if (y >= end) {
+                                             task.stop();
+                                         }
+                                         return Future.succeededFuture();
+                                     })));
     }
 
     /**
@@ -389,11 +383,9 @@ public interface KeelAsyncMixin {
      * @since 3.0.1
      */
     default void asyncCallEndlessly(@Nonnull Supplier<Future<Void>> supplier) {
-        asyncCallRepeatedly(routineResult -> {
-            return Future.succeededFuture()
-                         .compose(v -> supplier.get())
-                         .eventually(() -> Future.succeededFuture());
-        });
+        asyncCallRepeatedly(routineResult -> Future.succeededFuture()
+                                               .compose(v -> supplier.get())
+                                               .eventually(Future::succeededFuture));
     }
 
 
@@ -419,9 +411,7 @@ public interface KeelAsyncMixin {
     default Future<Void> asyncSleep(long time, @Nullable Promise<Void> interrupter) {
         Promise<Void> promise = Promise.promise();
         if (time < 1) time = 1;
-        long timer_id = Keel.getVertx().setTimer(time, timerID -> {
-            promise.complete();
-        });
+        long timer_id = Keel.getVertx().setTimer(time, timerID -> promise.complete());
         if (interrupter != null) {
             interrupter.future().onSuccess(interrupted -> {
                 Keel.getVertx().cancelTimer(timer_id);
@@ -527,12 +517,8 @@ public interface KeelAsyncMixin {
                         promise.fail(ar.cause());
                     }
                 })
-                .recover(throwable -> {
-                    return Future.succeededFuture();
-                })
-                .compose(v -> {
-                    return promise.future();
-                });
+                .recover(throwable -> Future.succeededFuture())
+                .compose(v -> promise.future());
     }
 
     /**
@@ -554,10 +540,8 @@ public interface KeelAsyncMixin {
             return Future.succeededFuture();
         });
         return verticle.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER))
-                       .compose(deploymentId -> {
-                           return promise.future()
-                                         .onComplete(ar -> verticle.undeployMe());
-                       });
+                       .compose(deploymentId -> promise.future()
+                                                   .onComplete(ar -> verticle.undeployMe()));
     }
 
     /**

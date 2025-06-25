@@ -2,6 +2,7 @@ package io.github.sinri.keel.test.lab.excel;
 
 import com.github.pjfanning.xlsx.StreamingReader;
 import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnit;
+import io.github.sinri.keel.facade.tesuto.instant.InstantRunUnitSkipped;
 import io.github.sinri.keel.facade.tesuto.instant.KeelInstantRunner;
 import io.github.sinri.keel.integration.poi.excel.KeelSheet;
 import io.github.sinri.keel.integration.poi.excel.KeelSheets;
@@ -15,7 +16,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 public class StaxTest extends KeelInstantRunner {
-    @InstantRunUnit(skip = true)
+    @InstantRunUnit
+    @InstantRunUnitSkipped
     public Future<Void> test1() {
         FileInputStream in = null;
         try {

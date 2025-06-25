@@ -130,9 +130,7 @@ public class KeelNetHelper {
         clientIPChain.add(ctx.request().remoteAddress().hostAddress());
 
         List<String> list = new ArrayList<>();
-        clientIPChain.forEach(item -> {
-            list.add(item.toString());
-        });
+        clientIPChain.forEach(item -> list.add(item.toString()));
         return list;
     }
 }

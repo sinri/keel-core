@@ -52,10 +52,9 @@ abstract public class KeelHttpServer extends KeelVerticleImpl {
         this.configureRoutes(router);
 
         server.requestHandler(router)
-              .exceptionHandler(throwable -> {
-                  getHttpServerLogger().exception(throwable, r -> r.message("KeelHttpServer Exception"));
-              })
-              .listen(httpServerAsyncResult -> {
+              .exceptionHandler(throwable -> getHttpServerLogger().exception(throwable, r -> r.message("KeelHttpServer Exception")))
+              .listen()
+              .onComplete(httpServerAsyncResult -> {
                   if (httpServerAsyncResult.succeeded()) {
                       HttpServer httpServer = httpServerAsyncResult.result();
                       getHttpServerLogger().info(r -> r.message("HTTP Server Established, Actual Port: " + httpServer.actualPort()));

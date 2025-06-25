@@ -268,8 +268,6 @@ public class DatabaseTest extends KeelInstantRunner {
 ```java
 @Retention(RetentionPolicy.RUNTIME)
 public @interface InstantRunUnit {
-    @Deprecated(since = "4.0.0")
-    boolean skip() default false;  // 已废弃，使用 @InstantRunUnitSkipped 代替
 }
 ```
 

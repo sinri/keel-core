@@ -41,9 +41,7 @@ abstract public class KeelInstantRunner {
 
         instantLogger = KeelIssueRecordCenter.outputCenter()
                                              .generateIssueRecorder("KeelInstantRunner", KeelEventLog::new);
-        instantLogger.setRecordFormatter(eventLog -> {
-            eventLog.classification("preparing");
-        });
+        instantLogger.setRecordFormatter(eventLog -> eventLog.classification("preparing"));
 
         instantLogger.debug(r -> r.message("Keel Instant Runner Class: " + calledClass));
 
@@ -93,9 +91,7 @@ abstract public class KeelInstantRunner {
                   instantLogger.info(r -> r.message("RUNNING INSTANT UNITS..."));
 
                   return Keel.asyncCallIteratively(testUnits.iterator(), testUnit -> {
-                                 instantLogger.setRecordFormatter(eventLogger -> {
-                                     eventLogger.classification(testUnit.getName());
-                                 });
+                                 instantLogger.setRecordFormatter(eventLogger -> eventLogger.classification(testUnit.getName()));
                                  return testUnit.runTest((KeelInstantRunner) testInstance)
                                                 .compose(testUnitResult -> {
                                                     testUnitResults.add(testUnitResult);
@@ -105,14 +101,10 @@ abstract public class KeelInstantRunner {
                                                     countDownLatch.countDown();
                                                     return Future.succeededFuture();
                                                 })
-                                                .compose(vv -> {
-                                                    return Future.succeededFuture();
-                                                });
+                                                .compose(vv -> Future.succeededFuture());
                              })
                              .onComplete(vv -> {
-                                 instantLogger.setRecordFormatter(eventLogger -> {
-                                     eventLogger.classification("conclusion");
-                                 });
+                                 instantLogger.setRecordFormatter(eventLogger -> eventLogger.classification("conclusion"));
                                  AtomicInteger totalNonSkippedRef = new AtomicInteger(0);
                                  testUnitResults.forEach(testUnitResult -> {
                                      if (testUnitResult.isSkipped()) {
@@ -132,12 +124,8 @@ abstract public class KeelInstantRunner {
                                  instantLogger.notice(r -> r.message("PASSED RATE: " + totalPassedRef.get() + " / " + totalNonSkippedRef.get() + " i.e. " + (100.0 * totalPassedRef.get() / totalNonSkippedRef.get()) + "%"));
                              });
               })
-              .onFailure(throwable -> {
-                  instantLogger.exception(throwable, r -> r.message("ERROR OCCURRED DURING TESTING"));
-              })
-              .eventually(() -> {
-                  return ((KeelInstantRunner) testInstance).ending(testUnitResults);
-              })
+              .onFailure(throwable -> instantLogger.exception(throwable, r -> r.message("ERROR OCCURRED DURING TESTING")))
+              .eventually(() -> ((KeelInstantRunner) testInstance).ending(testUnitResults))
         //              .eventually(() -> {
         //                  return Keel.getVertx().close();
         //              })

@@ -385,9 +385,7 @@ public class KeelSheet {
             });
             return Future.succeededFuture();
         }, 1000)
-                .compose(v -> {
-                    return Future.succeededFuture(keelSheetMatrix);
-                });
+                .compose(v -> Future.succeededFuture(keelSheetMatrix));
     }
 
     /**
@@ -446,9 +444,7 @@ public class KeelSheet {
             });
             return Future.succeededFuture();
         }, 1000)
-                .compose(v -> {
-                    return Future.succeededFuture(templatedMatrixRef.get());
-                });
+                .compose(v -> Future.succeededFuture(templatedMatrixRef.get()));
     }
 
 
@@ -494,9 +490,7 @@ public class KeelSheet {
         AtomicInteger rowIndexRef = new AtomicInteger(0);
         blockWriteAllRows(List.of(templatedMatrix.getTemplate().getColumnNames()), 0, 0);
         rowIndexRef.incrementAndGet();
-        templatedMatrix.getRows().forEach(templatedRow -> {
-            blockWriteAllRows(List.of(templatedRow.getRawRow()), rowIndexRef.get(), 0);
-        });
+        templatedMatrix.getRows().forEach(templatedRow -> blockWriteAllRows(List.of(templatedRow.getRawRow()), rowIndexRef.get(), 0));
     }
 
     public Future<Void> writeTemplatedMatrix(@Nonnull KeelSheetTemplatedMatrix templatedMatrix) {

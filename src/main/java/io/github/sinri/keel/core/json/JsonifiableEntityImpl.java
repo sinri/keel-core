@@ -32,8 +32,13 @@ public abstract class JsonifiableEntityImpl<E> implements JsonifiableEntity<E> {
     }
 
     @Override
-    public final String toString() {
+    public final String toJsonExpression() {
         return this.toJsonObject().toString();
+    }
+
+    @Override
+    public final String toString() {
+        return this.toJsonExpression();
     }
 
 }

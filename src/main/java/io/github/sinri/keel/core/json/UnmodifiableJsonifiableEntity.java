@@ -39,6 +39,16 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
 
     /**
      * @return The JSON Object expression.
+     * @since 4.0.14
+     */
+    default String toJsonExpression() {
+        return cloneAsJsonObject().toString();
+    }
+
+    /**
+     * Should return same content with {@link UnmodifiableJsonifiableEntity#toJsonExpression()}
+     *
+     * @return The JSON Object expression.
      * @since 3.2.17
      */
     @Override
@@ -50,7 +60,8 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
      * @since 2.8 If java.lang.ClassCastException occurred, return null instead.
      * @since 3.1.10 make it abstract.
      */
-    @Nullable <T> T read(@Nonnull Function<JsonPointer, Class<T>> func);
+    @Nullable
+    <T> T read(@Nonnull Function<JsonPointer, Class<T>> func);
 
     /**
      * @since 2.7

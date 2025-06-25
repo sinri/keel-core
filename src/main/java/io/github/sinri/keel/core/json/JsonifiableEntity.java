@@ -46,11 +46,14 @@ public interface JsonifiableEntity<E>
 
     /**
      * Wrap a JsonObject into a JsonifiableEntity.
-     * 
+     *
      * @param jsonObject The JsonObject to wrap.
      * @return A JsonifiableEntity wraps the JsonObject.
      * @since 3.2.11
+     * @deprecated As of 4.0.14, {@link SimpleJsonifiableEntity} is deprecated. For read-only scenario, use
+     *         {@link UnmodifiableJsonifiableEntity#wrap(JsonObject)}.
      */
+    @Deprecated(since = "4.0.14")
     static SimpleJsonifiableEntity wrap(@Nonnull JsonObject jsonObject) {
         return new SimpleJsonifiableEntity(jsonObject);
     }
@@ -66,6 +69,14 @@ public interface JsonifiableEntity<E>
     JsonObject toJsonObject();
 
     /**
+     * @return The JSON Object expression.
+     * @since 4.0.14
+     */
+    default String toJsonExpression() {
+        return toJsonObject().toString();
+    }
+
+    /**
      * Reloads the data of this entity from the provided {@link JsonObject}.
      *
      * @param jsonObject a non-null {@link JsonObject} containing the new data to be
@@ -77,8 +88,8 @@ public interface JsonifiableEntity<E>
     E reloadDataFromJsonObject(@Nonnull JsonObject jsonObject);
 
     /**
-     * It should be the same as {@link #toJsonObject()}.toString().
-     * 
+     * It should be the same as {@link JsonifiableEntity#toJsonExpression()}.
+     *
      * @return The JsonObject expression.
      * @since 1.14
      */
@@ -147,7 +158,7 @@ public interface JsonifiableEntity<E>
      * @since 2.7
      */
     default @Nullable <B extends JsonifiableEntity<?>> B readJsonifiableEntity(@Nonnull Class<B> bClass,
-            String... args) {
+                                                                               String... args) {
         JsonObject jsonObject = readJsonObject(args);
         if (jsonObject == null)
             return null;
@@ -156,11 +167,11 @@ public interface JsonifiableEntity<E>
             x.reloadDataFromJsonObject(jsonObject);
             return x;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException
-                | NoSuchMethodException ignored1) {
+                 | NoSuchMethodException ignored1) {
             try {
                 return bClass.getConstructor(JsonObject.class).newInstance(jsonObject);
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException
-                    | NoSuchMethodException ignored2) {
+                     | NoSuchMethodException ignored2) {
                 return null;
             }
         }
@@ -169,7 +180,7 @@ public interface JsonifiableEntity<E>
     /**
      * Read an entity from a JSON Object with Jackson
      * {@link JsonObject#mapTo(Class)}.
-     * 
+     *
      * @param cClass The class of the entity to be read.
      * @param args   The arguments used to form a JSON pointer for locating the JSON
      *               object within a larger structure.
@@ -190,7 +201,6 @@ public interface JsonifiableEntity<E>
     }
 
     /**
-     * 
      * @since 2.8
      */
     default void fromBuffer(@Nonnull Buffer buffer) {

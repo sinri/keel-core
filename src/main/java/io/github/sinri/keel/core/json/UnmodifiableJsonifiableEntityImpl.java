@@ -32,12 +32,19 @@ public class UnmodifiableJsonifiableEntityImpl implements UnmodifiableJsonifiabl
         this.jsonObject = jsonObject;
     }
 
+    @Override
+    public final String toJsonExpression() {
+        return jsonObject.toString();
+    }
+
     /**
+     * As of 4.0.14, it is final.
+     *
      * @since 3.2.17
      */
     @Override
-    public String toString() {
-        return jsonObject.toString();
+    public final String toString() {
+        return toJsonExpression();
     }
 
     /**

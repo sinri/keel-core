@@ -9,6 +9,7 @@ import javax.annotation.Nonnull;
  *
  * @since 3.0.14
  */
+@Deprecated(since = "4.1.0")
 public class InstantRunnerResult {
     private final @Nonnull String testName;
     private Long spentTime;

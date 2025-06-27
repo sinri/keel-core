@@ -38,19 +38,23 @@ AbstractStatement setRemarkAsComment(String remarkAsComment)
 - `call()` - 构建存储过程调用
 
 **DDL语句构建**：
-- `createTable()` - 创建表
-- `alterTable()` - 修改表结构
-- `truncateTable()` - 清空表
-- `createView()` - 创建视图
-- `alterView()` - 修改视图
-- `dropView()` - 删除视图
+
+- `createTable()` - 创建表 (4.0.4+)
+- `createTableLikeTable()` - 创建类似表 (4.0.4+)
+- `alterTable()` - 修改表结构 (4.0.4+)
+- `truncateTable()` - 清空表 (4.0.4+)
+- `createView()` - 创建视图 (4.0.4+)
+- `alterView()` - 修改视图 (4.0.4+)
+- `dropView()` - 删除视图 (4.0.4+)
 
 **模板化语句**：
 - `templatedRead()` - 模板化查询语句
 - `templatedModify()` - 模板化修改语句
 
 **原始SQL**：
-- `raw()` - 执行原始SQL语句
+
+- `raw(String sql)` - 执行原始SQL语句 (3.0.9+)
+- `raw(String sql, boolean withoutPrepare)` - 执行原始SQL语句，可指定是否跳过预处理 (4.0.7+)
 
 ### 实现类 (impl包)
 

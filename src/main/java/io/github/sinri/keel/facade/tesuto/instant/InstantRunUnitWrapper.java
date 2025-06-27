@@ -13,6 +13,7 @@ import java.lang.reflect.Method;
  *
  * @since 3.0.10
  */
+@Deprecated(since = "4.1.0")
 class InstantRunUnitWrapper {
     @Nonnull
     private final Method method;

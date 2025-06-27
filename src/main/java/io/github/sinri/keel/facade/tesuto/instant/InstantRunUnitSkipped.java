@@ -10,6 +10,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @see InstantRunUnit
  */
+@Deprecated(since = "4.1.0")
 @Retention(RetentionPolicy.RUNTIME)
 public @interface InstantRunUnitSkipped {
 }

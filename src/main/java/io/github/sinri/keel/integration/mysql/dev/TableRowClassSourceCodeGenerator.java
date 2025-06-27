@@ -2,6 +2,7 @@ package io.github.sinri.keel.integration.mysql.dev;
 
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.sqlclient.SqlConnection;
 
@@ -22,12 +23,8 @@ public class TableRowClassSourceCodeGenerator {
     private final Set<String> excludedTableSet;
     private String schema;
 
-    private boolean provideConstSchema = true;
-    private boolean provideConstTable = true;
-    private boolean provideConstSchemaAndTable = false;
-    private @Nullable String strictEnumPackage = null;
-    private @Nullable String envelopePackage = null;
-    private boolean usePureMode = false;
+    @Nullable
+    private Handler<TableRowClassBuildStandard> standardHandler;
 
     public TableRowClassSourceCodeGenerator(NamedMySQLConnection namedMySQLConnection) {
         this.sqlConnection = namedMySQLConnection.getSqlConnection();
@@ -60,51 +57,14 @@ public class TableRowClassSourceCodeGenerator {
         return this;
     }
 
-    public TableRowClassSourceCodeGenerator setProvideConstSchema(boolean provideConstSchema) {
-        this.provideConstSchema = provideConstSchema;
+    public TableRowClassSourceCodeGenerator setStandardHandler(@Nullable Handler<TableRowClassBuildStandard> standardHandler) {
+        this.standardHandler = standardHandler;
         return this;
     }
 
-    public TableRowClassSourceCodeGenerator setProvideConstSchemaAndTable(boolean provideConstSchemaAndTable) {
-        this.provideConstSchemaAndTable = provideConstSchemaAndTable;
-        return this;
-    }
-
-    public TableRowClassSourceCodeGenerator setProvideConstTable(boolean provideConstTable) {
-        this.provideConstTable = provideConstTable;
-        return this;
-    }
-
-    /**
-     * @param strictEnumPackage empty or a package path. No dot in tail.
-     */
-    public TableRowClassSourceCodeGenerator setStrictEnumPackage(@Nonnull String strictEnumPackage) {
-        this.strictEnumPackage = strictEnumPackage;
-        return this;
-    }
-
-    /**
-     * @param envelopePackage empty or a package path. No dot in tail.
-     * @since 3.1.0
-     */
-    public TableRowClassSourceCodeGenerator setEnvelopePackage(@Nonnull String envelopePackage) {
-        this.envelopePackage = envelopePackage;
-        return this;
-    }
-
-    /**
-     * Do not add DDL and Update Timestamp to Generated Class Code.
-     *
-     * @since 4.0.11
-     */
-    public TableRowClassSourceCodeGenerator setUsePureMode(boolean usePureMode) {
-        this.usePureMode = usePureMode;
-        return this;
-    }
-
-    public Future<Void> generate(String packageName, String packagePath) {
+    public Future<Void> generate(String packagePath) {
         return this.confirmTablesToGenerate()
-                   .compose(tables -> generateForTables(packageName, packagePath, tables));
+                   .compose(tables -> generateForTables(packagePath, tables));
     }
 
     private Future<Set<String>> confirmTablesToGenerate() {
@@ -146,14 +106,24 @@ public class TableRowClassSourceCodeGenerator {
         }
     }
 
-    private Future<Void> generateForTables(String packageName, String packagePath, Collection<String> tables) {
+
+    private Future<Void> generateForTables(String packagePath, Collection<String> tables) {
         Map<String, String> writeMap = new HashMap<>();
         return Keel.asyncCallIteratively(
                            tables,
                            table -> {
                                String className = Keel.stringHelper().fromUnderScoreCaseToCamelCase(table) + "TableRow";
                                String classFile = packagePath + "/" + className + ".java";
-                               return this.generateClassCodeForOneTable(schema, table, packageName, className)
+
+                               TableRowClassBuildStandard standard = new TableRowClassBuildStandard();
+                               if (standardHandler != null) {
+                                   standardHandler.handle(standard);
+                               }
+                               var options = new TableRowClassBuildOptions(standard)
+                                       .setSchema(schema)
+                                       .setTable(table);
+
+                               return this.generateClassCodeForOneTable(options)
                                           .compose(code -> {
                                               writeMap.put(classFile, code);
                                               return Future.succeededFuture();
@@ -166,28 +136,22 @@ public class TableRowClassSourceCodeGenerator {
                    }));
     }
 
-    private Future<String> generateClassCodeForOneTable(String schema, String table, String packageName, String className) {
+    private Future<String> generateClassCodeForOneTable(TableRowClassBuildOptions options) {
         return Future.all(
-                             this.getCommentOfTable(table, schema),// comment of table
-                             this.getFieldsOfTable(table, schema),// fields
-                             this.getCreationOfTable(table, schema)// creation ddl
+                             this.getCommentOfTable(options.getTable(), schema),// comment of table
+                             this.getFieldsOfTable(options.getTable(), schema, options.getStrictEnumPackage(), options.getEnvelopePackage()),// fields
+                             this.getCreationOfTable(options.getTable(), schema)// creation ddl
                      )
                      .compose(compositeFuture -> {
                          String table_comment = compositeFuture.resultAt(0);
                          List<TableRowClassField> fields = compositeFuture.resultAt(1);
                          String creation = compositeFuture.resultAt(2);
 
-                         var builder = new TableRowClassBuilder(table, schema, packageName)
-                                 .setTableComment(table_comment)
-                                 .setProvideConstTable(provideConstTable)
-                                 .setProvideConstSchema(provideConstSchema)
-                                 .setProvideConstSchemaAndTable(provideConstSchemaAndTable)
-                                 .addFields(fields);
-                         if (usePureMode) {
-                             builder.setVcsFriendly(true);
-                         } else {
-                             builder.setDdl(creation);
-                         }
+                         options.setTableComment(table_comment)
+                                .addFields(fields)
+                                .setDdl(creation);
+
+                         var builder = new TableRowClassBuilder(options);
                          String code = builder.build();
                          return Future.succeededFuture(code);
                      });
@@ -209,7 +173,7 @@ public class TableRowClassSourceCodeGenerator {
                             });
     }
 
-    private Future<List<TableRowClassField>> getFieldsOfTable(@Nonnull String table, @Nullable String schema) {
+    private Future<List<TableRowClassField>> getFieldsOfTable(@Nonnull String table, @Nullable String schema, @Nullable String strictEnumPackage, @Nullable String envelopePackage) {
         String sql_for_columns = "show full columns in ";
         if (schema != null && !schema.isBlank()) {
             sql_for_columns += "`" + schema + "`.";
@@ -232,7 +196,10 @@ public class TableRowClassSourceCodeGenerator {
                                     String nullability = row.getString("Null");
                                     boolean isNullable = "YES".equalsIgnoreCase(nullability);
 
-                                    fields.add(new TableRowClassField(field, type, isNullable, comment, strictEnumPackage, envelopePackage));
+                                    fields.add(new TableRowClassField(
+                                            field, type, isNullable, comment,
+                                            strictEnumPackage, envelopePackage
+                                    ));
                                 });
                                 return Future.succeededFuture(fields);
                             });

@@ -146,11 +146,11 @@ class TableRowClassField {
 
         StringBuilder code = new StringBuilder();
         if (looseEnum != null) {
-            code.append(looseEnum.build()).append("\n");
-            code.append("\t/*\n")
-                    .append("\t * ").append(actualComment).append("\n\t * \n")
-                    .append("\t * Loose Enum of Field `").append(field).append("` of type `").append(type).append("`.\n")
-                    .append("\t */\n");
+            code.append(looseEnum.build()).append("\n")
+                .append("\t/*\n")
+                .append("\t * ").append(actualComment).append("\n\t * \n")
+                .append("\t * Loose Enum of Field `").append(field).append("` of type `").append(type).append("`.\n")
+                .append("\t */\n");
             if (fieldDeprecated) {
                 code.append("\t@Deprecated\n");
             }
@@ -159,22 +159,22 @@ class TableRowClassField {
             } else {
                 code.append("\t@Nonnull\n");
             }
-            code
-                    .append("\tpublic ").append(looseEnum.looseEnumName()).append(" ").append(getter).append("() {\n")
-                    .append("\t\t@Nullable String enumExpression=").append(readMethod).append("(\"").append(field).append("\");\n");
+            code.append("\tpublic ").append(looseEnum.looseEnumName()).append(" ").append(getter).append("() {\n")
+                .append("\t\t@Nullable String enumExpression=").append(readMethod).append("(\"").append(field)
+                .append("\");\n");
             if (nullable) {
                 code.append("\t\tif (enumExpression==null) return null;\n");
             } else {
-                code.append("\t\tObjects.requireNonNull(enumExpression,\"The Enum Field `").append(field).append("` should not be null!\");\n");
+                code.append("\t\tObjects.requireNonNull(enumExpression,\"The Enum Field `").append(field)
+                    .append("` should not be null!\");\n");
             }
-            code
-                    .append("\t\treturn ").append(looseEnum.looseEnumName()).append(".valueOf(enumExpression);\n")
-                    .append("\t}\n");
+            code.append("\t\treturn ").append(looseEnum.looseEnumName()).append(".valueOf(enumExpression);\n")
+                .append("\t}\n");
         } else if (strictEnum != null) {
             code.append("\t/*\n")
-                    .append("\t * ").append(actualComment).append("\n\t * \n")
-                    .append("\t * Strict Enum of Field `").append(field).append("` of type `").append(type).append("`.\n")
-                    .append("\t */\n");
+                .append("\t * ").append(actualComment).append("\n\t * \n")
+                .append("\t * Strict Enum of Field `").append(field).append("` of type `").append(type).append("`.\n")
+                .append("\t */\n");
             if (fieldDeprecated) {
                 code.append("\t@Deprecated\n");
             }
@@ -183,24 +183,24 @@ class TableRowClassField {
             } else {
                 code.append("\t@Nonnull\n");
             }
-            code
-                    .append("\tpublic ").append(strictEnum.fullEnumRef()).append(" ").append(getter).append("() {\n")
-                    .append("\t\t@Nullable String enumExpression=").append(readMethod).append("(\"").append(field).append("\");\n");
+            code.append("\tpublic ").append(strictEnum.fullEnumRef()).append(" ").append(getter).append("() {\n")
+                .append("\t\t@Nullable String enumExpression=").append(readMethod).append("(\"").append(field)
+                .append("\");\n");
             if (nullable) {
                 code.append("\t\tif (enumExpression==null) return null;\n");
             } else {
-                code.append("\t\tObjects.requireNonNull(enumExpression,\"The Enum Field `").append(field).append("` should not be null!\");\n");
+                code.append("\t\tObjects.requireNonNull(enumExpression,\"The Enum Field `").append(field)
+                    .append("` should not be null!\");\n");
             }
-            code
-                    .append("\t\treturn ").append(strictEnum.fullEnumRef()).append(".valueOf(enumExpression);\n")
-                    .append("\t}\n");
+            code.append("\t\treturn ").append(strictEnum.fullEnumRef()).append(".valueOf(enumExpression);\n")
+                .append("\t}\n");
         } else {
             code.append("\t/*\n");
             if (comment != null) {
                 code.append("\t * ").append(actualComment).append("\n\t * \n");
             }
             code.append("\t * Field `").append(field).append("` of type `").append(type).append("`.\n")
-                    .append("\t */\n");
+                .append("\t */\n");
             if (fieldDeprecated) {
                 code.append("\t@Deprecated\n");
             }
@@ -210,24 +210,25 @@ class TableRowClassField {
                 code.append("\t@Nonnull\n");
             }
             code.append("\tpublic ").append(returnType).append(" ").append(getter).append("() {\n")
-                    .append("\t\treturn ")
-                    .append(nullable ? "" : "Objects.requireNonNull(")
-                    .append(readMethod).append("(\"").append(field).append("\")")
-                    .append(nullable ? "" : ")").append(";\n")
-                    .append("\t}\n");
+                .append("\t\treturn ")
+                .append(nullable ? "" : "Objects.requireNonNull(")
+                .append(readMethod).append("(\"").append(field).append("\")")
+                .append(nullable ? "" : ")").append(";\n")
+                .append("\t}\n");
         }
 
         if (aesEncryption != null) {
             code.append("\t/*\n")
-                    .append("\t * AES DECRYPTED VALUE.\n");
+                .append("\t * AES DECRYPTED VALUE.\n");
             if (comment != null) {
                 code.append("\t * ").append(actualComment).append("\n\t * \n");
             }
             code.append("\t */\n")
-                    .append("\t@Nullable\n")
-                    .append("\tpublic ").append("String").append(" ").append(getter).append("Decrypted() {\n")
-                    .append("\t\treturn ").append(aesEncryption.buildCallClassMethodCode(readMethod + "(\"" + field + "\")")).append("\n")
-                    .append("\t}\n");
+                .append("\t@Nullable\n")
+                .append("\tpublic ").append("String").append(" ").append(getter).append("Decrypted() {\n")
+                .append("\t\treturn ")
+                .append(aesEncryption.buildCallClassMethodCode(readMethod + "(\"" + field + "\")")).append("\n")
+                .append("\t}\n");
         }
 
         return code.toString();

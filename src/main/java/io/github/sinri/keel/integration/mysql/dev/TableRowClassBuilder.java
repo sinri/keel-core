@@ -4,10 +4,7 @@ import io.github.sinri.keel.integration.mysql.result.row.AbstractTableRow;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
@@ -17,80 +14,20 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 3.1.7 Add deprecated table annotation.
  */
 class TableRowClassBuilder {
-    private final @Nonnull String packageName;
-    private final @Nullable String schema;
-    private final @Nonnull String table;
-    private final @Nonnull List<TableRowClassField> fields = new ArrayList<>();
-    private boolean provideConstSchema = true;
-    private boolean provideConstTable = true;
-    private boolean provideConstSchemaAndTable = false;
-    private @Nullable String tableComment;
-    private @Nullable String ddl;
+
+    private final @Nonnull TableRowClassBuildOptions options;
     /**
      * @since 3.1.7
      */
     private boolean tableDeprecated = false;
-    /**
-     * @since 4.0.11
-     */
-    private boolean vcsFriendly = false;
 
-    public TableRowClassBuilder(@Nonnull String table, @Nullable String schema, @Nonnull String packageName) {
-        this.table = table;
-        this.schema = schema;
-        this.packageName = packageName;
-    }
-
-    /**
-     * Do not add update date time, auto-increment, etc. to class code generated, to let VCS know what actually changed.
-     *
-     * @since 4.0.11
-     */
-    public TableRowClassBuilder setVcsFriendly(boolean vcsFriendly) {
-        this.vcsFriendly = vcsFriendly;
-        return this;
-    }
-
-    public TableRowClassBuilder setProvideConstSchema(boolean provideConstSchema) {
-        this.provideConstSchema = provideConstSchema;
-        return this;
-    }
-
-    public TableRowClassBuilder setProvideConstTable(boolean provideConstTable) {
-        this.provideConstTable = provideConstTable;
-        return this;
-    }
-
-    public TableRowClassBuilder setProvideConstSchemaAndTable(boolean provideConstSchemaAndTable) {
-        this.provideConstSchemaAndTable = provideConstSchemaAndTable;
-        return this;
-    }
-
-    /**
-     * If set, it would be put into the generated class code.
-     */
-    public TableRowClassBuilder setDdl(@Nullable String ddl) {
-        this.ddl = ddl;
-        return this;
-    }
-
-    public TableRowClassBuilder setTableComment(@Nullable String tableComment) {
-        this.tableComment = tableComment;
-        return this;
-    }
-
-    public TableRowClassBuilder addField(TableRowClassField field) {
-        this.fields.add(field);
-        return this;
-    }
-
-    public TableRowClassBuilder addFields(@Nonnull List<TableRowClassField> fields) {
-        this.fields.addAll(fields);
-        return this;
+    public TableRowClassBuilder(@Nonnull TableRowClassBuildOptions options) {
+        this.options = options;
     }
 
     protected String parsedTableComment() {
-        if (tableComment == null || tableComment.isEmpty() || tableComment.isBlank()) {
+        var tableComment = options.getTableComment();
+        if (tableComment == null || tableComment.isBlank()) {
             return "Table comment is empty.";
         } else {
             // since 3.1.7
@@ -106,35 +43,35 @@ class TableRowClassBuilder {
     }
 
     public String getClassName() {
-        return Keel.stringHelper().fromUnderScoreCaseToCamelCase(table) + "TableRow";
+        return Keel.stringHelper().fromUnderScoreCaseToCamelCase(options.getTable()) + "TableRow";
     }
 
     public String build() {
+        var table = options.getTable();
+        var schema = options.getSchema();
         var className = getClassName();
+        var vcsFriendly = options.isVcsFriendly();
         StringBuilder code = new StringBuilder();
 
-        code
-                .append("package ").append(packageName).append(";").append("\n")
-                .append("import ").append(AbstractTableRow.class.getName()).append(";\n")
-                // .append("import io.github.sinri.keel.integration.mysql.result.row.AbstractTableRow;\n")
-                .append("import ").append(JsonObject.class.getName()).append(";\n")
-                //.append("import io.vertx.core.json.JsonObject;\n")
-                .append("\n")
-                .append("import javax.annotation.Nonnull;\n")
-                .append("import javax.annotation.Nullable;\n")
-                .append("import java.util.Objects;\n")
-                .append("\n")
-                .append("/**\n")
-                .append(" * ").append(parsedTableComment()).append("\n")
-                .append(" * (´^ω^`)\n");
-        if (schema != null && !schema.isEmpty() && !schema.isBlank()) {
+        code.append("package ").append(options.getPackageName()).append(";").append("\n")
+            .append("import ").append(AbstractTableRow.class.getName()).append(";\n")
+            .append("import ").append(JsonObject.class.getName()).append(";\n")
+            .append("\n")
+            .append("import javax.annotation.Nonnull;\n")
+            .append("import javax.annotation.Nullable;\n")
+            .append("import java.util.Objects;\n")
+            .append("\n")
+            .append("/**\n")
+            .append(" * ").append(parsedTableComment()).append("\n")
+            .append(" * (´^ω^`)\n");
+        if (schema != null && !schema.isBlank()) {
             code.append(" * SCHEMA: ").append(schema).append("\n");
         }
         code
                 .append(" * TABLE: ").append(table).append("\n")
                 .append(" * (*￣∇￣*)\n")
                 .append(" * NOTICE BY KEEL:\n")
-                .append(" * \tTo avoid being rewritten, do not modify this file manually, unless editable confirmed.\n");
+                .append(" * \tTo avoid being rewritten, do not modify this file manually.\n");
         if (!vcsFriendly) {
             code.append(" * \tIt was auto-generated on ").append(new Date()).append(".\n");
         }
@@ -145,16 +82,16 @@ class TableRowClassBuilder {
         }
         code.append("public class ").append(className).append(" extends AbstractTableRow {").append("\n");
 
-        if (this.schema != null && !this.schema.isEmpty() && !this.schema.isBlank()) {
-            if (this.provideConstSchema) {
+        if (schema != null && !schema.isBlank()) {
+            if (this.options.isProvideConstSchema()) {
                 code.append("\tpublic static final String SCHEMA = \"").append(schema).append("\";\n");
             }
-            if (this.provideConstSchemaAndTable) {
+            if (this.options.isProvideConstSchemaAndTable()) {
                 code.append("\tpublic static final String SCHEMA_AND_TABLE = \"").append(schema).append(".")
                     .append(table).append("\";\n");
             }
         }
-        if (this.provideConstTable) {
+        if (this.options.isProvideConstTable()) {
             code.append("\tpublic static final String TABLE = \"").append(table).append("\";\n");
         }
 
@@ -167,18 +104,22 @@ class TableRowClassBuilder {
                 .append("\t@Override\n")
                 .append("\t@Nonnull\n")
                 .append("\tpublic String sourceTableName() {\n")
-                .append("\t\treturn ").append(this.provideConstTable ? "TABLE" : "\"" + table + "\"").append(";\n")
+                .append("\t\treturn ").append(this.options.isProvideConstTable() ? "TABLE" : "\"" + table + "\"")
+                .append(";\n")
                 .append("\t}\n")
                 .append("\n");
-        if (this.schema != null) {
+        if (schema != null) {
             code.append("\tpublic String sourceSchemaName(){\n")
-                .append("\t\treturn ").append(this.provideConstSchema ? "SCHEMA" : "\"" + schema + "\"").append(";\n")
+                .append("\t\treturn ").append(this.options.isProvideConstSchema() ? "SCHEMA" : "\"" + schema + "\"")
+                .append(";\n")
                 .append("\t}\n");
         }
 
-        fields.forEach(field -> code.append(field.toString()).append("\n"));
+        options.getFields().forEach(field -> code.append(field.toString()).append("\n"));
 
         code.append("\n}\n");
+
+        var ddl = options.getDdl();
         if (ddl != null) {
             if (vcsFriendly) {
                 // AUTO_INCREMENT=2395644

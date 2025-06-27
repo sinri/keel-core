@@ -11,6 +11,7 @@ import java.lang.annotation.RetentionPolicy;
  * @see KeelInstantRunner
  * @since 3.0.10
  */
+@Deprecated(since = "4.1.0")
 @Retention(RetentionPolicy.RUNTIME)
 public @interface InstantRunUnit {
 }

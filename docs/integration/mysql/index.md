@@ -197,7 +197,85 @@ Map<String, List<JsonObject>> categoryMap =
 #### NamedActionMixinInterface
 命名操作混入接口，支持多重继承的操作组合。
 
-### 7. 工具类
+### 7. 开发工具 (dev 包)
+
+**版本**: 4.1.0+
+
+Keel MySQL 集成模块提供了一套完整的开发工具，用于自动生成表行类（Table Row Class）。
+
+#### TableRowClassSourceCodeGenerator
+
+表行类源代码生成器，负责连接数据库、分析表结构并生成对应的 Java 类。
+
+**主要功能：**
+
+- 连接数据库并自动分析表结构
+- 生成类型安全的表行类
+- 支持枚举字段处理（松散枚举和严格枚举）
+- 支持字段加密处理（AES加密）
+- 灵活的代码生成配置
+
+**核心方法：**
+
+- `forSchema(String)`: 设置目标数据库模式
+- `forTable(String)` / `forTables(Collection<String>)`: 设置目标表
+- `excludeTables(Collection<String>)`: 排除指定表
+- `setStandardHandler(Handler<TableRowClassBuildStandard>)`: 设置构建标准处理器
+- `generate(String)`: 生成代码到指定目录
+
+#### TableRowClassBuildStandard
+
+表行类构建标准配置，定义代码生成的标准和规范。
+
+**主要配置：**
+
+- `provideConstSchema`: 是否生成模式名常量
+- `provideConstTable`: 是否生成表名常量
+- `provideConstSchemaAndTable`: 是否生成组合常量
+- `vcsFriendly`: 是否生成版本控制友好的代码
+- `strictEnumPackage`: 严格枚举类的包路径
+- `envelopePackage`: 封装类的包路径
+
+**使用示例：**
+
+```java
+// 创建数据源连接
+NamedMySQLConnection connection = // ... 获取数据库连接
+
+        // 创建代码生成器
+        TableRowClassSourceCodeGenerator
+generator =new
+
+TableRowClassSourceCodeGenerator(connection);
+
+// 配置生成范围和标准
+generator.
+
+forSchema("myapp")
+         .
+
+forTables(Arrays.asList("users", "orders"))
+        .
+
+setStandardHandler(standard ->{
+        standard.
+
+setProvideConstSchema(true)
+                     .
+
+setProvideConstTable(true)
+                     .
+
+setVcsFriendly(true);
+         });
+
+                 // 生成代码
+                 generator.
+
+generate("src/main/java/com/example/entity");
+```
+
+### 8. 工具类
 
 #### Quoter
 SQL 引用工具类，提供安全的 SQL 值引用功能。
@@ -224,7 +302,7 @@ String listQuoted = new Quoter(Arrays.asList(1, 2, 3)).toString(); // (1,2,3)
 String wildcardQuoted = new Quoter("user%", true).toString(); // 'user\\%'
 ```
 
-### 8. 异常处理
+### 9. 异常处理
 
 #### KeelMySQLException
 MySQL 操作基础异常类。
@@ -237,6 +315,15 @@ SQL 生成错误异常类。
 
 #### KeelSQLResultRowIndexError
 结果行索引错误异常类。
+
+## 详细文档
+
+- [基础功能](base.md) - 核心连接和数据源管理
+- [操作接口](action.md) - 数据库操作抽象框架
+- [条件构建](condition.md) - WHERE 条件构建器
+- [语句构建](statement.md) - SQL 语句构建器
+- [结果处理](result.md) - 查询结果处理
+- [开发工具](dev.md) - 表行类代码生成工具 (4.1.0+)
 
 ## 使用指南
 

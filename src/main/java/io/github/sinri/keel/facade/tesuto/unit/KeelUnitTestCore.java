@@ -28,17 +28,27 @@ public interface KeelUnitTestCore {
 
     KeelIssueRecorder<KeelEventLog> getUnitTestLogger();
 
+    /**
+     * @deprecated use {@link Future#await()} for this scenario.
+     */
+    @Deprecated(since = "4.1.0")
     default void async(Handler<Promise<Void>> testHandler) {
         Keel.pseudoAwait(testHandler);
     }
 
+    /**
+     * @deprecated use {@link Future#await()} for this scenario.
+     */
+    @Deprecated(since = "4.1.0")
     default void async(Supplier<Future<Void>> testSupplier) {
-        Keel.pseudoAwait(p -> testSupplier.get().andThen(ar -> {
-            if (ar.succeeded()) {
-                p.complete();
-            } else {
-                p.fail(ar.cause());
-            }
-        }));
+        testSupplier.get().await();
+
+        //        Keel.pseudoAwait(p -> testSupplier.get().andThen(ar -> {
+        //            if (ar.succeeded()) {
+        //                p.complete();
+        //            } else {
+        //                p.fail(ar.cause());
+        //            }
+        //        }));
     }
 }

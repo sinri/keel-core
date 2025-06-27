@@ -25,7 +25,9 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * asynchronous operations.
  *
  * @since 4.0.0
+ * @deprecated As of 4.1.0, this class is deprecated, use JUnit5 instead.
  */
+@Deprecated(since = "4.1.0")
 abstract public class KeelInstantRunner {
     /**
      * @since 3.2.0

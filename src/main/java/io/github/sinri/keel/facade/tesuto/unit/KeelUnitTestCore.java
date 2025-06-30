@@ -2,10 +2,12 @@ package io.github.sinri.keel.facade.tesuto.unit;
 
 import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
+import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 
+import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
@@ -51,4 +53,6 @@ public interface KeelUnitTestCore {
         //            }
         //        }));
     }
+
+
 }

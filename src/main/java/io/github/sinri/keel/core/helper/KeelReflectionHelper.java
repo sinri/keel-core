@@ -22,8 +22,18 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 public class KeelReflectionHelper {
     private static final KeelReflectionHelper instance = new KeelReflectionHelper();
 
-    private KeelReflectionHelper() {
+    private final boolean virtualThreadsAvailable;
 
+    private KeelReflectionHelper() {
+        boolean available = false;
+        try {
+            //noinspection JavaReflectionMemberAccess
+            Thread.class.getMethod("isVirtual");
+            available = true;
+        } catch (NoSuchMethodException e) {
+            // Virtual threads not available
+        }
+        virtualThreadsAvailable = available;
     }
 
     static KeelReflectionHelper getInstance() {
@@ -202,5 +212,12 @@ public class KeelReflectionHelper {
      */
     public boolean isClassAssignable(@Nonnull Class<?> baseClass, @Nonnull Class<?> implementClass) {
         return baseClass.isAssignableFrom(implementClass);
+    }
+
+    /**
+     * @since 4.1.0
+     */
+    public boolean isVirtualThreadsAvailable() {
+        return virtualThreadsAvailable;
     }
 }

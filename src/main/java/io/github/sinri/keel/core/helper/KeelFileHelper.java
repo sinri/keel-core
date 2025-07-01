@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -357,14 +358,26 @@ public class KeelFileHelper {
      */
     public Future<Void> writeFile(String filePath, String content, String charset) {
         try {
-            java.nio.charset.Charset.forName(charset); // Validate charset
-            return fileSystem.writeFile(
-                    filePath,
-                    io.vertx.core.buffer.Buffer.buffer(content.getBytes(java.nio.charset.Charset.forName(charset)))
-            );
+            return writeFile(filePath, content, java.nio.charset.Charset.forName(charset));
         } catch (java.nio.charset.IllegalCharsetNameException | java.nio.charset.UnsupportedCharsetException e) {
             return Future.failedFuture(new IllegalArgumentException("Invalid charset: " + charset, e));
         }
+    }
+
+    /**
+     * Writes a string to a file with a specific charset.
+     *
+     * @param filePath the file path
+     * @param content  the content to write
+     * @param charset  the charset to use
+     * @return Future that completes when the write is done
+     * @since 4.1.0
+     */
+    public Future<Void> writeFile(String filePath, String content, java.nio.charset.Charset charset) {
+        return fileSystem.writeFile(
+                filePath,
+                io.vertx.core.buffer.Buffer.buffer(content.getBytes(charset))
+        );
     }
 
     /**
@@ -377,11 +390,43 @@ public class KeelFileHelper {
      * @since 4.0.12
      */
     public Future<Void> appendFile(String filePath, String content) {
+        return appendFile(filePath, content, Charset.defaultCharset());
+    }
+
+    /**
+     * Appends content to a file with a specific charset.
+     *
+     * @param filePath the file path
+     * @param content  the content to append
+     * @param charset  the charset to use
+     * @return Future that completes when the append is done
+     * @throws IllegalArgumentException if filePath is null or empty or charset is invalid
+     * @since 4.1.0
+     */
+    public Future<Void> appendFile(String filePath, String content, String charset) {
+        try {
+            return appendFile(filePath, content, java.nio.charset.Charset.forName(charset));
+        } catch (java.nio.charset.IllegalCharsetNameException | java.nio.charset.UnsupportedCharsetException e) {
+            return Future.failedFuture(new IllegalArgumentException("Invalid charset: " + charset, e));
+        }
+    }
+
+    /**
+     * Appends content to a file with a specific charset.
+     *
+     * @param filePath the file path
+     * @param content  the content to append
+     * @param charset  the charset to use
+     * @return Future that completes when the append is done
+     * @throws IllegalArgumentException if filePath is null or empty
+     * @since 4.1.0
+     */
+    public Future<Void> appendFile(String filePath, String content, java.nio.charset.Charset charset) {
         if (filePath == null || filePath.trim().isEmpty()) {
             return Future.failedFuture(new IllegalArgumentException("File path cannot be null or empty"));
         }
         return fileSystem.open(filePath, new io.vertx.core.file.OpenOptions().setAppend(true))
-                         .compose(file -> file.write(io.vertx.core.buffer.Buffer.buffer(content))
+                         .compose(file -> file.write(io.vertx.core.buffer.Buffer.buffer(content.getBytes(charset)))
                                               .compose(v -> file.close())
                                               .onFailure(err -> file.close())); // Ensure file is closed even on failure
     }

@@ -120,7 +120,6 @@ public class KeelConfigElement {
         return value;
     }
 
-
     /**
      * Retrieves the value of the configuration element as a string. If the value is not set, it returns the provided
      * default value.
@@ -137,7 +136,8 @@ public class KeelConfigElement {
      * Reads the string value of the configuration element.
      * If the keychain is not provided, it attempts to read the value from the current element.
      *
-     * @return the string value of the configuration element, or null if the value is not set or the keychain does not match any child
+     * @return the string value of the configuration element, or null if the value is not set or the keychain does not
+     *         match any child
      */
     @Nullable
     public String readString() {
@@ -148,7 +148,8 @@ public class KeelConfigElement {
      * Reads the string value of the configuration element based on the provided keychain.
      *
      * @param keychain the list of keys to traverse in the configuration hierarchy, must not be null
-     * @return the string value of the configuration element, or null if the value is not set or the keychain does not match any child
+     * @return the string value of the configuration element, or null if the value is not set or the keychain does not
+     *         match any child
      */
     @Nullable
     public String readString(@Nonnull List<String> keychain) {
@@ -162,7 +163,8 @@ public class KeelConfigElement {
      *
      * @param keychain the list of keys to traverse in the configuration hierarchy, must not be null
      * @param def      the default value to return if the value of the configuration element is not set
-     * @return the value of the configuration element as a string, or the provided default value if the value is not set or the keychain does not match any child
+     * @return the value of the configuration element as a string, or the provided default value if the value is not set
+     *         or the keychain does not match any child
      */
     @Nullable
     public String readString(@Nonnull List<String> keychain, @Nullable String def) {
@@ -176,7 +178,8 @@ public class KeelConfigElement {
      *
      * @param keychain the single key to traverse in the configuration hierarchy, must not be null
      * @param def      the default value to return if the value of the configuration element is not set
-     * @return the value of the configuration element as a string, or the provided default value if the value is not set or the keychain does not match any child
+     * @return the value of the configuration element as a string, or the provided default value if the value is not set
+     *         or the keychain does not match any child
      */
     @Nullable
     public String readString(@Nonnull String keychain, @Nullable String def) {
@@ -186,7 +189,8 @@ public class KeelConfigElement {
     /**
      * Returns the value as an Integer if it can be parsed, otherwise returns null.
      *
-     * @return the integer representation of the value if it can be parsed, or null if the value is null or cannot be parsed
+     * @return the integer representation of the value if it can be parsed, or null if the value is null or cannot be
+     *         parsed
      */
     @Nullable
     public Integer getValueAsInteger() {
@@ -199,7 +203,8 @@ public class KeelConfigElement {
      * If the value is not set or cannot be parsed as an integer, it returns the provided default value.
      *
      * @param def the default value to return if the value of the configuration element is not set or cannot be parsed
-     * @return the value of the configuration element as an integer, or the provided default value if the value is not set or cannot be parsed
+     * @return the value of the configuration element as an integer, or the provided default value if the value is not
+     *         set or cannot be parsed
      */
     public int getValueAsIntegerElse(int def) {
         if (value == null) return def;
@@ -214,7 +219,8 @@ public class KeelConfigElement {
      * Reads the integer value of the configuration element.
      * If no keychain is provided, it attempts to read the value from the current element.
      *
-     * @return the integer value of the configuration element, or null if the value is not set or cannot be parsed as an integer
+     * @return the integer value of the configuration element, or null if the value is not set or cannot be parsed as an
+     *         integer
      */
     @Nullable
     public Integer readInteger() {
@@ -225,7 +231,8 @@ public class KeelConfigElement {
      * Reads the integer value of the configuration element based on the provided keychain.
      *
      * @param keychain the list of keys to traverse in the configuration hierarchy, must not be null
-     * @return the integer value of the configuration element, or null if the value is not set or cannot be parsed as an integer
+     * @return the integer value of the configuration element, or null if the value is not set or cannot be parsed as an
+     *         integer
      */
     @Nullable
     public Integer readInteger(@Nonnull List<String> keychain) {
@@ -239,8 +246,10 @@ public class KeelConfigElement {
      * If the value is not set or cannot be parsed as an integer, it returns the provided default value.
      *
      * @param keychain the list of keys to traverse in the configuration hierarchy, must not be null
-     * @param def      the default value to return if the value of the configuration element is not set or cannot be parsed
-     * @return the value of the configuration element as an integer, or the provided default value if the value is not set or cannot be parsed
+     * @param def      the default value to return if the value of the configuration element is not set or cannot be
+     *                 parsed
+     * @return the value of the configuration element as an integer, or the provided default value if the value is not
+     *         set or cannot be parsed
      */
     public int readInteger(@Nonnull List<String> keychain, int def) {
         KeelConfigElement extracted = this.extract(keychain);
@@ -253,8 +262,10 @@ public class KeelConfigElement {
      * If the value is not set or cannot be parsed as an integer, it returns the provided default value.
      *
      * @param keychain the single key to traverse in the configuration hierarchy, must not be null
-     * @param def      the default value to return if the value of the configuration element is not set or cannot be parsed
-     * @return the value of the configuration element as an integer, or the provided default value if the value is not set or cannot be parsed
+     * @param def      the default value to return if the value of the configuration element is not set or cannot be
+     *                 parsed
+     * @return the value of the configuration element as an integer, or the provided default value if the value is not
+     *         set or cannot be parsed
      */
     public int readInteger(@Nonnull String keychain, int def) {
         return readInteger(List.of(keychain), def);
@@ -316,8 +327,9 @@ public class KeelConfigElement {
      * Reads a long value from the configuration using the provided keychain.
      *
      * @param keychain the list of keys to traverse in the configuration to find the desired value
-     * @param def the default value to return if the keychain does not resolve to a valid long or is not found
-     * @return the long value associated with the given keychain, or the default value if the keychain is invalid or the value is not a long
+     * @param def      the default value to return if the keychain does not resolve to a valid long or is not found
+     * @return the long value associated with the given keychain, or the default value if the keychain is invalid or the
+     *         value is not a long
      */
     public long readLong(@Nonnull List<String> keychain, long def) {
         KeelConfigElement extracted = this.extract(keychain);
@@ -329,7 +341,7 @@ public class KeelConfigElement {
      * Reads a long value from the configuration using the provided keychain.
      *
      * @param keychain the keychain to use for locating the value in the configuration
-     * @param def the default value to return if the keychain does not exist or the value is not a valid long
+     * @param def      the default value to return if the keychain does not exist or the value is not a valid long
      * @return the long value found at the specified keychain, or the default value if not found or invalid
      */
     public long readLong(@Nonnull String keychain, long def) {
@@ -348,7 +360,8 @@ public class KeelConfigElement {
     }
 
     /**
-     * Attempts to parse the value as a float. If the value is null or cannot be parsed, returns the provided default value.
+     * Attempts to parse the value as a float. If the value is null or cannot be parsed, returns the provided default
+     * value.
      *
      * @param def the default float value to return if the value is null or cannot be parsed
      * @return the parsed float value, or the default value if parsing fails or the value is null
@@ -376,7 +389,8 @@ public class KeelConfigElement {
      * Reads a float value from the configuration based on the provided keychain.
      *
      * @param keychain a non-null list of strings representing the path to the desired configuration value
-     * @return the float value if found and successfully converted, or null if the value is not found or cannot be converted to a float
+     * @return the float value if found and successfully converted, or null if the value is not found or cannot be
+     *         converted to a float
      */
     @Nullable
     public Float readFloat(@Nonnull List<String> keychain) {
@@ -389,7 +403,7 @@ public class KeelConfigElement {
      * Reads a float value from the configuration based on the provided keychain.
      *
      * @param keychain the list of keys to traverse the configuration tree
-     * @param def the default float value to return if the keychain does not resolve to a valid float
+     * @param def      the default float value to return if the keychain does not resolve to a valid float
      * @return the float value found at the end of the keychain, or the default value if not found or invalid
      */
     public float readFloat(@Nonnull List<String> keychain, float def) {
@@ -402,7 +416,7 @@ public class KeelConfigElement {
      * Reads a float value from the configuration using the provided keychain.
      *
      * @param keychain the keychain to use for locating the value in the configuration
-     * @param def the default value to return if the keychain does not exist or the value is not a valid float
+     * @param def      the default value to return if the keychain does not exist or the value is not a valid float
      * @return the float value found at the specified keychain, or the default value if not found or invalid
      */
     public float readFloat(@Nonnull String keychain, float def) {
@@ -463,8 +477,9 @@ public class KeelConfigElement {
      * Reads a double value from the configuration using the provided keychain.
      *
      * @param keychain the list of keys to navigate through the configuration
-     * @param def the default value to return if the keychain does not resolve to a valid double
-     * @return the double value found at the keychain, or the default value if the keychain is invalid or the value is not a double
+     * @param def      the default value to return if the keychain does not resolve to a valid double
+     * @return the double value found at the keychain, or the default value if the keychain is invalid or the value is
+     *         not a double
      */
     public double readDouble(@Nonnull List<String> keychain, double def) {
         KeelConfigElement extracted = this.extract(keychain);
@@ -477,8 +492,9 @@ public class KeelConfigElement {
      * If the keychain does not exist or the value cannot be parsed as a double, the default value is returned.
      *
      * @param keychain the keychain to read the double value from
-     * @param def the default value to return if the keychain is not found or the value is not a valid double
-     * @return the double value associated with the keychain, or the default value if the keychain is not found or the value is not a valid double
+     * @param def      the default value to return if the keychain is not found or the value is not a valid double
+     * @return the double value associated with the keychain, or the default value if the keychain is not found or the
+     *         value is not a valid double
      */
     public double readDouble(@Nonnull String keychain, double def) {
         return readDouble(List.of(keychain), def);
@@ -503,7 +519,8 @@ public class KeelConfigElement {
      * If the value is null, it returns the provided default value.
      *
      * @param def the default boolean value to return if the current value is null
-     * @return true if the value (case-insensitive) is one of "YES", "TRUE", "ON", or "1"; otherwise, returns the default value
+     * @return true if the value (case-insensitive) is one of "YES", "TRUE", "ON", or "1"; otherwise, returns the
+     *         default value
      */
     public boolean getValueAsBooleanElse(boolean def) {
         if (value == null) return def;
@@ -541,8 +558,10 @@ public class KeelConfigElement {
      * Reads a boolean value from the configuration based on the provided keychain.
      *
      * @param keychain the list of keys representing the path to the desired configuration element
-     * @param def the default boolean value to return if the configuration element is not found or cannot be converted to a boolean
-     * @return the boolean value of the configuration element, or the default value if the element is not found or conversion fails
+     * @param def      the default boolean value to return if the configuration element is not found or cannot be
+     *                 converted to a boolean
+     * @return the boolean value of the configuration element, or the default value if the element is not found or
+     *         conversion fails
      */
     public boolean readBoolean(@Nonnull List<String> keychain, boolean def) {
         KeelConfigElement extracted = this.extract(keychain);
@@ -554,7 +573,8 @@ public class KeelConfigElement {
      * Reads a boolean value from the configuration based on the provided keychain.
      *
      * @param keychain the keychain to locate the boolean value
-     * @param def the default boolean value to return if the keychain is not found or the value is not a valid boolean
+     * @param def      the default boolean value to return if the keychain is not found or the value is not a valid
+     *                 boolean
      * @return the boolean value associated with the keychain, or the default value if not found or invalid
      */
     public boolean readBoolean(@Nonnull String keychain, boolean def) {
@@ -605,7 +625,6 @@ public class KeelConfigElement {
         return this;
     }
 
-
     /**
      * Sets the value of the KeelConfigElement.
      *
@@ -619,9 +638,11 @@ public class KeelConfigElement {
 
     /**
      * Returns a map of child elements associated with this configuration element.
-     * The keys in the map are the names of the child elements, and the values are the corresponding {@link KeelConfigElement} instances.
+     * The keys in the map are the names of the child elements, and the values are the corresponding
+     * {@link KeelConfigElement} instances.
      *
-     * @return a non-null map of child elements, where the key is the name of the child and the value is the {@link KeelConfigElement} instance
+     * @return a non-null map of child elements, where the key is the name of the child and the value is the
+     *         {@link KeelConfigElement} instance
      */
     @Nonnull
     public Map<String, KeelConfigElement> getChildren() {
@@ -732,7 +753,7 @@ public class KeelConfigElement {
      * Loads a properties file and converts it into a KeelConfigElement.
      *
      * @param propertiesFileName the name of the properties file to load. This file should be placed alongside the JAR.
-     * @param charset the character set used to read the properties file.
+     * @param charset            the character set used to read the properties file.
      * @return a non-null KeelConfigElement containing the configuration data from the loaded properties file.
      */
     public @Nonnull KeelConfigElement loadPropertiesFile(@Nonnull String propertiesFileName, @Nonnull Charset charset) {

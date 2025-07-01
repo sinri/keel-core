@@ -1,0 +1,91 @@
+package io.github.sinri.keel.facade.configuration;
+
+import javax.annotation.Nullable;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
+
+/**
+ * @since 4.1.0
+ */
+public class KeelConfigPropertiesBuilder {
+    private List<KeelConfigProperty> configPropertyList;
+    private @Nullable List<String> prefix;
+
+    public KeelConfigPropertiesBuilder() {
+        this.configPropertyList = new ArrayList<>();
+    }
+
+    /**
+     * 所提供的 prefix 仅与 {@link KeelConfigPropertiesBuilder#add(List, String)} 配合使用时对keychain生效。
+     */
+    public final KeelConfigPropertiesBuilder setPrefix(@Nullable List<String> prefix) {
+        this.prefix = prefix;
+        return this;
+    }
+
+    /**
+     * 所提供的 prefix 仅与 {@link KeelConfigPropertiesBuilder#add(List, String)} 配合使用时对keychain生效。
+     */
+    public final KeelConfigPropertiesBuilder setPrefix(String... prefix) {
+        return this.setPrefix(List.of(prefix));
+    }
+
+    /**
+     * 当通过 {@link KeelConfigPropertiesBuilder#setPrefix(List)} 给定非空的前缀时，keychain将自动持有该前缀。
+     */
+    public final KeelConfigPropertiesBuilder add(List<String> keychain, String value) {
+        ArrayList<String> k = new ArrayList<>();
+        if (prefix != null) {
+            k.addAll(prefix);
+        }
+        k.addAll(keychain);
+        KeelConfigProperty keelConfigProperty = new KeelConfigProperty();
+        keelConfigProperty.setKeychain(k);
+        keelConfigProperty.setValue(value);
+        return add(keelConfigProperty);
+    }
+
+    /**
+     * 当通过 {@link KeelConfigPropertiesBuilder#setPrefix(List)} 给定非空的前缀时，keychain将自动持有该前缀。
+     *
+     * @param keychainAsSingleString 用于构成单一元素的keychain
+     */
+    public final KeelConfigPropertiesBuilder add(String keychainAsSingleString, String value) {
+        return add(List.of(keychainAsSingleString), value);
+    }
+
+    /**
+     * 本方法不受通过 {@link KeelConfigPropertiesBuilder#setPrefix(List)} 给定的前缀影响。
+     */
+    protected final KeelConfigPropertiesBuilder add(KeelConfigProperty configProperty) {
+        this.configPropertyList.add(configProperty);
+        return this;
+    }
+
+    public final KeelConfigPropertiesBuilder setConfigPropertyList(List<KeelConfigProperty> configPropertyList) {
+        this.configPropertyList = configPropertyList;
+        return this;
+    }
+
+    public String writeToString() {
+        if (configPropertyList.isEmpty()) {
+            return "";
+        }
+        List<String> collect = configPropertyList.stream()
+                                                 .map(KeelConfigProperty::toString)
+                                                 .collect(Collectors.toList());
+        return String.join("\n", collect);
+    }
+
+    public void writeToFile(String filePath) {
+        Keel.fileHelper().writeFile(filePath, writeToString(), StandardCharsets.US_ASCII);
+    }
+
+    public void appendToFile(String filePath) {
+        Keel.fileHelper().appendFile(filePath, writeToString(), StandardCharsets.US_ASCII);
+    }
+}

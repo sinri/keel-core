@@ -2,6 +2,7 @@ package io.github.sinri.keel.integration.mysql;
 
 import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.facade.configuration.KeelConfigElement;
+import io.github.sinri.keel.facade.configuration.KeelConfigPropertiesBuilder;
 import io.github.sinri.keel.integration.mysql.result.matrix.ResultMatrix;
 import io.vertx.core.Future;
 import io.vertx.mysqlclient.MySQLBuilder;
@@ -38,6 +39,23 @@ public class KeelMySQLConfiguration extends KeelConfigElement {
     public static KeelMySQLConfiguration loadConfigurationForDataSource(@Nonnull KeelConfigElement configCenter, @Nonnull String dataSourceName) {
         KeelConfigElement keelConfigElement = configCenter.extract("mysql", dataSourceName);
         return new KeelMySQLConfiguration(Objects.requireNonNull(keelConfigElement));
+    }
+
+    public static String generatePropertiesForConfig(String dataSourceName, MySQLConnectOptions mySQLConnectOptions, PoolOptions poolOptions) {
+        KeelConfigPropertiesBuilder builder = new KeelConfigPropertiesBuilder();
+        builder.setPrefix("mysql", dataSourceName);
+
+        builder.add("host", mySQLConnectOptions.getHost());
+        builder.add("port", String.valueOf(mySQLConnectOptions.getPort()));
+        builder.add("username", mySQLConnectOptions.getUser());
+        builder.add("password", mySQLConnectOptions.getPassword());
+        builder.add("schema", mySQLConnectOptions.getDatabase());
+        builder.add("charset", mySQLConnectOptions.getCharset());
+        builder.add("poolMaxSize", String.valueOf(poolOptions.getMaxSize()));
+        builder.add("poolShared", (poolOptions.isShared() ? "YES" : "NO"));
+        builder.add("poolConnectionTimeout", String.valueOf(poolOptions.getConnectionTimeout()));
+
+        return builder.writeToString();
     }
 
     @Nonnull

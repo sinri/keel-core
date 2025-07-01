@@ -2,12 +2,10 @@ package io.github.sinri.keel.facade.tesuto.unit;
 
 import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
-import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 
-import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
@@ -31,28 +29,33 @@ public interface KeelUnitTestCore {
     KeelIssueRecorder<KeelEventLog> getUnitTestLogger();
 
     /**
-     * @deprecated use {@link Future#await()} for this scenario.
+     * Executes the given test handler asynchronously and waits for its completion.
+     *
+     * <p>This method is designed to be used in testing scenarios where an asynchronous operation
+     * needs to be awaited. It ensures that the test does not proceed until the promise handled by
+     * the testHandler is completed.</p>
+     *
+     * @param testHandler a handler that receives a Promise and performs some asynchronous operations
+     * @throws RuntimeException if an error occurs during the execution of the testHandler
      */
-    @Deprecated(since = "4.1.0")
     default void async(Handler<Promise<Void>> testHandler) {
+        //        Promise<Void> promise = Promise.promise();
+        //        testHandler.handle(promise);
+        //        Keel.await(promise.future());
         Keel.pseudoAwait(testHandler);
     }
 
     /**
-     * @deprecated use {@link Future#await()} for this scenario.
+     * Executes the given supplier asynchronously and waits for its completion.
+     *
+     * <p>This method is designed to be used in testing scenarios where an asynchronous operation
+     * needs to be awaited. It ensures that the test does not proceed until the future returned by
+     * the supplier is completed.</p>
+     *
+     * @param testSupplier a supplier that provides a {@link Future} which will be awaited
+     * @throws NullPointerException if the provided supplier or the future it returns is null
      */
-    @Deprecated(since = "4.1.0")
     default void async(Supplier<Future<Void>> testSupplier) {
-        testSupplier.get().await();
-
-        //        Keel.pseudoAwait(p -> testSupplier.get().andThen(ar -> {
-        //            if (ar.succeeded()) {
-        //                p.complete();
-        //            } else {
-        //                p.fail(ar.cause());
-        //            }
-        //        }));
+        Keel.await(testSupplier.get());
     }
-
-
 }

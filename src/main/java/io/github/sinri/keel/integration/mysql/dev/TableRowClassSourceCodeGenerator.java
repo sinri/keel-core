@@ -1,6 +1,9 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
 import io.github.sinri.keel.integration.mysql.NamedMySQLConnection;
+import io.github.sinri.keel.logger.event.KeelEventLog;
+import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
+import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
@@ -26,11 +29,24 @@ public class TableRowClassSourceCodeGenerator {
     @Nullable
     private Handler<TableRowClassBuildStandard> standardHandler;
 
+    private KeelIssueRecorder<KeelEventLog> logger;
+
     public TableRowClassSourceCodeGenerator(NamedMySQLConnection namedMySQLConnection) {
         this.sqlConnection = namedMySQLConnection.getSqlConnection();
         this.schema = null;
         this.tableSet = new HashSet<>();
         this.excludedTableSet = new HashSet<>();
+        this.logger = KeelIssueRecordCenter.outputCenter()
+                                           .generateIssueRecorder(getClass().getSimpleName(), KeelEventLog::new);
+    }
+
+    public KeelIssueRecorder<KeelEventLog> getLogger() {
+        return logger;
+    }
+
+    public TableRowClassSourceCodeGenerator setLogger(KeelIssueRecorder<KeelEventLog> logger) {
+        this.logger = logger;
+        return this;
     }
 
     public TableRowClassSourceCodeGenerator forSchema(String schema) {
@@ -62,9 +78,9 @@ public class TableRowClassSourceCodeGenerator {
         return this;
     }
 
-    public Future<Void> generate(String packagePath) {
+    public Future<Void> generate(String packageName, String packagePath) {
         return this.confirmTablesToGenerate()
-                   .compose(tables -> generateForTables(packagePath, tables));
+                   .compose(tables -> generateForTables(packageName, packagePath, tables));
     }
 
     private Future<Set<String>> confirmTablesToGenerate() {
@@ -107,7 +123,9 @@ public class TableRowClassSourceCodeGenerator {
     }
 
 
-    private Future<Void> generateForTables(String packagePath, Collection<String> tables) {
+    private Future<Void> generateForTables(String packageName, String packagePath, Collection<String> tables) {
+        getLogger().info("To generate class code for tables: " + String.join(", ", tables));
+
         Map<String, String> writeMap = new HashMap<>();
         return Keel.asyncCallIteratively(
                            tables,
@@ -115,13 +133,16 @@ public class TableRowClassSourceCodeGenerator {
                                String className = Keel.stringHelper().fromUnderScoreCaseToCamelCase(table) + "TableRow";
                                String classFile = packagePath + "/" + className + ".java";
 
+                               getLogger().info(String.format("To generate class %s to file %s", className, classFile));
+
                                TableRowClassBuildStandard standard = new TableRowClassBuildStandard();
                                if (standardHandler != null) {
                                    standardHandler.handle(standard);
                                }
                                var options = new TableRowClassBuildOptions(standard)
                                        .setSchema(schema)
-                                       .setTable(table);
+                                       .setTable(table)
+                                       .setPackageName(packageName);
 
                                return this.generateClassCodeForOneTable(options)
                                           .compose(code -> {

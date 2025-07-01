@@ -30,37 +30,6 @@ public class AmongstCondition implements MySQLCondition {
         return this;
     }
 
-    /**
-     * @param element     expression or value
-     * @param needQuoting TRUE for VALUE, FALSE for EXPRESSION
-     * @return AmongstCondition
-     * @since 1.4
-     * @deprecated use any method named `elementAs[TYPE]` instead.
-     */
-    @Deprecated(since = "3.1.8", forRemoval = true)
-    public AmongstCondition element(@Nonnull Object element, boolean needQuoting) {
-        if (needQuoting) {
-            if (element instanceof Number) {
-                return elementAsValue((Number) element);
-            } else {
-                return elementAsValue(String.valueOf(element));
-            }
-        } else {
-            return elementAsExpression(String.valueOf(element));
-        }
-    }
-
-    /**
-     * @param element expression (would not be quoted)
-     * @return AmongstCondition
-     * @since 1.4
-     * @deprecated use any method named `elementAsExpression` instead.
-     */
-    @Deprecated(since = "3.1.8", forRemoval = true)
-    public AmongstCondition element(@Nonnull Object element) {
-        return element(element, false);
-    }
-
     public AmongstCondition elementAsExpression(@Nonnull String element) {
         this.element = element;
         return this;
@@ -73,43 +42,6 @@ public class AmongstCondition implements MySQLCondition {
 
     public AmongstCondition elementAsValue(@Nullable Number element) {
         this.element = new Quoter(element).toString();
-        return this;
-    }
-
-    /**
-     * @since 1.4
-     * @deprecated use method `amongst[Type]List` instead.
-     */
-    @Deprecated(since = "3.1.8", forRemoval = true)
-    public AmongstCondition amongst(@Nonnull Collection<?> targetSet, boolean needQuoting) {
-        if (needQuoting) {
-            return amongstValueList(targetSet);
-        } else {
-            List<String> x = new ArrayList<>();
-            for (var y : targetSet) {
-                x.add(y.toString());
-            }
-            return amongstExpressionList(x);
-        }
-    }
-
-    /**
-     * @since 1.4
-     * @deprecated use method `amongstValueList` instead.
-     */
-    @Deprecated(since = "3.1.8", forRemoval = true)
-    public AmongstCondition amongst(@Nonnull Collection<?> targetSet) {
-        return amongst(targetSet, true);
-    }
-
-    /**
-     * @deprecated @deprecated use method `amongstLiteralValueList` instead.
-     */
-    @Deprecated(since = "3.1.8", forRemoval = true)
-    public AmongstCondition amongstValueList(@Nonnull Collection<?> targetSet) {
-        for (Object next : targetSet) {
-            this.targetSet.add(new Quoter(String.valueOf(next)).toString());
-        }
         return this;
     }
 
@@ -136,26 +68,6 @@ public class AmongstCondition implements MySQLCondition {
     }
 
     /**
-     * @deprecated use method `amongstLiteralValueList` instead.
-     */
-    @Deprecated(since = "3.1.8", forRemoval = true)
-    public AmongstCondition amongstValueArray(@Nonnull Object[] targetSet) {
-        for (Object next : targetSet) {
-            this.targetSet.add(new Quoter(String.valueOf(next)).toString());
-        }
-        return this;
-    }
-
-    /**
-     * @deprecated use method `amongstLiteralValueList` instead.
-     */
-    @Deprecated(since = "3.1.8")
-    public AmongstCondition amongstValue(@Nullable String value) {
-        this.targetSet.add(new Quoter(value).toString());
-        return this;
-    }
-
-    /**
      * @since 3.1.8
      */
     protected AmongstCondition amongstLiteralValue(@Nullable Object value) {
@@ -164,15 +76,6 @@ public class AmongstCondition implements MySQLCondition {
         } else {
             this.targetSet.add(new Quoter(String.valueOf(value)).toString());
         }
-        return this;
-    }
-
-    /**
-     * @deprecated use method `amongstNumericValueList` instead.
-     */
-    @Deprecated(since = "3.1.8", forRemoval = true)
-    public AmongstCondition amongstValue(@Nullable Number value) {
-        this.targetSet.add(new Quoter(value).toString());
         return this;
     }
 

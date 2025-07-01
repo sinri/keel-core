@@ -1,5 +1,6 @@
 package io.github.sinri.keel.integration.mysql.statement.component;
 
+import io.github.sinri.keel.core.ValueBox;
 import io.github.sinri.keel.integration.mysql.condition.*;
 
 import javax.annotation.Nonnull;
@@ -42,6 +43,17 @@ public class ConditionsComponent {
     }
 
     /**
+     * @since 4.1.0
+     */
+    public ConditionsComponent expressionEqualsLiteralValueIfNonNull(@Nonnull String expression, @Nonnull ValueBox<Object> valueBox) {
+        if (valueBox.isValueSetAndNotNull()) {
+            return expressionEqualsLiteralValue(expression, valueBox.getNonNullValue());
+        } else {
+            return this;
+        }
+    }
+
+    /**
      * @param expression Not be quoted, may be fields, functions, etc.
      * @param value      Be quoted after stringify. BigDecimal would not be plain string.
      * @since 3.1.8
@@ -52,6 +64,17 @@ public class ConditionsComponent {
                 .operator(CompareCondition.OP_NEQ)
                 .againstLiteralValue(value)
         );
+    }
+
+    /**
+     * @since 4.1.0
+     */
+    public ConditionsComponent expressionNotLiteralValueIfNonNull(@Nonnull String expression, @Nonnull ValueBox<Object> valueBox) {
+        if (valueBox.isValueSetAndNotNull()) {
+            return expressionNotLiteralValue(expression, valueBox.getNonNullValue());
+        } else {
+            return this;
+        }
     }
 
     /**
@@ -68,6 +91,17 @@ public class ConditionsComponent {
     }
 
     /**
+     * @since 4.1.0
+     */
+    public ConditionsComponent expressionEqualsNumericValueIfNonNull(@Nonnull String expression, @Nonnull ValueBox<Number> valueBox) {
+        if (valueBox.isValueSetAndNotNull()) {
+            return expressionEqualsNumericValue(expression, valueBox.getNonNullValue());
+        } else {
+            return this;
+        }
+    }
+
+    /**
      * @param expression Not be quoted, may be fields, functions, etc.
      * @param value      Be quoted, numeric. BigDecimal would not be plain string.
      * @since 3.1.8
@@ -78,6 +112,14 @@ public class ConditionsComponent {
                 .operator(CompareCondition.OP_NEQ)
                 .againstNumericValue(value)
         );
+    }
+
+    public ConditionsComponent expressionNotNumericValueIfNonNull(@Nonnull String expression, @Nonnull ValueBox<Number> valueBox) {
+        if (valueBox.isValueSetAndNotNull()) {
+            return expressionNotNumericValue(expression, valueBox.getNonNullValue());
+        } else {
+            return this;
+        }
     }
 
     /**
@@ -133,6 +175,14 @@ public class ConditionsComponent {
     }
 
     /**
+     * @since 4.1.0
+     */
+    public ConditionsComponent expressionAmongLiteralValuesIfNotEmpty(@Nonnull String expression, @Nonnull Collection<?> values) {
+        if (values.isEmpty()) return this;
+        return expressionAmongLiteralValues(expression, values);
+    }
+
+    /**
      * @param expression Not be quoted, may be fields, functions, etc.
      * @param values     Be quoted each, as number or string.
      * @since 3.1.8
@@ -142,6 +192,14 @@ public class ConditionsComponent {
                 .elementAsExpression(expression)
                 .amongstNumericValueList(values)
         );
+    }
+
+    /**
+     * @since 4.1.0
+     */
+    public ConditionsComponent expressionAmongNumericValuesIfNotEmpty(@Nonnull String expression, @Nonnull Collection<? extends Number> values) {
+        if (values.isEmpty()) return this;
+        return expressionAmongNumericValues(expression, values);
     }
 
     /**
@@ -158,6 +216,14 @@ public class ConditionsComponent {
     }
 
     /**
+     * @since 4.1.0
+     */
+    public ConditionsComponent expressionNotInLiteralValuesIfNotEmpty(@Nonnull String expression, @Nonnull Collection<?> values) {
+        if (values.isEmpty()) return this;
+        return expressionNotInLiteralValues(expression, values);
+    }
+
+    /**
      * @param expression Not be quoted, may be fields, functions, etc.
      * @param values     Be quoted each, as number or string.
      * @since 3.1.8
@@ -168,6 +234,14 @@ public class ConditionsComponent {
                 .not()
                 .amongstNumericValueList(values)
         );
+    }
+
+    /**
+     * @since 4.1.0
+     */
+    public ConditionsComponent expressionNotInNumericValuesIfNotEmpty(@Nonnull String expression, @Nonnull Collection<? extends Number> values) {
+        if (values.isEmpty()) return this;
+        return expressionNotInNumericValues(expression, values);
     }
 
     public ConditionsComponent among(@Nonnull Function<AmongstCondition, AmongstCondition> function) {

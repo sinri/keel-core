@@ -96,31 +96,6 @@ public class CompareCondition implements MySQLCondition {
         return this;
     }
 
-    /**
-     * @param leftSide    expression or value
-     * @param needQuoting TRUE for value, FALSE for expression
-     * @return CompareCondition
-     * @since 1.4
-     */
-    @Deprecated(since = "3.1.8")
-    public CompareCondition compare(@Nonnull Object leftSide, boolean needQuoting) {
-        if (needQuoting) {
-            return compareValue(leftSide);
-        } else {
-            return compareExpression(leftSide);
-        }
-    }
-
-    /**
-     * @param leftSide expression (would not be quoted)
-     * @return CompareCondition
-     * @since 1.4
-     */
-    @Deprecated(since = "3.1.8")
-    public CompareCondition compare(@Nonnull Object leftSide) {
-        return compareExpression(leftSide);
-    }
-
     public CompareCondition compareExpression(@Nonnull Object leftSide) {
         this.leftSide = leftSide.toString();
         return this;
@@ -136,46 +111,9 @@ public class CompareCondition implements MySQLCondition {
         return this;
     }
 
-    /**
-     * @param rightSide   expression or value
-     * @param needQuoting TRUE for value, FALSE for expression
-     * @return CompareCondition
-     * @since 1.4
-     * @deprecated use againstValue or againstExpression
-     */
-    @Deprecated(since = "3.1.8", forRemoval = true)
-    public CompareCondition against(Object rightSide, Boolean needQuoting) {
-        if (needQuoting) {
-            return againstValue(rightSide);
-        } else {
-            return againstExpression(rightSide.toString());
-        }
-    }
-
-    /**
-     * @param rightSide value (would be quoted)
-     * @return CompareCondition
-     * @since 1.4
-     * @deprecated use againstLiteralValue
-     */
-    @Deprecated(since = "3.1.8", forRemoval = true)
-    public CompareCondition against(Object rightSide) {
-        return againstValue(rightSide);
-    }
-
     public CompareCondition againstExpression(@Nonnull String rightSide) {
         this.rightSide = rightSide;
         return this;
-    }
-
-    /**
-     * @deprecated use againstLiteralValue
-     */
-    @Deprecated(since = "3.1.8", forRemoval = true)
-    public CompareCondition againstValue(@Nullable Object rightSide) {
-        //this.rightSide = String.valueOf(new Quoter(String.valueOf(rightSide)));
-        //return this;
-        return this.againstLiteralValue(rightSide);
     }
 
     /**

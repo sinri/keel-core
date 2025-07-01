@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -18,8 +19,8 @@ public class ValueBox<T> {
     private volatile boolean valueAlreadySet;
     /**
      * @since 3.1.0
-     *        When expire is equal or less than zero, never expire;
-     *        Or as the milliseconds to reserve the value.
+     *         When expire is equal or less than zero, never expire;
+     *         Or as the milliseconds to reserve the value.
      */
     private volatile long expire = 0;
 
@@ -107,6 +108,18 @@ public class ValueBox<T> {
     }
 
     /**
+     * @since 4.1.0
+     */
+    @Nonnull
+    public synchronized T getNonNullValue() {
+        T t = getValue();
+        if (t == null) {
+            throw new NullPointerException("Value is expected as non-null value");
+        }
+        return t;
+    }
+
+    /**
      * Retrieves the value stored in the ValueBox if it has been set and not
      * expired.
      * If the value is not set or has expired, returns the provided fallback value.
@@ -152,5 +165,12 @@ public class ValueBox<T> {
      */
     public synchronized boolean isValueSetToNull() {
         return this.isValueAlreadySet() && this.getValue() == null;
+    }
+
+    /**
+     * @since 4.1.0
+     */
+    public synchronized boolean isValueSetAndNotNull() {
+        return this.isValueAlreadySet() && this.getValue() != null;
     }
 }

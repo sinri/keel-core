@@ -1,6 +1,5 @@
 package io.github.sinri.keel.integration.mysql.statement.impl;
 
-import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.integration.mysql.statement.AbstractStatement;
 import io.github.sinri.keel.integration.mysql.statement.component.ConditionsComponent;
 import io.github.sinri.keel.integration.mysql.statement.component.UpdateSetAssignmentComponent;
@@ -62,7 +61,6 @@ public class UpdateStatement extends AbstractStatement implements ModifyStatemen
     /**
      * @since 3.0.19 Technical Preview
      */
-    @TechnicalPreview(since = "3.0.19")
     public UpdateStatement setWithAssignment(@Nonnull UpdateSetAssignmentComponent updateSetAssignmentComponent) {
         this.assignments.add(updateSetAssignmentComponent);
         return this;
@@ -71,14 +69,12 @@ public class UpdateStatement extends AbstractStatement implements ModifyStatemen
     /**
      * @since 3.0.19
      */
-    @TechnicalPreview(since = "3.0.19")
     public UpdateStatement setWithAssignments(@Nonnull Collection<UpdateSetAssignmentComponent> updateSetAssignmentComponents) {
         this.assignments.addAll(updateSetAssignmentComponents);
         return this;
     }
 
     public UpdateStatement setWithExpression(@Nonnull Map<String, String> columnExpressionMapping) {
-        //columnExpressionMapping.forEach((k, v) -> assignments.add(k + "=" + v));
         columnExpressionMapping.forEach((k, v) -> assignments
                 .add(new UpdateSetAssignmentComponent(k)
                         .assignmentToExpression(v)));
@@ -86,13 +82,11 @@ public class UpdateStatement extends AbstractStatement implements ModifyStatemen
     }
 
     public UpdateStatement setWithExpression(@Nonnull String column, @Nonnull String expression) {
-        //assignments.add(column + "=" + expression);
         assignments.add(new UpdateSetAssignmentComponent(column).assignmentToExpression(expression));
         return this;
     }
 
     public UpdateStatement setWithValue(@Nonnull String column, @Nullable Number value) {
-        //assignments.add(column + "=" + (new Quoter(value)));
         assignments.add(new UpdateSetAssignmentComponent(column).assignmentToValue(value));
         return this;
     }

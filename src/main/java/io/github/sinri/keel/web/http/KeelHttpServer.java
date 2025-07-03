@@ -51,24 +51,28 @@ abstract public class KeelHttpServer extends KeelVerticleImpl {
         Router router = Router.router(Keel.getVertx());
         this.configureRoutes(router);
 
-        server.requestHandler(router)
-              .exceptionHandler(throwable -> getHttpServerLogger().exception(throwable, r -> r.message("KeelHttpServer Exception")))
-              .listen()
-              .onComplete(httpServerAsyncResult -> {
-                  if (httpServerAsyncResult.succeeded()) {
-                      HttpServer httpServer = httpServerAsyncResult.result();
-                      getHttpServerLogger().info(r -> r.message("HTTP Server Established, Actual Port: " + httpServer.actualPort()));
-                  } else {
-                      Throwable throwable = httpServerAsyncResult.cause();
-                      getHttpServerLogger().exception(throwable, r -> r.message("Listen failed"));
+        return server.requestHandler(router)
+                     .exceptionHandler(throwable -> getHttpServerLogger().exception(throwable, r -> r.message("KeelHttpServer Exception")))
+                     .listen()
+                     .compose(httpServer -> {
+                         int actualPort = httpServer.actualPort();
+                         getHttpServerLogger().info(r -> r.message("HTTP Server Established, Actual Port: " + actualPort));
+                         return Future.succeededFuture();
+                     }, throwable -> {
+                         getHttpServerLogger().exception(throwable, r -> r.message("Listen failed"));
 
-                      if (this.isMainService()) {
-                          Keel.gracefullyClose(Promise::complete);
-                      }
-                  }
-              });
-
-        return Future.succeededFuture();
+                         return Future.succeededFuture()
+                                      .compose(v -> {
+                                          if (this.isMainService()) {
+                                              return Keel.gracefullyClose(Promise::complete);
+                                          } else {
+                                              return Future.succeededFuture();
+                                          }
+                                      })
+                                      .compose(v -> {
+                                          return Future.failedFuture(throwable);
+                                      });
+                     });
     }
 
     /**

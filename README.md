@@ -43,6 +43,14 @@ Keel: https://github.com/sinri/DryDockLession :)
 
 ## Migration
 
+### From 4.0.x to 4.1.x
+
+* Based on Vert.x 5.0.1 and later.
+* Removed many deprecated methods.
+* Deprecated Instant Runner.
+* Provided `JsonifiableSerializer`.
+* When run in Aliyun SAE, you need to upgrade javaagent to at least 4.4.0.
+
 ### From 3.2.x to 4.0.x
 
 * Packages are shrunk.

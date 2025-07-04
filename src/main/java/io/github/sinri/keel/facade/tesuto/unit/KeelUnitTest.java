@@ -37,7 +37,7 @@ public class KeelUnitTest implements KeelUnitTestCore {
         prepareEnvironment();
         var builtLogger = this.buildUnitTestLogger();
         if (builtLogger != null) {
-            this.unitTestLogger = builtLogger;
+            resetUnitTestLogger(builtLogger);
         }
     }
 
@@ -60,7 +60,29 @@ public class KeelUnitTest implements KeelUnitTestCore {
      * of KeelEventLogger to initialize the logger if you have a special logging requirement.
      */
     protected @Nullable KeelIssueRecorder<KeelEventLog> buildUnitTestLogger() {
+        return buildUnitTestLoggerForEachTest(null);
+    }
+
+    /**
+     * 本方法默认情况下仅在单元测试类初始化时调用以生成和该测试类相关的日志记录器。
+     * 如果需要生成和特定测试方法相关的日志记录器，需要在{@code @BeforeEach}标记的setUp方法或测试方法中调用并生成局部变量用于记录日志。
+     *
+     * @param testMeta 如果这个参数为null，则生成和测试类相关的日志记录器；
+     *                 否则生成和测试方法相关的测试记录器，一般应使用 {@code org.junit.jupiter.api.TestInfo} 等单元测试框架提供的类。
+     * @since 4.1.0
+     */
+    protected @Nullable KeelIssueRecorder<KeelEventLog> buildUnitTestLoggerForEachTest(@Nullable Object testMeta) {
         return null;
+    }
+
+    /**
+     * @param logger if a non-null logger instance is provided, {@link KeelUnitTest#unitTestLogger} would be replaced.
+     * @since 4.1.0
+     */
+    protected void resetUnitTestLogger(@Nullable KeelIssueRecorder<KeelEventLog> logger) {
+        if (logger != null) {
+            this.unitTestLogger = logger;
+        }
     }
 
     /**

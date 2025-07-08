@@ -10,13 +10,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * As of 4.0.0 let it be an abstract class.
+ * As of 4.1.0 add {@link KeelIssueRecord#getThreadInfo()}.
+ *
  * @param <T> the final implementation type.
  * @since 3.1.10
- * @since 4.0.0 let it be an abstract class
  */
 public abstract class KeelIssueRecord<T> implements IssueRecordMessageMixin<T>, IssueRecordContextMixin<T> {
     private final @Nonnull JsonObject attributes;
     private final @Nonnull List<String> classification;
+    private final String threadInfo;
     private long timestamp;
     private @Nonnull KeelLogLevel level;
     private @Nullable Throwable exception;
@@ -26,6 +29,9 @@ public abstract class KeelIssueRecord<T> implements IssueRecordMessageMixin<T>, 
         this.attributes = new JsonObject();
         this.level = KeelLogLevel.INFO;
         this.classification = new ArrayList<>();
+        //        this.threadId=Thread.currentThread().getId();
+        //        this.threadName=Thread.currentThread().toString().getName();
+        this.threadInfo = Thread.currentThread().toString();
     }
 
     /**
@@ -37,6 +43,7 @@ public abstract class KeelIssueRecord<T> implements IssueRecordMessageMixin<T>, 
         this.timestamp = baseIssueRecord.timestamp();
         this.level = baseIssueRecord.level();
         this.exception = baseIssueRecord.exception();
+        this.threadInfo = Thread.currentThread().toString();
     }
 
     @Override
@@ -120,5 +127,12 @@ public abstract class KeelIssueRecord<T> implements IssueRecordMessageMixin<T>, 
     public T context(@Nonnull JsonObject context) {
         this.attribute(AttributeContext, context);
         return this.getImplementation();
+    }
+
+    /**
+     * @since 4.1.0
+     */
+    public String getThreadInfo() {
+        return threadInfo;
     }
 }

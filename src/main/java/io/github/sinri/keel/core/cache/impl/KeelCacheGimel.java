@@ -5,24 +5,21 @@ import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.BooleanSupplier;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
- * @param <K>
- * @param <V>
  * @since 2.9
  */
 public class KeelCacheGimel<K, V> implements KeelAsyncEverlastingCacheInterface<K, V> {
-    private final Lock lock;
+    private final ReadWriteLock lock;
     private final Map<K, V> map;
     private long lockWaitMs = 100;
 
     public KeelCacheGimel() {
-        lock = new ReentrantLock();
+        lock = new ReentrantReadWriteLock();
         map = new HashMap<>();
     }
 
@@ -35,85 +32,84 @@ public class KeelCacheGimel<K, V> implements KeelAsyncEverlastingCacheInterface<
         return this;
     }
 
-    private Future<Void> actionInLock(BooleanSupplier resultSupplier) {
-        return Future.succeededFuture()
-                .compose(ready -> {
-                    try {
-                        var locked = lock.tryLock(getLockWaitMs(), TimeUnit.MILLISECONDS);
-                        if (locked) {
-                            return Future.failedFuture("locked");
-                        }
-                    } catch (InterruptedException e) {
-                        return Future.failedFuture(e);
-                    }
-                    boolean result;
-                    try {
-                        result = resultSupplier.getAsBoolean();
-                    } catch (Throwable throwable) {
-                        result = false;
-                    } finally {
-                        lock.unlock();
-                    }
-                    if (result) {
-                        return Future.succeededFuture();
-                    } else {
-                        return Future.failedFuture("action failed");
-                    }
-                });
-    }
-
     @Override
     public Future<Void> save(@Nonnull K k, V v) {
-        return actionInLock(() -> {
-            map.put(k, v);
-            return true;
+        return Keel.getVertx().executeBlocking(() -> {
+            lock.writeLock().lock();
+            try {
+                map.put(k, v);
+            } finally {
+                lock.writeLock().unlock();
+            }
+            return null;
         });
     }
 
     @Override
     public Future<Void> save(@Nonnull Map<K, V> appendEntries) {
-        return actionInLock(() -> {
-            map.putAll(appendEntries);
-            return true;
+        return Keel.getVertx().executeBlocking(() -> {
+            lock.writeLock().lock();
+            try {
+                map.putAll(appendEntries);
+            } finally {
+                lock.writeLock().unlock();
+            }
+            return null;
         });
     }
 
     @Override
     public Future<V> read(@Nonnull K k, V v) {
-        AtomicReference<V> vRef = new AtomicReference<>();
-        return actionInLock(() -> {
-            var x = map.get(k);
-            if (x != null) {
-                vRef.set(x);
-            } else {
-                vRef.set(v);
+        return Keel.getVertx().executeBlocking(() -> {
+            lock.readLock().lock();
+            try {
+                var cachedValue = map.get(k);
+                if (cachedValue != null) {
+                    return cachedValue;
+                }
+            } finally {
+                lock.readLock().unlock();
             }
-            return true;
-        })
-                .compose(unlocked -> Future.succeededFuture(vRef.get()));
+            return v;
+        });
     }
 
     @Override
     public Future<Void> remove(@Nonnull K key) {
-        return actionInLock(() -> {
-            map.remove(key);
-            return true;
+        return Keel.getVertx().executeBlocking(() -> {
+            lock.writeLock().lock();
+            try {
+                map.remove(key);
+            } finally {
+                lock.writeLock().unlock();
+            }
+            return null;
         });
     }
 
     @Override
     public Future<Void> remove(@Nonnull Collection<K> keys) {
-        return actionInLock(() -> {
-            keys.forEach(map::remove);
-            return true;
+        return Keel.getVertx().executeBlocking(() -> {
+            lock.writeLock().lock();
+            try {
+                keys.forEach(map::remove);
+            } finally {
+                lock.writeLock().unlock();
+            }
+            return null;
         });
     }
 
     @Override
     public Future<Void> removeAll() {
-        return actionInLock(() -> {
-            map.clear();
-            return true;
+        return Keel.getVertx().executeBlocking(() -> {
+            lock.writeLock().lock();
+            try {
+                map.clear();
+            } finally {
+                lock.writeLock().unlock();
+            }
+            return null;
         });
     }
 
@@ -123,21 +119,31 @@ public class KeelCacheGimel<K, V> implements KeelAsyncEverlastingCacheInterface<
      */
     @Override
     public Future<Void> replaceAll(@Nonnull Map<K, V> newEntries) {
-        return actionInLock(() -> {
-            Set<K> ks = newEntries.keySet();
-            map.putAll(newEntries);
-            map.keySet().forEach(k -> {
-                if (!ks.contains(k)) {
-                    map.remove(k);
-                }
-            });
-            return true;
+        return Keel.getVertx().executeBlocking(() -> {
+            lock.writeLock().lock();
+            try {
+                Set<K> ks = newEntries.keySet();
+                map.putAll(newEntries);
+                map.keySet().forEach(k -> {
+                    if (!ks.contains(k)) {
+                        map.remove(k);
+                    }
+                });
+            } finally {
+                lock.writeLock().unlock();
+            }
+            return null;
         });
     }
 
     @Override
     @Nonnull
     public Map<K, V> getSnapshotMap() {
-        return Collections.unmodifiableMap(map);
+        lock.readLock().lock();
+        try {
+            return Collections.unmodifiableMap(map);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 }

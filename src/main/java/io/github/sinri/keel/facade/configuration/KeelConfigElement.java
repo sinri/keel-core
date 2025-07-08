@@ -762,7 +762,7 @@ public class KeelConfigElement {
             // here, the file named as `propertiesFileName` should be put along with JAR
             properties.load(new FileReader(propertiesFileName, charset));
         } catch (IOException e) {
-            System.err.println("Cannot find the file config.properties. Use the embedded one.");
+            Keel.getLogger().debug("Cannot read the file config.properties, use the embedded one.");
             try {
                 properties.load(getClass().getClassLoader().getResourceAsStream(propertiesFileName));
             } catch (IOException ex) {

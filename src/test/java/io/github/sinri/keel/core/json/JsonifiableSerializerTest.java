@@ -25,7 +25,12 @@ class JsonifiableSerializerTest extends KeelUnitTest {
 
         JsonObject j = new JsonObject();
         j.put("sth", sth);
-        System.out.println(j);
+        getUnitTestLogger().info("j: "+j);
+        getUnitTestLogger().info("j",j);
+
+        var k= new JsonObject(j.toString());
+        getUnitTestLogger().info("k: "+k);
+        getUnitTestLogger().info("k",k);
     }
 
     private static class Sth extends JsonifiableEntityImpl<Sth> {

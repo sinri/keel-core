@@ -2,6 +2,7 @@ package io.github.sinri.keel.test.unittest.core.cutter;
 
 import io.github.sinri.keel.core.cutter.IntravenouslyCutterOnString;
 import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
 import org.junit.jupiter.api.Assertions;
@@ -21,7 +22,7 @@ public class CutterUnitTest extends KeelUnitTest {
                 getUnitTestLogger().info("component: " + s);
                 results.add(s);
                 return Future.succeededFuture();
-            });
+            }, new DeploymentOptions());
 
             String text = "123456\n|\n789012|345678\n\n9012|34567890";
             String[] split = text.split("\\|");

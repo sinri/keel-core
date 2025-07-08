@@ -39,10 +39,9 @@ public interface KeelUnitTestCore {
      * @throws RuntimeException if an error occurs during the execution of the testHandler
      */
     default void async(Handler<Promise<Void>> testHandler) {
-        //        Promise<Void> promise = Promise.promise();
-        //        testHandler.handle(promise);
-        //        Keel.await(promise.future());
-        Keel.pseudoAwait(testHandler);
+        Promise<Void> promise = Promise.promise();
+        testHandler.handle(promise);
+        Keel.blockAwait(promise.future());
     }
 
     /**
@@ -56,6 +55,13 @@ public interface KeelUnitTestCore {
      * @throws NullPointerException if the provided supplier or the future it returns is null
      */
     default void async(Supplier<Future<Void>> testSupplier) {
-        Keel.await(testSupplier.get());
+        Keel.blockAwait(testSupplier.get());
+    }
+
+    /**
+     * @since 4.1.0
+     */
+    default void async(Future<Void> testFuture) {
+        Keel.blockAwait(testFuture);
     }
 }

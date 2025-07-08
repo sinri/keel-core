@@ -36,11 +36,12 @@ public class IntravenouslyCutterOnString implements IntravenouslyCutter<String> 
      */
     public IntravenouslyCutterOnString(
             KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor,
-            long timeout
+            long timeout,
+            DeploymentOptions deploymentOptions
     ) {
         this.stringSingleDropProcessor = stringSingleDropProcessor;
         intravenous = KeelIntravenous.instant(getSingleDropProcessor());
-        intravenous.deployMe(new DeploymentOptions());
+        intravenous.deployMe(deploymentOptions);
 
         // as of 4.0.12 add timeout support
         if (timeout > 0) {
@@ -58,8 +59,8 @@ public class IntravenouslyCutterOnString implements IntravenouslyCutter<String> 
      *
      * @param stringSingleDropProcessor The processor for handling individual strings.
      */
-    public IntravenouslyCutterOnString(KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor) {
-        this(stringSingleDropProcessor, 0);
+    public IntravenouslyCutterOnString(KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor, DeploymentOptions deploymentOptions) {
+        this(stringSingleDropProcessor, 0, deploymentOptions);
     }
 
     /**

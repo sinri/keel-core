@@ -25,11 +25,15 @@ public class KeelIssueRecordStringRender implements KeelIssueRecordRender<String
     @Override
     public String renderIssueRecord(@Nonnull String topic, @Nonnull KeelIssueRecord<?> issueRecord) {
         StringBuilder s = new StringBuilder("㏒ ");
-        s.append(Keel.datetimeHelper().getDateExpression(issueRecord.timestamp(), KeelDateTimeHelper.MYSQL_DATETIME_MS_PATTERN));
+        s.append(Keel.datetimeHelper()
+                     .getDateExpression(issueRecord.timestamp(), KeelDateTimeHelper.MYSQL_DATETIME_MS_PATTERN));
         s.append(" [").append(issueRecord.level().name()).append("]");
-        s.append(" ").append(topic).append(" (").append(Keel.stringHelper().joinStringArray(issueRecord.classification(), ",")).append(")");
+        s.append(" ").append(topic).append(" (")
+         .append(Keel.stringHelper().joinStringArray(issueRecord.classification(), ",")).append(")");
+        s.append(" on ").append(issueRecord.getThreadInfo());
         if (!issueRecord.attributes().isEmpty()) {
-            issueRecord.attributes().forEach(attribute -> s.append("\n ▪ ").append(attribute.getKey()).append(": ").append(attribute.getValue()));
+            issueRecord.attributes().forEach(attribute -> s.append("\n ▪ ").append(attribute.getKey()).append(": ")
+                                                           .append(attribute.getValue()));
         }
         Throwable exception = issueRecord.exception();
         if (exception != null) {

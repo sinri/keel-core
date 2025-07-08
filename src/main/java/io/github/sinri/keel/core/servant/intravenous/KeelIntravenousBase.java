@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.servant.intravenous;
 
 import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
-import io.github.sinri.keel.facade.async.KeelAsyncMixin;
+import io.github.sinri.keel.facade.async.RepeatedlyCallTask;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 
@@ -76,7 +76,7 @@ abstract class KeelIntravenousBase<D> extends KeelVerticleImpl implements KeelIn
         return Future.succeededFuture();
     }
 
-    private Future<Void> handleRoutine(KeelAsyncMixin.RepeatedlyCallTask repeatedlyCallTask) {
+    private Future<Void> handleRoutine(RepeatedlyCallTask repeatedlyCallTask) {
         this.interrupterRef.set(Promise.promise());
 
         boolean toStop = this.stoppedRef.get();

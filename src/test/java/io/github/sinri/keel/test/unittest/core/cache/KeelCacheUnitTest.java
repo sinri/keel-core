@@ -14,8 +14,8 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 public class KeelCacheUnitTest extends KeelUnitTest {
     @Test
-    public void testForValueWrapper() {
-        Keel.pseudoAwait(promise -> {
+    public void testForValueWrapper() throws Throwable {
+        this.async(promise -> {
             long t1 = System.currentTimeMillis();
             getUnitTestLogger().info("value: " + t1);
             var vw = new ValueWrapper<Long>(t1, 3);
@@ -40,7 +40,7 @@ public class KeelCacheUnitTest extends KeelUnitTest {
     }
 
     @Test
-    public void testForSyncCache() {
+    public void testForSyncCache() throws Throwable {
         async(() -> {
             KeelCacheInterface<String, String> cache = KeelCacheInterface.createDefaultInstance();
             cache.save("a", "apple", 2);
@@ -66,7 +66,7 @@ public class KeelCacheUnitTest extends KeelUnitTest {
     }
 
     @Test
-    public void testForAsyncCache() {
+    public void testForAsyncCache() throws Throwable {
         async(() -> {
             KeelAsyncCacheInterface<String, String> cache = KeelAsyncCacheInterface.createDefaultInstance();
             return cache.save("a", "apple", 2)

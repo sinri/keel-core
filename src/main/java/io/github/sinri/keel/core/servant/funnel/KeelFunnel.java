@@ -34,6 +34,7 @@ public class KeelFunnel extends KeelVerticleImpl {
         this.sleepTimeRef = new AtomicLong(1_000L);
         this.queue = new ConcurrentLinkedQueue<>();
         this.interruptRef = new AtomicReference<>();
+        this.funnelLogger = buildFunnelLogger();
     }
 
     /**
@@ -73,38 +74,36 @@ public class KeelFunnel extends KeelVerticleImpl {
 
     @Override
     protected Future<Void> startVerticle() {
-        this.funnelLogger = buildFunnelLogger();
-        Keel.asyncCallRepeatedly(repeatedlyCallTask -> {
-            this.interruptRef.set(null);
-
-            return Keel.asyncCallRepeatedly(routineResult -> {
-                           Supplier<Future<Void>> supplier = queue.poll();
-                           if (supplier == null) {
-                               // no job to do
-                               routineResult.stop();
-                               return Future.succeededFuture();
-                           }
-
-                           // got one job to do, no matter if done
-                           return Future.succeededFuture()
-                                        .compose(v -> supplier.get())
-                                        .compose(v -> {
-                                            //getLogger().debug("funnel done");
-                                            return Future.succeededFuture();
-                                        }, throwable -> {
-                                            getFunnelLogger().exception(throwable, r -> r.message("funnel task " +
-                                                    "error"));
-                                            return Future.succeededFuture();
-                                        });
-                       })
-                       .andThen(ar -> {
-                           this.interruptRef.set(Promise.promise());
-
-                           Keel.asyncSleep(this.sleepTimeRef.get(), getCurrentInterrupt())
-                               .andThen(slept -> repeatedlyCallTask.stop());
-                       });
-        });
-
+        Keel.asyncCallEndlessly(this::executeCircle);
         return Future.succeededFuture();
+    }
+
+    private Future<Void> executeCircle() {
+        this.interruptRef.set(null);
+        funnelLogger.debug("funnel one circle start");
+        return Keel.asyncCallRepeatedly(routineResult -> {
+                       // got one job to do, no matter if done
+                       return Future.succeededFuture()
+                                    .compose(ready -> {
+                                        Supplier<Future<Void>> supplier = queue.poll();
+                                        if (supplier == null) {
+                                            // no job to do
+                                            routineResult.stop();
+                                            Supplier<Future<Void>> supplierTemp = Future::succeededFuture;
+                                            return Future.succeededFuture(supplierTemp);
+                                        } else {
+                                            return Future.succeededFuture(supplier);
+                                        }
+                                    })
+                                    .compose(Supplier::get);
+                   })
+                   .recover(throwable -> {
+                       funnelLogger.exception(throwable);
+                       return Future.succeededFuture();
+                   })
+                   .eventually(() -> {
+                       this.interruptRef.set(Promise.promise());
+                       return Keel.asyncSleep(this.sleepTimeRef.get(), getCurrentInterrupt());
+                   });
     }
 }

@@ -112,16 +112,16 @@ public class KeelDateTimeHelper {
     }
 
     /**
+     * As of 4.1.0, reimplemented.
+     *
      * @since 3.0.1
      */
     protected String makeStandardWidthField(int x, int w) {
-        StringBuilder s = new StringBuilder(String.valueOf(x));
-        if (s.length() < w) {
-            for (int i = 0; i < w - s.length(); i++) {
-                s.insert(0, "0");
-            }
-        }
-        return String.valueOf(s);
+        if (x < 0) throw new IllegalArgumentException();
+        String numeric = String.valueOf(x);
+        if (w < numeric.length()) throw new IllegalArgumentException();
+        String prefix = "0".repeat(w - numeric.length());
+        return prefix + numeric;
     }
 
     /**
@@ -147,6 +147,8 @@ public class KeelDateTimeHelper {
     }
 
     /**
+     * As of 4.1.0, the date string is parsed with strict mode.
+     *
      * @param dateStr   A string expressing date time.
      * @param formatStr The format pattern. Consider to use provided pattern constants.
      * @return Date instance.
@@ -155,9 +157,10 @@ public class KeelDateTimeHelper {
     public @Nullable Date parseExpressionToDateInstance(@Nonnull String dateStr, @Nonnull String formatStr) {
         try {
             SimpleDateFormat format = new SimpleDateFormat(formatStr);
+            format.setLenient(false); // 启用严格模式，校验日期是否真实存在
             return format.parse(dateStr);
         } catch (Throwable e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException("Invalid date format or non-existent date: " + dateStr + " with pattern: " + formatStr, e);
         }
     }
 

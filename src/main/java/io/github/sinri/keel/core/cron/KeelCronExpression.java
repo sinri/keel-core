@@ -43,7 +43,7 @@ public class KeelCronExpression {
 
         String[] parts = rawCronExpression.trim().split("\\s+");
         if (parts.length != 5) {
-            throw new RuntimeException("Invalid Cron Expression");
+            throw new IllegalArgumentException("Invalid Cron Expression");
         }
 
         String minuteExpression = parts[0]; // 0-59

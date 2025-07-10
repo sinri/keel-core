@@ -41,25 +41,17 @@ interface KeelAsyncMixinCore {
      */
     default Future<Void> asyncSleep(long time, @Nullable Promise<Void> interrupter) {
         Context currentContext = Vertx.currentContext();
-        Keel.getLogger().info("<" + Thread.currentThread().getId() + "> asyncSleep start", ctx -> ctx
-                .put("onCurrentContext", currentContext != null)
-                .put("isOnWorkerContext", currentContext != null && currentContext.isWorkerContext())
-                .put("isOnEventLoop", currentContext != null && currentContext.isEventLoopContext())
-        );
         Promise<Void> promise = Promise.promise();
         time = Math.max(1, time);
         long timer_id = Keel.getVertx().setTimer(time, timerID -> {
-            Keel.getLogger().info("<" + Thread.currentThread().getId() + "> asyncSleep time up");
             promise.complete();
         });
-        Keel.getLogger().info("timer_id:" + timer_id);
         if (interrupter != null) {
             interrupter.future().onSuccess(interrupted -> {
                 Keel.getVertx().cancelTimer(timer_id);
                 promise.tryComplete();
             });
         }
-        var f = promise.future();
-        return f;
+        return promise.future();
     }
 }

@@ -103,7 +103,6 @@ interface KeelAsyncMixinBlock extends KeelAsyncMixinLogic {
                 cf.completeExceptionally(ar.cause());
             }
         });
-        Keel.getLogger().info("blockAwait: to wait for CompletableFuture::get");
         try {
             return cf.get(); // 阻塞等待
         } catch (ExecutionException e) {

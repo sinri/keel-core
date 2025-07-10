@@ -1,5 +1,7 @@
 package io.github.sinri.keel.facade.configuration;
 
+import io.vertx.core.Future;
+
 import javax.annotation.Nullable;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -81,11 +83,11 @@ public class KeelConfigPropertiesBuilder {
         return String.join("\n", collect);
     }
 
-    public void writeToFile(String filePath) {
-        Keel.fileHelper().writeFile(filePath, writeToString(), StandardCharsets.US_ASCII);
+    public Future<Void> writeToFile(String filePath) {
+        return Keel.fileHelper().writeFile(filePath, writeToString(), StandardCharsets.US_ASCII);
     }
 
-    public void appendToFile(String filePath) {
-        Keel.fileHelper().appendFile(filePath, writeToString(), StandardCharsets.US_ASCII);
+    public Future<Void> appendToFile(String filePath) {
+        return Keel.fileHelper().appendFile(filePath, writeToString(), StandardCharsets.US_ASCII);
     }
 }

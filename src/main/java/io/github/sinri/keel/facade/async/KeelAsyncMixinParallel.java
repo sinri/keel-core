@@ -1,5 +1,6 @@
 package io.github.sinri.keel.facade.async;
 
+import io.github.sinri.keel.facade.KeelInstance;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
@@ -9,6 +10,9 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
+ * Use {@link KeelInstance#Keel} to use the methods defined by this interface
+ *
+ * @see KeelInstance#Keel
  * @since 4.1.0
  */
 interface KeelAsyncMixinParallel extends KeelAsyncMixinCore {

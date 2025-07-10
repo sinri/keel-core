@@ -1,5 +1,6 @@
 package io.github.sinri.keel.facade.async;
 
+import io.github.sinri.keel.facade.KeelInstance;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -8,7 +9,11 @@ import io.vertx.core.Vertx;
 import javax.annotation.Nullable;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
+
 /**
+ * Use {@link KeelInstance#Keel} to use the methods defined by this interface
+ *
+ * @see KeelInstance#Keel
  * @since 4.1.0
  */
 interface KeelAsyncMixinCore {
@@ -36,10 +41,10 @@ interface KeelAsyncMixinCore {
      */
     default Future<Void> asyncSleep(long time, @Nullable Promise<Void> interrupter) {
         Context currentContext = Vertx.currentContext();
-        Keel.getLogger().info("<" + Thread.currentThread().getId() + "> asyncSleep start",ctx->ctx
-                .put("onCurrentContext",currentContext!=null)
-                .put("isOnWorkerContext",currentContext!=null&&currentContext.isWorkerContext())
-                .put("isOnEventLoop",currentContext!=null&&currentContext.isEventLoopContext())
+        Keel.getLogger().info("<" + Thread.currentThread().getId() + "> asyncSleep start", ctx -> ctx
+                .put("onCurrentContext", currentContext != null)
+                .put("isOnWorkerContext", currentContext != null && currentContext.isWorkerContext())
+                .put("isOnEventLoop", currentContext != null && currentContext.isEventLoopContext())
         );
         Promise<Void> promise = Promise.promise();
         time = Math.max(1, time);
@@ -47,14 +52,14 @@ interface KeelAsyncMixinCore {
             Keel.getLogger().info("<" + Thread.currentThread().getId() + "> asyncSleep time up");
             promise.complete();
         });
-        Keel.getLogger().info("timer_id:"+timer_id);
+        Keel.getLogger().info("timer_id:" + timer_id);
         if (interrupter != null) {
             interrupter.future().onSuccess(interrupted -> {
                 Keel.getVertx().cancelTimer(timer_id);
                 promise.tryComplete();
             });
         }
-        var f= promise.future();
+        var f = promise.future();
         return f;
     }
 }

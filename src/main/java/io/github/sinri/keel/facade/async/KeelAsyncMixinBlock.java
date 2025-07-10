@@ -67,6 +67,7 @@ interface KeelAsyncMixinBlock extends KeelAsyncMixinLogic {
     default <R> Future<R> asyncTransformRawFuture(@Nonnull java.util.concurrent.Future<R> rawFuture, long sleepTime) {
         return asyncCallRepeatedly(repeatedlyCallTask -> {
             if (rawFuture.isDone()) {
+                repeatedlyCallTask.stop();
                 return Future.succeededFuture();
             }
             return Keel.asyncSleep(sleepTime);
@@ -89,7 +90,7 @@ interface KeelAsyncMixinBlock extends KeelAsyncMixinLogic {
         if (isInNonBlockContext()) {
             throw new IllegalCallerException("Cannot call blockAwait in event loop context");
         }
-        
+
         CompletableFuture<T> cf = new CompletableFuture<>();
         longTermAsyncProcessFuture.onComplete(ar -> {
             if (ar.succeeded()) {
@@ -98,11 +99,11 @@ interface KeelAsyncMixinBlock extends KeelAsyncMixinLogic {
                 cf.completeExceptionally(ar.cause());
             }
         });
-        
+        Keel.getLogger().info("blockAwait: to wait for CompletableFuture::get");
         try {
             return cf.get(); // 阻塞等待
         } catch (ExecutionException e) {
-            throw new RuntimeException("",e.getCause());
+            throw new RuntimeException("Error occurred while executing", e.getCause());
         } catch (InterruptedException e) {
             // Thread.currentThread().interrupt();
             throw new RuntimeException("Interrupted while waiting", e);

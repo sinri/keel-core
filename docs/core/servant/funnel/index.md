@@ -5,6 +5,7 @@
 ## 版本信息
 
 - **引入版本**: 3.0.0
+- **日志记录器版本**: 4.0.2
 - **设计模式**: Verticle 模式
 - **线程安全**: 是（使用并发安全的数据结构）
 - **异步支持**: 基于 Vert.x Future 的异步操作
@@ -49,6 +50,7 @@ private final AtomicLong sleepTimeRef;
 private KeelIssueRecorder<KeelEventLog> funnelLogger;
 ```
 - 专用的日志记录器
+- 在构造函数中初始化
 - 记录任务执行异常
 - 支持自定义日志实现
 
@@ -60,6 +62,7 @@ public KeelFunnel() {
     this.sleepTimeRef = new AtomicLong(1_000L);
     this.queue = new ConcurrentLinkedQueue<>();
     this.interruptRef = new AtomicReference<>();
+    this.funnelLogger = buildFunnelLogger(); // 在构造函数中初始化
 }
 ```
 
@@ -84,7 +87,7 @@ public void setSleepTime(long sleepTime)
 protected KeelIssueRecorder<KeelEventLog> buildFunnelLogger()
 protected KeelIssueRecorder<KeelEventLog> getFunnelLogger()
 ```
-- `buildFunnelLogger()`: 创建默认日志记录器
+- `buildFunnelLogger()`: 创建默认日志记录器（4.0.2 版本引入）
 - `getFunnelLogger()`: 获取当前日志记录器
 - 支持子类重写以自定义日志行为
 
@@ -94,24 +97,49 @@ protected KeelIssueRecorder<KeelEventLog> getFunnelLogger()
 ```java
 @Override
 protected Future<Void> startVerticle() {
-    this.funnelLogger = buildFunnelLogger();
-    // 启动重复执行的任务处理循环
-    Keel.asyncCallRepeatedly(repeatedlyCallTask -> {
-        // 处理队列中的所有任务
-        // 然后进入睡眠状态
-    });
+    // 启动无限循环的任务处理
+    Keel.asyncCallEndlessly(this::executeCircle);
     return Future.succeededFuture();
 }
 ```
 
 ### 2. 任务处理循环
-1. **任务提取**: 从队列中轮询任务 (`queue.poll()`)
-2. **任务执行**: 调用任务供应商的 `get()` 方法
-3. **异常处理**: 捕获并记录任务执行异常
-4. **继续处理**: 重复直到队列为空
-5. **进入睡眠**: 设置中断引用并睡眠指定时间
+`executeCircle()` 方法实现了复杂的任务处理逻辑：
 
-### 3. 中断唤醒机制
+1. **重置中断引用**: `this.interruptRef.set(null)`
+2. **记录调试日志**: `funnelLogger.debug("funnel one circle start")`
+3. **嵌套异步处理**: 使用 `Keel.asyncCallRepeatedly` 处理队列中的任务
+4. **任务提取和执行**: 从队列中轮询任务并执行
+5. **异常处理**: 捕获并记录任务执行异常
+6. **睡眠设置**: 在 `eventually` 块中设置中断引用并睡眠
+
+### 3. 任务执行逻辑
+```java
+return Keel.asyncCallRepeatedly(routineResult -> {
+    return Future.succeededFuture()
+        .compose(ready -> {
+            Supplier<Future<Void>> supplier = queue.poll();
+            if (supplier == null) {
+                // 没有任务时停止重复执行
+                routineResult.stop();
+                return Future.succeededFuture(Future::succeededFuture);
+            } else {
+                return Future.succeededFuture(supplier);
+            }
+        })
+        .compose(Supplier::get);
+})
+.recover(throwable -> {
+    funnelLogger.exception(throwable);
+    return Future.succeededFuture();
+})
+.eventually(() -> {
+    this.interruptRef.set(Promise.promise());
+    return Keel.asyncSleep(this.sleepTimeRef.get(), getCurrentInterrupt());
+});
+```
+
+### 4. 中断唤醒机制
 - 当队列为空时，处理器进入睡眠状态
 - 新任务添加时，检查并完成中断 Promise
 - 睡眠被中断后，重新开始任务处理循环
@@ -126,7 +154,7 @@ import io.vertx.core.DeploymentOptions;
 
 // 创建并部署 KeelFunnel
 KeelFunnel funnel = new KeelFunnel();
-funnel.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER))
+funnel.deployMe(new DeploymentOptions())
     .onSuccess(deploymentId -> {
         System.out.println("Funnel 部署成功: " + deploymentId);
         
@@ -159,7 +187,7 @@ public class SocketHandler {
     
     public SocketHandler() {
         this.funnel = new KeelFunnel();
-        this.funnel.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));
+        this.funnel.deployMe(new DeploymentOptions());
     }
     
     public void handleIncomingData(Buffer buffer) {
@@ -207,12 +235,16 @@ public class CustomKeelFunnel extends KeelFunnel {
 3. **线程安全**: 使用并发安全的数据结构
 4. **响应及时**: 中断机制确保新任务快速响应
 5. **异常隔离**: 单个任务异常不影响后续任务
+6. **无限循环**: 使用 `asyncCallEndlessly` 确保处理器持续运行
+7. **嵌套异步**: 复杂的异步处理逻辑确保任务完整执行
 
 ### 注意事项
 1. **内存使用**: 大量待处理任务会占用内存
 2. **执行延迟**: 长时间运行的任务会阻塞后续任务
 3. **资源消耗**: 睡眠时间设置需要平衡响应性和资源消耗
 4. **部署要求**: 需要作为 Verticle 部署才能正常工作
+5. **复杂逻辑**: 嵌套的异步调用增加了调试难度
+6. **异常处理**: 任务异常会被捕获并记录，但不会停止处理器
 
 ## 适用场景
 
@@ -291,8 +323,10 @@ public class MonitoredKeelFunnel extends KeelFunnel {
 - **KeelEventLog**: 事件日志实体类
 - **ConcurrentLinkedQueue**: 线程安全队列实现
 - **AtomicReference/AtomicLong**: 原子操作类
+- **KeelAsyncMixin**: 提供 `asyncCallEndlessly` 和 `asyncCallRepeatedly` 方法
+- **RepeatedlyCallTask**: 重复执行任务的控制类
 
 ## 总结
 
-KeelFunnel 是一个设计精良的任务队列处理器，通过"漏斗"模式实现了高效的有序任务执行。它结合了 Vert.x 的异步特性和并发安全的数据结构，为需要保证执行顺序的场景提供了可靠的解决方案。合理使用 KeelFunnel 可以有效避免并发冲突，简化复杂的异步任务协调逻辑。
+KeelFunnel 是一个设计精良的任务队列处理器，通过"漏斗"模式实现了高效的有序任务执行。它结合了 Vert.x 的异步特性和并发安全的数据结构，使用复杂的嵌套异步调用逻辑确保任务的完整执行。通过 `asyncCallEndlessly` 和 `asyncCallRepeatedly` 的组合使用，KeelFunnel 为需要保证执行顺序的场景提供了可靠的解决方案。合理使用 KeelFunnel 可以有效避免并发冲突，简化复杂的异步任务协调逻辑。
 

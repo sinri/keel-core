@@ -23,11 +23,13 @@ public class KeelJsonHelper {
         return instance;
     }
 
+    @Deprecated(since = "4.1.0")
     public JsonObject writeIntoJsonObject(@Nonnull JsonObject jsonObject, @Nonnull String key, @Nullable Object value) {
         jsonObject.put(key, value);
         return jsonObject;
     }
 
+    @Deprecated(since = "4.1.0")
     public JsonArray writeIntoJsonArray(@Nonnull JsonArray jsonArray, int index, @Nullable Object value) {
         if (index >= 0) {
             if (index >= jsonArray.size()) {
@@ -45,6 +47,7 @@ public class KeelJsonHelper {
     /**
      * @throws RuntimeException if not writable
      */
+    @Deprecated(since = "4.1.0")
     @Nonnull
     public JsonObject writeIntoJsonObject(@Nonnull JsonObject jsonObject, @Nonnull List<Object> keychain, @Nullable Object value) {
         Objects.requireNonNull(jsonObject);
@@ -84,6 +87,7 @@ public class KeelJsonHelper {
         return jsonObject;
     }
 
+    @Deprecated(since = "4.1.0")
     @Nonnull
     public JsonArray writeIntoJsonArray(@Nonnull JsonArray jsonArray, @Nonnull List<Object> keychain, @Nullable Object value) {
         Objects.requireNonNull(keychain);
@@ -136,16 +140,19 @@ public class KeelJsonHelper {
         return jsonArray;
     }
 
+    @Deprecated(since = "4.1.0")
     @Nullable
     public Object readFromJsonObject(@Nonnull JsonObject jsonObject, @Nonnull String key) {
         return jsonObject.getValue(key);
     }
 
+    @Deprecated(since = "4.1.0")
     @Nullable
     public Object readFromJsonArray(@Nonnull JsonArray jsonArray, int index) {
         return jsonArray.getValue(index);
     }
 
+    @Deprecated(since = "4.1.0")
     @Nullable
     public Object readFromJsonObject(@Nonnull JsonObject jsonObject, @Nonnull List<Object> keychain) {
         Objects.requireNonNull(keychain);
@@ -166,6 +173,7 @@ public class KeelJsonHelper {
         throw new RuntimeException();
     }
 
+    @Deprecated(since = "4.1.0")
     @Nullable
     public Object readFromJsonArray(@Nonnull JsonArray jsonArray, @Nonnull List<Object> keychain) {
         Objects.requireNonNull(keychain);

@@ -7,137 +7,39 @@
 - **引入版本**: 2.6
 - **设计模式**: 单例模式
 - **线程安全**: 是
+- **当前状态**: 大部分核心方法已在 4.1.0 版本中废弃
 
-## 主要功能
+## ⚠️ 重要变更通知
 
-### 1. 深度读写操作
-- 支持多层嵌套的 JSON 对象和数组操作
-- 通过键链（keychain）方式访问深层嵌套数据
-- 动态创建嵌套结构
+**自 4.1.0 版本起，KeelJsonHelper 的大部分核心方法已被废弃**。这些方法包括：
 
-### 2. 排序功能
-- JSON 对象键排序
-- JSON 数组元素排序
-- 递归排序嵌套结构
+- 所有 `writeIntoJsonObject` 方法
+- 所有 `writeIntoJsonArray` 方法  
+- 所有 `readFromJsonObject` 方法
+- 所有 `readFromJsonArray` 方法
+- `renderThrowableChain` 方法
 
-### 3. 异常处理
-- 异常信息的 JSON 格式化
-- 堆栈跟踪过滤和美化
-- 支持忽略特定包的堆栈信息
-
-### 4. 格式化输出
-- 美化的 JSON 字符串输出
-- 块状显示格式
-- 层级缩进显示
+**推荐使用替代方案**：
+- 对于 JSON 读写操作，直接使用 Vert.x 的 `JsonObject` 和 `JsonArray` 原生方法
+- 对于异常处理，使用 `JsonifiedThrowable` 类
 
 ## 获取实例
 
 ```java
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
-// 通过 Keel 实例获取
+// 通过 Keel 实例获取（推荐方式）
 KeelJsonHelper jsonHelper = Keel.jsonHelper();
+
+// 直接获取单例实例
+KeelJsonHelper jsonHelper = KeelJsonHelper.getInstance();
 ```
 
-## 基本读写操作
+## 当前可用功能
 
-### 简单读写
+### 1. JSON 排序功能
 
-```java
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.JsonArray;
-
-// 创建 JSON 对象
-JsonObject jsonObject = new JsonObject();
-
-// 写入简单值
-Keel.jsonHelper().writeIntoJsonObject(jsonObject, "name", "张三");
-Keel.jsonHelper().writeIntoJsonObject(jsonObject, "age", 25);
-Keel.jsonHelper().writeIntoJsonObject(jsonObject, "active", true);
-
-System.out.println("JSON 对象: " + jsonObject.encodePrettily());
-
-// 读取简单值
-String name = (String) Keel.jsonHelper().readFromJsonObject(jsonObject, "name");
-Integer age = (Integer) Keel.jsonHelper().readFromJsonObject(jsonObject, "age");
-Boolean active = (Boolean) Keel.jsonHelper().readFromJsonObject(jsonObject, "active");
-
-System.out.println("姓名: " + name + ", 年龄: " + age + ", 活跃: " + active);
-```
-
-### 数组操作
-
-```java
-// 创建 JSON 数组
-JsonArray jsonArray = new JsonArray();
-
-// 写入数组元素
-Keel.jsonHelper().writeIntoJsonArray(jsonArray, 0, "第一个元素");
-Keel.jsonHelper().writeIntoJsonArray(jsonArray, 1, "第二个元素");
-Keel.jsonHelper().writeIntoJsonArray(jsonArray, -1, "追加元素"); // -1 表示追加
-
-System.out.println("JSON 数组: " + jsonArray.encodePrettily());
-
-// 读取数组元素
-String firstElement = (String) Keel.jsonHelper().readFromJsonArray(jsonArray, 0);
-String secondElement = (String) Keel.jsonHelper().readFromJsonArray(jsonArray, 1);
-
-System.out.println("第一个元素: " + firstElement);
-System.out.println("第二个元素: " + secondElement);
-```
-
-## 键链（Keychain）深度访问
-
-### 深度写入
-
-```java
-// 创建复杂的嵌套结构
-JsonObject complexObject = new JsonObject();
-
-// 使用键链写入深层嵌套数据
-List<Object> keychain1 = Arrays.asList("user", "profile", "name");
-Keel.jsonHelper().writeIntoJsonObject(complexObject, keychain1, "李四");
-
-List<Object> keychain2 = Arrays.asList("user", "profile", "age");
-Keel.jsonHelper().writeIntoJsonObject(complexObject, keychain2, 30);
-
-List<Object> keychain3 = Arrays.asList("user", "settings", "theme");
-Keel.jsonHelper().writeIntoJsonObject(complexObject, keychain3, "dark");
-
-List<Object> keychain4 = Arrays.asList("user", "hobbies", 0);
-Keel.jsonHelper().writeIntoJsonObject(complexObject, keychain4, "编程");
-
-List<Object> keychain5 = Arrays.asList("user", "hobbies", 1);
-Keel.jsonHelper().writeIntoJsonObject(complexObject, keychain5, "阅读");
-
-System.out.println("复杂对象: " + complexObject.encodePrettily());
-```
-
-### 深度读取
-
-```java
-// 从深层嵌套结构读取数据
-List<Object> nameKeychain = Arrays.asList("user", "profile", "name");
-String userName = (String) Keel.jsonHelper().readFromJsonObject(complexObject, nameKeychain);
-
-List<Object> ageKeychain = Arrays.asList("user", "profile", "age");
-Integer userAge = (Integer) Keel.jsonHelper().readFromJsonObject(complexObject, ageKeychain);
-
-List<Object> themeKeychain = Arrays.asList("user", "settings", "theme");
-String theme = (String) Keel.jsonHelper().readFromJsonObject(complexObject, themeKeychain);
-
-List<Object> hobbyKeychain = Arrays.asList("user", "hobbies", 0);
-String firstHobby = (String) Keel.jsonHelper().readFromJsonObject(complexObject, hobbyKeychain);
-
-System.out.println("用户名: " + userName);
-System.out.println("年龄: " + userAge);
-System.out.println("主题: " + theme);
-System.out.println("第一个爱好: " + firstHobby);
-```
-
-## JSON 排序功能
-
-### 对象键排序
+#### 对象键排序
 
 ```java
 // 创建无序的 JSON 对象
@@ -154,7 +56,7 @@ String sortedJson = Keel.jsonHelper().getJsonForObjectWhoseItemKeysSorted(unorde
 System.out.println("键排序后: " + sortedJson);
 ```
 
-### 数组元素排序
+#### 数组元素排序
 
 ```java
 // 创建无序的 JSON 数组
@@ -171,29 +73,28 @@ String sortedArrayJson = Keel.jsonHelper().getJsonForArrayWhoseItemsSorted(unord
 System.out.println("元素排序后: " + sortedArrayJson);
 ```
 
-## 异常处理和格式化
-
-### 异常信息 JSON 化
+### 2. 堆栈跟踪过滤
 
 ```java
-// 模拟一个异常
-try {
-    throw new RuntimeException("这是一个测试异常", 
-        new IllegalArgumentException("参数错误", 
-            new NullPointerException("空指针异常")));
-} catch (Exception e) {
-    // 将异常转换为 JSON 格式
-    JsonObject exceptionJson = Keel.jsonHelper().renderThrowableChain(e);
-    System.out.println("异常 JSON: " + exceptionJson.encodePrettily());
-    
-    // 忽略特定包的堆栈信息
-    Set<String> ignorablePackages = Set.of("java.lang", "sun.reflect");
-    JsonObject filteredExceptionJson = Keel.jsonHelper().renderThrowableChain(e, ignorablePackages);
-    System.out.println("过滤后的异常 JSON: " + filteredExceptionJson.encodePrettily());
-}
+// 自定义堆栈跟踪过滤处理
+StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+Set<String> ignorablePackages = Set.of("java.lang", "sun.reflect");
+
+Keel.jsonHelper().filterStackTrace(
+    stackTrace,
+    ignorablePackages,
+    (ignoringClassPackage, ignoringCount) -> {
+        // 处理被忽略的堆栈项
+        System.out.println("忽略包 " + ignoringClassPackage + " 的 " + ignoringCount + " 个堆栈项");
+    },
+    stackTraceItem -> {
+        // 处理保留的堆栈项
+        System.out.println("保留: " + stackTraceItem.getClassName() + "." + stackTraceItem.getMethodName());
+    }
+);
 ```
 
-### 格式化输出
+### 3. 格式化输出
 
 ```java
 // 创建复杂的 JSON 结构
@@ -208,13 +109,159 @@ System.out.println("块状格式:");
 System.out.println(blockFormat);
 ```
 
+输出格式说明：
+- 对象属性使用 `+` 标记
+- 数组元素使用 `-` 标记
+- 支持多级缩进显示
+- 每个条目以换行符结束
+
+## 废弃方法（4.1.0+）
+
+### 基本读写操作（已废弃）
+
+```java
+// ❌ 已废弃的方法
+JsonObject jsonObject = new JsonObject();
+Keel.jsonHelper().writeIntoJsonObject(jsonObject, "name", "张三"); // 废弃
+Object value = Keel.jsonHelper().readFromJsonObject(jsonObject, "name"); // 废弃
+
+// ✅ 推荐使用 Vert.x 原生方法
+JsonObject jsonObject = new JsonObject();
+jsonObject.put("name", "张三"); // 推荐
+Object value = jsonObject.getValue("name"); // 推荐
+```
+
+### 键链（Keychain）深度访问（已废弃）
+
+```java
+// ❌ 已废弃的方法
+List<Object> keychain = Arrays.asList("user", "profile", "name");
+Keel.jsonHelper().writeIntoJsonObject(jsonObject, keychain, "李四"); // 废弃
+Object value = Keel.jsonHelper().readFromJsonObject(jsonObject, keychain); // 废弃
+
+// ✅ 推荐使用原生方法
+JsonObject user = jsonObject.getJsonObject("user", new JsonObject());
+JsonObject profile = user.getJsonObject("profile", new JsonObject());
+profile.put("name", "李四"); // 推荐
+
+// 读取
+String name = jsonObject.getJsonObject("user", new JsonObject())
+    .getJsonObject("profile", new JsonObject())
+    .getString("name"); // 推荐
+```
+
+### 异常处理（已废弃）
+
+```java
+// ❌ 已废弃的方法
+try {
+    throw new RuntimeException("测试异常");
+} catch (Exception e) {
+    JsonObject exceptionJson = Keel.jsonHelper().renderThrowableChain(e); // 废弃
+    System.out.println(exceptionJson.encodePrettily());
+}
+
+// ✅ 推荐使用 JsonifiedThrowable
+import io.github.sinri.keel.core.json.JsonifiedThrowable;
+
+try {
+    throw new RuntimeException("测试异常");
+} catch (Exception e) {
+    JsonifiedThrowable jsonifiedThrowable = JsonifiedThrowable.wrap(e);
+    System.out.println(jsonifiedThrowable.toJsonObject().encodePrettily());
+    
+    // 忽略特定包的堆栈信息
+    Set<String> ignorablePackages = Set.of("java.lang", "sun.reflect");
+    JsonifiedThrowable filteredThrowable = JsonifiedThrowable.wrap(e, ignorablePackages, true);
+    System.out.println(filteredThrowable.toJsonObject().encodePrettily());
+}
+```
+
+## JsonifiedThrowable 详细用法
+
+### 基本用法
+
+```java
+import io.github.sinri.keel.core.json.JsonifiedThrowable;
+
+// 确保注册序列化器（应用启动时执行一次）
+JsonifiableSerializer.register();
+
+try {
+    throw new RuntimeException("这是一个测试异常", 
+        new IllegalArgumentException("参数错误"));
+} catch (Exception e) {
+    // 基本包装
+    JsonifiedThrowable jsonifiedThrowable = JsonifiedThrowable.wrap(e);
+    System.out.println("异常 JSON: " + jsonifiedThrowable.toJsonObject().encodePrettily());
+}
+```
+
+### 高级用法
+
+```java
+// 忽略特定包的堆栈信息，并省略被忽略的堆栈项
+Set<String> ignorablePackages = Set.of("java.lang", "sun.reflect");
+JsonifiedThrowable filteredThrowable = JsonifiedThrowable.wrap(e, ignorablePackages, true);
+
+// 保留被忽略的堆栈项信息
+JsonifiedThrowable withIgnoredInfo = JsonifiedThrowable.wrap(e, ignorablePackages, false);
+
+// 访问异常信息
+String className = jsonifiedThrowable.getThrowableClass();
+String message = jsonifiedThrowable.getThrowableMessage();
+List<JsonifiedThrowable.JsonifiedCallStackItem> stack = jsonifiedThrowable.getThrowableStack();
+JsonifiedThrowable cause = jsonifiedThrowable.getThrowableCause();
+```
+
+### 堆栈项访问
+
+```java
+List<JsonifiedThrowable.JsonifiedCallStackItem> stackItems = jsonifiedThrowable.getThrowableStack();
+for (JsonifiedThrowable.JsonifiedCallStackItem item : stackItems) {
+    String type = item.getType();
+    if ("call".equals(type)) {
+        System.out.println("调用: " + item.getCallStackClass() + "." + item.getCallStackMethod());
+    } else if ("ignored".equals(type)) {
+        System.out.println("忽略: " + item.getPackage() + " (" + item.getIgnoredStackCount() + " 项)");
+    }
+}
+```
+
+## 迁移指南
+
+### 从废弃方法迁移
+
+1. **基本读写操作**：
+   - 将 `writeIntoJsonObject` 替换为 `JsonObject.put`
+   - 将 `readFromJsonObject` 替换为 `JsonObject.getValue` 或类型特定的 getter
+
+2. **数组操作**：
+   - 将 `writeIntoJsonArray` 替换为 `JsonArray.add` 或 `JsonArray.set`
+   - 将 `readFromJsonArray` 替换为 `JsonArray.getValue` 或类型特定的 getter
+
+3. **键链访问**：
+   - 使用链式调用替代键链参数
+   - 考虑创建辅助方法来简化深层访问
+
+4. **异常处理**：
+   - 将 `renderThrowableChain` 替换为 `JsonifiedThrowable.wrap`
+   - 确保在应用启动时调用 `JsonifiableSerializer.register()`
+
+### 性能优化建议
+
+1. **避免频繁的深层访问**：缓存中间结果
+2. **使用类型安全的 getter**：避免类型转换错误
+3. **合理使用默认值**：减少空值检查
+4. **批量操作**：减少方法调用次数
+
 ## 注意事项
 
-1. **类型安全**: 从 JSON 读取数据时注意类型转换，建议进行类型检查
-2. **空值处理**: 键链访问可能返回 null，要做好空值检查
-3. **性能考虑**: 深度嵌套操作有性能开销，频繁操作建议缓存键链
-4. **内存使用**: 大型 JSON 对象的排序和格式化会消耗较多内存
-5. **异常处理**: JSON 操作可能抛出异常，要做好异常处理
+1. **废弃警告**：使用废弃方法会产生编译警告，建议尽快迁移
+2. **序列化器注册**：使用 `JsonifiedThrowable` 前必须调用 `JsonifiableSerializer.register()`
+3. **类型安全**：推荐使用类型特定的 getter 方法
+4. **性能考虑**：排序和格式化操作对大型 JSON 对象有性能影响
+5. **向后兼容**：废弃方法仍可使用，但将在未来版本中移除
 
 ## 版本历史
 
@@ -222,4 +269,6 @@ System.out.println(blockFormat);
 - **2.4**: 添加 JSON 排序功能
 - **2.9**: 添加异常处理和堆栈跟踪功能
 - **3.0.0**: 添加格式化输出和块状显示功能
-- **当前版本**: 支持完整的 JSON 处理功能和性能优化 
+- **3.1.0**: 通过 KeelHelpersInterface 提供统一访问方式
+- **4.1.0**: 废弃大部分核心方法，引入 JsonifiedThrowable
+- **当前版本**: 4.1.0-SNAPSHOT，保留排序、过滤和格式化功能 

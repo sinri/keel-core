@@ -30,6 +30,7 @@ public class KeelRuntimeHelper {
                 "io.github.sinri.keel.facade.async.",
                 "io.github.sinri.keel.facade.tesuto.",
                 "io.vertx.core.",
+                "io.vertx.ext.web",
                 "io.netty.",
                 "java.lang.",
                 "jdk.internal.",

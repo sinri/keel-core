@@ -1,5 +1,6 @@
 package io.github.sinri.keel.web.http.receptionist.responder;
 
+import io.github.sinri.keel.core.ValueBox;
 import io.github.sinri.keel.logger.KeelLogLevel;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.github.sinri.keel.web.http.prehandler.KeelPlatformHandler;
@@ -62,5 +63,21 @@ public abstract class AbstractKeelWebResponder implements KeelWebResponder {
 
     public @Nonnull List<String> readRequestIPChain() {
         return Keel.netHelper().parseWebClientIPChain(routingContext);
+    }
+
+    /**
+     * @deprecated let this deprecated method be final.
+     */
+    @Deprecated(since = "4.1.0")
+    public final void respondOnFailure(@Nonnull Throwable throwable, @Nonnull ValueBox<?> dataValueBox) {
+        KeelWebResponder.super.respondOnFailure(throwable, dataValueBox);
+    }
+
+    /**
+     * @deprecated let this deprecated method be final.
+     */
+    @Deprecated(since = "4.1.0")
+    public final void respondOnFailure(@Nonnull Throwable throwable) {
+        respondOnFailure(throwable, new ValueBox<>());
     }
 }

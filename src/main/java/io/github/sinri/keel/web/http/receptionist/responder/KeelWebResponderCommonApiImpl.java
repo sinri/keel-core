@@ -27,14 +27,14 @@ public class KeelWebResponderCommonApiImpl extends AbstractKeelWebResponder {
     }
 
     @Override
-    public void respondOnFailure(@Nonnull Throwable throwable, @Nonnull ValueBox<?> dataValueBox) {
+    public void respondOnFailure(@Nonnull KeelWebApiError webApiError, @Nonnull ValueBox<?> dataValueBox) {
         JsonObject resp;
         if (dataValueBox.isValueAlreadySet()) {
             resp = buildResponseBody(Code.FAILED, dataValueBox.getValue());
         } else {
-            resp = buildResponseBody(Code.FAILED, throwable.getMessage());
+            resp = buildResponseBody(Code.FAILED, webApiError.getMessage());
         }
-        resp.put("throwable", Keel.stringHelper().renderThrowableChain(throwable));
+        resp.put("throwable", Keel.stringHelper().renderThrowableChain(webApiError));
         recordResponseVerbosely(resp);
         getRoutingContext().json(resp);
     }

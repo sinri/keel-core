@@ -18,9 +18,37 @@ public interface KeelWebResponder {
 
     void respondOnSuccess(@Nullable Object data);
 
-    void respondOnFailure(@Nonnull Throwable throwable, @Nonnull ValueBox<?> dataValueBox);
+    /**
+     * @deprecated As of 4.1.0, this method should be replaced by
+     *         {@link KeelWebResponder#respondOnFailure(KeelWebApiError, ValueBox)}.
+     */
+    @Deprecated(since = "4.1.0")
+    default void respondOnFailure(@Nonnull Throwable throwable, @Nonnull ValueBox<?> dataValueBox) {
+        if (throwable instanceof KeelWebApiError) {
+            respondOnFailure((KeelWebApiError) throwable, dataValueBox);
+        } else {
+            respondOnFailure(KeelWebApiError.wrap(throwable), dataValueBox);
+        }
+    }
 
+    /**
+     * @since 4.1.0
+     */
+    void respondOnFailure(@Nonnull KeelWebApiError webApiError, @Nonnull ValueBox<?> dataValueBox);
+
+    /**
+     * @deprecated As of 4.1.0, this method should be replaced by
+     *         {@link KeelWebResponder#respondOnFailure(KeelWebApiError)}.
+     */
+    @Deprecated(since = "4.1.0")
     default void respondOnFailure(@Nonnull Throwable throwable) {
+        respondOnFailure(throwable, new ValueBox<>());
+    }
+
+    /**
+     * @since 4.1.0
+     */
+    default void respondOnFailure(@Nonnull KeelWebApiError throwable) {
         respondOnFailure(throwable, new ValueBox<>());
     }
 

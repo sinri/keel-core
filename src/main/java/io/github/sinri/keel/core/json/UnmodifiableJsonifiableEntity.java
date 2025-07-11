@@ -8,10 +8,7 @@ import io.vertx.core.shareddata.Shareable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 
@@ -76,6 +73,19 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
     }
 
     /**
+     * This method is a shortcut for {@link UnmodifiableJsonifiableEntity#readString(String...)} with
+     * {@link Objects#requireNonNull(Object)}.
+     * @param args The JSON Pointer arguments.
+     * @throws NullPointerException if the value is null.
+     * @since 4.1.0
+     */
+    default @Nonnull String readStringRequired(String... args) {
+        var r = readString(args);
+        Objects.requireNonNull(r);
+        return r;
+    }
+
+    /**
      * @since 2.7
      */
     default @Nullable Number readNumber(String... args) {
@@ -88,12 +98,38 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
     }
 
     /**
+     * This method is a shortcut for {@link UnmodifiableJsonifiableEntity#readNumber(String...)} with
+     * {@link Objects#requireNonNull(Object)}.
+     * @param args The JSON Pointer arguments.
+     * @throws NullPointerException if the value is null.
+     * @since 4.1.0
+     */
+    default @Nonnull Number readNumberRequired(String... args) {
+        var r = readNumber(args);
+        Objects.requireNonNull(r);
+        return r;
+    }
+
+    /**
      * @since 2.7
      */
     default @Nullable Long readLong(String... args) {
         Number number = readNumber(args);
         if (number == null) return null;
         return number.longValue();
+    }
+
+    /**
+     * This method is a shortcut for {@link UnmodifiableJsonifiableEntity#readLong(String...)} with
+     * {@link Objects#requireNonNull(Object)}.
+     * @param args The JSON Pointer arguments.
+     * @throws NullPointerException if the value is null.
+     * @since 4.1.0
+     */
+    default @Nonnull Long readLongRequired(String... args) {
+        var r = readLong(args);
+        Objects.requireNonNull(r);
+        return r;
     }
 
     /**
@@ -106,6 +142,19 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
     }
 
     /**
+     * This method is a shortcut for {@link UnmodifiableJsonifiableEntity#readInteger(String...)} with
+     * {@link Objects#requireNonNull(Object)}.
+     * @param args The JSON Pointer arguments.
+     * @throws NullPointerException if the value is null.
+     * @since 4.1.0
+     */
+    default @Nonnull Integer readIntegerRequired(String... args) {
+        var r = readInteger(args);
+        Objects.requireNonNull(r);
+        return r;
+    }
+
+    /**
      * @since 2.7
      */
     default @Nullable Float readFloat(String... args) {
@@ -115,12 +164,38 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
     }
 
     /**
+     * This method is a shortcut for {@link UnmodifiableJsonifiableEntity#readFloat(String...)} with
+     * {@link Objects#requireNonNull(Object)}.
+     * @param args The JSON Pointer arguments.
+     * @throws NullPointerException if the value is null.
+     * @since 4.1.0
+     */
+    default @Nonnull Float readFloatRequired(String... args) {
+        var r = readFloat(args);
+        Objects.requireNonNull(r);
+        return r;
+    }
+
+    /**
      * @since 2.7
      */
     default @Nullable Double readDouble(String... args) {
         Number number = readNumber(args);
         if (number == null) return null;
         return number.doubleValue();
+    }
+
+    /**
+     * This method is a shortcut for {@link UnmodifiableJsonifiableEntity#readDouble(String...)} with
+     * {@link Objects#requireNonNull(Object)}.
+     * @param args The JSON Pointer arguments.
+     * @throws NullPointerException if the value is null.
+     * @since 4.1.0
+     */
+    default @Nonnull Double readDoubleRequired(String... args) {
+        var r = readDouble(args);
+        Objects.requireNonNull(r);
+        return r;
     }
 
     /**
@@ -136,6 +211,19 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
     }
 
     /**
+     * This method is a shortcut for {@link UnmodifiableJsonifiableEntity#readBoolean(String...)} with
+     * {@link Objects#requireNonNull(Object)}.
+     * @param args The JSON Pointer arguments.
+     * @throws NullPointerException if the value is null.
+     * @since 4.1.0
+     */
+    default @Nonnull Boolean readBooleanRequired(String... args) {
+        var r = readBoolean(args);
+        Objects.requireNonNull(r);
+        return r;
+    }
+
+    /**
      * @since 2.7
      */
     default @Nullable JsonObject readJsonObject(String... args) {
@@ -148,6 +236,19 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
     }
 
     /**
+     * This method is a shortcut for {@link UnmodifiableJsonifiableEntity#readJsonObject(String...)} with
+     * {@link Objects#requireNonNull(Object)}.
+     * @param args The JSON Pointer arguments.
+     * @throws NullPointerException if the value is null.
+     * @since 4.1.0
+     */
+    default @Nonnull JsonObject readJsonObjectRequired(String... args) {
+        var r = readJsonObject(args);
+        Objects.requireNonNull(r);
+        return r;
+    }
+
+    /**
      * @since 2.7
      */
     default @Nullable JsonArray readJsonArray(String... args) {
@@ -157,6 +258,19 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
             }
             return JsonArray.class;
         });
+    }
+
+    /**
+     * This method is a shortcut for {@link UnmodifiableJsonifiableEntity#readJsonArray(String...)} with
+     * {@link Objects#requireNonNull(Object)}.
+     * @param args The JSON Pointer arguments.
+     * @throws NullPointerException if the value is null.
+     * @since 4.1.0
+     */
+    default @Nonnull JsonArray readJsonArrayRequired(String... args) {
+        var r = readJsonArray(args);
+        Objects.requireNonNull(r);
+        return r;
     }
 
     /**
@@ -184,6 +298,19 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
     }
 
     /**
+     * This method is a shortcut for {@link UnmodifiableJsonifiableEntity#readJsonObjectArray(String...)} with
+     * {@link Objects#requireNonNull(Object)}.
+     * @param args The JSON Pointer arguments.
+     * @throws NullPointerException if the value is null.
+     * @since 4.1.0
+     */
+    default @Nonnull List<JsonObject> readJsonObjectArrayRequired(String... args) {
+        var r = readJsonObjectArray(args);
+        Objects.requireNonNull(r);
+        return r;
+    }
+
+    /**
      * @since 2.8
      */
     default @Nullable List<String> readStringArray(String... args) {
@@ -203,6 +330,19 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
             }
         });
         return list;
+    }
+
+    /**
+     * This method is a shortcut for {@link UnmodifiableJsonifiableEntity#readStringArray(String...)} with
+     * {@link Objects#requireNonNull(Object)}.
+     * @param args The JSON Pointer arguments.
+     * @throws NullPointerException if the value is null.
+     * @since 4.1.0
+     */
+    default @Nonnull List<String> readStringArrayRequired(String... args) {
+        var r = readStringArray(args);
+        Objects.requireNonNull(r);
+        return r;
     }
 
     /**
@@ -232,6 +372,19 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
     }
 
     /**
+     * This method is a shortcut for {@link UnmodifiableJsonifiableEntity#readIntegerArray(String...)} with
+     * {@link Objects#requireNonNull(Object)}.
+     * @param args The JSON Pointer arguments.
+     * @throws NullPointerException if the value is null.
+     * @since 4.1.0
+     */
+    default @Nonnull List<Integer> readIntegerArrayRequired(String... args) {
+        var r = readIntegerArray(args);
+        Objects.requireNonNull(r);
+        return r;
+    }
+
+    /**
      * @since 2.8
      */
     default @Nullable List<Long> readLongArray(String... args) {
@@ -255,6 +408,19 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
             }
         });
         return list;
+    }
+
+    /**
+     * This method is a shortcut for {@link UnmodifiableJsonifiableEntity#readLongArray(String...)} with
+     * {@link Objects#requireNonNull(Object)}.
+     * @param args The JSON Pointer arguments.
+     * @throws NullPointerException if the value is null.
+     * @since 4.1.0
+     */
+    default @Nonnull List<Long> readLongArrayRequired(String... args) {
+        var r = readLongArray(args);
+        Objects.requireNonNull(r);
+        return r;
     }
 
     /**
@@ -284,6 +450,19 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
     }
 
     /**
+     * This method is a shortcut for {@link UnmodifiableJsonifiableEntity#readFloatArray(String...)} with
+     * {@link Objects#requireNonNull(Object)}.
+     * @param args The JSON Pointer arguments.
+     * @throws NullPointerException if the value is null.
+     * @since 4.1.0
+     */
+    default @Nonnull List<Float> readFloatArrayRequired(String... args) {
+        var r = readFloatArray(args);
+        Objects.requireNonNull(r);
+        return r;
+    }
+
+    /**
      * @since 2.8
      */
     default @Nullable List<Double> readDoubleArray(String... args) {
@@ -310,6 +489,19 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
     }
 
     /**
+     * This method is a shortcut for {@link UnmodifiableJsonifiableEntity#readDoubleArray(String...)} with
+     * {@link Objects#requireNonNull(Object)}.
+     * @param args The JSON Pointer arguments.
+     * @throws NullPointerException if the value is null.
+     * @since 4.1.0
+     */
+    default @Nonnull List<Double> readDoubleArrayRequired(String... args) {
+        var r = readDoubleArray(args);
+        Objects.requireNonNull(r);
+        return r;
+    }
+
+    /**
      * @since 2.7
      */
     default @Nullable Object readValue(String... args) {
@@ -319,6 +511,19 @@ public interface UnmodifiableJsonifiableEntity extends Iterable<Map.Entry<String
             }
             return Object.class;
         });
+    }
+
+    /**
+     * This method is a shortcut for {@link UnmodifiableJsonifiableEntity#readValue(String...)} with
+     * {@link Objects#requireNonNull(Object)}.
+     * @param args The JSON Pointer arguments.
+     * @throws NullPointerException if the value is null.
+     * @since 4.1.0
+     */
+    default @Nonnull Object readValueRequired(String... args) {
+        var r = readValue(args);
+        Objects.requireNonNull(r);
+        return r;
     }
 
     /**

@@ -1,6 +1,7 @@
 package io.github.sinri.keel.web.http.receptionist.responder;
 
 import io.github.sinri.keel.core.ValueBox;
+import io.github.sinri.keel.core.json.JsonifiedThrowable;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.github.sinri.keel.web.http.receptionist.ReceptionistIssueRecord;
 import io.vertx.core.json.JsonObject;
@@ -8,8 +9,6 @@ import io.vertx.ext.web.RoutingContext;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 4.0.4
@@ -34,7 +33,7 @@ public class KeelWebResponderCommonApiImpl extends AbstractKeelWebResponder {
         } else {
             resp = buildResponseBody(Code.FAILED, webApiError.getMessage());
         }
-        resp.put("throwable", Keel.stringHelper().renderThrowableChain(webApiError));
+        resp.put("throwable", JsonifiedThrowable.wrap(webApiError).toJsonObject());
         recordResponseVerbosely(resp);
         if (webApiError.getStatusCode() != 200) {
             getRoutingContext().response().setStatusCode(webApiError.getStatusCode());

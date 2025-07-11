@@ -17,6 +17,8 @@ import java.io.IOException;
  * @since 4.1.0
  */
 public class JsonifiableSerializer extends JsonSerializer<UnmodifiableJsonifiableEntity> {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     public static void register() {
         // 注册序列化器
         DatabindCodec.mapper()
@@ -24,59 +26,9 @@ public class JsonifiableSerializer extends JsonSerializer<UnmodifiableJsonifiabl
                              .addSerializer(UnmodifiableJsonifiableEntity.class, new JsonifiableSerializer()));
     }
 
-    //    public static void main(String[] args) {
-    //        register();
-    //        var t1=new T1(new JsonObject()
-    //                .put("t1",1)
-    //                .put("t2",new JsonObject()
-    //                        .put("k","v")
-    //                )
-    //        );
-    //        System.out.println(t1);
-    //        System.out.println(t1.getT2());
-    //        var j=new JsonObject().put("data",t1.getT2());
-    //        System.out.println(j);
-    //    }
-
     @Override
     public void serialize(UnmodifiableJsonifiableEntity value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-        JsonNode jsonNode = new ObjectMapper().readTree(value.toString());
+        JsonNode jsonNode = objectMapper.readTree(value.toString());
         gen.writeTree(jsonNode);
-
-        //        gen.writeStartObject();
-        //        gen.writeNumberField("time", logItem.getTime());
-        //
-        //        if (logItem.getNanoPartOfTime() != null) {
-        //            gen.writeNumberField("nanoPartOfTime", logItem.getNanoPartOfTime());
-        //        }
-        //
-        //        gen.writeArrayFieldStart("contents");
-        //        for (LogContent content : logItem.getContents()) {
-        //            gen.writeObject(content);
-        //        }
-        //        gen.writeEndArray();
-        //
-        //        gen.writeEndObject();
     }
-
-
-    //    private static class T1 extends UnmodifiableJsonifiableEntityImpl {
-    //
-    //        public T1(@Nonnull JsonObject jsonObject) {
-    //            super(jsonObject);
-    //        }
-    //
-    //        public T2 getT2(){
-    //            return new T2(readJsonObject("t2"));
-    //        }
-    //
-    //        public static class T2 extends UnmodifiableJsonifiableEntityImpl {
-    //
-    //            public T2(@Nonnull JsonObject jsonObject) {
-    //                super(jsonObject);
-    //            }
-    //
-    //
-    //        }
-    //    }
 }

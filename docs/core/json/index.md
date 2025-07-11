@@ -68,6 +68,14 @@
 
 **功能:** 提供自定义的JSON序列化逻辑，确保序列化结果的一致性和性能优化。
 
+#### JsonifiedThrowable
+用于将Java异常（Throwable）转换为JSON格式的工具类。
+
+**继承关系:**
+- `extends JsonifiableEntityImpl<JsonifiedThrowable>` - 继承JSON实体抽象实现类
+
+**功能:** 提供异常信息完整捕获、堆栈跟踪处理、异常链序列化等功能。
+
 ## 类层次结构图
 
 ```
@@ -78,7 +86,8 @@ UnmodifiableJsonifiableEntity (interface)
 │   ├── extends ClusterSerializable
 │   ├── extends SelfInterface<E>
 │   └── ← JsonifiableEntityImpl<E> (abstract class)
-│       └── ← SimpleJsonifiableEntity (concrete class)
+│       ├── ← SimpleJsonifiableEntity (concrete class) ⚠️ 已弃用
+│       └── ← JsonifiedThrowable (concrete class)
 └── ← UnmodifiableJsonifiableEntityImpl (concrete class)
 ```
 
@@ -86,15 +95,18 @@ UnmodifiableJsonifiableEntity (interface)
 
 - **JSON转换**: 实体与JSON对象之间的双向转换
 - **数据读取**: 支持读取各种数据类型（String、Number、Boolean、JsonObject、JsonArray等）
+- **必需值读取**: 提供`*Required`方法确保返回值不为null
 - **缓冲区序列化**: 支持与Buffer的序列化和反序列化
 - **集群支持**: 实现了ClusterSerializable接口，支持EventBus消息传递
 - **迭代支持**: 实现了Iterable接口，支持foreach操作
 - **不可变性**: 提供只读包装器确保数据安全
 - **Jackson序列化**: 通过JsonifiableSerializer提供自定义序列化支持
+- **异常JSON化**: 通过JsonifiedThrowable提供异常信息序列化
 
 ## 相关文档
 
 - [JsonifiableEntity](./JsonifiableEntity.md) - 主要的JSON实体接口文档
 - [JsonifiableSerializer](./JsonifiableSerializer.md) - Jackson序列化器文档
 - [UnmodifiableJsonifiableEntity](./UnmodifiableJsonifiableEntity.md) - 只读JSON实体接口文档
+- [JsonifiedThrowable](./JsonifiedThrowable.md) - 异常JSON化工具文档
 

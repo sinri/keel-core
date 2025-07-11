@@ -26,6 +26,10 @@
 - 类型转换异常时返回 `null` 而非抛出异常
 - 提供优雅的错误处理机制
 
+### 5. 必需值读取
+- 提供 `*Required` 方法，确保返回值不为 `null`
+- 当值为 `null` 时抛出 `NullPointerException`
+
 ## 核心方法
 
 ### 基础方法
@@ -42,6 +46,12 @@ static UnmodifiableJsonifiableEntity wrap(@Nonnull JsonObject jsonObject)
 ```
 克隆当前实体为新的 `JsonObject`。
 
+#### `toJsonExpression()`
+```java
+default String toJsonExpression()
+```
+返回 JSON 对象的字符串表达式。
+
 #### `read(Function<JsonPointer, Class<T>> func)`
 ```java
 @Nullable <T> T read(@Nonnull Function<JsonPointer, Class<T>> func)
@@ -57,6 +67,13 @@ static UnmodifiableJsonifiableEntity wrap(@Nonnull JsonObject jsonObject)
 @Nullable Boolean readBoolean(String... args)
 ```
 
+#### 必需值读取（4.1.0新增）
+```java
+@Nonnull String readStringRequired(String... args)
+@Nonnull Number readNumberRequired(String... args)
+@Nonnull Boolean readBooleanRequired(String... args)
+```
+
 #### 数值类型读取
 ```java
 @Nullable Long readLong(String... args)
@@ -65,10 +82,24 @@ static UnmodifiableJsonifiableEntity wrap(@Nonnull JsonObject jsonObject)
 @Nullable Double readDouble(String... args)
 ```
 
+#### 数值类型必需值读取（4.1.0新增）
+```java
+@Nonnull Long readLongRequired(String... args)
+@Nonnull Integer readIntegerRequired(String... args)
+@Nonnull Float readFloatRequired(String... args)
+@Nonnull Double readDoubleRequired(String... args)
+```
+
 #### 复合类型读取
 ```java
 @Nullable JsonObject readJsonObject(String... args)
 @Nullable JsonArray readJsonArray(String... args)
+```
+
+#### 复合类型必需值读取（4.1.0新增）
+```java
+@Nonnull JsonObject readJsonObjectRequired(String... args)
+@Nonnull JsonArray readJsonArrayRequired(String... args)
 ```
 
 #### 数组类型读取
@@ -81,9 +112,20 @@ static UnmodifiableJsonifiableEntity wrap(@Nonnull JsonObject jsonObject)
 @Nullable List<Double> readDoubleArray(String... args)
 ```
 
+#### 数组类型必需值读取（4.1.0新增）
+```java
+@Nonnull List<JsonObject> readJsonObjectArrayRequired(String... args)
+@Nonnull List<String> readStringArrayRequired(String... args)
+@Nonnull List<Integer> readIntegerArrayRequired(String... args)
+@Nonnull List<Long> readLongArrayRequired(String... args)
+@Nonnull List<Float> readFloatArrayRequired(String... args)
+@Nonnull List<Double> readDoubleArrayRequired(String... args)
+```
+
 #### 通用读取
 ```java
 @Nullable Object readValue(String... args)
+@Nonnull Object readValueRequired(String... args)
 ```
 
 ### 工具方法
@@ -183,7 +225,21 @@ String nonExistent = entity.readString("nonExistentKey");  // null
 Integer invalidType = entity.readInteger("stringField");   // null
 ```
 
-### 6. 迭代访问
+### 6. 必需值读取（4.1.0新增）
+```java
+UnmodifiableJsonifiableEntity entity = UnmodifiableJsonifiableEntity.wrap(jsonObject);
+
+// 必需值读取，确保返回值不为 null
+try {
+    String name = entity.readStringRequired("name");  // 如果为 null 会抛出 NullPointerException
+    Integer age = entity.readIntegerRequired("age");  // 如果为 null 会抛出 NullPointerException
+} catch (NullPointerException e) {
+    // 处理必需值缺失的情况
+    System.err.println("Required field is missing");
+}
+```
+
+### 7. 迭代访问
 ```java
 UnmodifiableJsonifiableEntity entity = UnmodifiableJsonifiableEntity.wrap(jsonObject);
 
@@ -198,7 +254,7 @@ if (!entity.isEmpty()) {
 }
 ```
 
-### 7. 数据转换
+### 8. 数据转换
 ```java
 UnmodifiableJsonifiableEntity entity = UnmodifiableJsonifiableEntity.wrap(jsonObject);
 
@@ -210,6 +266,38 @@ JsonObject cloned = entity.cloneAsJsonObject();
 
 // 转换为字符串
 String jsonString = entity.toString();
+String jsonExpression = entity.toJsonExpression();
+```
+
+## 实现类
+
+### UnmodifiableJsonifiableEntityImpl
+
+`UnmodifiableJsonifiableEntityImpl` 是 `UnmodifiableJsonifiableEntity` 接口的标准实现类：
+
+```java
+public class UnmodifiableJsonifiableEntityImpl implements UnmodifiableJsonifiableEntity {
+    private final @Nonnull JsonObject jsonObject;
+    
+    public UnmodifiableJsonifiableEntityImpl(@Nonnull JsonObject jsonObject) {
+        this.jsonObject = jsonObject;
+    }
+    
+    // 实现所有接口方法...
+}
+```
+
+#### 主要特性
+- 提供不可修改的 JSON 对象包装
+- 支持深度复制
+- 线程安全的只读访问
+
+#### 复制功能
+```java
+@Override
+public UnmodifiableJsonifiableEntityImpl copy() {
+    return new UnmodifiableJsonifiableEntityImpl(cloneAsJsonObject());
+}
 ```
 
 ## 设计优势
@@ -221,6 +309,7 @@ String jsonString = entity.toString();
 ### 2. 空值安全
 - 优雅处理不存在的键
 - 类型不匹配时返回 `null`
+- 提供必需值读取方法确保非空
 
 ### 3. 链式访问
 - 支持深层嵌套属性访问
@@ -234,6 +323,10 @@ String jsonString = entity.toString();
 - 不可修改特性保证线程安全
 - 实现 `Shareable` 接口支持共享
 
+### 6. 扩展性
+- 支持 Jackson 序列化
+- 提供丰富的工具方法
+
 ## 版本历史
 
 - **2.7**: 引入基础读取方法
@@ -242,18 +335,26 @@ String jsonString = entity.toString();
 - **3.1.10**: 抽象化核心方法
 - **3.2.17**: 添加 `cloneAsJsonObject()` 方法
 - **4.0.0**: 添加 `toBuffer()` 默认实现
+- **4.1.0**: 
+  - 添加 `toJsonExpression()` 方法
+  - 添加所有 `*Required` 方法
+  - 添加 `readValueRequired()` 方法
+  - 所有 `toString()` 方法变为 `final`
 
 ## 注意事项
 
 1. **空值处理**: 所有读取方法在找不到键或类型不匹配时返回 `null`
-2. **类型转换**: 数值类型之间会自动转换，但非数值类型转换会返回 `null`
-3. **数组处理**: 数组中的 `null` 元素会被保留或转换为默认值（如数值类型的 0）
-4. **性能考虑**: 频繁的深层访问可能影响性能，建议缓存常用值
-5. **线程安全**: 虽然接口本身是线程安全的，但底层 `JsonObject` 的线程安全性取决于具体实现
-6. **Jackson序列化**: 如需要Jackson序列化支持，请参考 [JsonifiableSerializer](JsonifiableSerializer.md) 文档
+2. **必需值读取**: `*Required` 方法在值为 `null` 时会抛出 `NullPointerException`
+3. **类型转换**: 数值类型之间会自动转换，但非数值类型转换会返回 `null`
+4. **数组处理**: 数组中的 `null` 元素会被保留或转换为默认值（如数值类型的 0）
+5. **性能考虑**: 频繁的深层访问可能影响性能，建议缓存常用值
+6. **线程安全**: 虽然接口本身是线程安全的，但底层 `JsonObject` 的线程安全性取决于具体实现
+7. **Jackson序列化**: 如需要Jackson序列化支持，请参考 [JsonifiableSerializer](JsonifiableSerializer.md) 文档
+8. **实现类**: 推荐使用 `UnmodifiableJsonifiableEntityImpl` 作为标准实现
 
 ## 相关文档
 
 - [JsonifiableEntity](JsonifiableEntity.md) - 可修改的JSON实体接口
 - [JsonifiableSerializer](JsonifiableSerializer.md) - Jackson序列化器支持
+- [JsonifiedThrowable](JsonifiedThrowable.md) - 异常JSON化工具
 

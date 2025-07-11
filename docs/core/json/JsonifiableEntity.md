@@ -109,6 +109,9 @@ default JsonArray ensureJsonArray(String key);
 
 // 写入键值对
 default E write(String key, Object value);
+
+// 返回 JSON 对象表达式
+default String toJsonExpression();
 ```
 
 ## SimpleJsonifiableEntity 实现
@@ -207,6 +210,9 @@ tags.add("developer").add("java");
 
 // 读取数组数据
 List<String> tagList = entity.readStringArray("tags");
+
+// 获取 JSON 表达式
+String jsonExpression = entity.toJsonExpression();
 ```
 
 ### 5. 自定义实体类
@@ -335,4 +341,6 @@ AddressPojo addressPojo = person.readEntity(AddressPojo.class, "address");
 ## 相关文档
 
 - [JsonifiableSerializer](JsonifiableSerializer.md) - Jackson序列化器支持
+- [UnmodifiableJsonifiableEntity](UnmodifiableJsonifiableEntity.md) - 不可修改的JSON实体接口
+- [JsonifiedThrowable](JsonifiedThrowable.md) - 异常JSON化工具
 

@@ -1,5 +1,6 @@
 package io.github.sinri.keel.facade.tesuto.unit;
 
+import io.github.sinri.keel.core.json.JsonifiableSerializer;
 import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
@@ -31,6 +32,9 @@ public class KeelUnitTest implements KeelUnitTestCore {
         if (vertxOptions != null) {
             Keel.initializeVertxStandalone(vertxOptions);
         }
+
+        JsonifiableSerializer.register();
+
         Keel.getConfiguration().loadPropertiesFile("config.properties");
         this.unitTestLogger = KeelIssueRecordCenter.outputCenter()
                                                    .generateIssueRecorder("KeelUnitTest", KeelEventLog::new);

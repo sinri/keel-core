@@ -239,7 +239,9 @@ public class KeelJsonHelper {
 
     /**
      * @since 3.0.0
+     * @deprecated use {@link io.github.sinri.keel.core.json.JsonifiedThrowable} instead.
      */
+    @Deprecated(since = "4.1.0")
     @Nullable
     public JsonObject renderThrowableChain(@Nullable Throwable throwable) {
         return renderThrowableChain(throwable, Set.of());
@@ -247,7 +249,9 @@ public class KeelJsonHelper {
 
     /**
      * @since 2.9
+     * @deprecated use {@link io.github.sinri.keel.core.json.JsonifiedThrowable} instead.
      */
+    @Deprecated(since = "4.1.0")
     @Nullable
     public JsonObject renderThrowableChain(@Nullable Throwable throwable, @Nonnull Set<String> ignorableStackPackageSet) {
         if (throwable == null) return null;
@@ -324,7 +328,9 @@ public class KeelJsonHelper {
     /**
      * @since 2.9 original name: buildStackChainText
      * @since 3.0.0 become private and renamed to filterStackTraceToJsonArray
+     * @deprecated its usage are both deprecated.
      */
+    @Deprecated(since = "4.1.0")
     @Nonnull
     private JsonArray filterStackTraceToJsonArray(@Nullable StackTraceElement[] stackTrace, @Nonnull Set<String> ignorableStackPackageSet) {
         JsonArray array = new JsonArray();

@@ -1,0 +1,189 @@
+package io.github.sinri.keel.core.json;
+
+import io.github.sinri.keel.core.helper.KeelRuntimeHelper;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
+
+/**
+ * A JSON CODEC REGISTER action is required, i.e.
+ * {@link JsonifiableSerializer#register()}, to ensure this class to work
+ * correctly.
+ *
+ * @since 4.1.0
+ */
+public class JsonifiedThrowable extends JsonifiableEntityImpl<JsonifiedThrowable> {
+
+    private JsonifiedThrowable() {
+        super();
+    }
+
+    public static JsonifiedThrowable wrap(@Nonnull Throwable throwable) {
+        return wrap(throwable, KeelRuntimeHelper.ignorableCallStackPackage, true);
+    }
+
+    @Nonnull
+    public static JsonifiedThrowable wrap(
+            @Nonnull Throwable throwable,
+            @Nonnull Set<String> ignorableStackPackageSet,
+            boolean omitIgnoredStack
+    ) {
+        JsonifiedThrowable x = new JsonifiedThrowable()
+                .write("class", throwable.getClass().getName())
+                .write("message", throwable.getMessage())
+                .write("stack",
+                        new JsonArray(filterStackTraceAndReduce(throwable.getStackTrace(), ignorableStackPackageSet,
+                                omitIgnoredStack)))
+                .write("cause", null);
+
+        JsonifiedThrowable upper = x;
+        Throwable cause = throwable.getCause();
+        while (cause != null) {
+            JsonifiedThrowable current = new JsonifiedThrowable()
+                    .write("class", cause.getClass().getName())
+                    .write("message", cause.getMessage())
+                    .write("stack",
+                            new JsonArray(filterStackTraceAndReduce(cause.getStackTrace(), ignorableStackPackageSet,
+                                    omitIgnoredStack)))
+                    .write("cause", null);
+            upper.write("cause", current);
+            upper = current;
+
+            cause = cause.getCause();
+        }
+        return x;
+    }
+
+    /**
+     * @since 2.9 original name: buildStackChainText
+     * @since 3.0.0 become private and renamed to filterStackTraceToJsonArray
+     */
+    @Nonnull
+    private static List<JsonifiedCallStackItem> filterStackTraceAndReduce(
+            @Nullable StackTraceElement[] stackTrace,
+            @Nonnull Set<String> ignorableStackPackageSet,
+            boolean omitIgnoredStack
+    ) {
+        List<JsonifiedCallStackItem> items = new ArrayList<>();
+
+        Keel.jsonHelper().filterStackTrace(
+                stackTrace,
+                ignorableStackPackageSet,
+                (ignoringClassPackage, ignoringCount) -> {
+                    if (!omitIgnoredStack) {
+                        items.add(new JsonifiedCallStackItem(ignoringClassPackage, ignoringCount));
+                    }
+                },
+                stackTranceItem -> items.add(new JsonifiedCallStackItem(stackTranceItem)));
+
+        return items;
+    }
+
+    public static void main(String[] args) {
+        JsonifiableSerializer.register();
+        try {
+            try {
+                throw new NullPointerException("1");
+            } catch (Exception e) {
+                throw new Exception("2", e);
+            }
+        } catch (Throwable throwable) {
+            var jt = JsonifiedThrowable.wrap(throwable);
+            System.out.println(jt.toJsonObject().encodePrettily());
+        }
+    }
+
+    public String getThrowableClass() {
+        return readString("class");
+    }
+
+    public String getThrowableMessage() {
+        return readString("message");
+    }
+
+    @Nonnull
+    public List<JsonifiedCallStackItem> getThrowableStack() {
+        List<JsonifiedCallStackItem> items = new ArrayList<>();
+        var a = readJsonObjectArray("stack");
+        if (a != null) {
+            a.forEach(j -> {
+                var x = new JsonifiedCallStackItem(j);
+                items.add(x);
+            });
+        }
+        return items;
+    }
+
+    public JsonifiedThrowable getThrowableCause() {
+        return readJsonifiableEntity(JsonifiedThrowable.class, "cause");
+    }
+
+    @Nonnull
+    @Override
+    public JsonifiedThrowable getImplementation() {
+        return this;
+    }
+
+    public static class JsonifiedCallStackItem extends JsonifiableEntityImpl<JsonifiedCallStackItem> {
+        private JsonifiedCallStackItem(JsonObject jsonObject) {
+            super(jsonObject);
+        }
+
+        private JsonifiedCallStackItem(String ignoringClassPackage, Integer ignoringCount) {
+            super(new JsonObject()
+                    .put("type", "ignored")
+                    .put("package", ignoringClassPackage)
+                    .put("count", ignoringCount));
+        }
+
+        private JsonifiedCallStackItem(StackTraceElement stackTranceItem) {
+            super(new JsonObject()
+                    .put("type", "call")
+                    .put("class", stackTranceItem.getClassName())
+                    .put("method", stackTranceItem.getMethodName())
+                    .put("file", stackTranceItem.getFileName())
+                    .put("line", stackTranceItem.getLineNumber()));
+        }
+
+        public String getType() {
+            return readString("type");
+        }
+
+        public String getPackage() {
+            return readString("package");
+        }
+
+        public String getIgnoredStackCount() {
+            return readString("count");
+        }
+
+        public String getCallStackClass() {
+            return readString("class");
+        }
+
+        public String getCallStackMethod() {
+            return readString("method");
+        }
+
+        public String getCallStackFile() {
+            return readString("file");
+        }
+
+        public String getCallStackLine() {
+            return readString("line");
+        }
+
+        @Nonnull
+        @Override
+        public JsonifiedCallStackItem getImplementation() {
+            return this;
+        }
+    }
+}

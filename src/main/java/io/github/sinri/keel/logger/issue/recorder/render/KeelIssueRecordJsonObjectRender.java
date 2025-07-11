@@ -1,13 +1,12 @@
 package io.github.sinri.keel.logger.issue.recorder.render;
 
+import io.github.sinri.keel.core.json.JsonifiableSerializer;
+import io.github.sinri.keel.core.json.JsonifiedThrowable;
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
-import java.util.Objects;
-
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.1.10
@@ -44,9 +43,14 @@ public class KeelIssueRecordJsonObjectRender implements KeelIssueRecordRender<Js
         return x;
     }
 
+    /**
+     * A JSON CODEC REGISTER action is required, i.e.
+     * {@link JsonifiableSerializer#register()}, to ensure this class to work correctly.
+     */
     @Nonnull
     @Override
     public JsonObject renderThrowable(@Nonnull Throwable throwable) {
-        return Objects.requireNonNull(Keel.jsonHelper().renderThrowableChain(throwable, ignorableStackPackageSet()));
+        return JsonifiedThrowable.wrap(throwable, ignorableStackPackageSet(), true).toJsonObject();
+        //return Objects.requireNonNull(Keel.jsonHelper().renderThrowableChain(throwable, ignorableStackPackageSet()));
     }
 }

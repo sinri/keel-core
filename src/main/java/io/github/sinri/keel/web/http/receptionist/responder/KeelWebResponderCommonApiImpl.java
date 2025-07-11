@@ -36,6 +36,9 @@ public class KeelWebResponderCommonApiImpl extends AbstractKeelWebResponder {
         }
         resp.put("throwable", Keel.stringHelper().renderThrowableChain(webApiError));
         recordResponseVerbosely(resp);
+        if (webApiError.getStatusCode() != 200) {
+            getRoutingContext().response().setStatusCode(webApiError.getStatusCode());
+        }
         getRoutingContext().json(resp);
     }
 

@@ -52,19 +52,14 @@ public class KeelSmtpKit {
 
     /**
      * As of 3.0.6, only five property keys supported.
+     * As of 4.1.0, use {@link KeelSmtpConfigElement}.
      */
     private static MailConfig buildMailConfig(@Nonnull String smtpName) {
         var smtpConfiguration = Keel.getConfiguration().extract("email", "smtp", smtpName);
         Objects.requireNonNull(smtpConfiguration);
 
-        var mailConfig = new MailConfig();
-        mailConfig.setHostname(smtpConfiguration.readString("hostname", null));
-        mailConfig.setPort(smtpConfiguration.readInteger("port", 25));
-        mailConfig.setUsername(smtpConfiguration.readString("username", null));
-        mailConfig.setPassword(smtpConfiguration.readString("password", null));
-        mailConfig.setSsl(smtpConfiguration.readBoolean("ssl", false));
-
-        return mailConfig;
+        KeelSmtpConfigElement keelSmtpConfigElement = new KeelSmtpConfigElement(smtpConfiguration);
+        return keelSmtpConfigElement.toMailConfig();
     }
 
     public MailClient getMailClient() {

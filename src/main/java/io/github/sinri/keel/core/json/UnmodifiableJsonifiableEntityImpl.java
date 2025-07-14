@@ -29,7 +29,16 @@ public class UnmodifiableJsonifiableEntityImpl implements UnmodifiableJsonifiabl
     private final @Nonnull JsonObject jsonObject;
 
     public UnmodifiableJsonifiableEntityImpl(@Nonnull JsonObject jsonObject) {
-        this.jsonObject = jsonObject;
+        this.jsonObject = purify(jsonObject);
+    }
+
+    /**
+     * @param raw the raw JsonObject.
+     * @return the JsonObject that be purified, such as remove some fields.
+     * @since 4.1.0
+     */
+    protected JsonObject purify(JsonObject raw) {
+        return raw;
     }
 
     @Override

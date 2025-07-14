@@ -12,6 +12,7 @@ import java.util.Objects;
  * @since 3.2.13 automatically support JSON and FORM.
  */
 abstract public class AbstractRequestBody extends UnmodifiableJsonifiableEntityImpl {
+
     public AbstractRequestBody(@Nonnull RoutingContext routingContext) {
         super(parse(routingContext));
     }

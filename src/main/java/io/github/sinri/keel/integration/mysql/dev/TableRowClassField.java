@@ -10,10 +10,12 @@ import java.util.regex.Pattern;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
+ *
+ * As of 3.0.18 Finished Technical Preview.
+ * As of 3.1.0 Add support for AES encryption.
+ * As of 3.1.7 Add deprecated field annotation.
+ * As of 4.1.0 Add tableExpression.
  * @since 3.0.15
- * @since 3.0.18 Finished Technical Preview.
- * @since 3.1.0 Add support for AES encryption.
- * @since 3.1.7 Add deprecated field annotation.
  */
 class TableRowClassField {
     private static final Pattern patternForLooseEnum;
@@ -35,6 +37,8 @@ class TableRowClassField {
      * @since 3.1.10
      */
     private final boolean nullable;
+    private @Nonnull
+    final String tableExpression;
     private String returnType;
     private String readMethod;
     private @Nullable TableRowClassFieldLooseEnum looseEnum;
@@ -47,6 +51,7 @@ class TableRowClassField {
     private String actualComment;
 
     public TableRowClassField(
+            @Nonnull String tableExpression,
             @Nonnull String field,
             @Nonnull String type,
             boolean nullable,
@@ -54,6 +59,7 @@ class TableRowClassField {
             @Nullable String strictEnumPackage,
             @Nullable String aesEnvelopePackage
     ) {
+        this.tableExpression = tableExpression;
         this.field = field;
         this.type = type;
         this.nullable = nullable;
@@ -148,6 +154,7 @@ class TableRowClassField {
         if (looseEnum != null) {
             code.append(looseEnum.build()).append("\n")
                 .append("\t/*\n")
+                .append("\t * Field {@code ").append(tableExpression).append(".").append(field).append("}.\n")
                 .append("\t * ").append(actualComment).append("\n\t * \n")
                 .append("\t * Loose Enum of Field `").append(field).append("` of type `").append(type).append("`.\n")
                 .append("\t */\n");
@@ -172,6 +179,7 @@ class TableRowClassField {
                 .append("\t}\n");
         } else if (strictEnum != null) {
             code.append("\t/*\n")
+                .append("\t * Field {@code ").append(tableExpression).append(".").append(field).append("}.\n")
                 .append("\t * ").append(actualComment).append("\n\t * \n")
                 .append("\t * Strict Enum of Field `").append(field).append("` of type `").append(type).append("`.\n")
                 .append("\t */\n");
@@ -196,6 +204,7 @@ class TableRowClassField {
                 .append("\t}\n");
         } else {
             code.append("\t/*\n");
+            code.append("\t * Field {@code ").append(tableExpression).append(".").append(field).append("}.\n");
             if (comment != null) {
                 code.append("\t * ").append(actualComment).append("\n\t * \n");
             }
@@ -219,7 +228,8 @@ class TableRowClassField {
 
         if (aesEncryption != null) {
             code.append("\t/*\n")
-                .append("\t * AES DECRYPTED VALUE.\n");
+                .append("\t * AES DECRYPTED VALUE of {@code ").append(tableExpression).append(".").append(field)
+                .append("}.\n");
             if (comment != null) {
                 code.append("\t * ").append(actualComment).append("\n\t * \n");
             }

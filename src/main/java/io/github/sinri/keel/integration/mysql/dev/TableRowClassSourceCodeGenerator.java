@@ -218,6 +218,7 @@ public class TableRowClassSourceCodeGenerator {
                                     boolean isNullable = "YES".equalsIgnoreCase(nullability);
 
                                     fields.add(new TableRowClassField(
+                                            ((schema != null && !schema.isBlank()) ? (schema + ".") : "") + table,
                                             field, type, isNullable, comment,
                                             strictEnumPackage, envelopePackage
                                     ));

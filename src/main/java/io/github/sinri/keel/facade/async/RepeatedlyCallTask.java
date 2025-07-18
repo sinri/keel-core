@@ -13,7 +13,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * stopped.
  * The task is represented by a {@link Function} that takes an instance of this
  * class and
- * returns a {@link Future <Void>}. The task will continue to be executed with a
+ * returns a {@code Future<Void>}. The task will continue to be executed with a
  * delay of 1 millisecond
  * between each execution, unless the stop method is called or the task itself
  * fails.

@@ -153,7 +153,7 @@ class TableRowClassField {
         StringBuilder code = new StringBuilder();
         if (looseEnum != null) {
             code.append(looseEnum.build()).append("\n")
-                .append("\t/*\n")
+                .append("\t/**\n")
                 .append("\t * Field {@code ").append(tableExpression).append(".").append(field).append("}.\n")
                 .append("\t * ").append(actualComment).append("\n\t * \n")
                 .append("\t * Loose Enum of Field `").append(field).append("` of type `").append(type).append("`.\n")
@@ -178,7 +178,7 @@ class TableRowClassField {
             code.append("\t\treturn ").append(looseEnum.looseEnumName()).append(".valueOf(enumExpression);\n")
                 .append("\t}\n");
         } else if (strictEnum != null) {
-            code.append("\t/*\n")
+            code.append("\t/**\n")
                 .append("\t * Field {@code ").append(tableExpression).append(".").append(field).append("}.\n")
                 .append("\t * ").append(actualComment).append("\n\t * \n")
                 .append("\t * Strict Enum of Field `").append(field).append("` of type `").append(type).append("`.\n")
@@ -203,7 +203,7 @@ class TableRowClassField {
             code.append("\t\treturn ").append(strictEnum.fullEnumRef()).append(".valueOf(enumExpression);\n")
                 .append("\t}\n");
         } else {
-            code.append("\t/*\n");
+            code.append("\t/**\n");
             code.append("\t * Field {@code ").append(tableExpression).append(".").append(field).append("}.\n");
             if (comment != null) {
                 code.append("\t * ").append(actualComment).append("\n\t * \n");
@@ -227,7 +227,7 @@ class TableRowClassField {
         }
 
         if (aesEncryption != null) {
-            code.append("\t/*\n")
+            code.append("\t/**\n")
                 .append("\t * AES DECRYPTED VALUE of {@code ").append(tableExpression).append(".").append(field)
                 .append("}.\n");
             if (comment != null) {

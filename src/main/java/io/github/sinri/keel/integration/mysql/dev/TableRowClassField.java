@@ -10,11 +10,11 @@ import java.util.regex.Pattern;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
- *
  * As of 3.0.18 Finished Technical Preview.
  * As of 3.1.0 Add support for AES encryption.
  * As of 3.1.7 Add deprecated field annotation.
  * As of 4.1.0 Add tableExpression.
+ *
  * @since 3.0.15
  */
 class TableRowClassField {
@@ -155,7 +155,8 @@ class TableRowClassField {
             code.append(looseEnum.build()).append("\n")
                 .append("\t/**\n")
                 .append("\t * Field {@code ").append(tableExpression).append(".").append(field).append("}.\n")
-                .append("\t * ").append(actualComment).append("\n\t * \n")
+                .append("\t * ").append(actualComment).append("\n")
+                .append("\t * <p>\n")
                 .append("\t * Loose Enum of Field `").append(field).append("` of type `").append(type).append("`.\n")
                 .append("\t */\n");
             if (fieldDeprecated) {
@@ -180,7 +181,8 @@ class TableRowClassField {
         } else if (strictEnum != null) {
             code.append("\t/**\n")
                 .append("\t * Field {@code ").append(tableExpression).append(".").append(field).append("}.\n")
-                .append("\t * ").append(actualComment).append("\n\t * \n")
+                .append("\t * ").append(actualComment).append("\n")
+                .append("\t * <p>\n")
                 .append("\t * Strict Enum of Field `").append(field).append("` of type `").append(type).append("`.\n")
                 .append("\t */\n");
             if (fieldDeprecated) {
@@ -206,7 +208,8 @@ class TableRowClassField {
             code.append("\t/**\n");
             code.append("\t * Field {@code ").append(tableExpression).append(".").append(field).append("}.\n");
             if (comment != null) {
-                code.append("\t * ").append(actualComment).append("\n\t * \n");
+                code.append("\t * ").append(actualComment).append("\n")
+                    .append("\t * <p>\n");
             }
             code.append("\t * Field `").append(field).append("` of type `").append(type).append("`.\n")
                 .append("\t */\n");
@@ -231,7 +234,8 @@ class TableRowClassField {
                 .append("\t * AES DECRYPTED VALUE of {@code ").append(tableExpression).append(".").append(field)
                 .append("}.\n");
             if (comment != null) {
-                code.append("\t * ").append(actualComment).append("\n\t * \n");
+                code.append("\t * ").append(actualComment).append("\n")
+                    .append("\t * <p>\n");
             }
             code.append("\t */\n")
                 .append("\t@Nullable\n")

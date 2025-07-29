@@ -2,7 +2,6 @@ package io.github.sinri.keel.facade;
 
 import io.github.sinri.keel.core.helper.KeelHelpersInterface;
 import io.github.sinri.keel.facade.async.KeelAsyncMixin;
-import io.github.sinri.keel.facade.cluster.KeelClusterKit;
 import io.github.sinri.keel.facade.configuration.KeelConfigElement;
 import io.github.sinri.keel.logger.KeelLogLevel;
 import io.github.sinri.keel.logger.event.KeelEventLog;
@@ -23,7 +22,7 @@ import java.util.Objects;
  * @since 3.1.0
  * @since 4.0.0 make it final and implement KeelAsyncMixin.
  */
-public final class KeelInstance implements KeelHelpersInterface, KeelClusterKit, KeelAsyncMixin, KeelWebRequestMixin {
+public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin, KeelWebRequestMixin {
     public final static KeelInstance Keel = new KeelInstance();
 
     /**

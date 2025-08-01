@@ -18,7 +18,7 @@ import javax.annotation.Nonnull;
  * @since 2.7
  * @deprecated as of 4.1.0, this class is not recommended to use, define a detailed implement class instead.
  */
-@Deprecated(since = "4.1.0")
+@Deprecated(since = "4.1.0", forRemoval = true)
 public class SimpleJsonifiableEntity extends JsonifiableEntityImpl<SimpleJsonifiableEntity> {
 
     /**

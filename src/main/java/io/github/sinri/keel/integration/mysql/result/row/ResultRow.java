@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.mysql.result.row;
 
-import io.github.sinri.keel.core.json.JsonifiableEntity;
+import io.github.sinri.keel.core.json.JsonifiableDataUnit;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.sqlclient.Row;
@@ -14,11 +14,12 @@ import java.util.Collection;
 import java.util.function.Function;
 
 /**
- * From class `io.vertx.sqlclient.Row`, dump to a JsonObject, and then wrap it with a ResultRow implementation.
+ * Dump an instance of class {@link Row}  to {@link JsonObject},
+ * and then wrap it to a {@link ResultRow} instance.
  *
  * @since 2.7
  */
-public interface ResultRow extends JsonifiableEntity<ResultRow> {
+public interface ResultRow extends JsonifiableDataUnit {
     /**
      * @since 4.0.0
      */
@@ -63,7 +64,7 @@ public interface ResultRow extends JsonifiableEntity<ResultRow> {
         String s = readString(field);
         if (s == null) return null;
         return LocalDateTime.parse(s)
-                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
     @Nullable

@@ -19,9 +19,9 @@ class JsonifiableSerializerTest extends KeelUnitTest {
     @Test
     void serialize() {
         Sth sth = new Sth();
-        sth.write("a", "b");
-        sth.write("b", Map.of("p", "q"));
-        sth.write("c", List.of("a", "b", "c", "d"));
+        sth.ensureEntry("a", "b");
+        sth.ensureEntry("b", Map.of("p", "q"));
+        sth.ensureEntry("c", List.of("a", "b", "c", "d"));
 
         JsonObject j = new JsonObject();
         j.put("sth", sth);

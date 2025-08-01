@@ -34,7 +34,7 @@ public class UnmodifiableJsonifiableEntityImpl implements UnmodifiableJsonifiabl
 
     /**
      * @param raw the raw JsonObject.
-     * @return the JsonObject that be purified, such as remove some fields.
+     * @return the JsonObject that be purified, such as create a copy, remove some fields, and so on.
      * @since 4.1.0
      */
     protected JsonObject purify(JsonObject raw) {

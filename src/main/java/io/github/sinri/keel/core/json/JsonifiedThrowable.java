@@ -35,25 +35,25 @@ public class JsonifiedThrowable extends JsonifiableEntityImpl<JsonifiedThrowable
             @Nonnull Set<String> ignorableStackPackageSet,
             boolean omitIgnoredStack
     ) {
-        JsonifiedThrowable x = new JsonifiedThrowable()
-                .write("class", throwable.getClass().getName())
-                .write("message", throwable.getMessage())
-                .write("stack",
-                        new JsonArray(filterStackTraceAndReduce(throwable.getStackTrace(), ignorableStackPackageSet,
-                                omitIgnoredStack)))
-                .write("cause", null);
+        JsonifiedThrowable x = new JsonifiedThrowable();
+        x.ensureEntry("class", throwable.getClass().getName());
+        x.ensureEntry("message", throwable.getMessage());
+        x.ensureEntry("stack", new JsonArray(filterStackTraceAndReduce(
+                throwable.getStackTrace(),
+                ignorableStackPackageSet,
+                omitIgnoredStack)));
+        x.ensureEntry("cause", null);
 
         JsonifiedThrowable upper = x;
         Throwable cause = throwable.getCause();
         while (cause != null) {
-            JsonifiedThrowable current = new JsonifiedThrowable()
-                    .write("class", cause.getClass().getName())
-                    .write("message", cause.getMessage())
-                    .write("stack",
-                            new JsonArray(filterStackTraceAndReduce(cause.getStackTrace(), ignorableStackPackageSet,
-                                    omitIgnoredStack)))
-                    .write("cause", null);
-            upper.write("cause", current);
+            JsonifiedThrowable current = new JsonifiedThrowable();
+            current.ensureEntry("class", cause.getClass().getName());
+            current.ensureEntry("message", cause.getMessage());
+            current.ensureEntry("stack", new JsonArray(filterStackTraceAndReduce(cause.getStackTrace(), ignorableStackPackageSet,
+                    omitIgnoredStack)));
+            current.ensureEntry("cause", null);
+            upper.ensureEntry("cause", current);
             upper = current;
 
             cause = cause.getCause();

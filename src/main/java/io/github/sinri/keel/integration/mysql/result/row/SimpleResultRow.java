@@ -5,9 +5,13 @@ import io.vertx.core.json.JsonObject;
 import javax.annotation.Nonnull;
 
 /**
- * @since 1.10 Designed for a wrapper of each row in ResultMatrix
- * @since 2.0 renamed from AbstractTableRow
- * @since 2.7 renamed from AbstractRow
+ * Designed for a wrapper of each row in ResultMatrix.
+ * <p>
+ * As of 2.0 renamed from AbstractTableRow.
+ * <p>
+ * As of 2.7 renamed from AbstractRow.
+ *
+ * @since 1.10
  */
 public class SimpleResultRow implements ResultRow {
     private JsonObject row;
@@ -21,15 +25,14 @@ public class SimpleResultRow implements ResultRow {
         return row;
     }
 
-    @Override
+    @Deprecated(since = "4.1.1", forRemoval = true)
     public final @Nonnull ResultRow reloadDataFromJsonObject(@Nonnull JsonObject jsonObject) {
-        this.row = jsonObject;
+        reloadData(jsonObject);
         return this;
     }
 
-    @Nonnull
     @Override
-    public ResultRow getImplementation() {
-        return this;
+    public final void reloadData(@Nonnull JsonObject jsonObject) {
+        this.row = jsonObject;
     }
 }

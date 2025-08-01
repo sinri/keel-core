@@ -2,14 +2,12 @@ package io.github.sinri.keel.core.json;
 
 import io.github.sinri.keel.core.SelfInterface;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.pointer.JsonPointer;
 import io.vertx.core.shareddata.ClusterSerializable;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
@@ -33,51 +31,38 @@ import java.util.function.Function;
  * extended ClusterSerializable for EventBus Messaging;
  * extended Shareable for LocalMap;
  * extended Iterable for FOREACH.
- * </p>
  * <p>
  * As of 4.0.12, extends {@link SelfInterface}.
- * </p>
+ * <p>
+ * As of 4.1.1, if you want to avoid generic type, you can use {@link JsonifiableDataUnit} instead.
  *
  * @param <E> the type of the entity implementing this interface
  * @since 1.14
  */
 public interface JsonifiableEntity<E>
-        extends UnmodifiableJsonifiableEntity, ClusterSerializable, SelfInterface<E> {
-
-    /**
-     * Wrap a JsonObject into a JsonifiableEntity.
-     *
-     * @param jsonObject The JsonObject to wrap.
-     * @return A JsonifiableEntity wraps the JsonObject.
-     * @since 3.2.11
-     * @deprecated As of 4.1.0, {@link SimpleJsonifiableEntity} is deprecated. For read-only scenario, use
-     *         {@link UnmodifiableJsonifiableEntity#wrap(JsonObject)}.
-     */
-    @Deprecated(since = "4.1.0")
-    static SimpleJsonifiableEntity wrap(@Nonnull JsonObject jsonObject) {
-        return new SimpleJsonifiableEntity(jsonObject);
-    }
-
-    /**
-     * Converts the current state of this entity into a {@link JsonObject}.
-     *
-     * @return a non-null {@link JsonObject} representing the current state of the
-     *         entity.
-     * @since 1.14
-     */
-    @Nonnull
-    JsonObject toJsonObject();
+        extends JsonObjectConvertible, JsonObjectReloadable, JsonObjectWritable,
+        UnmodifiableJsonifiableEntity, ClusterSerializable, SelfInterface<E> {
 
     /**
      * @return The JSON Object expression.
      * @since 4.1.0
      */
     default String toJsonExpression() {
-        return toJsonObject().toString();
+        return toJsonObject().encode();
+    }
+
+    /**
+     * @return The JSON Object expression which is formatted with intends.
+     * @since 4.1.1
+     */
+    @Override
+    default String toFormattedJsonExpression() {
+        return toJsonObject().encodePrettily();
     }
 
     /**
      * Reloads the data of this entity from the provided {@link JsonObject}.
+     * <p>As of 4.1.1, use {@link JsonObjectReloadable#reloadData(JsonObject)} is recommended.
      *
      * @param jsonObject a non-null {@link JsonObject} containing the new data to be
      *                   loaded into the entity
@@ -85,16 +70,11 @@ public interface JsonifiableEntity<E>
      * @since 1.14
      */
     @Nonnull
-    E reloadDataFromJsonObject(@Nonnull JsonObject jsonObject);
+    default E reloadDataFromJsonObject(@Nonnull JsonObject jsonObject) {
+        reloadData(jsonObject);
+        return getImplementation();
+    }
 
-    /**
-     * It should be the same as {@link JsonifiableEntity#toJsonExpression()}.
-     *
-     * @return The JsonObject expression.
-     * @since 1.14
-     */
-    @Override
-    String toString();
 
     /**
      * Reads a value from the JSON representation of this entity, using the provided
@@ -132,85 +112,19 @@ public interface JsonifiableEntity<E>
     }
 
     /**
-     * Attempts to read and convert a JSON object into an instance of the specified
-     * class that implements
-     * {@link JsonifiableEntity}.
-     *
-     * <p>
-     * This method first tries to create an instance of the provided class using its
-     * no-argument constructor and
-     * then
-     * loads the data from the JSON object. If the no-argument constructor is not
-     * available, it tries to use a
-     * constructor
-     * that takes a {@link JsonObject} as an argument. If neither constructor is
-     * found or an exception occurs during
-     * instantiation, the method returns null.
-     * </p>
-     *
-     * @param bClass the class of the entity to be created, which must extend or
-     *               implement {@link JsonifiableEntity}
-     * @param args   the arguments used to form a JSON pointer for locating the JSON
-     *               object within a larger structure
-     * @param <B>    the type of the entity to be created
-     * @return an instance of the specified class with data loaded from the JSON
-     *         object, or null if the operation fails
-     * @since 2.7
-     */
-    default @Nullable <B extends JsonifiableEntity<?>> B readJsonifiableEntity(@Nonnull Class<B> bClass,
-                                                                               String... args) {
-        JsonObject jsonObject = readJsonObject(args);
-        if (jsonObject == null)
-            return null;
-        try {
-            var x = bClass.getConstructor().newInstance();
-            x.reloadDataFromJsonObject(jsonObject);
-            return x;
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException
-                 | NoSuchMethodException ignored1) {
-            try {
-                return bClass.getConstructor(JsonObject.class).newInstance(jsonObject);
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException
-                     | NoSuchMethodException ignored2) {
-                return null;
-            }
-        }
-    }
-
-    /**
-     * Read an entity from a JSON Object with Jackson
-     * {@link JsonObject#mapTo(Class)}.
-     *
-     * @param cClass The class of the entity to be read.
-     * @param args   The arguments used to form a JSON pointer for locating the JSON
-     *               object within a larger structure.
-     * @param <C>    The type of the entity to be read.
-     * @return The entity read from the JSON Object.
-     * @since 4.0.13
-     */
-    default @Nullable <C> C readEntity(@Nonnull Class<C> cClass, String... args) {
-        JsonObject jsonObject = readJsonObject(args);
-        if (jsonObject == null) {
-            return null;
-        }
-        try {
-            return jsonObject.mapTo(cClass);
-        } catch (Throwable t) {
-            return null;
-        }
-    }
-
-    /**
      * @since 2.8
+     * @deprecated as of 4.1.1
      */
+    @Deprecated(since = "4.1.1")
     default void fromBuffer(@Nonnull Buffer buffer) {
-        this.reloadDataFromJsonObject(new JsonObject(buffer));
+        this.reloadData(new JsonObject(buffer));
     }
 
     /**
      * @param buffer the buffer to write to, should not be null
      * @since 2.8
      */
+    @Override
     default void writeToBuffer(Buffer buffer) {
         JsonObject jsonObject = this.toJsonObject();
         jsonObject.writeToBuffer(buffer);
@@ -224,7 +138,7 @@ public interface JsonifiableEntity<E>
     default int readFromBuffer(int pos, Buffer buffer) {
         JsonObject jsonObject = new JsonObject();
         int i = jsonObject.readFromBuffer(pos, buffer);
-        this.reloadDataFromJsonObject(jsonObject);
+        this.reloadData(jsonObject);
         return i;
     }
 
@@ -232,7 +146,9 @@ public interface JsonifiableEntity<E>
      * As of 3.1.10, moved here from UnmodifiableJsonifiableEntity.
      *
      * @since 2.8
+     * @deprecated as of 4.1.1
      */
+    @Deprecated(since = "4.1.1")
     default Buffer toBuffer() {
         return toJsonObject().toBuffer();
     }
@@ -254,48 +170,9 @@ public interface JsonifiableEntity<E>
         return toJsonObject().isEmpty();
     }
 
-    /**
-     * Retrieves the JSON object associated with the specified key from the entity's
-     * JSON representation.
-     * If no JSON object exists for the given key, a new empty JSON object is
-     * created, associated with the key,
-     * and added to the entity's JSON representation. This ensures that the key
-     * always maps to a valid JSON object.
-     *
-     * @param key the key for which the JSON object is to be retrieved or created
-     * @return the existing or newly created JSON object associated with the
-     *         specified key
-     * @since 4.0.12
-     */
-    default JsonObject ensureJsonObject(String key) {
-        JsonObject x = this.readJsonObject(key);
-        if (x == null) {
-            x = new JsonObject();
-            this.toJsonObject().put(key, x);
-        }
-        return x;
-    }
-
-    /**
-     * Retrieves the JSON array associated with the specified key from the entity's
-     * JSON representation.
-     * If no JSON array exists for the given key, a new empty JSON array is created,
-     * associated with the key,
-     * and added to the entity's JSON representation. This ensures that the key
-     * always maps to a valid JSON array.
-     *
-     * @param key the key for which the JSON array is to be retrieved or created
-     * @return the existing or newly created JSON array associated with the
-     *         specified key
-     * @since 4.0.12
-     */
-    default JsonArray ensureJsonArray(String key) {
-        JsonArray x = this.readJsonArray(key);
-        if (x == null) {
-            x = new JsonArray();
-            this.toJsonObject().put(key, x);
-        }
-        return x;
+    @Override
+    default void ensureEntry(String key, Object value) {
+        this.toJsonObject().put(key, value);
     }
 
     /**
@@ -304,7 +181,7 @@ public interface JsonifiableEntity<E>
      * @since 4.0.12
      */
     default E write(String key, Object value) {
-        this.toJsonObject().put(key, value);
+        this.ensureEntry(key, value);
         return getImplementation();
     }
 }

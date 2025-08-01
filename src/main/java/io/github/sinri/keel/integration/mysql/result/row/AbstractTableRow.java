@@ -6,8 +6,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
+ * As of 2.8 rename and remove.
+ *
  * @since 2.0
- * @since 2.8 rename and remove
  */
 public abstract class AbstractTableRow extends SimpleResultRow {
     public AbstractTableRow(@Nonnull JsonObject tableRow) {

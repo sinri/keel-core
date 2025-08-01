@@ -76,4 +76,14 @@ public interface JsonifiableDataUnit
         this.reloadData(new JsonObject(buf));
         return pos + length + 4;
     }
+
+    @Override
+    default String toFormattedJsonExpression() {
+        return toJsonObject().encodePrettily();
+    }
+
+    @Override
+    default String toJsonExpression() {
+        return toJsonObject().encode();
+    }
 }

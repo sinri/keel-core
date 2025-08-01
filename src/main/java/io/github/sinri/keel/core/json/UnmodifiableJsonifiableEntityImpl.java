@@ -43,7 +43,12 @@ public class UnmodifiableJsonifiableEntityImpl implements UnmodifiableJsonifiabl
 
     @Override
     public final String toJsonExpression() {
-        return jsonObject.toString();
+        return jsonObject.encode();
+    }
+
+    @Override
+    public String toFormattedJsonExpression() {
+        return jsonObject.encodePrettily();
     }
 
     /**

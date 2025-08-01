@@ -29,4 +29,14 @@ public class JsonifiableDataUnitImpl implements JsonifiableDataUnit {
     public void reloadData(@Nonnull JsonObject jsonObject) {
         this.jsonObject = jsonObject;
     }
+
+    @Override
+    public String toJsonExpression() {
+        return jsonObject.encode();
+    }
+
+    @Override
+    public String toFormattedJsonExpression() {
+        return jsonObject.encodePrettily();
+    }
 }

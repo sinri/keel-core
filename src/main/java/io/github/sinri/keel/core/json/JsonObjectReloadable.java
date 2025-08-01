@@ -12,7 +12,6 @@ import javax.annotation.Nonnull;
 public interface JsonObjectReloadable {
     /**
      * @param jsonObject the JSON object with which this class should be reloaded
-     * @return this class itself with data reloaded, to make chained call available.
      */
     void reloadData(@Nonnull JsonObject jsonObject);
 

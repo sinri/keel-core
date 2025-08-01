@@ -14,6 +14,8 @@ public interface JsonObjectWritable extends JsonObjectReadable {
      */
     void ensureEntry(String key, Object value);
 
+    void removeEntry(String key);
+
     /**
      * Retrieves the JSON object associated with the specified key from the entity's
      * JSON representation.

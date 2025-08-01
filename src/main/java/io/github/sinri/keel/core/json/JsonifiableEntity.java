@@ -184,4 +184,12 @@ public interface JsonifiableEntity<E>
         this.ensureEntry(key, value);
         return getImplementation();
     }
+
+    /**
+     * @since 4.1.1
+     */
+    @Override
+    default void removeEntry(String key) {
+        this.toJsonObject().remove(key);
+    }
 }

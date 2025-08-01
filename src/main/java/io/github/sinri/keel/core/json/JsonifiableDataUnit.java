@@ -41,6 +41,11 @@ public interface JsonifiableDataUnit
     }
 
     @Override
+    default void removeEntry(String key) {
+        this.toJsonObject().remove(key);
+    }
+
+    @Override
     default boolean isEmpty() {
         return toJsonObject().isEmpty();
     }

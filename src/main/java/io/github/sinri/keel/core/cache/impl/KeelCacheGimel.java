@@ -1,6 +1,7 @@
 package io.github.sinri.keel.core.cache.impl;
 
 import io.github.sinri.keel.core.cache.KeelAsyncEverlastingCacheInterface;
+import io.github.sinri.keel.core.cache.KeelEverlastingCacheInterface;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
@@ -12,7 +13,10 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 2.9
+ * @deprecated This implement is meaningless as it is based on a map in local memory,
+ *          while {@link KeelCacheVet} following interface {@link KeelEverlastingCacheInterface} is preferred.
  */
+@Deprecated(since = "4.1.1", forRemoval = true)
 public class KeelCacheGimel<K, V> implements KeelAsyncEverlastingCacheInterface<K, V> {
     private final ReadWriteLock lock;
     private final Map<K, V> map;

@@ -1,6 +1,7 @@
 package io.github.sinri.keel.core.cache.impl;
 
 import io.github.sinri.keel.core.cache.KeelAsyncCacheInterface;
+import io.github.sinri.keel.core.cache.KeelCacheInterface;
 import io.github.sinri.keel.core.cache.NotCached;
 import io.github.sinri.keel.core.cache.ValueWrapper;
 import io.vertx.core.Future;
@@ -15,6 +16,11 @@ import java.util.function.Function;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
+/**
+ * @deprecated This implement is meaningless as it is based on a map in local memory,
+ *         while {@link KeelCacheAlef} following interface {@link KeelCacheInterface} is preferred.
+ */
+@Deprecated(since = "4.1.1", forRemoval = true)
 public class KeelCacheBet<K, V> implements KeelAsyncCacheInterface<K, V> {
     private final ConcurrentMap<K, ValueWrapper<V>> map;
 
@@ -64,8 +70,8 @@ public class KeelCacheBet<K, V> implements KeelAsyncCacheInterface<K, V> {
         }
 
         return generator.apply(key)
-                .compose(v -> save(key, v, lifeInSeconds)
-                        .compose(saved -> Future.succeededFuture(v)));
+                        .compose(v -> save(key, v, lifeInSeconds)
+                                .compose(saved -> Future.succeededFuture(v)));
     }
 
     @Override

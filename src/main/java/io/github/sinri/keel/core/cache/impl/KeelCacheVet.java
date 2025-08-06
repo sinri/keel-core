@@ -3,82 +3,121 @@ package io.github.sinri.keel.core.cache.impl;
 import io.github.sinri.keel.core.cache.KeelEverlastingCacheInterface;
 
 import javax.annotation.Nonnull;
-import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Function;
 
 /**
  * @since 2.9
  */
 public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
-    private final Lock lock;
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private final Map<K, V> map;
 
     public KeelCacheVet() {
-        lock = new ReentrantLock();
         map = new HashMap<>();
     }
 
+    private void saveImpl(@Nonnull K key, @Nullable V value) {
+        if (value == null) {
+            map.remove(key);
+        } else {
+            map.put(key, value);
+        }
+    }
 
     @Override
-    public void save(@Nonnull K k, V v) {
-        lock.lock();
+    public void save(@Nonnull K k, @Nullable V v) {
+        lock.writeLock().lock();
         try {
-            map.put(k, v);
+            saveImpl(k, v);
         } finally {
-            lock.unlock();
+            lock.writeLock().unlock();
         }
     }
 
     @Override
     public void save(@Nonnull Map<K, V> appendEntries) {
-        lock.lock();
+        lock.writeLock().lock();
         try {
-            map.putAll(appendEntries);
+            appendEntries.forEach(this::saveImpl);
         } finally {
-            lock.unlock();
+            lock.writeLock().unlock();
         }
+    }
+
+    @Nullable
+    private V readImpl(@Nonnull K key) {
+        return map.get(key);
     }
 
     @Override
     public V read(@Nonnull K k, V v) {
-        V r;
-        lock.lock();
+        lock.readLock().lock();
         try {
-            r = map.getOrDefault(k, v);
+            var cached = readImpl(k);
+            if (cached != null) {
+                return cached;
+            } else {
+                return v;
+            }
         } finally {
-            lock.unlock();
+            lock.readLock().unlock();
         }
-        return r;
+    }
+
+    @Override
+    public synchronized V computed(@Nonnull K key, @Nonnull Function<V, V> computation) {
+        lock.writeLock().lock();
+        try {
+            var v = readImpl(key);
+            var r = computation.apply(v);
+            saveImpl(key, r);
+            return r;
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    private void removeImpl(@Nonnull K key) {
+        map.remove(key);
+    }
+
+    private void removeAllImpl() {
+        map.clear();
     }
 
     @Override
     public void remove(@Nonnull K key) {
-        lock.lock();
+        lock.writeLock().lock();
         try {
-            map.remove(key);
+            removeImpl(key);
         } finally {
-            lock.unlock();
+            lock.writeLock().unlock();
         }
     }
 
     @Override
     public void remove(@Nonnull Collection<K> keys) {
-        lock.lock();
+        lock.writeLock().lock();
         try {
-            keys.forEach(map::remove);
+            keys.forEach(this::removeImpl);
         } finally {
-            lock.unlock();
+            lock.writeLock().unlock();
         }
     }
 
     @Override
     public void removeAll() {
-        lock.lock();
+        lock.writeLock().lock();
         try {
-            map.clear();
+            removeAllImpl();
         } finally {
-            lock.unlock();
+            lock.writeLock().unlock();
         }
     }
 
@@ -88,23 +127,23 @@ public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
      */
     @Override
     public void replaceAll(@Nonnull Map<K, V> newEntries) {
-        lock.lock();
+        lock.writeLock().lock();
         try {
-            Set<K> ks = newEntries.keySet();
-            map.putAll(newEntries);
-            map.keySet().forEach(k -> {
-                if (!ks.contains(k)) {
-                    map.remove(k);
-                }
-            });
+            removeAllImpl();
+            newEntries.forEach(this::saveImpl);
         } finally {
-            lock.unlock();
+            lock.writeLock().unlock();
         }
     }
 
     @Override
     @Nonnull
     public Map<K, V> getSnapshotMap() {
-        return Collections.unmodifiableMap(map);
+        lock.readLock().lock();
+        try {
+            return Collections.unmodifiableMap(map);
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 }

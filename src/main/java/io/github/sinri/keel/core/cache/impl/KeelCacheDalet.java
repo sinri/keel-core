@@ -1,118 +1,112 @@
 package io.github.sinri.keel.core.cache.impl;
 
-import io.github.sinri.keel.core.cache.KeelEverlastingCacheInterface;
-import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
+import io.github.sinri.keel.core.verticles.KeelVerticle;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.ThreadingModel;
 
-import javax.annotation.Nonnull;
-import java.util.Collection;
-import java.util.Collections;
+import javax.annotation.Nullable;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.function.Supplier;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
- * This implement is to provide: 1. initialized cache data; 2. everlasting cache till modified; 3. regular updating.
+ * An extension of KeelCacheVet that provides an embedded verticle for periodic full updates and deployment management.
+ * <p>
+ * The class can be initialized with a callback to fetch the latest data and a time period for regular updates. It deploys
+ * a verticle that will periodically update the cache using the provided callback, if any.
+ * </p>
  *
- * @since 3.2.11
+ * @param <K> the type of keys maintained by this cache
+ * @param <V> the type of mapped values
  */
-abstract public class KeelCacheDalet extends KeelVerticleImpl implements KeelEverlastingCacheInterface<String, String> {
-    private final ConcurrentMap<String, String> map = new ConcurrentHashMap<>();
+public class KeelCacheDalet<K, V> extends KeelCacheVet<K, V> {
+    @Nullable
+    private final Supplier<Future<Map<K, V>>> fullyUpdateCallback;
+    private final long regularUpdatePeriod;
+    private String deploymentId;
 
-    /**
-     * Save the item to cache.
-     *
-     * @param key   key
-     * @param value value
-     */
-    @Override
-    public void save(@Nonnull String key, String value) {
-        this.map.put(key, value);
+    public KeelCacheDalet() {
+        this(null, 0);
     }
 
-    @Override
-    public void save(@Nonnull Map<String, String> appendEntries) {
-        this.map.putAll(appendEntries);
+    public KeelCacheDalet(@Nullable Supplier<Future<Map<K, V>>> fullyUpdateCallback, long regularUpdatePeriod) {
+        this.fullyUpdateCallback = fullyUpdateCallback;
+        this.regularUpdatePeriod = regularUpdatePeriod;
+        KeelVerticle.instant(this::startVerticle)
+                    .deployMe(new DeploymentOptions()
+                            .setThreadingModel(ThreadingModel.WORKER))
+                    .compose(deploymentId -> {
+                        this.deploymentId = deploymentId;
+                        return Future.succeededFuture();
+                    });
     }
 
-    /**
-     * @param key   key
-     * @param value default value for the situation that key not existed
-     * @return @return cache value or default when not-existed
-     */
-    @Override
-    public String read(@Nonnull String key, String value) {
-        return map.getOrDefault(key, value);
+    public final Future<String> getDeploymentId() {
+        return Keel.asyncCallRepeatedly(repeatedlyCallTask -> {
+                       if (deploymentId == null) {
+                           return Keel.asyncSleep(100L);
+                       } else {
+                           repeatedlyCallTask.stop();
+                           return Future.succeededFuture();
+                       }
+                   })
+                   .compose(done -> {
+                       return Future.succeededFuture(deploymentId);
+                   });
     }
 
-    /**
-     * Remove the cached item with key.
-     *
-     * @param key key
-     */
-    @Override
-    public void remove(@Nonnull String key) {
-        this.map.remove(key);
-    }
 
-    @Override
-    public void remove(@Nonnull Collection<String> keys) {
-        keys.forEach(this.map::remove);
-    }
-
-    /**
-     * Remove all the cached items.
-     */
-    @Override
-    public void removeAll() {
-        map.clear();
-    }
-
-    /**
-     * Replace all entries in cache map with new entries.
-     *
-     * @param newEntries new map of entries
-     */
-    @Override
-    public void replaceAll(@Nonnull Map<String, String> newEntries) {
-        newEntries.forEach(map::replace);
-    }
-
-    /**
-     * @return ConcurrentMap K → V alive value only
-     * @since 1.14
-     */
-    @Nonnull
-    @Override
-    public Map<String, String> getSnapshotMap() {
-        return Collections.unmodifiableMap(map);
-    }
-
-    @Override
-    protected Future<Void> startVerticle() {
+    private Future<Void> startVerticle() {
         return fullyUpdate()
                 .compose(updated -> {
                     if (regularUpdatePeriod() >= 0) {
                         Keel.asyncCallEndlessly(() -> Future.succeededFuture()
-                                                        .compose(v -> {
-                                         if (regularUpdatePeriod() == 0) return Future.succeededFuture();
-                                         else return Keel.asyncSleep(regularUpdatePeriod());
-                                     })
-                                                        .compose(v -> fullyUpdate()));
+                                                            .compose(v -> {
+                                                                if (regularUpdatePeriod() <= 0)
+                                                                    return Future.succeededFuture();
+                                                                else return Keel.asyncSleep(regularUpdatePeriod());
+                                                            })
+                                                            .compose(v -> fullyUpdate()));
                     }
                     return Future.succeededFuture();
                 });
     }
 
-    abstract public Future<Void> fullyUpdate();
+    private Future<Void> fullyUpdate() {
+        if (fullyUpdateCallback != null) {
+            return fullyUpdateCallback.get()
+                                      .compose(map -> {
+                                          if (map != null) {
+                                              this.replaceAll(map);
+                                          }
+                                          return Future.succeededFuture();
+                                      });
+        }
+        return Future.succeededFuture();
+    }
 
     /**
      * @return a time period to sleep between regular updates. Use minus number to disable regular update.
      */
-    protected long regularUpdatePeriod() {
-        return 600_000L;// by default, 10min.
+    private long regularUpdatePeriod() {
+        return regularUpdatePeriod;
     }
 
+    /**
+     * Undeploy the embedded verticle and remove all cached entries.
+     * <p>After this method be called, the instance should not be used anymore to avoid more IO occurs.
+     */
+    public Future<Void> undeploy() {
+        if (deploymentId != null) {
+            return Keel.getVertx().undeploy(this.deploymentId)
+                       .eventually(() -> {
+                           this.removeAll();
+                           return Future.succeededFuture();
+                       });
+        } else {
+            return Future.succeededFuture();
+        }
+    }
 }

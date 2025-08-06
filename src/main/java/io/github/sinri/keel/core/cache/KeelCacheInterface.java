@@ -5,6 +5,7 @@ import io.github.sinri.keel.core.cache.impl.KeelCacheDummy;
 
 import javax.annotation.Nonnull;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
@@ -92,7 +93,19 @@ public interface KeelCacheInterface<K, V> {
     V read(@Nonnull K key, Supplier<V> generator, long lifeInSeconds);
 
     /**
-     * Remove the cached item with key.
+     * Atomically, read the cached nullable value with the given key, then call the given compute function to generate a
+     * new value to save back and return.
+     * <p>The given compute function should take the value read by the key as input, compute for a
+     * result, save it to map the key, and finally outputs it.
+     *
+     * @param key         the target key
+     * @param computation a compute function takes a nullable cached value as input, and returns a nullable value.
+     * @since 4.1.1
+     */
+    V computed(@Nonnull K key, @Nonnull Function<V, V> computation);
+
+    /**
+     * Remove the cached item with the key.
      *
      * @param key key
      */

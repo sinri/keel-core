@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  * @since 4.0.1 T is strict.
  */
 public interface KeelIssueRecorder<T extends KeelIssueRecord<T>>
-        extends KeelIssueRecorderCore<T>, KeelIssueRecorderCommonMixin<T>, KeelIssueRecorderJsonMixin<T> {
+        extends KeelIssueRecorderCommonMixin<T>, KeelIssueRecorderJsonMixin<T> {
     /**
      * @since 4.0.0
      */

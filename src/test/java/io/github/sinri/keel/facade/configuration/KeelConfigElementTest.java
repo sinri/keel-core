@@ -157,11 +157,39 @@ class KeelConfigElementTest extends KeelUnitTest {
         props.setProperty("database.username", "user");
         props.setProperty("database.password", "pass");
 
-        KeelConfigElement config = new KeelConfigElement("database");
+        KeelConfigElement config = new KeelConfigElement("config");
         config.loadProperties(props);
 
         assertEquals("jdbc:mysql://localhost:3306/test", config.readString(List.of("database", "url")));
         assertEquals("user", config.readString(List.of("database", "username")));
         assertEquals("pass", config.readString(List.of("database", "password")));
+    }
+
+    @Test
+    void testLoadPropertiesEdgeCases() {
+        Properties props = new Properties();
+        // Test single level key
+        props.setProperty("simple", "value");
+        // Test multi-level key
+        props.setProperty("nested.deep.value", "nested_value");
+        // Test key with dots in value
+        props.setProperty("key.with.dots", "value.with.dots");
+
+        KeelConfigElement config = new KeelConfigElement("root");
+        config.loadProperties(props);
+
+        // Test single level
+        assertEquals("value", config.readString(List.of("simple")));
+        
+        // Test multi-level
+        assertEquals("nested_value", config.readString(List.of("nested", "deep", "value")));
+        
+        // Test key with dots in value
+        assertEquals("value.with.dots", config.readString(List.of("key", "with", "dots")));
+        
+        // Verify the structure is correct
+        assertNotNull(config.getChild("simple"));
+        assertNotNull(config.getChild("nested"));
+        assertNotNull(config.getChild("key"));
     }
 }

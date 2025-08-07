@@ -13,6 +13,7 @@ import java.util.Map;
  * @since 2.9
  */
 public interface KeelAsyncEverlastingCacheInterface<K, V> {
+    @Deprecated(since = "4.1.1", forRemoval = true)
     static <K, V> KeelAsyncEverlastingCacheInterface<K, V> createDefaultInstance() {
         return new KeelCacheGimel<>();
     }

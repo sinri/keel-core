@@ -18,12 +18,14 @@ public interface KeelAsyncCacheInterface<K, V> {
     /**
      * @since 2.5
      */
+    @Deprecated(since = "4.1.1", forRemoval = true)
     static <K, V> KeelAsyncCacheInterface<K, V> createDefaultInstance() {
         return new KeelCacheBet<>();
     }
 
     /**
-     * Save an item (as key and value pair) into cache, keep it available for a certain time.
+     * Save an item (as key and value pair) into cache, keep it available for a
+     * certain time.
      *
      * @param key           key
      * @param value         value
@@ -36,27 +38,32 @@ public interface KeelAsyncCacheInterface<K, V> {
      * or return a failed future of NotCached.
      *
      * @param key key
-     * @return async: value of found available cached item, or an exception `NotCache`.
+     * @return async: value of found available cached item, or an exception
+     *         `NotCache`.
      */
     Future<V> read(@Nonnull K key);
 
     /**
-     * Read an available cached item with key, or return `fallbackValue` when not found;
+     * Read an available cached item with key, or return `fallbackValue` when not
+     * found;
      * no failed future.
      *
      * @param key           key
      * @param fallbackValue the certain value returned when not found
-     * @return async: value of found available cached item, or the provided fallbackValue.
+     * @return async: value of found available cached item, or the provided
+     *         fallbackValue.
      */
     Future<V> read(@Nonnull K key, V fallbackValue);
 
     /**
      * Read an available cached item with key;
-     * if not found, try to generate one with key using `fallbackValueGenerator` to save into cache, then return it in the future;
+     * if not found, try to generate one with key using `fallbackValueGenerator` to
+     * save into cache, then return it in the future;
      * if failed to generate, failed future instead.
      *
      * @param key           key
-     * @param generator     function to generate a value for given key, to be saved into cache and return when no cached item found
+     * @param generator     function to generate a value for given key, to be saved
+     *                      into cache and return when no cached item found
      * @param lifeInSeconds cache available in this period, in seconds
      * @return async: the valued read from cache
      * @since 2.5

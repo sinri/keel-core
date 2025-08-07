@@ -1,6 +1,7 @@
 package io.github.sinri.keel.core.json;
 
 import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ class JsonObjectReloadableTest extends KeelUnitTest {
                 .put("number", 42)
                 .put("boolean", true)
                 .put("null", null)
-                .put("array", new String[]{"item1", "item2"})
+                .put("array", new JsonArray().add("item1").add("item2"))
                 .put("object", new JsonObject().put("nested", "value"));
 
         testEntity = new TestJsonObjectReloadable();
@@ -37,7 +38,8 @@ class JsonObjectReloadableTest extends KeelUnitTest {
         assertEquals(42, result.getInteger("number"));
         assertTrue(result.getBoolean("boolean"));
         assertNull(result.getValue("null"));
-        assertArrayEquals(new String[]{"item1", "item2"}, result.getJsonArray("array").getList().toArray());
+        assertEquals("item1", result.getJsonArray("array").getString(0));
+        assertEquals("item2", result.getJsonArray("array").getString(1));
         assertEquals("value", result.getJsonObject("object").getString("nested"));
     }
 
@@ -107,19 +109,20 @@ class JsonObjectReloadableTest extends KeelUnitTest {
                 .put("level1", new JsonObject()
                         .put("level2", new JsonObject()
                                 .put("level3", "deep value")
-                                .put("array", new String[]{"a", "b", "c"}))
+                                .put("array", new JsonArray().add("a").add("b").add("c")))
                         .put("simple", "simple value"))
-                .put("rootArray", new Integer[]{1, 2, 3, 4, 5});
+                .put("rootArray", new JsonArray().add(1).add(2).add(3).add(4).add(5));
 
         testEntity.reloadData(complexData);
 
         JsonObject result = testEntity.getData();
         assertEquals("deep value", result.getJsonObject("level1").getJsonObject("level2").getString("level3"));
         assertEquals("simple value", result.getJsonObject("level1").getString("simple"));
-        assertArrayEquals(new String[]{"a", "b", "c"},
-                result.getJsonObject("level1").getJsonObject("level2").getJsonArray("array").getList().toArray());
-        assertArrayEquals(new Integer[]{1, 2, 3, 4, 5},
-                result.getJsonArray("rootArray").getList().toArray());
+        assertEquals("a", result.getJsonObject("level1").getJsonObject("level2").getJsonArray("array").getString(0));
+        assertEquals("b", result.getJsonObject("level1").getJsonObject("level2").getJsonArray("array").getString(1));
+        assertEquals("c", result.getJsonObject("level1").getJsonObject("level2").getJsonArray("array").getString(2));
+        assertEquals(1, result.getJsonArray("rootArray").getInteger(0));
+        assertEquals(5, result.getJsonArray("rootArray").getInteger(4));
     }
 
     @Test
@@ -131,7 +134,7 @@ class JsonObjectReloadableTest extends KeelUnitTest {
                 .put("double", 3.14159)
                 .put("boolean", true)
                 .put("null", null)
-                .put("array", new Object[]{1, "two", 3.0, true, null})
+                .put("array", new JsonArray().add(1).add("two").add(3.0).add(true).add(null))
                 .put("object", new JsonObject().put("nested", "value"));
 
         testEntity.reloadData(mixedData);
@@ -144,6 +147,11 @@ class JsonObjectReloadableTest extends KeelUnitTest {
         assertTrue(result.getBoolean("boolean"));
         assertNull(result.getValue("null"));
         assertEquals(5, result.getJsonArray("array").size());
+        assertEquals(1, result.getJsonArray("array").getInteger(0));
+        assertEquals("two", result.getJsonArray("array").getString(1));
+        assertEquals(3.0, result.getJsonArray("array").getDouble(2));
+        assertTrue(result.getJsonArray("array").getBoolean(3));
+        assertNull(result.getJsonArray("array").getValue(4));
         assertEquals("value", result.getJsonObject("object").getString("nested"));
     }
 

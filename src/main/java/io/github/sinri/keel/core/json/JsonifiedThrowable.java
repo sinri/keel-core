@@ -111,18 +111,29 @@ public class JsonifiedThrowable extends JsonifiableEntityImpl<JsonifiedThrowable
     @Nonnull
     public List<JsonifiedCallStackItem> getThrowableStack() {
         List<JsonifiedCallStackItem> items = new ArrayList<>();
-        var a = readJsonObjectArray("stack");
+        var a = readJsonArray("stack");
         if (a != null) {
-            a.forEach(j -> {
-                var x = new JsonifiedCallStackItem(j);
-                items.add(x);
+            a.forEach(x -> {
+                if (x instanceof JsonifiedCallStackItem) {
+                    items.add((JsonifiedCallStackItem) x);
+                } else if (x instanceof JsonObject) {
+                    items.add(new JsonifiedCallStackItem((JsonObject) x));
+                }
             });
         }
         return items;
     }
 
     public JsonifiedThrowable getThrowableCause() {
-        return readJsonifiableEntity(JsonifiedThrowable.class, "cause");
+        Object cause = readValue("cause");
+        if (cause instanceof JsonifiedThrowable) {
+            return (JsonifiedThrowable) cause;
+        } else if (cause instanceof JsonObject) {
+            JsonifiedThrowable jsonifiedThrowable = new JsonifiedThrowable();
+            jsonifiedThrowable.reloadDataFromJsonObject((JsonObject) cause);
+            return jsonifiedThrowable;
+        }
+        return null;
     }
 
     @Nonnull

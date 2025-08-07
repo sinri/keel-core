@@ -84,10 +84,10 @@ public class KeelFastDocsKit {
     }
 
     public void processRouterRequest(RoutingContext ctx) {
-        var requestInfo = new JsonObject()
-                .put("method", ctx.request().method().name())
-                .put("path", ctx.request().path())
-                .put("stream_id", ctx.request().streamId());
+        // var requestInfo = new JsonObject()
+        //         .put("method", ctx.request().method().name())
+        //         .put("path", ctx.request().path())
+        //         .put("stream_id", ctx.request().streamId());
         // eventLogger.debug(event -> event.message("processRouterRequest start").context(c -> c.put("request",
         // requestInfo)));
         if (!Objects.equals(ctx.request().method(), HttpMethod.GET)) {
@@ -147,7 +147,7 @@ public class KeelFastDocsKit {
                     // + relativePathOfMarkdownFile));
                     String markdownFilePath = this.rootMarkdownFilePath + relativePathOfMarkdownFile;
                     // eventLogger.debug(r -> r.message("processRequestWithMarkdownPath file: " + markdownFilePath));
-                    File x = new File(markdownFilePath);
+                    // File x = new File(markdownFilePath);
                     // eventLogger.debug(r -> r.message("abs: " + x.getAbsolutePath()));
                     String markdownContent;
                     try (InputStream resourceAsStream = getClass().getClassLoader()

@@ -5,11 +5,13 @@ import io.github.sinri.keel.integration.elasticsearch.index.ESIndexMixin;
 import javax.annotation.Nonnull;
 
 /**
- * @see <a href="https://www.elastic.co/guide/en/elasticsearch/reference/8.9/rest-apis.html">ES Restful API 8.9</a>
- * Here only JSON over HTTP(s) supported.
+ * @see <a href=
+ *      "https://www.elastic.co/guide/en/elasticsearch/reference/8.9/rest-apis.html">ES
+ *      Restful API 8.9</a>
+ *      Here only JSON over HTTP(s) supported.
  * @since 3.0.7
  */
-public class ElasticSearchKit implements ESApiMixin, ESIndexMixin {
+public class ElasticSearchKit implements ESIndexMixin {
     private final ElasticSearchConfig esConfig;
 
     /**

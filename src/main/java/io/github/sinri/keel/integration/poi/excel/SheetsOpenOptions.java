@@ -104,7 +104,7 @@ public class SheetsOpenOptions {
      * @see <a href="https://github.com/pjfanning/excel-streaming-reader">PJFANNING::ExcelStreamingReader</a>
      */
     public SheetsOpenOptions setHugeXlsxStreamingReaderBuilder(@Nonnull Handler<StreamingReader.Builder> streamingReaderBuilderHandler) {
-        this.hugeXlsxStreamingReaderBuilder = new StreamingReader.Builder();
+        var hugeXlsxStreamingReaderBuilder = new StreamingReader.Builder();
 
         // number of rows to keep in memory (defaults to 10)
         hugeXlsxStreamingReaderBuilder.rowCacheSize(32);
@@ -113,6 +113,7 @@ public class SheetsOpenOptions {
 
         streamingReaderBuilderHandler.handle(hugeXlsxStreamingReaderBuilder);
 
+        this.hugeXlsxStreamingReaderBuilder = hugeXlsxStreamingReaderBuilder;
         this.setUseXlsx(true);
         return this;
     }

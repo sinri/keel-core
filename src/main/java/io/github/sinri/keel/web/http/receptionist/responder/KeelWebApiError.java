@@ -6,21 +6,23 @@ import javax.annotation.Nullable;
 /**
  * Any exception thrown from receptionists to responder should be and recommended to be instance-of this class;
  * or would be automatically wrapped to this class.
+ * <p>
+ * As of 4.1.1, this class public its constructors and wrap method.
  *
  * @since 4.1.0
  */
 public class KeelWebApiError extends RuntimeException {
     private final int statusCode;
 
-    protected KeelWebApiError(@Nonnull String message) {
+    public KeelWebApiError(@Nonnull String message) {
         this(200, message, null);
     }
 
-    protected KeelWebApiError(@Nonnull String message, @Nullable Throwable cause) {
+    public KeelWebApiError(@Nonnull String message, @Nullable Throwable cause) {
         this(200, message, cause);
     }
 
-    protected KeelWebApiError(int statusCode, @Nonnull String message, @Nullable Throwable cause) {
+    public KeelWebApiError(int statusCode, @Nonnull String message, @Nullable Throwable cause) {
         super(message, cause);
         this.statusCode = statusCode;
     }
@@ -32,7 +34,7 @@ public class KeelWebApiError extends RuntimeException {
      * @param message    the detail message for the error (must not be null)
      * @param throwable  the cause of the error (must not be null)
      */
-    public static void issue(int statusCode, @Nonnull String message, @Nullable Throwable throwable) {
+    public static void issue(int statusCode, @Nonnull String message, @Nullable Throwable throwable) throws KeelWebApiError {
         throw new KeelWebApiError(statusCode, message, throwable);
     }
 
@@ -41,7 +43,7 @@ public class KeelWebApiError extends RuntimeException {
      *
      * @param message the detail message for the error (must not be null)
      */
-    public static void issue(@Nonnull String message) {
+    public static void issue(@Nonnull String message) throws KeelWebApiError {
         issue(200, message, null);
     }
 
@@ -51,11 +53,11 @@ public class KeelWebApiError extends RuntimeException {
      *
      * @param throwable the cause of the error (must not be null)
      */
-    public static void issue(@Nonnull Throwable throwable) {
+    public static void issue(@Nonnull Throwable throwable) throws KeelWebApiError {
         throw wrap(throwable);
     }
 
-    static KeelWebApiError wrap(Throwable throwable) {
+    public static KeelWebApiError wrap(@Nonnull Throwable throwable) {
         return new KeelWebApiError(200, "Web API Error with message: " + throwable.getMessage(), throwable);
     }
 

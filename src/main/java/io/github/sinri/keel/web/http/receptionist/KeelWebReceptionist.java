@@ -4,6 +4,7 @@ import io.github.sinri.keel.logger.KeelLogLevel;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.github.sinri.keel.web.http.prehandler.KeelPlatformHandler;
+import io.github.sinri.keel.web.http.receptionist.responder.KeelWebApiError;
 import io.github.sinri.keel.web.http.receptionist.responder.KeelWebResponder;
 import io.vertx.core.http.impl.CookieImpl;
 import io.vertx.ext.auth.User;
@@ -103,7 +104,7 @@ public abstract class KeelWebReceptionist {
      * @since 3.0.12 add request_id to output json object
      */
     protected final void respondOnFailure(@Nonnull Throwable throwable) {
-        getResponder().respondOnFailure(throwable);
+        getResponder().respondOnFailure(KeelWebApiError.wrap(throwable));
         getIssueRecorder().exception(throwable, r -> r.message("FAILED, TO RESPOND."));
     }
 

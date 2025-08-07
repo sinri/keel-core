@@ -67,35 +67,19 @@ abstract public class KeelAuthenticationHandler implements AuthenticationHandler
 
         boolean isLegalRequest();
 
-        default int statusCodeToFailRequest() {
-            return 401;
-        }
+        int statusCodeToFailRequest();
 
-        default Throwable failure() {
-            return new Exception("Request Denied");
-        }
+        Throwable failure();
 
         default void failRequest(RoutingContext routingContext) {
             routingContext.fail(statusCodeToFailRequest(), failure());
         }
 
-        default JsonObject authenticatedPrinciple() {
-            return new JsonObject();
-        }
+        JsonObject authenticatedPrinciple();
 
         default User authenticatedUser() {
             return User.create(authenticatedPrinciple());
         }
-
-        //        default AuthenticateResult setSessionExpire(long expireTimestamp) {
-        //            // exp is expected as (System.currentTimeMillis() / 1000);
-        //            //  or new Date().getTime() / 1000
-        //            if (expireTimestamp > 1660000000000L) {
-        //                expireTimestamp = expireTimestamp / 1000;
-        //            }
-        //            this.authenticatedUser().attributes().put("exp", expireTimestamp);
-        //            return this;
-        //        }
     }
 
     private static class AuthenticateResultImpl implements AuthenticateResult {
@@ -153,6 +137,11 @@ abstract public class KeelAuthenticationHandler implements AuthenticationHandler
         @Override
         public JsonObject authenticatedPrinciple() {
             return principle;
+        }
+
+        @Override
+        public int statusCodeToFailRequest() {
+            return respondStatusCode;
         }
     }
 }

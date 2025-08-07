@@ -4,6 +4,8 @@ import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
+import javax.annotation.Nonnull;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class SelfInterfaceTest extends KeelUnitTest {
@@ -16,6 +18,7 @@ class SelfInterfaceTest extends KeelUnitTest {
             this.name = name;
         }
 
+        @Nonnull
         @Override
         public TestImplementation getImplementation() {
             return this;

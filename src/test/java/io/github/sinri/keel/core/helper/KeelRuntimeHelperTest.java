@@ -199,6 +199,14 @@ class KeelRuntimeHelperTest extends KeelUnitTest {
             this.name = name;
             this.value = value;
         }
+
+        public String getName() {
+            return name;
+        }
+
+        public int getValue() {
+            return value;
+        }
     }
     
     private static class CircularObject {
@@ -211,6 +219,14 @@ class KeelRuntimeHelperTest extends KeelUnitTest {
         
         public void setReference(CircularObject reference) {
             this.reference = reference;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public CircularObject getReference() {
+            return reference;
         }
     }
 } 

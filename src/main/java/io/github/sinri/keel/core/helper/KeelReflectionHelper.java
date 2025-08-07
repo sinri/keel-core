@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.helper;
 
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
@@ -27,7 +26,7 @@ public class KeelReflectionHelper {
     private KeelReflectionHelper() {
         boolean available = false;
         try {
-            //noinspection JavaReflectionMemberAccess
+            // noinspection JavaReflectionMemberAccess
             Thread.class.getMethod("isVirtual");
             available = true;
         } catch (NoSuchMethodException e) {
@@ -46,7 +45,8 @@ public class KeelReflectionHelper {
      * @since 1.13
      */
     @Nullable
-    public <T extends Annotation> T getAnnotationOfMethod(@Nonnull Method method, @Nonnull Class<T> classOfAnnotation, @Nullable T defaultAnnotation) {
+    public <T extends Annotation> T getAnnotationOfMethod(@Nonnull Method method, @Nonnull Class<T> classOfAnnotation,
+                                                          @Nullable T defaultAnnotation) {
         T annotation = method.getAnnotation(classOfAnnotation);
         if (annotation == null) {
             return defaultAnnotation;
@@ -63,13 +63,16 @@ public class KeelReflectionHelper {
     }
 
     /**
-     * @return Returns this element's annotation for the specified type if such an annotation is present, else null.
+     * @return Returns this element's annotation for the specified type if such an
+     *         annotation is present, else null.
      * @throws NullPointerException – if the given annotation class is null
-     *                              Note that any annotation returned by this method is a declaration annotation.
+     *                              Note that any annotation returned by this method
+     *                              is a declaration annotation.
      * @since 2.8
      */
     @Nullable
-    public <T extends Annotation> T getAnnotationOfClass(@Nonnull Class<?> anyClass, @Nonnull Class<T> classOfAnnotation) {
+    public <T extends Annotation> T getAnnotationOfClass(@Nonnull Class<?> anyClass,
+                                                         @Nonnull Class<T> classOfAnnotation) {
         return anyClass.getAnnotation(classOfAnnotation);
     }
 
@@ -78,7 +81,8 @@ public class KeelReflectionHelper {
      *         For the repeatable annotations.
      */
     @Nonnull
-    public <T extends Annotation> T[] getAnnotationsOfClass(@Nonnull Class<?> anyClass, @Nonnull Class<T> classOfAnnotation) {
+    public <T extends Annotation> T[] getAnnotationsOfClass(@Nonnull Class<?> anyClass,
+                                                            @Nonnull Class<T> classOfAnnotation) {
         return anyClass.getAnnotationsByType(classOfAnnotation);
     }
 
@@ -90,16 +94,18 @@ public class KeelReflectionHelper {
      * @since 3.0.6
      * @since 3.2.12.1 rewrite
      */
-    public <R> Set<Class<? extends R>> seekClassDescendantsInPackage(@Nonnull String packageName, @Nonnull Class<R> baseClass) {
-        //        Reflections reflections = new Reflections(packageName);
-        //        return reflections.getSubTypesOf(baseClass);
+    public <R> Set<Class<? extends R>> seekClassDescendantsInPackage(@Nonnull String packageName,
+                                                                     @Nonnull Class<R> baseClass) {
+        // Reflections reflections = new Reflections(packageName);
+        // return reflections.getSubTypesOf(baseClass);
 
         Set<Class<? extends R>> set = new HashSet<>();
 
         List<String> classPathList = Keel.fileHelper().getClassPathList();
         for (String classPath : classPathList) {
             if (classPath.endsWith(".jar")) {
-                Set<Class<? extends R>> classes = seekClassDescendantsInPackageForProvidedJar(classPath, packageName, baseClass);
+                Set<Class<? extends R>> classes = seekClassDescendantsInPackageForProvidedJar(classPath, packageName,
+                        baseClass);
                 set.addAll(classes);
             } else {
                 Set<Class<? extends R>> classes = seekClassDescendantsInPackageForFileSystem(packageName, baseClass);
@@ -113,7 +119,9 @@ public class KeelReflectionHelper {
     /**
      * @since 3.2.11
      */
-    protected <R> Set<Class<? extends R>> seekClassDescendantsInPackageForFileSystem(@Nonnull String packageName, @Nonnull Class<R> baseClass) {
+    protected <R> Set<Class<? extends R>> seekClassDescendantsInPackageForFileSystem(
+            @Nonnull String packageName,
+            @Nonnull Class<R> baseClass) {
         Set<Class<? extends R>> descendantClasses = new HashSet<>();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         // in file system
@@ -135,9 +143,10 @@ public class KeelReflectionHelper {
                             try {
                                 // since java 16, you may use:
                                 // if (clazzAny instanceof Class<? extends R> clazzR) {
-                                //    // 在这里可以安全地使用 clazzR
+                                // // 在这里可以安全地使用 clazzR
                                 // }
-                                //Class<? extends R> clazz = (Class<? extends R>) classLoader.loadClass(className);
+                                // Class<? extends R> clazz = (Class<? extends R>)
+                                // classLoader.loadClass(className);
                                 var clazz = classLoader.loadClass(className);
                                 if (baseClass.isAssignableFrom(clazz)) {
                                     @SuppressWarnings("unchecked")
@@ -146,7 +155,8 @@ public class KeelReflectionHelper {
                                 }
                             } catch (Throwable e) {
                                 Keel.getLogger()
-                                    .debug(getClass() + " seekClassDescendantsInPackageForFileSystem for " + className + " error: " + e.getMessage());
+                                    .debug(getClass() + " seekClassDescendantsInPackageForFileSystem for "
+                                            + className + " error: " + e.getMessage());
                             }
                         }
                         return FileVisitResult.CONTINUE;
@@ -162,7 +172,8 @@ public class KeelReflectionHelper {
     /**
      * @since 3.2.11
      */
-    protected <R> Set<Class<? extends R>> seekClassDescendantsInPackageForRunningJar(@Nonnull String packageName, @Nonnull Class<R> baseClass) {
+    protected <R> Set<Class<? extends R>> seekClassDescendantsInPackageForRunningJar(@Nonnull String packageName,
+                                                                                     @Nonnull Class<R> baseClass) {
         Set<Class<? extends R>> descendantClasses = new HashSet<>();
         Set<String> strings = Keel.fileHelper().seekPackageClassFilesInRunningJar(packageName);
         for (String s : strings) {
@@ -174,8 +185,10 @@ public class KeelReflectionHelper {
                     descendantClasses.add(castedClass);
                 }
             } catch (Throwable e) {
-                Keel.getLogger()
-                    .debug(getClass() + " seekClassDescendantsInPackageForRunningJar for " + s + " error: " + e.getMessage());
+                Keel.getLogger().debug(String.format(
+                        "%s seekClassDescendantsInPackageForRunningJar for %s error: %s",
+                        getClass(), s, e.getMessage()
+                ));
             }
         }
         return descendantClasses;
@@ -184,7 +197,8 @@ public class KeelReflectionHelper {
     /**
      * @since 3.2.11
      */
-    protected <R> Set<Class<? extends R>> seekClassDescendantsInPackageForProvidedJar(@Nonnull String jarInClassPath, @Nonnull String packageName, @Nonnull Class<R> baseClass) {
+    protected <R> Set<Class<? extends R>> seekClassDescendantsInPackageForProvidedJar(@Nonnull String jarInClassPath,
+                                                                                      @Nonnull String packageName, @Nonnull Class<R> baseClass) {
         Set<Class<? extends R>> descendantClasses = new HashSet<>();
         List<String> classNames = Keel.fileHelper().traversalInJarFile(new File(jarInClassPath));
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -198,7 +212,8 @@ public class KeelReflectionHelper {
                     }
                 } catch (Throwable e) {
                     Keel.getLogger()
-                        .debug(getClass() + " seekClassDescendantsInPackageForProvidedJar for " + className + " error" +
+                        .debug(getClass() + " seekClassDescendantsInPackageForProvidedJar for " + className
+                                + " error" +
                                 ": " + e.getMessage());
                 }
             }
@@ -207,7 +222,8 @@ public class KeelReflectionHelper {
     }
 
     /**
-     * @return Whether the given `baseClass` is the base of the given `implementClass`.
+     * @return Whether the given `baseClass` is the base of the given
+     *         `implementClass`.
      * @since 3.0.10
      */
     public boolean isClassAssignable(@Nonnull Class<?> baseClass, @Nonnull Class<?> implementClass) {

@@ -6,12 +6,10 @@ import io.github.sinri.keel.web.http.fastdocs.page.MarkdownPageBuilder;
 import io.github.sinri.keel.web.http.fastdocs.page.PageBuilderOptions;
 import io.vertx.core.Future;
 import io.vertx.core.http.HttpMethod;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.StaticHandler;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;

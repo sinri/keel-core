@@ -16,7 +16,6 @@ public final class TableCreateDefinitionForKey extends TableCreateIndexDefinitio
     @Override
     public String toString() {
         var indexType = getIndexType();
-        var keyParts = getKeyParts();
         var indexOption = getIndexOption();
         return "KEY " + (indexName != null ? indexName : "") + " " + (indexType != null ? indexType : "") + " "
                 + getKeyPartsExpression() + " "

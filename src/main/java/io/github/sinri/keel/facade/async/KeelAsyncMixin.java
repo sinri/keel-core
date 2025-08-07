@@ -15,6 +15,6 @@ import io.github.sinri.keel.facade.KeelInstance;
  * @see KeelInstance#Keel
  * @since 4.0.0
  */
-public interface KeelAsyncMixin extends KeelAsyncMixinParallel, KeelAsyncMixinLogic, KeelAsyncMixinLock, KeelAsyncMixinBlock {
+public interface KeelAsyncMixin extends KeelAsyncMixinParallel, KeelAsyncMixinLock, KeelAsyncMixinBlock {
 
 }

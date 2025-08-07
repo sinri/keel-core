@@ -1,10 +1,8 @@
 package io.github.sinri.keel.facade.async;
 
 import io.github.sinri.keel.facade.KeelInstance;
-import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 
 import javax.annotation.Nullable;
 
@@ -40,7 +38,6 @@ interface KeelAsyncMixinCore {
      *         interrupted by the interrupter.
      */
     default Future<Void> asyncSleep(long time, @Nullable Promise<Void> interrupter) {
-        Context currentContext = Vertx.currentContext();
         Promise<Void> promise = Promise.promise();
         time = Math.max(1, time);
         long timer_id = Keel.getVertx().setTimer(time, timerID -> {

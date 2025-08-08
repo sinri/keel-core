@@ -1,7 +1,5 @@
 package io.github.sinri.keel.integration.poi.csv;
 
-import io.github.sinri.keel.core.TechnicalPreview;
-
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +7,6 @@ import java.util.List;
 /**
  * @since 3.1.1 Technical Preview
  */
-@TechnicalPreview(since = "3.1.1")
 public class CsvRow {
     private final List<CsvCell> cells = new ArrayList<>();
 

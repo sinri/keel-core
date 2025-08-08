@@ -21,6 +21,9 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * As of 4.1.1, implements {@link Closeable}, and deprecates all the asynchronous write methods.
+ * <p>
+ * Call static method {@link KeelCsvWriter#write(OutputStream, String, Charset, Function)} or
+ * {@link KeelCsvWriter#write(OutputStream, Function)} is the recommended usage.
  *
  * @since 3.1.1
  */

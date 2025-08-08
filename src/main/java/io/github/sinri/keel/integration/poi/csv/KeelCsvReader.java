@@ -1,21 +1,28 @@
 package io.github.sinri.keel.integration.poi.csv;
 
+import io.vertx.core.Completable;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Iterator;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 /**
  * As of 4.1.1, implements {@link Closeable}, and deprecates all the asynchronous methods.
+ * <p>
+ * Call static method {@link KeelCsvReader#read(InputStream, Charset, String, Function)} is the recommended usage.
  * <p>
  *     TODO: implement {@link Iterator} in the future, and remove all the asynchronous methods.
  *
  * @since 3.1.1
  */
-public class KeelCsvReader implements Closeable {
+public class KeelCsvReader implements io.vertx.core.Closeable {
     private final BufferedReader br;
     /**
      * TODO: make it final.
@@ -37,7 +44,7 @@ public class KeelCsvReader implements Closeable {
     /**
      * @since 4.1.1
      */
-    public KeelCsvReader(@Nonnull InputStream inputStream, Charset charset, @Nonnull String separator) {
+    public KeelCsvReader(@Nonnull InputStream inputStream, @Nonnull Charset charset, @Nonnull String separator) {
         this(new BufferedReader(new InputStreamReader(inputStream, charset)), separator);
     }
 
@@ -77,6 +84,40 @@ public class KeelCsvReader implements Closeable {
     @Deprecated(since = "4.1.1", forRemoval = true)
     public static Future<KeelCsvReader> create(@Nonnull String file, @Nonnull Charset charset) {
         return create(new File(file), charset);
+    }
+
+    /**
+     * @param inputStream the input stream for csv
+     * @param charset     the charset used by the csv
+     * @param separator   the separator used by the csv
+     * @param readFunc    a function to read the csv and process the data with a generated {@link KeelCsvReader}
+     *                    instance.
+     * @since 4.1.1
+     */
+    public static Future<Void> read(
+            @Nonnull InputStream inputStream, @Nonnull Charset charset, @Nonnull String separator,
+            @Nonnull Function<KeelCsvReader, Future<Void>> readFunc
+    ) {
+        AtomicReference<KeelCsvReader> ref = new AtomicReference<>();
+        return Future.succeededFuture()
+                     .compose(v -> {
+                         KeelCsvReader keelCsvReader = new KeelCsvReader(inputStream, charset, separator);
+                         ref.set(keelCsvReader);
+                         return Future.succeededFuture();
+                     })
+                     .compose(v -> {
+                         KeelCsvReader keelCsvReader = ref.get();
+                         Objects.requireNonNull(keelCsvReader);
+                         return readFunc.apply(keelCsvReader);
+                     })
+                     .eventually(() -> {
+                         KeelCsvReader keelCsvReader = ref.get();
+                         if (keelCsvReader != null) {
+                             return keelCsvReader.close();
+                         } else {
+                             return Future.succeededFuture();
+                         }
+                     });
     }
 
     /**
@@ -207,8 +248,27 @@ public class KeelCsvReader implements Closeable {
                      });
     }
 
+    /**
+     * @param completion the promise to signal when close has completed
+     * @since 4.1.1
+     */
     @Override
-    public void close() throws IOException {
-        this.br.close();
+    public void close(Completable<Void> completion) {
+        try {
+            this.br.close();
+            completion.succeed();
+        } catch (IOException e) {
+            completion.fail(e);
+        }
+    }
+
+    /**
+     * @since 4.1.1
+     */
+    @Nonnull
+    public Future<Void> close() {
+        Promise<Void> promise = Promise.promise();
+        close(promise);
+        return promise.future();
     }
 }

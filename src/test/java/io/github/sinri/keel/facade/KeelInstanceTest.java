@@ -1,7 +1,6 @@
 package io.github.sinri.keel.facade;
 
 import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
-import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;

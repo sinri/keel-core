@@ -31,6 +31,36 @@ public class KeelConfigProperty {
         return this;
     }
 
+    /**
+     * /**
+     * Returns the property name represented by this configuration property.
+     * <p>
+     * The property name is constructed by joining all elements of the keychain with a dot ('.').
+     * <p>
+     * For example, if the keychain is ["database", "url"], the property name will be "database.url".
+     *
+     * @return the dot-separated property name
+     * @since 4.1.1
+     */
+    @Nonnull
+    public String getPropertyName() {
+        return String.join(".", keychain);
+    }
+
+    /**
+     * /**
+     * Returns the value associated with this configuration property.
+     * <p>
+     * If the value was not set, an empty string is returned.
+     *
+     * @return the property value as a string, never null
+     * @since 4.1.1
+     */
+    @Nonnull
+    public String getPropertyValue() {
+        return value;
+    }
+
     @Override
     public final String toString() {
         return String.join(".", keychain) + "=" + value;

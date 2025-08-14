@@ -1,5 +1,6 @@
 package io.github.sinri.keel.integration.poi.excel;
 
+import com.github.pjfanning.xlsx.impl.StreamingWorkbook;
 import io.github.sinri.keel.core.ValueBox;
 import io.vertx.core.Closeable;
 import io.vertx.core.Completable;
@@ -30,20 +31,25 @@ public class KeelSheets implements Closeable {
      */
     private final @Nullable FormulaEvaluator formulaEvaluator;
     protected @Nonnull Workbook autoWorkbook;
+    /**
+     * This field is null for write mode.
+     */
+    @Nullable
+    protected KeelSheetsReaderType sheetsReaderType;
 
     /**
      * @param workbook The generated POI Workbook Implementation.
      * @since 3.0.20
      */
-    protected KeelSheets(@Nonnull Workbook workbook) {
-        this(workbook, false);
+    protected KeelSheets(@Nullable KeelSheetsReaderType sheetsReaderType, @Nonnull Workbook workbook) {
+        this(sheetsReaderType, workbook, false);
     }
 
     /**
      * Create a new Sheets.
      */
     protected KeelSheets() {
-        this(null, false);
+        this(null, null, false);
     }
 
     /**
@@ -52,7 +58,8 @@ public class KeelSheets implements Closeable {
      * @param workbook if null, create a new Sheets; otherwise, use it.
      * @since 3.1.3
      */
-    protected KeelSheets(@Nullable Workbook workbook, boolean withFormulaEvaluator) {
+    protected KeelSheets(@Nullable KeelSheetsReaderType sheetsReaderType, @Nullable Workbook workbook, boolean withFormulaEvaluator) {
+        this.sheetsReaderType = sheetsReaderType;
         autoWorkbook = Objects.requireNonNullElseGet(workbook, XSSFWorkbook::new);
         if (withFormulaEvaluator) {
             formulaEvaluator = autoWorkbook.getCreationHelper().createFormulaEvaluator();
@@ -72,12 +79,16 @@ public class KeelSheets implements Closeable {
                              KeelSheets keelSheets;
                              if (sheetsOpenOptions.isUseHugeXlsxStreamReading()) {
                                  if (sheetsOpenOptions.getInputStream() != null) {
-                                     keelSheets = new KeelSheets(sheetsOpenOptions.getHugeXlsxStreamingReaderBuilder()
-                                                                                  .open(sheetsOpenOptions.getInputStream())
+                                     keelSheets = new KeelSheets(
+                                             KeelSheetsReaderType.XLSX_STREAMING,
+                                             sheetsOpenOptions.getHugeXlsxStreamingReaderBuilder()
+                                                              .open(sheetsOpenOptions.getInputStream())
                                      );
                                  } else if (sheetsOpenOptions.getFile() != null) {
-                                     keelSheets = new KeelSheets(sheetsOpenOptions.getHugeXlsxStreamingReaderBuilder()
-                                                                                  .open(sheetsOpenOptions.getFile())
+                                     keelSheets = new KeelSheets(
+                                             KeelSheetsReaderType.XLSX_STREAMING,
+                                             sheetsOpenOptions.getHugeXlsxStreamingReaderBuilder()
+                                                              .open(sheetsOpenOptions.getFile())
                                      );
                                  } else {
                                      throw new IOException("No input source!");
@@ -104,10 +115,28 @@ public class KeelSheets implements Closeable {
                                              workbook = new HSSFWorkbook(inputStream);
                                          }
                                      }
-                                     keelSheets = new KeelSheets(workbook, sheetsOpenOptions.isWithFormulaEvaluator());
-                                 } else if (sheetsOpenOptions.getFile() != null) {
                                      keelSheets = new KeelSheets(
-                                             WorkbookFactory.create(sheetsOpenOptions.getFile()),
+                                             (useXlsx ? KeelSheetsReaderType.XLSX : KeelSheetsReaderType.XLS),
+                                             workbook,
+                                             sheetsOpenOptions.isWithFormulaEvaluator()
+                                     );
+                                 } else if (sheetsOpenOptions.getFile() != null) {
+                                     Workbook workbook = WorkbookFactory.create(sheetsOpenOptions.getFile());
+                                     KeelSheetsReaderType sheetsReaderType1;
+                                     if (workbook instanceof XSSFWorkbook || workbook instanceof SXSSFWorkbook) {
+                                         sheetsReaderType1 = KeelSheetsReaderType.XLSX;
+                                     } else if (workbook instanceof HSSFWorkbook) {
+                                         sheetsReaderType1 = KeelSheetsReaderType.XLS;
+                                     } else if (workbook instanceof StreamingWorkbook) {
+                                         sheetsReaderType1 = KeelSheetsReaderType.XLSX_STREAMING;
+                                     } else {
+                                         throw new UnsupportedOperationException(
+                                                 "unsupported workbook type:" + workbook.getClass().getName()
+                                         );
+                                     }
+                                     keelSheets = new KeelSheets(
+                                             sheetsReaderType1,
+                                             workbook,
                                              sheetsOpenOptions.isWithFormulaEvaluator()
                                      );
                                  } else {
@@ -134,12 +163,12 @@ public class KeelSheets implements Closeable {
                      .compose(v -> {
                          KeelSheets keelSheets;
                          if (sheetsCreateOptions.isUseXlsx()) {
-                             keelSheets = new KeelSheets(new XSSFWorkbook(), sheetsCreateOptions.isWithFormulaEvaluator());
+                             keelSheets = new KeelSheets(null, new XSSFWorkbook(), sheetsCreateOptions.isWithFormulaEvaluator());
                              if (sheetsCreateOptions.isUseStreamWriting()) {
                                  keelSheets.useStreamWrite();
                              }
                          } else {
-                             keelSheets = new KeelSheets(new HSSFWorkbook(), sheetsCreateOptions.isWithFormulaEvaluator());
+                             keelSheets = new KeelSheets(null, new HSSFWorkbook(), sheetsCreateOptions.isWithFormulaEvaluator());
                          }
 
                          return usage.apply(keelSheets)
@@ -175,7 +204,7 @@ public class KeelSheets implements Closeable {
         if (parseFormulaCellToValue) {
             formulaEvaluatorValueBox.setValue(this.formulaEvaluator);
         }
-        return new KeelSheet(sheet, formulaEvaluatorValueBox);
+        return new KeelSheet(sheetsReaderType, sheet, formulaEvaluatorValueBox);
     }
 
     public KeelSheet generateReaderForSheet(int sheetIndex) {
@@ -191,7 +220,7 @@ public class KeelSheets implements Closeable {
         if (parseFormulaCellToValue) {
             formulaEvaluatorValueBox.setValue(this.formulaEvaluator);
         }
-        return new KeelSheet(sheet, formulaEvaluatorValueBox);
+        return new KeelSheet(sheetsReaderType, sheet, formulaEvaluatorValueBox);
     }
 
     public KeelSheet generateWriterForSheet(@Nonnull String sheetName, Integer pos) {
@@ -199,7 +228,7 @@ public class KeelSheets implements Closeable {
         if (pos != null) {
             this.getWorkbook().setSheetOrder(sheetName, pos);
         }
-        return new KeelSheet(sheet, new ValueBox<>(this.formulaEvaluator));
+        return new KeelSheet(null, sheet, new ValueBox<>(this.formulaEvaluator));
     }
 
     public KeelSheet generateWriterForSheet(@Nonnull String sheetName) {
@@ -251,4 +280,5 @@ public class KeelSheets implements Closeable {
             completable.fail(e);
         }
     }
+
 }

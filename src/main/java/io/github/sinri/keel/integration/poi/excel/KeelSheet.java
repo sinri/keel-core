@@ -29,13 +29,18 @@ public class KeelSheet {
      * @since 3.1.3
      */
     private final @Nonnull ValueBox<FormulaEvaluator> formulaEvaluatorBox;
+    /**
+     * This field is null for write mode.
+     */
+    @Nullable
+    protected KeelSheetsReaderType sheetsReaderType;
 
     /**
      * Load sheet without formula evaluator,
      * i.e. the cell with formula would be parsed to string as is.
      */
-    public KeelSheet(@Nonnull Sheet sheet) {
-        this(sheet, new ValueBox<>());
+    public KeelSheet(@Nullable KeelSheetsReaderType sheetsReaderType, @Nonnull Sheet sheet) {
+        this(sheetsReaderType, sheet, new ValueBox<>());
     }
 
     /**
@@ -43,7 +48,8 @@ public class KeelSheet {
      *
      * @since 3.1.4
      */
-    public KeelSheet(@Nonnull Sheet sheet, @Nonnull ValueBox<FormulaEvaluator> formulaEvaluatorBox) {
+    public KeelSheet(@Nullable KeelSheetsReaderType sheetsReaderType, @Nonnull Sheet sheet, @Nonnull ValueBox<FormulaEvaluator> formulaEvaluatorBox) {
+        this.sheetsReaderType = sheetsReaderType;
         this.sheet = sheet;
         this.formulaEvaluatorBox = formulaEvaluatorBox;
     }
@@ -151,6 +157,23 @@ public class KeelSheet {
         }
 
         return rowDatum;
+    }
+
+    @Nullable
+    public KeelSheetsReaderType getSheetsReaderType() {
+        return sheetsReaderType;
+    }
+
+    public KeelSheet setSheetsReaderType(@Nullable KeelSheetsReaderType sheetsReaderType) {
+        this.sheetsReaderType = sheetsReaderType;
+        return this;
+    }
+
+    /**
+     * @since 4.1.1
+     */
+    public KeelSheetDrawing getDrawing() {
+        return new KeelSheetDrawing(this);
     }
 
     public String getName() {
@@ -333,7 +356,8 @@ public class KeelSheet {
     }
 
     /**
-     * @return A future for matrix read with rules: (1) first row as header, (2) auto-detect columns, (3) throw empty rows.
+     * @return A future for matrix read with rules: (1) first row as header, (2) auto-detect columns, (3) throw empty
+     *         rows.
      * @since 3.0.20
      */
     public final Future<KeelSheetMatrix> readAllRowsToMatrix() {
@@ -389,7 +413,8 @@ public class KeelSheet {
     }
 
     /**
-     * @return A future for matrix read with rules: (1) first row as header, (2) auto-detect columns, (3) throw empty rows.
+     * @return A future for matrix read with rules: (1) first row as header, (2) auto-detect columns, (3) throw empty
+     *         rows.
      * @since 3.0.20
      */
     public final Future<KeelSheetTemplatedMatrix> readAllRowsToTemplatedMatrix() {
@@ -490,7 +515,8 @@ public class KeelSheet {
         AtomicInteger rowIndexRef = new AtomicInteger(0);
         blockWriteAllRows(List.of(templatedMatrix.getTemplate().getColumnNames()), 0, 0);
         rowIndexRef.incrementAndGet();
-        templatedMatrix.getRows().forEach(templatedRow -> blockWriteAllRows(List.of(templatedRow.getRawRow()), rowIndexRef.get(), 0));
+        templatedMatrix.getRows()
+                       .forEach(templatedRow -> blockWriteAllRows(List.of(templatedRow.getRawRow()), rowIndexRef.get(), 0));
     }
 
     public Future<Void> writeTemplatedMatrix(@Nonnull KeelSheetTemplatedMatrix templatedMatrix) {

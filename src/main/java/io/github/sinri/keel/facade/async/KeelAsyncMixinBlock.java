@@ -26,13 +26,25 @@ interface KeelAsyncMixinBlock extends KeelAsyncMixinLogic {
 
     /**
      * Runs the provided function in a verticle deployed on a virtual thread using the Keel framework.
-     * This method ensures the execution of asynchronous tasks within a virtual-thread-based deployment.
      * <p>
-     * JDK version 21 is required at least to run this method.
+     * <strong>Use Cases:</strong> Asynchronous task isolation, high-performance concurrency in JDK 21+, 
+     * batch processing, API calls, and other high-concurrency scenarios.
+     * <p>
+     * <strong>Key Points:</strong>
+     * <ul>
+     *   <li>Requires JDK 21+ (technical preview feature)</li>
+     *   <li>Creates a new verticle instance for each call</li>
+     *   <li>Verticles auto-stop after task completion</li>
+     *   <li>Returned Future indicates deployment success, not task completion</li>
+     *   <li>Implement error handling within the provided function</li>
+     * </ul>
+     * <p>
+     * <strong>Best Practices:</strong> Use only when needed, set concurrency limits, 
+     * monitor resources, consider {@code executeBlocking} for simpler tasks.
      *
-     * @param function a supplier that provides a future representing the asynchronous process to be executed within the
-     *                 virtual thread
-     * @return a future that completes when the function's execution and the verticle lifecycle are successfully handled
+     * @param function a supplier that provides a future representing the async process to execute.
+     *                 Must handle exceptions internally as they won't propagate to the returned Future.
+     * @return a future that completes when deployment succeeds, not when the task completes
      * @since 4.1.1
      */
     @TechnicalPreview(since = "4.1.1", notice = "Require JDK 21+")

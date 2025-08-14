@@ -854,7 +854,6 @@ public class KeelConfigElement {
                         x -> new KeelConfigElement(keyArray[0]));
                 if (keyArray.length == 1) {
                     keelConfigElement.setValue(v.toString());
-                    return;
                 }else{
                     for (int i = 1; i < keyArray.length; i++) {
                         String key = keyArray[i];
@@ -924,4 +923,71 @@ public class KeelConfigElement {
         }
         return loadProperties(properties);
     }
+
+    
+    /**
+     * Performs a depth-first traversal of the configuration tree, starting from the given node,
+     * and collects all leaf properties into the provided output list.
+     * <p>
+     * For each node with a non-null value, a {@link KeelConfigProperty} is created with the current path as its
+     * keychain.
+     * <p>
+     * Child nodes are traversed in lexicographical order to ensure stable output.
+     *
+     * @param node the current configuration element being traversed
+     * @param path the keychain representing the path from the root to the current node
+     * @param out  the list to collect resulting {@link KeelConfigProperty} objects
+     * @since 4.1.1
+     */
+    private static void dfsTransform(@Nonnull KeelConfigElement node,
+                                     @Nonnull List<String> path,
+                                     @Nonnull List<KeelConfigProperty> out) {
+        // 当前节点若有值，则输出一条属性
+        if (node.value != null) {
+            out.add(new KeelConfigProperty()
+                    .setKeychain(path)
+                    .setValue(node.value));
+        }
+        // 继续遍历子节点
+        if (!node.children.isEmpty()) {
+            List<String> keys = new ArrayList<>(node.children.keySet());
+            Collections.sort(keys);
+            for (String k : keys) {
+                KeelConfigElement child = node.children.get(k);
+                if (child != null) {
+                    List<String> nextPath = new ArrayList<>(path);
+                    nextPath.add(k);
+                    dfsTransform(child, nextPath, out);
+                }
+            }
+        }
+    }
+
+    /**
+     * /**
+     * Converts all child elements of this configuration element into a list of {@link KeelConfigProperty} objects.
+     * <p>
+     * Each property in the list represents a leaf node in the configuration tree, with its keychain reflecting the path
+     * from this element to the leaf.
+     * <p>
+     * The properties are collected using a depth-first traversal, and sibling nodes are processed in lexicographical
+     * order to ensure stable output.
+     *
+     * @return a list of {@link KeelConfigProperty} representing all leaf properties of the child elements
+     * @since 4.1.1
+     */
+    public List<KeelConfigProperty> transformChildrenToPropertyList() {
+        List<KeelConfigProperty> properties = new ArrayList<>();
+        // 为了输出稳定，按字典序遍历同级子节点
+        List<String> keys = new ArrayList<>(this.children.keySet());
+        Collections.sort(keys);
+        for (String key : keys) {
+            KeelConfigElement child = this.children.get(key);
+            if (child != null) {
+                dfsTransform(child, new ArrayList<>(List.of(key)), properties);
+            }
+        }
+        return properties;
+    }
+
 }

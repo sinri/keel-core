@@ -1,14 +1,14 @@
 package io.github.sinri.keel.facade.async;
 
+import io.github.sinri.keel.core.TechnicalPreview;
+import io.github.sinri.keel.core.verticles.KeelVerticle;
 import io.github.sinri.keel.facade.KeelInstance;
-import io.vertx.core.Context;
-import io.vertx.core.Future;
-import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Supplier;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
@@ -22,6 +22,26 @@ interface KeelAsyncMixinBlock extends KeelAsyncMixinLogic {
     private boolean isInNonBlockContext() {
         Context currentContext = Vertx.currentContext();
         return currentContext != null && currentContext.isEventLoopContext();
+    }
+
+    /**
+     * Runs the provided function in a verticle deployed on a virtual thread using the Keel framework.
+     * This method ensures the execution of asynchronous tasks within a virtual-thread-based deployment.
+     * <p>
+     * JDK version 21 is required at least to run this method.
+     *
+     * @param function a supplier that provides a future representing the asynchronous process to be executed within the
+     *                 virtual thread
+     * @return a future that completes when the function's execution and the verticle lifecycle are successfully handled
+     * @since 4.1.1
+     */
+    @TechnicalPreview(since = "4.1.1", notice = "Require JDK 21+")
+    @Nonnull
+    default Future<Void> runInVerticleOnVirtualThread(@Nonnull Supplier<Future<Void>> function) {
+        return KeelVerticle.instant(() -> Future.succeededFuture()
+                                                .compose(v -> function.get()))
+                           .deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.VIRTUAL_THREAD))
+                           .compose(s -> Future.succeededFuture());
     }
 
     default <R> Future<R> asyncTransformCompletableFuture(@Nonnull CompletableFuture<R> completableFuture) {

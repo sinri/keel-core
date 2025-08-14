@@ -20,7 +20,9 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * tasks before and
  * after each test method, respectively. Additionally, subclasses can override {@link #buildVertxOptions()} to configure
  * Vertx
- * and {@link #buildUnitTestLogger()} to provide a custom logger.</p>
+ * and {@link #buildUnitTestLogger()} to provide a custom logger.
+ *
+ * <p> This class is almost for JUnit 4 eco.
  *
  * @since 3.2.19
  */

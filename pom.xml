@@ -6,7 +6,8 @@
 
     <groupId>io.github.sinri</groupId>
     <artifactId>Keel</artifactId>
-    <version>4.1.1-rc.1</version>
+    <version>4.1.1-SNAPSHOT</version>
+    <!--    <version>4.1.1-rc.1</version>-->
     <!--    <version>4.1.0</version>-->
 
     <name>Keel</name>
@@ -38,13 +39,11 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vertxVersion>5.0.1</vertxVersion>
+        <vertxVersion>5.0.2</vertxVersion>
         <commonmarkVersion>0.21.0</commonmarkVersion>
         <jacksonVersion>2.16.1</jacksonVersion>
-        <!--        <poiVersion>5.2.5</poiVersion>-->
-        <!--        <excelStreamingReader>4.3.1</excelStreamingReader>-->
-        <poiVersion>5.4.0</poiVersion>
-        <excelStreamingReader>5.0.3</excelStreamingReader>
+        <poiVersion>5.4.1</poiVersion>
+        <excelStreamingReader>5.1.1</excelStreamingReader>
         <oshiCoreVersion>6.4.9</oshiCoreVersion>
         <jolCoreVersion>0.17</jolCoreVersion>
     </properties>
@@ -65,12 +64,6 @@
             <artifactId>vertx-mysql-client</artifactId>
             <version>${vertxVersion}</version>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>io.vertx</groupId>-->
-        <!--            <artifactId>vertx-unit</artifactId>-->
-        <!--            <version>${vertxVersion}</version>-->
-        <!--            <scope>test</scope>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web-client</artifactId>
@@ -123,11 +116,6 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>${jacksonVersion}</version>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>org.reflections</groupId>-->
-        <!--            <artifactId>reflections</artifactId>-->
-        <!--            <version>0.10.2</version>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
@@ -140,11 +128,6 @@
             <version>${vertxVersion}</version>
             <scope>test</scope>
         </dependency>
-        <!--        <dependency>-->
-        <!--            <groupId>io.vertx</groupId>-->
-        <!--            <artifactId>vertx-hazelcast</artifactId>-->
-        <!--            <version>${vertxVersion}</version>-->
-        <!--        </dependency>-->
         <dependency>
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core</artifactId>

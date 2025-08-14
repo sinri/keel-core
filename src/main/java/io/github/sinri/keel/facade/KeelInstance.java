@@ -1,5 +1,6 @@
 package io.github.sinri.keel.facade;
 
+import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.core.helper.KeelHelpersInterface;
 import io.github.sinri.keel.facade.async.KeelAsyncMixin;
 import io.github.sinri.keel.facade.configuration.KeelConfigElement;
@@ -90,6 +91,34 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
     public void initializeVertxStandalone(@Nonnull VertxOptions vertxOptions) {
         this.clusterManager = null;
         this.vertx = Vertx.builder().with(vertxOptions).build();
+    }
+
+    /**
+     * This method is designed for Unit Test with JUnit5, in {@code @BeforeEach} methods.
+     * <p>
+     * Do not call this method in your own code.
+     *
+     * @param vertx the vertx instance to replace the current one.
+     * @since 4.1.1
+     */
+    @TechnicalPreview(since = "4.1.1")
+    public void replaceVertxInstance(@Nonnull Vertx vertx) {
+        if (this.vertx != null) {
+            this.vertx.close();
+        }
+        this.vertx = vertx;
+    }
+
+    /**
+     * This method is designed for Unit Test with JUnit5, in {@code @BeforeEach} methods.
+     * <p>
+     * Do not call this method in your own code.
+     *
+     * @since 4.1.1
+     */
+    @TechnicalPreview(since = "4.1.1")
+    public void initializeVertx(@Nonnull Vertx vertx) {
+        this.vertx = vertx;
     }
 
     public boolean isVertxInitialized() {

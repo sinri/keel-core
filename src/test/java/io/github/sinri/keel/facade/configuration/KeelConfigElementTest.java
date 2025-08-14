@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -191,5 +192,104 @@ class KeelConfigElementTest extends KeelUnitTest {
         assertNotNull(config.getChild("simple"));
         assertNotNull(config.getChild("nested"));
         assertNotNull(config.getChild("key"));
+    }
+
+    @Test
+    void transformChildrenToPropertyList() {
+        // 测试基本功能：将子节点转换为属性列表
+        List<KeelConfigProperty> properties = root.transformChildrenToPropertyList();
+
+        getUnitTestLogger().info("root as json", root.toJsonObject());
+        getUnitTestLogger().info("root as properties", new JsonObject()
+                .put("array", new JsonArray(
+                        properties.stream().map(kcp -> {
+                            return kcp.toString();
+                        }).collect(Collectors.toList()))
+                )
+        );
+
+        // 验证返回的属性数量（应该有3个属性：child1, child1.grandChild, child2）
+        assertEquals(3, properties.size());
+
+        // 验证属性按深度优先搜索的顺序输出
+        // 实际顺序：child1, child1.grandChild, child2
+        assertEquals("child1", properties.get(0).toString().split("=")[0]);
+        assertEquals("child1.grandChild", properties.get(1).toString().split("=")[0]);
+        assertEquals("child2", properties.get(2).toString().split("=")[0]);
+
+        // 验证属性值
+        assertEquals("value1", properties.get(0).toString().split("=")[1]);
+        assertEquals("true", properties.get(1).toString().split("=")[1]);
+        assertEquals("123", properties.get(2).toString().split("=")[1]);
+
+        // 测试空子节点的情况
+        KeelConfigElement emptyRoot = new KeelConfigElement("empty");
+        List<KeelConfigProperty> emptyProperties = emptyRoot.transformChildrenToPropertyList();
+        assertEquals(0, emptyProperties.size());
+
+        // 测试只有值没有子节点的情况
+        KeelConfigElement leafNode = new KeelConfigElement("leaf");
+        leafNode.setValue("leaf_value");
+        List<KeelConfigProperty> leafProperties = leafNode.transformChildrenToPropertyList();
+        assertEquals(0, leafProperties.size()); // 没有子节点，所以不会输出属性
+
+        // 测试复杂嵌套结构
+        KeelConfigElement complexRoot = new KeelConfigElement("complex");
+        complexRoot.setValue("root_value");
+
+        KeelConfigElement level1a = new KeelConfigElement("a");
+        level1a.setValue("a_value");
+        complexRoot.addChild(level1a);
+
+        KeelConfigElement level1b = new KeelConfigElement("b");
+        level1b.setValue("b_value");
+        complexRoot.addChild(level1b);
+
+        KeelConfigElement level2a = new KeelConfigElement("sub");
+        level2a.setValue("sub_value");
+        level1a.addChild(level2a);
+
+        KeelConfigElement level2b = new KeelConfigElement("deep");
+        level2b.setValue("deep_value");
+        level1b.addChild(level2b);
+
+        List<KeelConfigProperty> complexProperties = complexRoot.transformChildrenToPropertyList();
+
+        // 应该有4个属性：a, a.sub, b, b.deep（按深度优先搜索顺序）
+        assertEquals(4, complexProperties.size());
+
+        // 验证按深度优先搜索顺序
+        assertEquals("a", complexProperties.get(0).toString().split("=")[0]);
+        assertEquals("a.sub", complexProperties.get(1).toString().split("=")[0]);
+        assertEquals("b", complexProperties.get(2).toString().split("=")[0]);
+        assertEquals("b.deep", complexProperties.get(3).toString().split("=")[0]);
+
+        // 验证属性值
+        assertEquals("a_value", complexProperties.get(0).toString().split("=")[1]);
+        assertEquals("sub_value", complexProperties.get(1).toString().split("=")[1]);
+        assertEquals("b_value", complexProperties.get(2).toString().split("=")[1]);
+        assertEquals("deep_value", complexProperties.get(3).toString().split("=")[1]);
+
+        // 测试字典序排序在同一层级内的效果
+        KeelConfigElement sortTestRoot = new KeelConfigElement("sortTest");
+
+        KeelConfigElement zChild = new KeelConfigElement("z");
+        zChild.setValue("z_value");
+        sortTestRoot.addChild(zChild);
+
+        KeelConfigElement aChild = new KeelConfigElement("a");
+        aChild.setValue("a_value");
+        sortTestRoot.addChild(aChild);
+
+        KeelConfigElement mChild = new KeelConfigElement("m");
+        mChild.setValue("m_value");
+        sortTestRoot.addChild(mChild);
+
+        List<KeelConfigProperty> sortTestProperties = sortTestRoot.transformChildrenToPropertyList();
+
+        // 验证同一层级内按字典序排序
+        assertEquals("a", sortTestProperties.get(0).toString().split("=")[0]);
+        assertEquals("m", sortTestProperties.get(1).toString().split("=")[0]);
+        assertEquals("z", sortTestProperties.get(2).toString().split("=")[0]);
     }
 }

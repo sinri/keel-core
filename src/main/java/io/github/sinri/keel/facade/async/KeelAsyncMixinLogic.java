@@ -306,7 +306,10 @@ interface KeelAsyncMixinLogic extends KeelAsyncMixinCore {
     default void asyncCallEndlessly(@Nonnull Supplier<Future<Void>> supplier) {
         asyncCallRepeatedly(routineResult -> Future.succeededFuture()
                                                    .compose(v -> supplier.get())
-                                                   .eventually(Future::succeededFuture)); // Convert failures to success to keep loop running
+                                                   .eventually(() -> {
+                                                       // Convert failures to success to keep the loop running
+                                                       return Future.succeededFuture();
+                                                   }));
     }
 
 }

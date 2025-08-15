@@ -12,10 +12,16 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * The base class for JUnit5 test cases.
+ * <p>
+ * Any implementation of this class should be annotated with {@code @ExtendWith(VertxExtension.class)}.
+ * <p>
+ * In any implementation of this class, you should define a method annotated {@code @BeforeAll}
+ * with parameters {@code Vertx vertx} and {@code VertxTestContext testContext},
+ * in which {@link KeelJUnit5Test#beforeAllShared(Vertx)} should be called to enable Keel functionality.
  *
  * @since 4.1.1
  */
-public class KeelJUnit5Test implements KeelJUnit5TestCore {
+public abstract class KeelJUnit5Test implements KeelJUnit5TestCore {
     private final KeelIssueRecorder<KeelEventLog> unitTestLogger;
 
     /**

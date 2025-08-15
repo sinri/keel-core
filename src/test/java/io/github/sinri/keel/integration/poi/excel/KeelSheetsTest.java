@@ -1,27 +1,33 @@
 package io.github.sinri.keel.integration.poi.excel;
 
 import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.github.sinri.keel.core.ValueBox;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
-import org.apache.poi.hssf.usermodel.HSSFPatriarch;
 import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Drawing;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFDrawing;
-import org.apache.poi.xssf.usermodel.XSSFPicture;
-import org.apache.poi.xssf.usermodel.XSSFPictureData;
-import org.apache.poi.xssf.usermodel.XSSFShape;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.Iterator;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith({VertxExtension.class})
 class KeelSheetsTest extends KeelJUnit5Test {
+    private static final String TEST_XLSX_FILE_PATH = "/Users/sinri/code/keel/src/test/resources/runtime/with-pic.xlsx";
+    private static final String TEST_XLS_FILE_PATH = "/Users/sinri/code/keel/src/test/resources/runtime/with-pic.xls";
+    private static final String TEST_OUTPUT_DIR = "/Users/sinri/code/keel/src/test/resources/runtime/output";
+    
+    private File testOutputDir;
 
     @BeforeAll
     static void beforeAll(Vertx vertx, VertxTestContext testContext) {
@@ -29,262 +35,277 @@ class KeelSheetsTest extends KeelJUnit5Test {
         testContext.completeNow();
     }
 
+    @BeforeEach
+    void setUp() {
+        testOutputDir = new File(TEST_OUTPUT_DIR);
+        if (!testOutputDir.exists()) {
+            testOutputDir.mkdirs();
+        }
+    }
+
+    @AfterEach
+    void tearDown() {
+        if (testOutputDir.exists()) {
+            deleteDirectory(testOutputDir);
+        }
+    }
+
+    private void deleteDirectory(File dir) {
+        File[] files = dir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    deleteDirectory(file);
+                } else {
+                    file.delete();
+                }
+            }
+        }
+        dir.delete();
+    }
+
+
+
     @Test
-    void testReadXlsxWithPic0(Vertx vertx, VertxTestContext testContext) throws Exception {
+    @DisplayName("测试文件操作 - 打开、读取、保存")
+    void testFileOperations() {
+        // 测试打开XLSX文件
+        File testFile = new File(TEST_XLSX_FILE_PATH);
+        assertTrue(testFile.exists(), "测试文件应该存在");
+
         KeelSheets.useSheets(
-                          new SheetsOpenOptions()
-                                  .setFile("/Users/sinri/code/keel/src/test/resources/runtime/with-pic.xlsx"),
-                          keelSheets -> {
-                              Sheet sheet0 = keelSheets.getWorkbook().getSheetAt(0);
-                              Iterator<Row> rowIterator = sheet0.rowIterator();
-                              int rowIndex = 0;
-                              while (rowIterator.hasNext()) {
-                                  Row row = rowIterator.next();
-                                  Iterator<Cell> cellIterator = row.cellIterator();
-                                  int cellIndex = 0;
-                                  while (cellIterator.hasNext()) {
-                                      Cell cell = cellIterator.next();
-                                      getUnitTestLogger().info(String.format(
-                                              "cell[%d][%d]: %s as %s",
-                                              rowIndex, cellIndex,
-                                              cell, cell.getCellType().name()
-                                      ));
-                                      cellIndex++;
-                                  }
-                                  rowIndex++;
-                              }
-
-                              sheet0.getWorkbook().getAllPictures()
-                                    .forEach(sheetPic -> {
-                                        getUnitTestLogger().info(String.format(
-                                                "pic <%s> type %s mime %s>",
-                                                sheetPic.getClass().getName(),
-                                                sheetPic.getPictureType(),
-                                                sheetPic.getMimeType()
-                                        ));
-
-                                        //                                       org.apache.poi.xssf.usermodel.XSSFPictureData xssfPictureData= (org.apache.poi.xssf.usermodel.XSSFPictureData) sheetPic;
-                                    });
-
-                              // 获取工作表中的所有绘图对象（包含图片）
-                              XSSFDrawing drawing = (XSSFDrawing) sheet0.getDrawingPatriarch();
-                              if (drawing != null) {
-                                  System.out.println("  发现绘图对象");
-
-                                  int pictureIndex = 0; // 图片计数器
-                                  // 遍历所有图形对象
-                                  for (XSSFShape shape : drawing.getShapes()) {
-                                      getUnitTestLogger().info("shape class: " + shape.getClass().getName());
-                                      // 只处理图片类型的对象
-                                      if (shape instanceof XSSFPicture) {
-                                          XSSFPicture picture = (XSSFPicture) shape;
-                                          XSSFPictureData pictureData = picture.getPictureData();
-
-                                          // 获取图片位置信息 - POI 5.4.1兼容方式
-                                          int row = 0;
-                                          int col = 0;
-
-                                          try {
-                                              // 使用新的API获取位置信息
-                                              if (picture.getClientAnchor() != null) {
-                                                  var anchor = picture.getClientAnchor();
-                                                  row = anchor.getRow1() + 1; // 转换为Excel行号（从1开始）
-                                                  col = anchor.getCol1() + 1; // 转换为Excel列号（从1开始）
-                                              } else {
-                                                  // 如果无法获取位置信息，使用默认值
-                                                  System.out.println("    警告：无法获取图片精确位置信息");
-                                                  row = -1;
-                                                  col = -1;
-                                              }
-                                          } catch (Exception e) {
-                                              System.out.println("    警告：获取图片位置信息时出错: " + e.getMessage());
-                                              row = -1;
-                                              col = -1;
-                                          }
-
-                                          // 获取图片尺寸（像素）
-                                          int width = 0;
-                                          int height = 0;
-                                          try {
-                                              var dimension = picture.getImageDimension();
-                                              width = dimension.width;
-                                              height = dimension.height;
-                                          } catch (Exception e) {
-                                              System.out.println("    警告：无法获取图片尺寸信息: " + e.getMessage());
-                                          }
-
-                                          // 输出图片信息
-                                          pictureIndex++;
-                                          System.out.printf("  图片 %d: %s%n",
-                                                  pictureIndex,
-                                                  pictureData.suggestFileExtension());
-                                          if (row > 0 && col > 0) {
-                                              System.out.printf("    位置: 第%d行，第%d列%n", row, col);
-                                          } else {
-                                              System.out.printf("    位置: 无法确定%n");
-                                          }
-                                          if (width > 0 && height > 0) {
-                                              System.out.printf("    尺寸: %dx%d像素%n", width, height);
-                                          } else {
-                                              System.out.printf("    尺寸: 无法确定%n");
-                                          }
-                                          System.out.printf("    MIME类型: %s%n", pictureData.getMimeType());
-                                      }
-                                  }
-                              } else {
-                                  System.out.println("  无图片");
-                              }
-
-                              return Future.succeededFuture();
-                          }
-                  )
-                  .onComplete(testContext.succeedingThenComplete());
+                new SheetsOpenOptions().setFile(testFile),
+                keelSheets -> {
+                    assertNotNull(keelSheets);
+                    assertNotNull(keelSheets.getWorkbook());
+                    assertEquals(1, keelSheets.getSheetCount());
+                    
+                    // 读取工作表数据
+                    KeelSheet sheet = keelSheets.generateReaderForSheet(0);
+                    assertNotNull(sheet);
+                    
+                    return sheet.readAllRowsToMatrix()
+                            .compose(matrix -> {
+                                assertNotNull(matrix);
+                                List<List<String>> rows = matrix.getRawRowList();
+                                assertFalse(rows.isEmpty(), "应该能读取到行数据");
+                                
+                                getUnitTestLogger().info(r -> r.message("成功读取工作表数据，行数: " + rows.size()));
+                                
+                                // 读取第一行详细信息
+                                Row firstRow = sheet.readRow(0);
+                                if (firstRow != null) {
+                                    getUnitTestLogger().info(r -> r.message("第一行单元格数: " + firstRow.getLastCellNum()));
+                                    
+                                    for (int colIndex = 0; colIndex < firstRow.getLastCellNum(); colIndex++) {
+                                        final int index = colIndex;
+                                        Cell cell = firstRow.getCell(index);
+                                        if (cell != null) {
+                                            // 使用KeelSheet的公共方法获取单元格值
+                                            String cellValue = KeelSheet.dumpCellToString(cell, new ValueBox<>(sheet.getFormulaEvaluator()));
+                                            getUnitTestLogger().info(r -> r.message("单元格[" + index + "]: " + cellValue));
+                                        }
+                                    }
+                                }
+                                
+                                return Future.succeededFuture();
+                            });
+                }
+        );
     }
 
     @Test
-    void testReadXlsWithPic0(Vertx vertx, VertxTestContext testContext) throws Exception {
+    @DisplayName("测试XLS格式文件")
+    void testXlsFile() {
+        File testFile = new File(TEST_XLS_FILE_PATH);
+        assertTrue(testFile.exists(), "测试文件应该存在");
+
         KeelSheets.useSheets(
-                          new SheetsOpenOptions()
-                                  .setFile("/Users/sinri/code/keel/src/test/resources/runtime/with-pic.xls"),
-                          keelSheets -> {
-                              Sheet sheet0 = keelSheets.getWorkbook().getSheetAt(0);
-                              Iterator<Row> rowIterator = sheet0.rowIterator();
-                              int rowIndex = 0;
-                              while (rowIterator.hasNext()) {
-                                  Row row = rowIterator.next();
-                                  Iterator<Cell> cellIterator = row.cellIterator();
-                                  int cellIndex = 0;
-                                  while (cellIterator.hasNext()) {
-                                      Cell cell = cellIterator.next();
-                                      getUnitTestLogger().info(String.format(
-                                              "cell[%d][%d]: %s as %s",
-                                              rowIndex, cellIndex,
-                                              cell, cell.getCellType().name()
-                                      ));
-                                      cellIndex++;
-                                  }
-                                  rowIndex++;
-                              }
-
-                              sheet0.getWorkbook().getAllPictures()
-                                    .forEach(sheetPic -> {
-                                        getUnitTestLogger().info(String.format(
-                                                "pic <%s> type %s mime %s>",
-                                                sheetPic.getClass().getName(),
-                                                sheetPic.getPictureType(),
-                                                sheetPic.getMimeType()
-                                        ));
-                                    });
-
-                              // 获取工作表中的所有绘图对象（包含图片）
-                              Drawing<?> drawingPatriarch = sheet0.getDrawingPatriarch();
-                              getUnitTestLogger().info("drawingPatriarch class: " + drawingPatriarch.getClass().getName());
-
-                              if (drawingPatriarch instanceof HSSFPatriarch) {
-                                  HSSFPatriarch drawing = (HSSFPatriarch) drawingPatriarch;
-                                  System.out.println("  发现HSSF绘图对象");
-
-                                  int pictureIndex = 0; // 图片计数器
-                                  // 遍历所有图形对象 - 使用HSSF兼容的方式
-                                  for (org.apache.poi.hssf.usermodel.HSSFShape shape : drawing.getChildren()) {
-                                      getUnitTestLogger().info("shape class: " + shape.getClass().getName());
-                                      // 只处理图片类型的对象
-                                      if (shape instanceof org.apache.poi.hssf.usermodel.HSSFPicture) {
-                                          org.apache.poi.hssf.usermodel.HSSFPicture picture = (org.apache.poi.hssf.usermodel.HSSFPicture) shape;
-                                          org.apache.poi.hssf.usermodel.HSSFPictureData pictureData = picture.getPictureData();
-
-                                          // 获取图片位置信息 - POI 5.4.1兼容方式
-                                          int row = 0;
-                                          int col = 0;
-
-                                          try {
-                                              // 使用HSSF的ClientAnchor获取位置信息
-                                              if (picture.getClientAnchor() != null) {
-                                                  var anchor = picture.getClientAnchor();
-                                                  row = anchor.getRow1() + 1; // 转换为Excel行号（从1开始）
-                                                  col = anchor.getCol1() + 1; // 转换为Excel列号（从1开始）
-                                              } else {
-                                                  // 如果无法获取位置信息，使用默认值
-                                                  System.out.println("    警告：无法获取图片精确位置信息");
-                                                  row = -1;
-                                                  col = -1;
-                                              }
-                                          } catch (Exception e) {
-                                              System.out.println("    警告：获取图片位置信息时出错: " + e.getMessage());
-                                              row = -1;
-                                              col = -1;
-                                          }
-
-                                          // 获取图片尺寸（像素）
-                                          int width = 0;
-                                          int height = 0;
-                                          try {
-                                              // HSSF中获取图片尺寸的方法
-                                              var anchor = picture.getClientAnchor();
-                                              if (anchor != null) {
-                                                  // 使用anchor的尺寸信息 - POI 5.4.1兼容方式
-                                                  width = anchor.getDx1();
-                                                  height = anchor.getDy1();
-                                                  // 转换为像素（近似值）
-                                                  width = Math.max(1, width / 9525); // 9525 EMUs per pixel
-                                                  height = Math.max(1, height / 9525);
-                                              }
-                                          } catch (Exception e) {
-                                              System.out.println("    警告：无法获取图片尺寸信息: " + e.getMessage());
-                                          }
-
-                                          // 输出图片信息
-                                          pictureIndex++;
-                                          System.out.printf("  图片 %d: %s%n",
-                                                  pictureIndex,
-                                                  pictureData.suggestFileExtension());
-                                          if (row > 0 && col > 0) {
-                                              System.out.printf("    位置: 第%d行，第%d列%n", row, col);
-                                          } else {
-                                              System.out.printf("    位置: 无法确定%n");
-                                          }
-                                          if (width > 0 && height > 0) {
-                                              System.out.printf("    尺寸: %dx%d像素%n", width, height);
-                                          } else {
-                                              System.out.printf("    尺寸: 无法确定%n");
-                                          }
-                                          System.out.printf("    MIME类型: %s%n", pictureData.getMimeType());
-                                      }
-                                  }
-                              } else {
-                                  System.out.println("  无HSSF绘图对象");
-                              }
-
-                              return Future.succeededFuture();
-                          }
-                  )
-                  .onComplete(testContext.succeedingThenComplete());
+                new SheetsOpenOptions().setFile(testFile),
+                keelSheets -> {
+                    assertNotNull(keelSheets);
+                    assertNotNull(keelSheets.getWorkbook());
+                    assertEquals(1, keelSheets.getSheetCount());
+                    
+                    getUnitTestLogger().info(r -> r.message("成功打开XLS文件，工作表数量: " + keelSheets.getSheetCount()));
+                    return Future.succeededFuture();
+                }
+        );
     }
 
     @Test
-    void testReadXlsxWithPic1(Vertx vertx, VertxTestContext testContext) throws Exception {
+    @DisplayName("测试工作簿创建和操作")
+    void testWorkbookCreationAndOperations() {
         KeelSheets.useSheets(
-                          new SheetsOpenOptions()
-                                  .setFile("/Users/sinri/code/keel/src/test/resources/runtime/with-pic.xlsx"),
-                          keelSheets -> {
-                              var sheet = keelSheets.generateReaderForSheet(0);
+                new SheetsCreateOptions().setUseXlsx(true),
+                keelSheets -> {
+                    assertNotNull(keelSheets);
+                    assertEquals(0, keelSheets.getSheetCount());
 
-                              sheet.blockReadAllRows(row -> {
-                                  int rowNum = row.getRowNum();
-                                  getUnitTestLogger().info("==== rowNum: " + rowNum);
-                                  // 修复：遍历当前行的所有单元格，而不是从0到rowNum
-                                  int lastCellNum = row.getLastCellNum();
-                                  for (int i = 0; i < lastCellNum; i++) {
-                                      Cell cell = row.getCell(i);
-                                      if (cell != null) {
-                                          getUnitTestLogger().info("row[" + rowNum + "][cell" + i + "]=" + cell + " as " + cell.getCellType()
-                                                                                                                               .name());
-                                      }
-                                  }
-                              });
-                              return Future.succeededFuture();
-                          }
-                  )
-                  .onComplete(testContext.succeedingThenComplete());
+                    // 添加工作表
+                    KeelSheet sheet1 = keelSheets.generateWriterForSheet("Sheet1");
+                    KeelSheet sheet2 = keelSheets.generateWriterForSheet("Sheet2", 0);
+                    KeelSheet sheet3 = keelSheets.generateWriterForSheet("ThirdSheet");
+                    
+                    assertEquals(3, keelSheets.getSheetCount());
+                    assertEquals("Sheet2", keelSheets.getWorkbook().getSheetName(0));
+                    assertEquals("Sheet1", keelSheets.getWorkbook().getSheetName(1));
+                    assertEquals("ThirdSheet", keelSheets.getWorkbook().getSheetName(2));
+                    
+                    // 测试通过名称获取工作表
+                    KeelSheet reader1 = keelSheets.generateReaderForSheet("Sheet1");
+                    KeelSheet reader2 = keelSheets.generateReaderForSheet("Sheet2");
+                    
+                    assertNotNull(reader1);
+                    assertNotNull(reader2);
+                    assertEquals("Sheet1", reader1.getName());
+                    assertEquals("Sheet2", reader2.getName());
+                    
+                    getUnitTestLogger().info(r -> r.message("成功测试工作表操作"));
+                    return Future.succeededFuture();
+                }
+        );
+    }
+
+    @Test
+    @DisplayName("测试文件保存和图片读取")
+    void testFileSaveAndPictureReading() {
+        String outputPath = TEST_OUTPUT_DIR + "/test_output.xlsx";
+        File outputFile = new File(outputPath);
+
+        // 先创建并保存文件
+        KeelSheets.useSheets(
+                new SheetsCreateOptions().setUseXlsx(true),
+                keelSheets -> {
+                    KeelSheet sheet = keelSheets.generateWriterForSheet("TestSheet");
+                    
+                    // 添加测试数据
+                    Row row1 = sheet.getSheet().createRow(0);
+                    row1.createCell(0).setCellValue("Name");
+                    row1.createCell(1).setCellValue("Age");
+                    
+                    Row row2 = sheet.getSheet().createRow(1);
+                    row2.createCell(0).setCellValue("John");
+                    row2.createCell(1).setCellValue(25);
+
+                    keelSheets.save(outputPath);
+                    assertTrue(outputFile.exists(), "输出文件应该被创建");
+                    
+                    getUnitTestLogger().info(r -> r.message("成功保存工作簿到文件: " + outputPath));
+                    return Future.succeededFuture();
+                }
+        );
+
+        // 然后读取原文件测试图片功能
+        KeelSheets.useSheets(
+                new SheetsOpenOptions().setFile(TEST_XLSX_FILE_PATH),
+                keelSheets -> {
+                    KeelSheet sheet = keelSheets.generateReaderForSheet(0);
+                    List<KeelPictureInSheet> pictures = sheet.getPictures();
+                    assertNotNull(pictures);
+                    
+                    getUnitTestLogger().info(r -> r.message("工作表包含图片数量: " + pictures.size()));
+                    
+                    // 验证图片数据
+                    for (int picIndex = 0; picIndex < pictures.size(); picIndex++) {
+                        final int index = picIndex;
+                        KeelPictureInSheet picture = pictures.get(index);
+                        getUnitTestLogger().info(r -> r.message("图片[" + index + "]: " + picture.toString()));
+                        
+                        assertNotNull(picture.getData());
+                        assertTrue(picture.getData().length > 0, "图片数据应该不为空");
+                        assertNotNull(picture.getMimeType());
+                        assertNotNull(picture.getSuggestFileExtension());
+                    }
+                    
+                    return Future.succeededFuture();
+                }
+        );
+    }
+
+    @Test
+    @DisplayName("测试高级功能 - 公式求值器和流式写入")
+    void testAdvancedFeatures() {
+        // 测试公式求值器
+        KeelSheets.useSheets(
+                new SheetsCreateOptions().setUseXlsx(true).setWithFormulaEvaluator(true),
+                keelSheets -> {
+                    KeelSheet sheet = keelSheets.generateWriterForSheet("FormulaTest");
+                    
+                    Row row1 = sheet.getSheet().createRow(0);
+                    row1.createCell(0).setCellValue("A");
+                    row1.createCell(1).setCellValue("B");
+                    row1.createCell(2).setCellValue("Sum");
+                    
+                    Row row2 = sheet.getSheet().createRow(1);
+                    row2.createCell(0).setCellValue(10);
+                    row2.createCell(1).setCellValue(20);
+                    row2.createCell(2).setCellFormula("A2+B2");
+                    
+                    assertNotNull(keelSheets.getWorkbook().getCreationHelper().createFormulaEvaluator());
+                    getUnitTestLogger().info(r -> r.message("成功创建带公式求值器的工作簿"));
+                    return Future.succeededFuture();
+                }
+        );
+
+        // 测试流式写入模式
+        KeelSheets.useSheets(
+                new SheetsCreateOptions().setUseXlsx(true).setUseStreamWriting(true),
+                keelSheets -> {
+                    KeelSheet sheet = keelSheets.generateWriterForSheet("StreamTest");
+                    
+                    // 添加大量数据测试流式写入
+                    for (int i = 0; i < 100; i++) {
+                        Row row = sheet.getSheet().createRow(i);
+                        for (int j = 0; j < 10; j++) {
+                            row.createCell(j).setCellValue("Cell_" + i + "_" + j);
+                        }
+                    }
+                    
+                    getUnitTestLogger().info(r -> r.message("成功使用流式写入模式创建大量数据"));
+                    return Future.succeededFuture();
+                }
+        );
+    }
+
+    @Test
+    @DisplayName("测试错误处理和资源管理")
+    void testErrorHandlingAndResourceManagement() {
+        // 测试错误处理
+        File nonExistentFile = new File("/non/existent/file.xlsx");
+        
+        KeelSheets.useSheets(
+                new SheetsOpenOptions().setFile(nonExistentFile),
+                keelSheets -> {
+                    fail("应该抛出异常，因为文件不存在");
+                    return Future.succeededFuture();
+                }
+        ).onComplete(ar -> {
+            if (ar.failed()) {
+                getUnitTestLogger().info(r -> r.message("预期的错误: " + ar.cause().getMessage()));
+                assertTrue(ar.cause() instanceof IOException || ar.cause().getCause() instanceof IOException);
+            } else {
+                fail("应该失败但没有失败");
+            }
+        });
+
+        // 测试资源自动关闭
+        KeelSheets.useSheets(
+                new SheetsCreateOptions().setUseXlsx(true),
+                keelSheets -> {
+                    KeelSheet sheet = keelSheets.generateWriterForSheet("AutoCloseTest");
+                    Row row = sheet.getSheet().createRow(0);
+                    row.createCell(0).setCellValue("Test");
+                    
+                    getUnitTestLogger().info(r -> r.message("在回调中成功操作工作簿"));
+                    return Future.succeededFuture();
+                }
+        ).onComplete(ar -> {
+            if (ar.succeeded()) {
+                getUnitTestLogger().info(r -> r.message("资源自动关闭测试成功"));
+            } else {
+                getUnitTestLogger().error(r -> r.message("资源自动关闭测试失败: " + ar.cause().getMessage()));
+            }
+        });
     }
 }

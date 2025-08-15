@@ -38,17 +38,21 @@ public class KeelSheet {
     /**
      * Load sheet without formula evaluator,
      * i.e. the cell with formula would be parsed to string as is.
+     * <p>
+     * As of 4.1.1, it is package-protected.
      */
-    public KeelSheet(@Nullable KeelSheetsReaderType sheetsReaderType, @Nonnull Sheet sheet) {
+    KeelSheet(@Nullable KeelSheetsReaderType sheetsReaderType, @Nonnull Sheet sheet) {
         this(sheetsReaderType, sheet, new ValueBox<>());
     }
 
     /**
      * Load sheet with 3 kinds of cell formula evaluator: None, Cached, and Evaluate.
+     * <p>
+     * As of 4.1.1, it is package-protected.
      *
      * @since 3.1.4
      */
-    public KeelSheet(@Nullable KeelSheetsReaderType sheetsReaderType, @Nonnull Sheet sheet, @Nonnull ValueBox<FormulaEvaluator> formulaEvaluatorBox) {
+    KeelSheet(@Nullable KeelSheetsReaderType sheetsReaderType, @Nonnull Sheet sheet, @Nonnull ValueBox<FormulaEvaluator> formulaEvaluatorBox) {
         this.sheetsReaderType = sheetsReaderType;
         this.sheet = sheet;
         this.formulaEvaluatorBox = formulaEvaluatorBox;
@@ -59,7 +63,7 @@ public class KeelSheet {
      * @return The number of cells from index zero to the last non-zero cell. If no cells, return 0.
      * @since 3.0.17 support auto detect column count
      */
-    public static int autoDetectNonBlankColumnCountInOneRow(Row row) {
+    private static int autoDetectNonBlankColumnCountInOneRow(Row row) {
         short firstCellNum = row.getFirstCellNum();
         if (firstCellNum < 0) {
             return 0;
@@ -79,12 +83,15 @@ public class KeelSheet {
     }
 
     /**
-     * @since 3.0.14 add nullable to cell, and nonnull to return.
-     * @since 3.1.3 return computed value for formula cells.
-     * @since 3.1.4 add optional formulaEvaluator and becomes static again
+     * As of 3.0.14 add nullable to cell, and nonnull to return.<br>
+     * As of 3.1.3 return computed value for formula cells.<br>
+     * As of 3.1.4 add optional formulaEvaluator and becomes static again<br>
+     * As of 4.1.1 make it public.
+     *
+     * @since 3.0.14
      */
     @Nonnull
-    private static String dumpCellToString(
+    public static String dumpCellToString(
             @Nullable Cell cell,
             @Nonnull ValueBox<FormulaEvaluator> formulaEvaluatorBox
     ) {
@@ -132,10 +139,10 @@ public class KeelSheet {
     }
 
     /**
-     * @param sheetRowFilter added since 3.0.20
-     * @since 3.0.20 add SheetRowFilter, and may return null if the row should be thrown.
+     * As of 3.0.20 add parameter {@code sheetRowFilter}, and may return null if the row should be thrown.<br>
+     * As of 4.1.1 make it public.
      */
-    private static @Nullable List<String> dumpRowToRawRow(
+    public static @Nullable List<String> dumpRowToRawRow(
             @Nonnull Row row,
             int maxColumns,
             @Nullable SheetRowFilter sheetRowFilter,
@@ -172,8 +179,17 @@ public class KeelSheet {
     /**
      * @since 4.1.1
      */
-    public KeelSheetDrawing getDrawing() {
+    private KeelSheetDrawing getDrawing() {
         return new KeelSheetDrawing(this);
+    }
+
+    /**
+     * @return A list of {@link KeelPictureInSheet} read from the sheet.
+     * @since 4.1.1
+     */
+    @Nonnull
+    public List<KeelPictureInSheet> getPictures() {
+        return getDrawing().getPictures();
     }
 
     public String getName() {
@@ -586,5 +602,15 @@ public class KeelSheet {
                 return KeelSheetMatrixTemplatedRow.create(template, rawRowIterator.next());
             }
         };
+    }
+
+    /**
+     * Retrieves the formula evaluator associated with the sheet.
+     *
+     * @return The {@link FormulaEvaluator} instance if available; otherwise, returns null.
+     */
+    @Nullable
+    public FormulaEvaluator getFormulaEvaluator() {
+        return formulaEvaluatorBox.getValue();
     }
 }

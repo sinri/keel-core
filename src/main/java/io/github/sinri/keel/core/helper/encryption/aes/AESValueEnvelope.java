@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.helper.encryption.aes;
 
+import io.github.sinri.keel.core.KeelValueEnvelope;
 import io.github.sinri.keel.core.TechnicalPreview;
 
 import javax.annotation.Nullable;
@@ -8,7 +9,7 @@ import javax.annotation.Nullable;
  * @since 3.1.0 Technical Preview
  */
 @TechnicalPreview(since = "3.1.0")
-public interface AESValueEnvelope {
+public interface AESValueEnvelope extends KeelValueEnvelope {
     /**
      * Encrypt the raw string and store the encrypted value with this instance.
      *

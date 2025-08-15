@@ -1,24 +1,20 @@
 package io.github.sinri.keel.integration.mysql.dev;
 
 import io.github.sinri.keel.core.TechnicalPreview;
+import io.github.sinri.keel.core.helper.encryption.aes.AESValueEnvelope;
 
 import javax.annotation.Nonnull;
 
 /**
+ * Use with {@link AESValueEnvelope}, bind a field to a certain AES Value Envelope.
+ *
  * @since 3.1.0 Technical Preview
- * Use with @see AESValueEnvelope, bind a field to a certain AES Value Envelope.
+ * @deprecated As of 4.1.1, use {@link TableRowClassFieldAnyEnvelope} instead.
  */
 @TechnicalPreview(since = "3.1.0")
-public class TableRowClassFieldAesEncryption {
-    private final String envelopePackage;
-    private final String envelopeName;
-
+@Deprecated(since = "4.1.1")
+public class TableRowClassFieldAesEncryption extends TableRowClassFieldAnyEnvelope {
     public TableRowClassFieldAesEncryption(@Nonnull String envelopeName, @Nonnull String envelopePackage) {
-        this.envelopePackage = envelopePackage;
-        this.envelopeName = envelopeName;
-    }
-
-    public String buildCallClassMethodCode(@Nonnull String parameter) {
-        return "new " + envelopePackage + "." + envelopeName + "().decrypt(" + parameter + ");";
+        super(envelopeName, envelopePackage);
     }
 }

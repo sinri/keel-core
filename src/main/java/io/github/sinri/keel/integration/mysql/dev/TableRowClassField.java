@@ -20,19 +20,22 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 class TableRowClassField {
     private static final Pattern patternForLooseEnum;
     private static final Pattern patternForStrictEnum;
+    @Deprecated(since = "4.1.1")
     private static final Pattern patternForAESEnvelope;
+    private static final Pattern patternForAnyEnvelope;
 
     static {
         patternForLooseEnum = Pattern.compile("Enum\\{([A-Za-z0-9_, ]+)}");
         patternForStrictEnum = Pattern.compile("Enum<([A-Za-z0-9_.]+)>");
         patternForAESEnvelope = Pattern.compile("AES<([A-Za-z0-9_.]+)>");
+        patternForAnyEnvelope = Pattern.compile("Envelope<([A-Za-z0-9_.]+)>");
     }
 
     private final String field;
     private final String type;
     private final String comment;
     private final @Nullable String strictEnumPackage;
-    private final @Nullable String aesEnvelopePackage;
+    private final @Nullable String envelopePackage;
     /**
      * @since 3.1.10
      */
@@ -44,6 +47,10 @@ class TableRowClassField {
     private @Nullable TableRowClassFieldLooseEnum looseEnum;
     private @Nullable TableRowClassFieldStrictEnum strictEnum;
     private @Nullable TableRowClassFieldAesEncryption aesEncryption;
+    /**
+     * @since 4.1.1
+     */
+    private @Nullable TableRowClassFieldAnyEnvelope envelope;
     /**
      * @since 3.1.7
      */
@@ -57,7 +64,7 @@ class TableRowClassField {
             boolean nullable,
             @Nullable String comment,
             @Nullable String strictEnumPackage,
-            @Nullable String aesEnvelopePackage
+            @Nullable String envelopePackage
     ) {
         this.tableExpression = tableExpression;
         this.field = field;
@@ -65,7 +72,7 @@ class TableRowClassField {
         this.nullable = nullable;
         this.comment = comment;
         this.strictEnumPackage = strictEnumPackage;
-        this.aesEnvelopePackage = aesEnvelopePackage;
+        this.envelopePackage = envelopePackage;
 
         parseType();
         parseComment();
@@ -126,10 +133,18 @@ class TableRowClassField {
             }
 
             // AES Envelope
+            // todo (added in 4.1.1) remove it in future version, use AnyEnvelope instead.
             Matcher matcherForAESEnvelope = patternForAESEnvelope.matcher(comment);
             if (matcherForAESEnvelope.find()) {
                 String aes = matcherForAESEnvelope.group(1);
-                aesEncryption = new TableRowClassFieldAesEncryption(aes, Objects.requireNonNull(this.aesEnvelopePackage));
+                aesEncryption = new TableRowClassFieldAesEncryption(aes, Objects.requireNonNull(this.envelopePackage));
+            }
+
+            // Any Envelope
+            Matcher matcherForAnyEnvelope = patternForAnyEnvelope.matcher(comment);
+            if (matcherForAnyEnvelope.find()) {
+                String any = matcherForAnyEnvelope.group(1);
+                envelope = new TableRowClassFieldAnyEnvelope(any, Objects.requireNonNull(this.envelopePackage));
             }
         }
 
@@ -242,6 +257,22 @@ class TableRowClassField {
                 .append("\tpublic ").append("String").append(" ").append(getter).append("Decrypted() {\n")
                 .append("\t\treturn ")
                 .append(aesEncryption.buildCallClassMethodCode(readMethod + "(\"" + field + "\")")).append("\n")
+                .append("\t}\n");
+        }
+
+        if (envelope != null) {
+            code.append("\t/**\n")
+                .append("\t * EXTRACTED VALUE of {@code ").append(tableExpression).append(".").append(field)
+                .append("}.\n");
+            if (comment != null) {
+                code.append("\t * ").append(actualComment).append("\n")
+                    .append("\t * <p>\n");
+            }
+            code.append("\t */\n")
+                .append("\t@Nullable\n")
+                .append("\tpublic ").append("String").append(" ").append(getter).append("Extracted() {\n")
+                .append("\t\treturn ")
+                .append(envelope.buildCallClassMethodCode(readMethod + "(\"" + field + "\")")).append("\n")
                 .append("\t}\n");
         }
 

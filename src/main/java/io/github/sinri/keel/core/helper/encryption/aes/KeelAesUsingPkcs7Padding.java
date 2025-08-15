@@ -5,6 +5,23 @@ import java.security.Provider;
 import java.security.Security;
 
 /**
+ * PKCS7Padding is not supported in Java Native Environment,
+ * you need to add BouncyCastleProvider to support it.
+ * <p>
+ * To use this class, add the following BouncyCastle dependency to your pom.xml:
+ * <pre>
+ * &lt;dependency&gt;
+ *     &lt;groupId&gt;org.bouncycastle&lt;/groupId&gt;
+ *     &lt;artifactId&gt;bcprov-jdk15on&lt;/artifactId&gt;
+ *     &lt;version&gt;1.70&lt;/version&gt;
+ * &lt;/dependency&gt;
+ * </pre>
+ * <p>
+ * Before using this class, make sure to initialize the BouncyCastle provider by calling:
+ * {@code KeelAesUsingPkcs7Padding.requireBouncyCastleProvider()}
+ * <p>
+ * This should be done once during application startup.
+ *
  * @since 2.8
  */
 abstract public class KeelAesUsingPkcs7Padding extends KeelAesBase {

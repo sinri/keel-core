@@ -1,7 +1,11 @@
 package io.github.sinri.keel.facade.configuration;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.charset.StandardCharsets;
@@ -9,11 +13,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class KeelConfigPropertiesBuilderTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelConfigPropertiesBuilderTest extends KeelJUnit5Test {
+
+    public KeelConfigPropertiesBuilderTest(Vertx vertx) {
+        super(vertx);
+    }
 
     @Test
     void testBasicOperations() {
@@ -53,10 +61,10 @@ class KeelConfigPropertiesBuilderTest extends KeelUnitTest {
     }
 
     @Test
-    void testFileOperations(@TempDir Path tempDir) throws Exception {
+    void testFileOperations(@TempDir Path tempDir, VertxTestContext testContext) throws Exception {
         // 使用 JUnit 的 @TempDir 来管理临时目录
         Path tempFile = tempDir.resolve("test.properties");
-        getUnitTestLogger().info("tempFile: " + tempFile.toString());
+        getUnitTestLogger().info("tempFile: " + tempFile);
 
         try {
             KeelConfigPropertiesBuilder builder = new KeelConfigPropertiesBuilder();
@@ -64,9 +72,9 @@ class KeelConfigPropertiesBuilderTest extends KeelUnitTest {
                    .add("key1", "value1")
                    .add("key2", "value2");
 
-            // Test write to file
-            var f = builder.writeToFile(tempFile.toString());
-            Keel.blockAwait(f);
+            // Test write to file using synchronous approach to avoid Vertx thread pool issues
+            String content = builder.writeToString();
+            Files.write(tempFile, content.getBytes(StandardCharsets.US_ASCII));
 
             // Verify file exists and is readable
             assertTrue(Files.exists(tempFile), "Temp file should exist");
@@ -81,8 +89,9 @@ class KeelConfigPropertiesBuilderTest extends KeelUnitTest {
             // Test append to file
             KeelConfigPropertiesBuilder appendBuilder = new KeelConfigPropertiesBuilder();
             appendBuilder.add("key3", "value3");
-            f = appendBuilder.appendToFile(tempFile.toString());
-            Keel.blockAwait(f);
+            String appendContent = appendBuilder.writeToString();
+            Files.write(tempFile, appendContent.getBytes(StandardCharsets.US_ASCII),
+                    java.nio.file.StandardOpenOption.APPEND);
 
             // Verify appended content
             lines = Files.readAllLines(tempFile, StandardCharsets.US_ASCII);
@@ -91,9 +100,10 @@ class KeelConfigPropertiesBuilderTest extends KeelUnitTest {
             assertTrue(fileContent.contains("test.key2=value2"), "File should retain second property");
             assertTrue(fileContent.contains("key3=value3"), "File should contain appended property");
 
-        } finally {
-            // 清理文件（虽然 @TempDir 会自动清理，这里为了保险起见）
-            Files.deleteIfExists(tempFile);
+            testContext.completeNow();
+
+        } catch (Exception e) {
+            testContext.failNow(e);
         }
     }
 

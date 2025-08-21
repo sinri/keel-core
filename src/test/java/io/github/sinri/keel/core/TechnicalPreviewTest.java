@@ -1,15 +1,23 @@
 package io.github.sinri.keel.core;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
-import org.junit.jupiter.api.Test;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TechnicalPreviewTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class TechnicalPreviewTest extends KeelJUnit5Test {
+
+    public TechnicalPreviewTest(Vertx vertx) {
+        super(vertx);
+    }
 
     @TechnicalPreview(since = "3.0.10", notice = "Test annotation")
     private static class TestClass {
@@ -94,7 +102,7 @@ class TechnicalPreviewTest extends KeelUnitTest {
         assertTrue(TestClass.class.isAnnotationPresent(TechnicalPreview.class));
         
         // 验证注解可以用于方法
-        assertTrue(getMethodAnnotation("testMethod") != null);
+        assertNotNull(getMethodAnnotation("testMethod"));
     }
 
     @Test

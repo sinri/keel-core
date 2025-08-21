@@ -1,17 +1,25 @@
 package io.github.sinri.keel.core.json;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class JsonObjectReloadableTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class JsonObjectReloadableTest extends KeelJUnit5Test {
 
     private TestJsonObjectReloadable testEntity;
     private JsonObject testJsonObject;
+
+    public JsonObjectReloadableTest(Vertx vertx) {
+        super(vertx);
+    }
 
     @BeforeEach
     public void setUp() {

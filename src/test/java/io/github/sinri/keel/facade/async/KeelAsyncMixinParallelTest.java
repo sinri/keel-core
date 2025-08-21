@@ -1,19 +1,30 @@
 package io.github.sinri.keel.facade.async;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class KeelAsyncMixinParallelTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelAsyncMixinParallelTest extends KeelJUnit5Test {
+
+    public KeelAsyncMixinParallelTest(Vertx vertx) {
+        super(vertx);
+    }
+    
     @Test
-    void testParallelForAllSuccess() {
+    void testParallelForAllSuccess(VertxTestContext testContext) {
         List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
         AtomicInteger sum = new AtomicInteger(0);
 
@@ -26,13 +37,17 @@ class KeelAsyncMixinParallelTest extends KeelUnitTest {
         });
 
         future.onComplete(ar -> {
-            assertTrue(ar.succeeded());
-            assertEquals(15, sum.get()); // 1 + 2 + 3 + 4 + 5 = 15
+            if (ar.succeeded()) {
+                assertEquals(15, sum.get()); // 1 + 2 + 3 + 4 + 5 = 15
+                testContext.completeNow();
+            } else {
+                testContext.failNow(ar.cause());
+            }
         });
     }
 
     @Test
-    void testParallelForAllSuccessWithFailure() {
+    void testParallelForAllSuccessWithFailure(VertxTestContext testContext) {
         List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
 
         Future<Void> future = Keel.parallelForAllSuccess(numbers, num -> {
@@ -43,13 +58,17 @@ class KeelAsyncMixinParallelTest extends KeelUnitTest {
         });
 
         future.onComplete(ar -> {
-            assertTrue(ar.failed());
-            assertEquals("Failed on number 3", ar.cause().getMessage());
+            if (ar.failed()) {
+                assertEquals("Failed on number 3", ar.cause().getMessage());
+                testContext.completeNow();
+            } else {
+                testContext.failNow("Expected failure but got success");
+            }
         });
     }
 
     @Test
-    void testParallelForAnySuccess() {
+    void testParallelForAnySuccess(VertxTestContext testContext) {
         List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
         AtomicInteger successCount = new AtomicInteger(0);
 
@@ -62,13 +81,17 @@ class KeelAsyncMixinParallelTest extends KeelUnitTest {
         });
 
         future.onComplete(ar -> {
-            assertTrue(ar.succeeded());
-            assertTrue(successCount.get() > 0);
+            if (ar.succeeded()) {
+                assertTrue(successCount.get() > 0);
+                testContext.completeNow();
+            } else {
+                testContext.failNow(ar.cause());
+            }
         });
     }
 
     @Test
-    void testParallelForAnySuccessAllFailed() {
+    void testParallelForAnySuccessAllFailed(VertxTestContext testContext) {
         List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
 
         Future<Void> future = Keel.parallelForAnySuccess(numbers, num -> 
@@ -76,12 +99,16 @@ class KeelAsyncMixinParallelTest extends KeelUnitTest {
         );
 
         future.onComplete(ar -> {
-            assertTrue(ar.failed());
+            if (ar.failed()) {
+                testContext.completeNow();
+            } else {
+                testContext.failNow("Expected failure but got success");
+            }
         });
     }
 
     @Test
-    void testParallelForAllComplete() {
+    void testParallelForAllComplete(VertxTestContext testContext) {
         List<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
         AtomicInteger successCount = new AtomicInteger(0);
         AtomicInteger failureCount = new AtomicInteger(0);
@@ -107,19 +134,36 @@ class KeelAsyncMixinParallelTest extends KeelUnitTest {
             assertEquals(3, successCount.get(), "Should have 3 successful tasks (1,3,5)");
             assertEquals(2, failureCount.get(), "Should have 2 failed tasks (2,4)");
             // 不需要验证 ar.succeeded()，因为 parallelForAllComplete 只关心任务是否完成，不关心成功失败
+            testContext.completeNow();
         });
     }
 
     @Test
-    void testEmptyCollection() {
-        List<Integer> emptyList = Arrays.asList();
+    void testEmptyCollection(VertxTestContext testContext) {
+        List<Integer> emptyList = List.of();
 
         Future<Void> allSuccess = Keel.parallelForAllSuccess(emptyList, num -> Future.succeededFuture());
         Future<Void> anySuccess = Keel.parallelForAnySuccess(emptyList, num -> Future.succeededFuture());
         Future<Void> allComplete = Keel.parallelForAllComplete(emptyList, num -> Future.succeededFuture());
 
-        allSuccess.onComplete(ar -> assertTrue(ar.succeeded()));
-        anySuccess.onComplete(ar -> assertTrue(ar.succeeded()));
-        allComplete.onComplete(ar -> assertTrue(ar.succeeded()));
+        allSuccess.onComplete(ar -> {
+            if (ar.succeeded()) {
+                anySuccess.onComplete(ar2 -> {
+                    if (ar2.succeeded()) {
+                        allComplete.onComplete(ar3 -> {
+                            if (ar3.succeeded()) {
+                                testContext.completeNow();
+                            } else {
+                                testContext.failNow(ar3.cause());
+                            }
+                        });
+                    } else {
+                        testContext.failNow(ar2.cause());
+                    }
+                });
+            } else {
+                testContext.failNow(ar.cause());
+            }
+        });
     }
 }

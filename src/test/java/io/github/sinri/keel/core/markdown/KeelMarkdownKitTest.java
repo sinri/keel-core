@@ -1,20 +1,27 @@
 package io.github.sinri.keel.core.markdown;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
 import org.commonmark.Extension;
 import org.commonmark.ext.gfm.tables.TablesExtension;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeelMarkdownKitTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelMarkdownKitTest extends KeelJUnit5Test {
+
+    public KeelMarkdownKitTest(Vertx vertx) {
+        super(vertx);
+    }
 
     // ==================== 构造函数测试 ====================
 

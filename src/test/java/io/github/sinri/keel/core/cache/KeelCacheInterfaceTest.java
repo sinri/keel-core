@@ -1,16 +1,19 @@
 package io.github.sinri.keel.core.cache;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-class KeelCacheInterfaceTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelCacheInterfaceTest extends KeelJUnit5Test {
     static KeelCacheInterface<String, Integer> cache;
 
-    @BeforeAll
-    public static void init() {
+    KeelCacheInterfaceTest(Vertx vertx) {
+        super(vertx);
         cache = KeelCacheInterface.createDefaultInstance();
         cache.startEndlessCleanUp(3);
     }

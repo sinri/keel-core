@@ -11,13 +11,16 @@ import javax.annotation.Nonnull;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
- * The base class for JUnit5 test cases.
+ * The base class for Vertx-JUnit5 unit test classes.
  * <p>
  * Any implementation of this class should be annotated with {@code @ExtendWith(VertxExtension.class)}.
  * <p>
- * In any implementation of this class, you should define a method annotated {@code @BeforeAll}
- * with parameters {@code Vertx vertx} and {@code VertxTestContext testContext},
- * in which {@link KeelJUnit5Test#beforeAllShared(Vertx)} should be called to enable Keel functionality.
+ * The constructor would run after the {@code @BeforeAll} annotated method (if defined)
+ * to initialize Keel with the Vertx instance provided by the Vertx-JUnit5 framework.
+ * <p>
+ * For those methods annotated with {@code @Test},
+ * if it runs in async mode with vertx event loop, parameter {@code VertxTestContext testContext} should be provided to
+ * await the async test logic ends.
  *
  * @since 4.1.1
  */
@@ -26,21 +29,16 @@ public abstract class KeelJUnit5Test implements KeelJUnit5TestCore {
 
     /**
      * The constructor would run after {@code @BeforeAll} annotated method.
+     * Here, {@link JsonifiableSerializer#register()} would be called, and a {@link KeelIssueRecorder} would be created.
      */
-    public KeelJUnit5Test() {
-        this.unitTestLogger = buildUnitTestLogger();
-    }
+    public KeelJUnit5Test(Vertx vertx) {
+        // System.out.println("KeelJUnit5Test: " + vertx);
 
-    /**
-     * This method would run before all test cases by called in {@code @BeforeAll} annotated method.
-     *
-     * @param vertx the vertx instance to be used in Keel, provided by the JUnit5 framework.
-     */
-    protected static void beforeAllShared(Vertx vertx) {
-        Keel.initializeVertx(vertx);
         JsonifiableSerializer.register();
-
+        Keel.initializeVertx(vertx);
         Keel.getConfiguration().loadPropertiesFile("config.properties");
+
+        this.unitTestLogger = buildUnitTestLogger();
     }
 
     @Nonnull

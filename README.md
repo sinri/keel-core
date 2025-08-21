@@ -10,22 +10,22 @@ A Java framework with VERT.X eco, for projects for web, job and more.
 <dependency>
     <groupId>io.github.sinri</groupId>
     <artifactId>Keel</artifactId>
-  <version>4.1.1-rc.1</version>
+  <version>4.1.1-rc.3</version>
 </dependency>
 ```
 
 ## Third Party Integration
 
-* [Vert.x](https://vertx.io) 5.0.1
+* [Vert.x](https://vertx.io) 5.0.2
 * [org.commonmark:commonmark](https://github.com/commonmark/commonmark-java) ![GitHub](https://img.shields.io/github/license/commonmark/commonmark-java)
   0.21.0
 * [com.warrenstrange:googleauth](https://github.com/wstrange/GoogleAuth) ![GitHub](https://img.shields.io/github/license/wstrange/GoogleAuth)
 * [com.github.oshi:oshi-core](https://github.com/oshi/oshi) ![GitHub](https://img.shields.io/github/license/oshi/oshi)
   6.4.9
 * [org.apache.poi:poi](https://github.com/apache/poi) ![GitHub](https://img.shields.io/github/license/apache/poi)
-  5.4.0
+  5.4.1
 * [com.github.pjfanning:excel-streaming-reader](https://github.com/pjfanning/excel-streaming-reader) ![GitHub](https://img.shields.io/github/license/pjfanning/excel-streaming-reader)
-  5.0.3
+  5.1.1
 * [org.openjdk.jol:jol-core](https://github.com/openjdk/jol) ![GitHub](https://img.shields.io/github/license/openjdk/jol)
   0.17
 

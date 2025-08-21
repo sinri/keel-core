@@ -23,6 +23,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * and {@link #buildUnitTestLogger()} to provide a custom logger.
  *
  * <p> This class is almost for JUnit 4 eco.
+ * <p> If your tests environment is JUnit 5, use {@link KeelJUnit5Test} instead.
  *
  * @since 3.2.19
  */

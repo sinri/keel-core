@@ -1,12 +1,20 @@
 package io.github.sinri.keel.core.helper;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
-import org.junit.jupiter.api.Test;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeelHelpersInterfaceTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelHelpersInterfaceTest extends KeelJUnit5Test {
+
+    public KeelHelpersInterfaceTest(Vertx vertx) {
+        super(vertx);
+    }
 
     private final KeelHelpersInterface helpers = new KeelHelpersInterface() {};
 
@@ -159,6 +167,6 @@ class KeelHelpersInterfaceTest extends KeelUnitTest {
     void testInterfaceIsFunctional() {
         // 验证接口可以正常实例化
         assertNotNull(helpers);
-        assertTrue(helpers instanceof KeelHelpersInterface);
+        assertInstanceOf(KeelHelpersInterface.class, helpers);
     }
 } 

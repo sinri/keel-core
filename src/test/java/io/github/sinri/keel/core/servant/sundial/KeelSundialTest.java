@@ -2,24 +2,36 @@ package io.github.sinri.keel.core.servant.sundial;
 
 import io.github.sinri.keel.core.cron.KeelCronExpression;
 import io.github.sinri.keel.core.cron.ParsedCalenderElements;
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.*;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeelSundialTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelSundialTest extends KeelJUnit5Test {
 
     private TestSundial testSundial;
     private KeelIssueRecorder<SundialIssueRecord> testRecorder;
+
+    public KeelSundialTest(Vertx vertx) {
+        super(vertx);
+    }
 
     @BeforeEach
     public void setUp() {
@@ -93,7 +105,7 @@ class KeelSundialTest extends KeelUnitTest {
 
     @Test
     @DisplayName("测试KeelSundialPlan执行")
-    void testKeelSundialPlanExecution() {
+    void testKeelSundialPlanExecution(VertxTestContext testContext) {
         AtomicBoolean executed = new AtomicBoolean(false);
         AtomicInteger executionCount = new AtomicInteger(0);
 
@@ -121,16 +133,21 @@ class KeelSundialTest extends KeelUnitTest {
         };
 
         Calendar now = Calendar.getInstance();
-        Future<Void> future = plan.execute(now, testRecorder);
-
-        assertTrue(future.succeeded());
-        assertTrue(executed.get());
-        assertEquals(1, executionCount.get());
+        plan.execute(now, testRecorder)
+            .onComplete(ar -> {
+                if (ar.succeeded()) {
+                    assertTrue(executed.get());
+                    assertEquals(1, executionCount.get());
+                    testContext.completeNow();
+                } else {
+                    testContext.failNow(ar.cause());
+                }
+            });
     }
 
     @Test
     @DisplayName("测试KeelSundialPlan执行失败")
-    void testKeelSundialPlanExecutionFailure() {
+    void testKeelSundialPlanExecutionFailure(VertxTestContext testContext) {
         KeelSundialPlan plan = new KeelSundialPlan() {
             @Override
             public String key() {
@@ -149,10 +166,15 @@ class KeelSundialTest extends KeelUnitTest {
         };
 
         Calendar now = Calendar.getInstance();
-        Future<Void> future = plan.execute(now, testRecorder);
-
-        assertTrue(future.failed());
-        assertEquals("模拟执行失败", future.cause().getMessage());
+        plan.execute(now, testRecorder)
+            .onComplete(ar -> {
+                if (ar.failed()) {
+                    assertEquals("模拟执行失败", ar.cause().getMessage());
+                    testContext.completeNow();
+                } else {
+                    testContext.failNow(new RuntimeException("Expected failure but got success"));
+                }
+            });
     }
 
     @Test
@@ -220,7 +242,7 @@ class KeelSundialTest extends KeelUnitTest {
 
     @Test
     @DisplayName("测试KeelSundial计划执行逻辑")
-    void testKeelSundialExecutionLogic() {
+    void testKeelSundialExecutionLogic(VertxTestContext testContext) {
         AtomicInteger executionCount = new AtomicInteger(0);
 
         KeelSundialPlan plan = new KeelSundialPlan() {
@@ -249,6 +271,7 @@ class KeelSundialTest extends KeelUnitTest {
 
         // 由于cron表达式是"* * * * *"，应该匹配并执行
         assertEquals(1, executionCount.get());
+        testContext.completeNow();
     }
 
     @Test

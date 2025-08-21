@@ -1,9 +1,6 @@
 package io.github.sinri.keel.integration.poi.csv;
 
-import io.vertx.core.Closeable;
-import io.vertx.core.Completable;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -115,7 +112,12 @@ public class KeelCsvWriter implements Closeable {
                      .eventually(() -> {
                          KeelCsvWriter keelCsvWriter = ref.get();
                          if (keelCsvWriter != null) {
-                             return keelCsvWriter.close();
+                             try {
+                                 keelCsvWriter.close();
+                                 return Future.succeededFuture();
+                             } catch (IOException e) {
+                                 return Future.failedFuture(e);
+                             }
                          } else {
                              return Future.succeededFuture();
                          }
@@ -226,16 +228,6 @@ public class KeelCsvWriter implements Closeable {
                      });
     }
 
-    public void blockClose() throws IOException {
-        this.outputStream.close();
-    }
-
-    public Future<Void> close() {
-        Promise<Void> promise = Promise.promise();
-        close(promise);
-        return promise.future();
-    }
-
     private String quote(@Nullable String s) {
         if (s == null) {
             s = "";
@@ -247,17 +239,8 @@ public class KeelCsvWriter implements Closeable {
         }
     }
 
-    /**
-     * @param completion the promise to signal when close has completed
-     * @since 4.1.1
-     */
     @Override
-    public void close(Completable<Void> completion) {
-        try {
-            blockClose();
-            completion.succeed();
-        } catch (IOException e) {
-            completion.fail(e);
-        }
+    public void close() throws IOException {
+        this.outputStream.close();
     }
 }

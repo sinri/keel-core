@@ -3,15 +3,23 @@ package io.github.sinri.keel.core.helper;
 import io.github.sinri.keel.core.helper.encryption.aes.KeelAes;
 import io.github.sinri.keel.core.helper.encryption.rsa.KeelRSA;
 import io.github.sinri.keel.core.helper.encryption.rsa.KeelRSAKeyPair;
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.File;
 import java.security.NoSuchAlgorithmException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeelCryptographyHelperTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelCryptographyHelperTest extends KeelJUnit5Test {
+
+    public KeelCryptographyHelperTest(Vertx vertx) {
+        super(vertx);
+    }
 
     @Test
     void testGetInstance() {
@@ -98,7 +106,7 @@ class KeelCryptographyHelperTest extends KeelUnitTest {
         assertNotNull(rsa);
         
         // 验证返回的是 KeelRSA 实例
-        assertTrue(rsa instanceof KeelRSA);
+        assertInstanceOf(KeelRSA.class, rsa);
     }
 
     @Test

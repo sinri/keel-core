@@ -1,13 +1,17 @@
 package io.github.sinri.keel.core.verticles;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -19,15 +23,19 @@ import java.util.function.Supplier;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeelVerticleWrapTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelVerticleWrapTest extends KeelJUnit5Test {
 
     private AtomicBoolean started;
     private AtomicBoolean stopped;
     private AtomicInteger callCount;
     private AtomicReference<Exception> lastException;
 
+    public KeelVerticleWrapTest(Vertx vertx) {
+        super(vertx);
+    }
+
     @BeforeEach
-    @Override
     public void setUp() {
         started = new AtomicBoolean(false);
         stopped = new AtomicBoolean(false);
@@ -71,7 +79,7 @@ class KeelVerticleWrapTest extends KeelUnitTest {
 
     @Test
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
-    void testSuccessfulDeploymentWithSupplier() {
+    void testSuccessfulDeploymentWithSupplier(VertxTestContext testContext) {
         Supplier<Future<Void>> supplier = () -> {
             started.set(true);
             callCount.incrementAndGet();
@@ -79,8 +87,8 @@ class KeelVerticleWrapTest extends KeelUnitTest {
         };
 
         KeelVerticleWrap verticle = new KeelVerticleWrap(supplier);
-        
-        Future<Void> testFuture = verticle.deployMe(new DeploymentOptions())
+
+        verticle.deployMe(new DeploymentOptions())
                 .compose(deploymentId -> {
                     assertNotNull(deploymentId);
                     assertFalse(deploymentId.isEmpty());
@@ -89,14 +97,13 @@ class KeelVerticleWrapTest extends KeelUnitTest {
                     assertEquals(deploymentId, verticle.deploymentID());
                     
                     return verticle.undeployMe();
-                });
-        
-        async(testFuture);
+                })
+                .onComplete(testContext.succeedingThenComplete());
     }
 
     @Test
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
-    void testSuccessfulDeploymentWithFunction() {
+    void testSuccessfulDeploymentWithFunction(VertxTestContext testContext) {
         Function<Promise<Void>, Future<Void>> function = stopPromise -> {
             started.set(true);
             callCount.incrementAndGet();
@@ -104,8 +111,8 @@ class KeelVerticleWrapTest extends KeelUnitTest {
         };
 
         KeelVerticleWrap verticle = new KeelVerticleWrap(function);
-        
-        Future<Void> testFuture = verticle.deployMe(new DeploymentOptions())
+
+        verticle.deployMe(new DeploymentOptions())
                 .compose(deploymentId -> {
                     assertNotNull(deploymentId);
                     assertFalse(deploymentId.isEmpty());
@@ -114,14 +121,13 @@ class KeelVerticleWrapTest extends KeelUnitTest {
                     assertEquals(deploymentId, verticle.deploymentID());
                     
                     return verticle.undeployMe();
-                });
-        
-        async(testFuture);
+                })
+                .onComplete(testContext.succeedingThenComplete());
     }
 
     @Test
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
-    void testFailedDeploymentWithSupplier() {
+    void testFailedDeploymentWithSupplier(VertxTestContext testContext) {
         RuntimeException testException = new RuntimeException("Test failure");
         Supplier<Future<Void>> supplier = () -> {
             started.set(true);
@@ -130,10 +136,10 @@ class KeelVerticleWrapTest extends KeelUnitTest {
         };
 
         KeelVerticleWrap verticle = new KeelVerticleWrap(supplier);
-        
-        Future<Void> testFuture = verticle.deployMe(new DeploymentOptions())
+
+        verticle.deployMe(new DeploymentOptions())
                 .compose(deploymentId -> {
-                    fail("Deployment should have failed");
+                    testContext.failNow("Deployment should have failed");
                     return Future.succeededFuture();
                 })
                 .recover(throwable -> {
@@ -142,16 +148,12 @@ class KeelVerticleWrapTest extends KeelUnitTest {
                     assertEquals(testException, throwable);
                     return Future.succeededFuture();
                 })
-                .compose(v->{
-                    return Future.succeededFuture();
-                });
-        
-        async(testFuture);
+                .onComplete(testContext.succeedingThenComplete());
     }
 
     @Test
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
-    void testVerticleConfig() {
+    void testVerticleConfig(VertxTestContext testContext) {
         JsonObject config = new JsonObject()
                 .put("test.property", "test.value")
                 .put("number", 42);
@@ -162,8 +164,8 @@ class KeelVerticleWrapTest extends KeelUnitTest {
         };
 
         KeelVerticleWrap verticle = new KeelVerticleWrap(supplier);
-        
-        Future<Void> testFuture = verticle.deployMe(new DeploymentOptions().setConfig(config))
+
+        verticle.deployMe(new DeploymentOptions().setConfig(config))
                 .compose(deploymentId -> {
                     JsonObject retrievedConfig = verticle.config();
                     assertNotNull(retrievedConfig);
@@ -171,14 +173,13 @@ class KeelVerticleWrapTest extends KeelUnitTest {
                     assertEquals(42, retrievedConfig.getInteger("number"));
                     
                     return verticle.undeployMe();
-                });
-        
-        async(testFuture);
+                })
+                .onComplete(testContext.succeedingThenComplete());
     }
 
     @Test
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
-    void testGetVerticleInfo() {
+    void testGetVerticleInfo(VertxTestContext testContext) {
         JsonObject config = new JsonObject().put("test", "value");
         
         Supplier<Future<Void>> supplier = () -> {
@@ -187,8 +188,8 @@ class KeelVerticleWrapTest extends KeelUnitTest {
         };
 
         KeelVerticleWrap verticle = new KeelVerticleWrap(supplier);
-        
-        Future<Void> testFuture = verticle.deployMe(new DeploymentOptions().setConfig(config))
+
+        verticle.deployMe(new DeploymentOptions().setConfig(config))
                 .compose(deploymentId -> {
                     JsonObject info = verticle.getVerticleInfo();
                     assertNotNull(info);
@@ -197,14 +198,13 @@ class KeelVerticleWrapTest extends KeelUnitTest {
                     assertEquals(deploymentId, info.getString("deployment_id"));
                     
                     return verticle.undeployMe();
-                });
-        
-        async(testFuture);
+                })
+                .onComplete(testContext.succeedingThenComplete());
     }
 
     @Test
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
-    void testStopperPromiseWithFunction() {
+    void testStopperPromiseWithFunction(VertxTestContext testContext) {
         AtomicReference<Promise<Void>> stopperPromiseRef = new AtomicReference<>();
         
         Function<Promise<Void>, Future<Void>> function = stopPromise -> {
@@ -215,8 +215,8 @@ class KeelVerticleWrapTest extends KeelUnitTest {
         };
 
         KeelVerticleWrap verticle = new KeelVerticleWrap(function);
-        
-        Future<Void> testFuture = verticle.deployMe(new DeploymentOptions())
+
+        verticle.deployMe(new DeploymentOptions())
                 .compose(deploymentId -> {
                     assertNotNull(deploymentId);
                     assertTrue(started.get());
@@ -228,14 +228,13 @@ class KeelVerticleWrapTest extends KeelUnitTest {
                     
                     // 给一些时间让异步操作完成
                     return Keel.asyncSleep(100L);
-                });
-        
-        async(testFuture);
+                })
+                .onComplete(testContext.succeedingThenComplete());
     }
 
     @Test
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
-    void testAsyncStartOperation() {
+    void testAsyncStartOperation(VertxTestContext testContext) {
         Supplier<Future<Void>> supplier = () -> {
             // 模拟异步启动操作
             return Keel.asyncSleep(100L)
@@ -246,19 +245,18 @@ class KeelVerticleWrapTest extends KeelUnitTest {
         };
 
         KeelVerticleWrap verticle = new KeelVerticleWrap(supplier);
-        
-        Future<Void> testFuture = verticle.deployMe(new DeploymentOptions())
+
+        verticle.deployMe(new DeploymentOptions())
                 .compose(deploymentId -> {
                     assertTrue(started.get());
                     return verticle.undeployMe();
-                });
-        
-        async(testFuture);
+                })
+                .onComplete(testContext.succeedingThenComplete());
     }
 
     @Test
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
-    void testMultipleDeployments() {
+    void testMultipleDeployments(VertxTestContext testContext) {
         AtomicInteger deploymentCount = new AtomicInteger(0);
         
         Supplier<Future<Void>> supplier = () -> {
@@ -268,8 +266,8 @@ class KeelVerticleWrapTest extends KeelUnitTest {
 
         KeelVerticleWrap verticle1 = new KeelVerticleWrap(supplier);
         KeelVerticleWrap verticle2 = new KeelVerticleWrap(supplier);
-        
-        Future<Void> testFuture = verticle1.deployMe(new DeploymentOptions())
+
+        verticle1.deployMe(new DeploymentOptions())
                 .compose(deploymentId1 -> {
                     return verticle2.deployMe(new DeploymentOptions())
                             .compose(deploymentId2 -> {
@@ -279,14 +277,13 @@ class KeelVerticleWrapTest extends KeelUnitTest {
                                 return verticle1.undeployMe()
                                         .compose(v -> verticle2.undeployMe());
                             });
-                });
-        
-        async(testFuture);
+                })
+                 .onComplete(testContext.succeedingThenComplete());
     }
 
     @Test
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
-    void testExceptionDuringStop() {
+    void testExceptionDuringStop(VertxTestContext testContext) {
         AtomicReference<Promise<Void>> stopperPromiseRef = new AtomicReference<>();
         
         Function<Promise<Void>, Future<Void>> function = stopPromise -> {
@@ -296,8 +293,8 @@ class KeelVerticleWrapTest extends KeelUnitTest {
         };
 
         KeelVerticleWrap verticle = new KeelVerticleWrap(function);
-        
-        Future<Void> testFuture = verticle.deployMe(new DeploymentOptions())
+
+        verticle.deployMe(new DeploymentOptions())
                 .compose(deploymentId -> {
                     assertTrue(started.get());
                     
@@ -310,36 +307,34 @@ class KeelVerticleWrapTest extends KeelUnitTest {
                 .compose(v -> {
                     // 即使停止失败，也应该能够正常继续
                     return Future.succeededFuture();
-                });
-        
-        async(testFuture);
+                })
+                .onComplete(testContext.succeedingThenComplete());
     }
 
     @Test
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
-    void testNullConfigHandling() {
+    void testNullConfigHandling(VertxTestContext testContext) {
         Supplier<Future<Void>> supplier = () -> {
             started.set(true);
             return Future.succeededFuture();
         };
 
         KeelVerticleWrap verticle = new KeelVerticleWrap(supplier);
-        
-        Future<Void> testFuture = verticle.deployMe(new DeploymentOptions())
+
+        verticle.deployMe(new DeploymentOptions())
                 .compose(deploymentId -> {
                     JsonObject config = verticle.config();
                     assertNotNull(config);
                     assertTrue(config.isEmpty());
                     
                     return verticle.undeployMe();
-                });
-        
-        async(testFuture);
+                })
+                .onComplete(testContext.succeedingThenComplete());
     }
 
     @Test
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
-    void testStaticInstantMethods() {
+    void testStaticInstantMethods(VertxTestContext testContext) {
         // 测试静态工厂方法
         AtomicBoolean supplierCalled = new AtomicBoolean(false);
         AtomicBoolean functionCalled = new AtomicBoolean(false);
@@ -359,10 +354,10 @@ class KeelVerticleWrapTest extends KeelUnitTest {
         
         assertNotNull(verticle1);
         assertNotNull(verticle2);
-        assertTrue(verticle1 instanceof KeelVerticleWrap);
-        assertTrue(verticle2 instanceof KeelVerticleWrap);
-        
-        Future<Void> testFuture = verticle1.deployMe(new DeploymentOptions())
+        assertInstanceOf(KeelVerticleWrap.class, verticle1);
+        assertInstanceOf(KeelVerticleWrap.class, verticle2);
+
+        verticle1.deployMe(new DeploymentOptions())
                 .compose(deploymentId1 -> {
                     assertTrue(supplierCalled.get());
                     return verticle2.deployMe(new DeploymentOptions())
@@ -371,14 +366,13 @@ class KeelVerticleWrapTest extends KeelUnitTest {
                                 return verticle1.undeployMe()
                                         .compose(v -> verticle2.undeployMe());
                             });
-                });
-        
-        async(testFuture);
+                })
+                 .onComplete(testContext.succeedingThenComplete());
     }
 
     @Test
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
-    void testLongRunningStartOperation() {
+    void testLongRunningStartOperation(VertxTestContext testContext) {
         Supplier<Future<Void>> supplier = () -> {
             // 模拟长时间运行的启动操作
             return Keel.asyncSleep(500L)
@@ -392,7 +386,7 @@ class KeelVerticleWrapTest extends KeelUnitTest {
         KeelVerticleWrap verticle = new KeelVerticleWrap(supplier);
         
         long startTime = System.currentTimeMillis();
-        Future<Void> testFuture = verticle.deployMe(new DeploymentOptions())
+        verticle.deployMe(new DeploymentOptions())
                 .compose(deploymentId -> {
                     long endTime = System.currentTimeMillis();
                     assertTrue(endTime - startTime >= 500L);
@@ -400,8 +394,7 @@ class KeelVerticleWrapTest extends KeelUnitTest {
                     assertEquals(1, callCount.get());
                     
                     return verticle.undeployMe();
-                });
-        
-        async(testFuture);
+                })
+                .onComplete(testContext.succeedingThenComplete());
     }
 }

@@ -1,9 +1,12 @@
 package io.github.sinri.keel.core.helper;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import org.junit.jupiter.api.Test;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,7 +15,12 @@ import java.util.List;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeelStringHelperTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelStringHelperTest extends KeelJUnit5Test {
+
+    public KeelStringHelperTest(Vertx vertx) {
+        super(vertx);
+    }
 
     private KeelStringHelper getHelper() {
         return Keel.stringHelper();

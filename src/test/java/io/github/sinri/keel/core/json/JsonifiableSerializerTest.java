@@ -1,15 +1,23 @@
 package io.github.sinri.keel.core.json;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 
-class JsonifiableSerializerTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class JsonifiableSerializerTest extends KeelJUnit5Test {
+
+    public JsonifiableSerializerTest(Vertx vertx) {
+        super(vertx);
+    }
 
     @BeforeAll
     static void prepare() {

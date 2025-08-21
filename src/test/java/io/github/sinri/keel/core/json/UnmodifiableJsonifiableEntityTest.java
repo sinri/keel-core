@@ -1,12 +1,14 @@
 package io.github.sinri.keel.core.json;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.pointer.JsonPointer;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -15,11 +17,16 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class UnmodifiableJsonifiableEntityTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class UnmodifiableJsonifiableEntityTest extends KeelJUnit5Test {
 
     private UnmodifiableJsonifiableEntity emptyEntity;
     private UnmodifiableJsonifiableEntity populatedEntity;
     private JsonObject testJsonObject;
+
+    public UnmodifiableJsonifiableEntityTest(Vertx vertx) {
+        super(vertx);
+    }
 
     @BeforeEach
     public void setUp() {
@@ -530,11 +537,11 @@ class UnmodifiableJsonifiableEntityTest extends KeelUnitTest {
     @Test
     void testNullHandling() {
         JsonObject nullData = new JsonObject()
-                .put("nullString", (String) null)
-                .put("nullNumber", (Number) null)
-                .put("nullBoolean", (Boolean) null)
-                .put("nullObject", (JsonObject) null)
-                .put("nullArray", (JsonArray) null);
+                .put("nullString", null)
+                .put("nullNumber", null)
+                .put("nullBoolean", null)
+                .put("nullObject", null)
+                .put("nullArray", null);
 
         UnmodifiableJsonifiableEntity nullEntity = UnmodifiableJsonifiableEntity.wrap(nullData);
 

@@ -26,7 +26,7 @@ public class WriteCsvTest extends KeelInstantRunner {
 
         try (FileOutputStream fos = new FileOutputStream(file)) {
             KeelCsvWriter keelCsvWriter = new KeelCsvWriter(fos);
-            
+
             return Keel.asyncCallIteratively(rows, row -> {
                 try {
                     keelCsvWriter.blockWriteRow(row);
@@ -34,8 +34,15 @@ public class WriteCsvTest extends KeelInstantRunner {
                 } catch (IOException e) {
                     return Future.failedFuture(e);
                 }
-            }).compose(v -> keelCsvWriter.close());
-            
+            }).compose(v -> {
+                try {
+                    keelCsvWriter.close();
+                    return Future.succeededFuture();
+                } catch (IOException e) {
+                    return Future.failedFuture(e);
+                }
+            });
+
         } catch (IOException e) {
             return Future.failedFuture(e);
         }

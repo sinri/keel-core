@@ -6,20 +6,17 @@ import io.github.sinri.keel.integration.poi.excel.entity.KeelSheetMatrixRow;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxExtension;
-import io.vertx.junit5.VertxTestContext;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,7 +26,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith({VertxExtension.class})
+@ExtendWith(VertxExtension.class)
 class KeelSheetTest extends KeelJUnit5Test {
     private static final String TEST_OUTPUT_DIR = "src/test/resources/runtime/test_output";
     private File testOutputDir;
@@ -37,12 +34,9 @@ class KeelSheetTest extends KeelJUnit5Test {
     private KeelSheets testSheets;
     private Workbook testWorkbook;
 
-    @BeforeAll
-    static void beforeAll(Vertx vertx, VertxTestContext testContext) {
-        beforeAllShared(vertx);
-        testContext.completeNow();
+    KeelSheetTest(Vertx vertx) {
+        super(vertx);
     }
-
     @BeforeEach
     void setUp() throws IOException {
         testOutputDir = new File(TEST_OUTPUT_DIR);

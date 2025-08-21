@@ -1,13 +1,17 @@
 package io.github.sinri.keel.core.cutter;
 
 import io.github.sinri.keel.core.servant.intravenous.KeelIntravenous;
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class IntravenouslyCutterOnStringTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class IntravenouslyCutterOnStringTest extends KeelJUnit5Test {
     
     private List<String> processedStrings;
     private AtomicInteger processedCount;
@@ -25,8 +30,11 @@ class IntravenouslyCutterOnStringTest extends KeelUnitTest {
     private KeelIntravenous.SingleDropProcessor<String> processor;
     private DeploymentOptions deploymentOptions;
 
+    IntravenouslyCutterOnStringTest(Vertx vertx) {
+        super(vertx);
+    }
+
     @BeforeEach
-    @Override
     public void setUp() {
         processedStrings = new ArrayList<>();
         processedCount = new AtomicInteger(0);
@@ -64,7 +72,7 @@ class IntravenouslyCutterOnStringTest extends KeelUnitTest {
     }
 
     @Test
-    void testAcceptFromStreamWithSingleSegment() throws Exception {
+    void testAcceptFromStreamWithSingleSegment(VertxTestContext testContext) {
         IntravenouslyCutterOnString cutter = new IntravenouslyCutterOnString(processor, deploymentOptions);
         
         // 发送包含单个段的数据
@@ -73,14 +81,17 @@ class IntravenouslyCutterOnStringTest extends KeelUnitTest {
         
         // 停止并等待处理完成
         cutter.stopHere();
-        cutter.waitForAllHandled().toCompletionStage().toCompletableFuture().get(5, TimeUnit.SECONDS);
-        
-        assertEquals(1, processedStrings.size());
-        assertEquals("Hello World", processedStrings.get(0));
+        cutter.waitForAllHandled()
+              .onSuccess(v -> {
+                  assertEquals(1, processedStrings.size());
+                  assertEquals("Hello World", processedStrings.get(0));
+                  testContext.completeNow();
+              })
+              .onFailure(testContext::failNow);
     }
 
     @Test
-    void testAcceptFromStreamWithMultipleSegments() throws Exception {
+    void testAcceptFromStreamWithMultipleSegments(VertxTestContext testContext) {
         IntravenouslyCutterOnString cutter = new IntravenouslyCutterOnString(processor, deploymentOptions);
         
         // 发送包含多个段的数据
@@ -88,16 +99,19 @@ class IntravenouslyCutterOnStringTest extends KeelUnitTest {
         cutter.acceptFromStream(buffer);
         
         cutter.stopHere();
-        cutter.waitForAllHandled().toCompletionStage().toCompletableFuture().get(5, TimeUnit.SECONDS);
-        
-        assertEquals(3, processedStrings.size());
-        assertEquals("First", processedStrings.get(0));
-        assertEquals("Second", processedStrings.get(1));
-        assertEquals("Third", processedStrings.get(2));
+        cutter.waitForAllHandled()
+              .onSuccess(v -> {
+                  assertEquals(3, processedStrings.size());
+                  assertEquals("First", processedStrings.get(0));
+                  assertEquals("Second", processedStrings.get(1));
+                  assertEquals("Third", processedStrings.get(2));
+                  testContext.completeNow();
+              })
+              .onFailure(testContext::failNow);
     }
 
     @Test
-    void testAcceptFromStreamWithPartialData() throws Exception {
+    void testAcceptFromStreamWithPartialData(VertxTestContext testContext) {
         IntravenouslyCutterOnString cutter = new IntravenouslyCutterOnString(processor, deploymentOptions);
         
         // 分多次发送数据
@@ -107,15 +121,18 @@ class IntravenouslyCutterOnStringTest extends KeelUnitTest {
         cutter.acceptFromStream(Buffer.buffer("\n\n"));
         
         cutter.stopHere();
-        cutter.waitForAllHandled().toCompletionStage().toCompletableFuture().get(5, TimeUnit.SECONDS);
-        
-        assertEquals(2, processedStrings.size());
-        assertEquals("Partial Data", processedStrings.get(0));
-        assertEquals("Complete", processedStrings.get(1));
+        cutter.waitForAllHandled()
+              .onSuccess(v -> {
+                  assertEquals(2, processedStrings.size());
+                  assertEquals("Partial Data", processedStrings.get(0));
+                  assertEquals("Complete", processedStrings.get(1));
+                  testContext.completeNow();
+              })
+              .onFailure(testContext::failNow);
     }
 
     @Test
-    void testAcceptFromStreamWithNoDelimiter() throws Exception {
+    void testAcceptFromStreamWithNoDelimiter(VertxTestContext testContext) {
         IntravenouslyCutterOnString cutter = new IntravenouslyCutterOnString(processor, deploymentOptions);
         
         // 发送不包含分隔符的数据
@@ -123,14 +140,17 @@ class IntravenouslyCutterOnStringTest extends KeelUnitTest {
         cutter.acceptFromStream(buffer);
         
         cutter.stopHere();
-        cutter.waitForAllHandled().toCompletionStage().toCompletableFuture().get(5, TimeUnit.SECONDS);
-        
-        assertEquals(1, processedStrings.size());
-        assertEquals("No delimiter data", processedStrings.get(0));
+        cutter.waitForAllHandled()
+              .onSuccess(v -> {
+                  assertEquals(1, processedStrings.size());
+                  assertEquals("No delimiter data", processedStrings.get(0));
+                  testContext.completeNow();
+              })
+              .onFailure(testContext::failNow);
     }
 
     @Test
-    void testAcceptFromStreamWithEmptyBuffer() throws Exception {
+    void testAcceptFromStreamWithEmptyBuffer(VertxTestContext testContext) {
         IntravenouslyCutterOnString cutter = new IntravenouslyCutterOnString(processor, deploymentOptions);
         
         // 发送空缓冲区，然后发送一些实际内容
@@ -142,14 +162,17 @@ class IntravenouslyCutterOnStringTest extends KeelUnitTest {
         cutter.acceptFromStream(contentBuffer);
         
         cutter.stopHere();
-        cutter.waitForAllHandled().toCompletionStage().toCompletableFuture().get(5, TimeUnit.SECONDS);
-        
-        assertEquals(1, processedStrings.size());
+        cutter.waitForAllHandled()
+              .onSuccess(v -> {
+                  assertEquals(1, processedStrings.size());
                 assertEquals("content", processedStrings.get(0));
+                  testContext.completeNow();
+              })
+              .onFailure(testContext::failNow);
     }
 
     @Test
-    void testAcceptFromStreamWithOnlyDelimiters() throws Exception {
+    void testAcceptFromStreamWithOnlyDelimiters(VertxTestContext testContext) {
         IntravenouslyCutterOnString cutter = new IntravenouslyCutterOnString(processor, deploymentOptions);
         
         // 发送只包含分隔符的数据
@@ -157,15 +180,18 @@ class IntravenouslyCutterOnStringTest extends KeelUnitTest {
         cutter.acceptFromStream(buffer);
         
         cutter.stopHere();
-        cutter.waitForAllHandled().toCompletionStage().toCompletableFuture().get(5, TimeUnit.SECONDS);
-        
-        assertEquals(2, processedStrings.size());
-        assertEquals("", processedStrings.get(0));
-        assertEquals("", processedStrings.get(1));
+        cutter.waitForAllHandled()
+              .onSuccess(v -> {
+                  assertEquals(2, processedStrings.size());
+                  assertEquals("", processedStrings.get(0));
+                  assertEquals("", processedStrings.get(1));
+                  testContext.completeNow();
+              })
+              .onFailure(testContext::failNow);
     }
 
     @Test
-    void testStopHereWithoutThrowable() throws Exception {
+    void testStopHereWithoutThrowable(VertxTestContext testContext) {
         IntravenouslyCutterOnString cutter = new IntravenouslyCutterOnString(processor, deploymentOptions);
         
         Buffer buffer = Buffer.buffer("Test data\n\n");
@@ -174,15 +200,17 @@ class IntravenouslyCutterOnStringTest extends KeelUnitTest {
         // 正常停止
         cutter.stopHere();
         Future<Void> result = cutter.waitForAllHandled();
-        
-        result.toCompletionStage().toCompletableFuture().get(5, TimeUnit.SECONDS);
-        assertTrue(result.succeeded());
-        assertEquals(1, processedStrings.size());
-        assertEquals("Test data", processedStrings.get(0));
+
+        result.onSuccess(v -> {
+            assertTrue(result.succeeded());
+            assertEquals(1, processedStrings.size());
+            assertEquals("Test data", processedStrings.get(0));
+            testContext.completeNow();
+        }).onFailure(testContext::failNow);
     }
 
     @Test
-    void testStopHereWithThrowable() throws Exception {
+    void testStopHereWithThrowable(VertxTestContext testContext) {
         IntravenouslyCutterOnString cutter = new IntravenouslyCutterOnString(processor, deploymentOptions);
         
         Buffer buffer = Buffer.buffer("Test data\n\n");
@@ -192,22 +220,21 @@ class IntravenouslyCutterOnStringTest extends KeelUnitTest {
         RuntimeException testException = new RuntimeException("Test exception");
         cutter.stopHere(testException);
         Future<Void> result = cutter.waitForAllHandled();
-        
-        try {
-            result.toCompletionStage().toCompletableFuture().get(5, TimeUnit.SECONDS);
-            fail("Expected exception");
-        } catch (Exception e) {
-            assertInstanceOf(RuntimeException.class, e.getCause());
-            assertEquals("Test exception", e.getCause().getMessage());
-        }
-        
-        assertEquals(1, processedStrings.size());
-        assertEquals("Test data", processedStrings.get(0));
+
+        result.onFailure(throwable -> {
+            assertInstanceOf(RuntimeException.class, throwable);
+            assertEquals("Test exception", throwable.getMessage());
+            assertEquals(1, processedStrings.size());
+            assertEquals("Test data", processedStrings.get(0));
+            testContext.completeNow();
+        }).onSuccess(v -> {
+            testContext.failNow("Expected exception but got success");
+        });
     }
 
     @Test
     @Timeout(value = 10, unit = TimeUnit.SECONDS)
-    void testTimeoutFunctionality() throws Exception {
+    void testTimeoutFunctionality(VertxTestContext testContext) {
         // 测试超时功能 - 设置很短的超时时间
         IntravenouslyCutterOnString cutter = new IntravenouslyCutterOnString(processor, 100, deploymentOptions);
         
@@ -216,20 +243,19 @@ class IntravenouslyCutterOnStringTest extends KeelUnitTest {
         
         // 等待超时触发
         Future<Void> result = cutter.waitForAllHandled();
-        
-        try {
-            result.toCompletionStage().toCompletableFuture().get(5, TimeUnit.SECONDS);
-            fail("Expected timeout exception");
-        } catch (Exception e) {
-            assertTrue(e.getCause() instanceof IntravenouslyCutter.Timeout);
-        }
-        
-        assertEquals(1, processedStrings.size());
-        assertEquals("Test data", processedStrings.get(0));
+
+        result.onFailure(throwable -> {
+            assertInstanceOf(IntravenouslyCutter.Timeout.class, throwable);
+            assertEquals(1, processedStrings.size());
+            assertEquals("Test data", processedStrings.get(0));
+            testContext.completeNow();
+        }).onSuccess(v -> {
+            testContext.failNow("Expected timeout exception but got success");
+        });
     }
 
     @Test
-    void testProcessingWithUnicodeCharacters() throws Exception {
+    void testProcessingWithUnicodeCharacters(VertxTestContext testContext) {
         IntravenouslyCutterOnString cutter = new IntravenouslyCutterOnString(processor, deploymentOptions);
         
         // 测试Unicode字符
@@ -237,15 +263,18 @@ class IntravenouslyCutterOnStringTest extends KeelUnitTest {
         cutter.acceptFromStream(buffer);
         
         cutter.stopHere();
-        cutter.waitForAllHandled().toCompletionStage().toCompletableFuture().get(5, TimeUnit.SECONDS);
-        
-        assertEquals(2, processedStrings.size());
-        assertEquals("Hello 世界", processedStrings.get(0));
-        assertEquals("测试 🌍", processedStrings.get(1));
+        cutter.waitForAllHandled()
+              .onSuccess(v -> {
+                  assertEquals(2, processedStrings.size());
+                  assertEquals("Hello 世界", processedStrings.get(0));
+                  assertEquals("测试 🌍", processedStrings.get(1));
+                  testContext.completeNow();
+              })
+              .onFailure(testContext::failNow);
     }
 
     @Test
-    void testLargeDataProcessing() throws Exception {
+    void testLargeDataProcessing(VertxTestContext testContext) {
         IntravenouslyCutterOnString cutter = new IntravenouslyCutterOnString(processor, deploymentOptions);
         
         // 生成大量数据
@@ -259,16 +288,19 @@ class IntravenouslyCutterOnStringTest extends KeelUnitTest {
         cutter.acceptFromStream(buffer);
         
         cutter.stopHere();
-        cutter.waitForAllHandled().toCompletionStage().toCompletableFuture().get(10, TimeUnit.SECONDS);
-        
-        assertEquals(segmentCount, processedStrings.size());
-        for (int i = 0; i < segmentCount; i++) {
-            assertEquals("Segment " + i, processedStrings.get(i));
-        }
+        cutter.waitForAllHandled()
+              .onSuccess(v -> {
+                  assertEquals(segmentCount, processedStrings.size());
+                  for (int i = 0; i < segmentCount; i++) {
+                      assertEquals("Segment " + i, processedStrings.get(i));
+                  }
+                  testContext.completeNow();
+              })
+              .onFailure(testContext::failNow);
     }
 
     @Test
-    void testMultipleStopCalls() throws Exception {
+    void testMultipleStopCalls(VertxTestContext testContext) {
         IntravenouslyCutterOnString cutter = new IntravenouslyCutterOnString(processor, deploymentOptions);
         
         Buffer buffer = Buffer.buffer("Test data\n\n");
@@ -280,15 +312,16 @@ class IntravenouslyCutterOnStringTest extends KeelUnitTest {
         cutter.stopHere();
         
         Future<Void> result = cutter.waitForAllHandled();
-        result.toCompletionStage().toCompletableFuture().get(5, TimeUnit.SECONDS);
-        
-        assertTrue(result.succeeded());
-        assertEquals(1, processedStrings.size());
-        assertEquals("Test data", processedStrings.get(0));
+        result.onSuccess(v -> {
+            assertTrue(result.succeeded());
+            assertEquals(1, processedStrings.size());
+            assertEquals("Test data", processedStrings.get(0));
+            testContext.completeNow();
+        }).onFailure(testContext::failNow);
     }
 
     @Test
-    void testProcessingFailure() throws Exception {
+    void testProcessingFailure(VertxTestContext testContext) {
         // 创建会失败的处理器
         KeelIntravenous.SingleDropProcessor<String> failingProcessor = drop -> {
             processedStrings.add(drop);
@@ -305,12 +338,15 @@ class IntravenouslyCutterOnStringTest extends KeelUnitTest {
         cutter.acceptFromStream(buffer);
         
         cutter.stopHere();
-        cutter.waitForAllHandled().toCompletionStage().toCompletableFuture().get(5, TimeUnit.SECONDS);
-        
-        assertTrue(processingFailed.get());
-        // 即使处理失败，数据仍应被添加到列表中
-        assertTrue(processedStrings.contains("success"));
-        assertTrue(processedStrings.contains("fail"));
-        assertTrue(processedStrings.contains("after_fail"));
+        cutter.waitForAllHandled()
+              .onSuccess(v -> {
+                  assertTrue(processingFailed.get());
+                  // 即使处理失败，数据仍应被添加到列表中
+                  assertTrue(processedStrings.contains("success"));
+                  assertTrue(processedStrings.contains("fail"));
+                  assertTrue(processedStrings.contains("after_fail"));
+                  testContext.completeNow();
+              })
+              .onFailure(testContext::failNow);
     }
 }

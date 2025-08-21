@@ -1,21 +1,28 @@
 package io.github.sinri.keel.core.json;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class JsonObjectWritableTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class JsonObjectWritableTest extends KeelJUnit5Test {
 
     private JsonObjectWritable writable;
     private JsonObject testData;
 
+    public JsonObjectWritableTest(Vertx vertx) {
+        super(vertx);
+    }
+
     @BeforeEach
-    @Override
     public void setUp() {
         // 使用 JsonifiableDataUnitImpl 作为 JsonObjectWritable 的实现
         testData = new JsonObject()
@@ -79,7 +86,7 @@ class JsonObjectWritableTest extends KeelUnitTest {
     @DisplayName("测试 removeEntry 方法")
     void testRemoveEntry() {
         // 验证键存在
-        assertTrue(writable.readString("string") != null);
+        assertNotNull(writable.readString("string"));
         
         // 删除键值对
         writable.removeEntry("string");

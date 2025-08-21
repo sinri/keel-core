@@ -1,24 +1,31 @@
 package io.github.sinri.keel.core.helper;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.BeforeEach;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeelFileHelperTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelFileHelperTest extends KeelJUnit5Test {
+
+    public KeelFileHelperTest(Vertx vertx) {
+        super(vertx);
+    }
 
     private KeelFileHelper fileHelper;
     private String testDir;
     private String testFile;
 
     @BeforeEach
-    @Override
     public void setUp() {
         fileHelper = KeelFileHelper.getInstance();
         testDir = "test_temp_dir";

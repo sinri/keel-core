@@ -1,15 +1,23 @@
 package io.github.sinri.keel.core.cron;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
-import org.junit.jupiter.api.Test;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeelCronExpressionTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelCronExpressionTest extends KeelJUnit5Test {
+
+    KeelCronExpressionTest(Vertx vertx) {
+        super(vertx);
+    }
 
     @Test
     @DisplayName("测试parseCalenderToElements静态方法")

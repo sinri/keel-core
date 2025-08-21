@@ -1,20 +1,28 @@
 package io.github.sinri.keel.core.json;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class JsonifiedThrowableTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class JsonifiedThrowableTest extends KeelJUnit5Test {
 
     private RuntimeException simpleException;
     private Exception chainedException;
     private NullPointerException nullPointerException;
+
+    public JsonifiedThrowableTest(Vertx vertx) {
+        super(vertx);
+    }
 
     @BeforeEach
     public void setUp() {

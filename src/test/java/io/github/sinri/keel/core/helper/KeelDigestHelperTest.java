@@ -1,8 +1,11 @@
 package io.github.sinri.keel.core.helper;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
-import org.junit.jupiter.api.Test;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -11,7 +14,12 @@ import java.security.SecureRandom;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeelDigestHelperTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelDigestHelperTest extends KeelJUnit5Test {
+
+    public KeelDigestHelperTest(Vertx vertx) {
+        super(vertx);
+    }
 
     private KeelDigestHelper getHelper() {
         return Keel.digestHelper();

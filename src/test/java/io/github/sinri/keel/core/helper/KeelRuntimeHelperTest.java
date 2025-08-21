@@ -3,21 +3,28 @@ package io.github.sinri.keel.core.helper;
 import io.github.sinri.keel.core.helper.runtime.CPUTimeResult;
 import io.github.sinri.keel.core.helper.runtime.GCStatResult;
 import io.github.sinri.keel.core.helper.runtime.JVMMemoryResult;
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.DisplayName;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.lang.management.MemoryUsage;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeelRuntimeHelperTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelRuntimeHelperTest extends KeelJUnit5Test {
+
+    public KeelRuntimeHelperTest(Vertx vertx) {
+        super(vertx);
+    }
 
     private KeelRuntimeHelper runtimeHelper;
 
     @BeforeEach
-    @Override
     public void setUp() {
         runtimeHelper = KeelRuntimeHelper.getInstance();
     }
@@ -192,8 +199,8 @@ class KeelRuntimeHelperTest extends KeelUnitTest {
 
     // 测试用的内部类
     private static class TestObject {
-        private String name;
-        private int value;
+        private final String name;
+        private final int value;
         
         public TestObject(String name, int value) {
             this.name = name;
@@ -210,7 +217,7 @@ class KeelRuntimeHelperTest extends KeelUnitTest {
     }
     
     private static class CircularObject {
-        private String name;
+        private final String name;
         private CircularObject reference;
         
         public CircularObject(String name) {

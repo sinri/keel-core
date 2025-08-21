@@ -416,7 +416,7 @@ public class KeelStringHelper {
     /**
      * Truncates a string to the specified length and adds an ellipsis if truncated.
      *
-     * @param str the string to truncate
+     * @param str       the string to truncate
      * @param maxLength the maximum length of the string
      * @return the truncated string
      * @since 4.0.12
@@ -455,7 +455,7 @@ public class KeelStringHelper {
     /**
      * Counts the occurrences of a substring within a string.
      *
-     * @param str the string to search in
+     * @param str    the string to search in
      * @param subStr the substring to search for
      * @return the number of occurrences
      * @since 4.0.12
@@ -521,7 +521,7 @@ public class KeelStringHelper {
         if (str == null || str.isEmpty()) return "";
         StringBuilder result = new StringBuilder();
         boolean capitalizeNext = true;
-        
+
         for (char c : str.toCharArray()) {
             if (Character.isSpaceChar(c)) {
                 capitalizeNext = true;
@@ -560,7 +560,7 @@ public class KeelStringHelper {
         return Pattern.compile(emailRegex).matcher(email).matches();
     }
 
-    
+
     /**
      * Generates a random string of specified length.
      *
@@ -576,7 +576,7 @@ public class KeelStringHelper {
     /**
      * Generates a random string of specified length using custom character set.
      *
-     * @param length the length of the random string
+     * @param length  the length of the random string
      * @param charSet the character set to use for generating the random string
      * @return the random string
      * @since 4.0.12

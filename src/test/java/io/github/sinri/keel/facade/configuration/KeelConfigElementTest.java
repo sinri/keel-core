@@ -1,10 +1,13 @@
 package io.github.sinri.keel.facade.configuration;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -16,11 +19,15 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeelConfigElementTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelConfigElementTest extends KeelJUnit5Test {
     private KeelConfigElement root;
 
+    public KeelConfigElementTest(Vertx vertx) {
+        super(vertx);
+    }
+
     @BeforeEach
-    @Override
     public void setUp() {
         root = new KeelConfigElement("root");
         root.setValue("root_value");

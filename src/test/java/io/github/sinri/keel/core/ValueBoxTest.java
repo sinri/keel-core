@@ -1,9 +1,12 @@
 package io.github.sinri.keel.core;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
-import org.junit.jupiter.api.Test;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -12,13 +15,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ValueBoxTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class ValueBoxTest extends KeelJUnit5Test {
 
     private ValueBox<String> stringBox;
     private ValueBox<Integer> intBox;
 
+    public ValueBoxTest(Vertx vertx) {
+        super(vertx);
+    }
+
     @BeforeEach
-    @Override
     public void setUp() {
         stringBox = new ValueBox<>();
         intBox = new ValueBox<>();
@@ -135,11 +142,11 @@ class ValueBoxTest extends KeelUnitTest {
     void testGetValueOrElse() {
         // Test with no value set
         assertEquals("fallback", stringBox.getValueOrElse("fallback"));
-        
+
         // Test with value set
         stringBox.setValue("hello");
         assertEquals("hello", stringBox.getValueOrElse("fallback"));
-        
+
         // Test with null value set
         stringBox.setValue(null);
         assertNull(stringBox.getValueOrElse("fallback"));
@@ -150,7 +157,7 @@ class ValueBoxTest extends KeelUnitTest {
     void testClear() {
         stringBox.setValue("hello");
         assertTrue(stringBox.isValueAlreadySet());
-        
+
         stringBox.clear();
         assertFalse(stringBox.isValueAlreadySet());
         assertThrows(IllegalStateException.class, () -> stringBox.getValue());
@@ -172,10 +179,10 @@ class ValueBoxTest extends KeelUnitTest {
         stringBox.setValue("hello", 100);
         assertTrue(stringBox.isValueAlreadySet());
         assertEquals("hello", stringBox.getValue());
-        
+
         // Wait for expiration
         Thread.sleep(150);
-        
+
         // Value should be expired and cleared
         assertFalse(stringBox.isValueAlreadySet());
         assertThrows(IllegalStateException.class, () -> stringBox.getValue());
@@ -187,10 +194,10 @@ class ValueBoxTest extends KeelUnitTest {
     void testExpirationWithZeroLifetime() throws InterruptedException {
         stringBox.setValue("hello", 0);
         assertTrue(stringBox.isValueAlreadySet());
-        
+
         // Wait some time
         Thread.sleep(100);
-        
+
         // Value should still be valid (no expiration)
         assertTrue(stringBox.isValueAlreadySet());
         assertEquals("hello", stringBox.getValue());
@@ -201,11 +208,11 @@ class ValueBoxTest extends KeelUnitTest {
     void testIsValueSetToNull() {
         // Not set
         assertFalse(stringBox.isValueSetToNull());
-        
+
         // Set to null
         stringBox.setValue(null);
         assertTrue(stringBox.isValueSetToNull());
-        
+
         // Set to non-null
         stringBox.setValue("hello");
         assertFalse(stringBox.isValueSetToNull());
@@ -216,11 +223,11 @@ class ValueBoxTest extends KeelUnitTest {
     void testIsValueSetAndNotNull() {
         // Not set
         assertFalse(stringBox.isValueSetAndNotNull());
-        
+
         // Set to null
         stringBox.setValue(null);
         assertFalse(stringBox.isValueSetAndNotNull());
-        
+
         // Set to non-null
         stringBox.setValue("hello");
         assertTrue(stringBox.isValueSetAndNotNull());
@@ -232,7 +239,7 @@ class ValueBoxTest extends KeelUnitTest {
         ExecutorService executor = Executors.newFixedThreadPool(10);
         CountDownLatch latch = new CountDownLatch(100);
         AtomicInteger successCount = new AtomicInteger(0);
-        
+
         // Create 100 threads that set and get values
         for (int i = 0; i < 100; i++) {
             final int value = i;
@@ -250,10 +257,10 @@ class ValueBoxTest extends KeelUnitTest {
                 }
             });
         }
-        
+
         latch.await();
         executor.shutdown();
-        
+
         // Should have some successful operations
         assertTrue(successCount.get() > 0);
         // Box should be in a valid state
@@ -268,10 +275,10 @@ class ValueBoxTest extends KeelUnitTest {
         CountDownLatch latch = new CountDownLatch(5);
         AtomicInteger setCount = new AtomicInteger(0);
         AtomicInteger getCount = new AtomicInteger(0);
-        
+
         // Set value with short lifetime
         stringBox.setValue("test", 50);
-        
+
         // Start 5 threads that try to get the value
         for (int i = 0; i < 5; i++) {
             executor.submit(() -> {
@@ -283,13 +290,13 @@ class ValueBoxTest extends KeelUnitTest {
                         } catch (IllegalStateException e) {
                             // Expected when expired
                         }
-                        
+
                         // Reset value sometimes
                         if (j % 3 == 0) {
                             stringBox.setValue("test" + j, 50);
                             setCount.incrementAndGet();
                         }
-                        
+
                         Thread.sleep(10);
                     }
                 } catch (InterruptedException e) {
@@ -299,10 +306,10 @@ class ValueBoxTest extends KeelUnitTest {
                 }
             });
         }
-        
+
         latch.await();
         executor.shutdown();
-        
+
         // Should have some operations
         assertTrue(setCount.get() > 0);
         assertTrue(getCount.get() > 0);
@@ -315,11 +322,11 @@ class ValueBoxTest extends KeelUnitTest {
         stringBox.setValue("test", 1);
         Thread.sleep(5);
         assertFalse(stringBox.isValueAlreadySet());
-        
+
         // Test setting expired value
         stringBox.setValue("test", -1);
         assertTrue(stringBox.isValueAlreadySet()); // Negative lifetime means no expiration
-        
+
         // Test clearing expired value
         stringBox.setValue("test", 1);
         Thread.sleep(5);
@@ -332,13 +339,13 @@ class ValueBoxTest extends KeelUnitTest {
     void testTypeSafety() {
         ValueBox<Integer> integerBox = new ValueBox<>();
         ValueBox<String> stringBox = new ValueBox<>();
-        
+
         integerBox.setValue(42);
         stringBox.setValue("hello");
-        
+
         assertEquals(Integer.valueOf(42), integerBox.getValue());
         assertEquals("hello", stringBox.getValue());
-        
+
         // Test with custom objects
         ValueBox<Object> objectBox = new ValueBox<>();
         Object testObject = new Object();
@@ -351,26 +358,26 @@ class ValueBoxTest extends KeelUnitTest {
     void testMultipleOperationsSequence() {
         // Initial state
         assertFalse(stringBox.isValueAlreadySet());
-        
+
         // Set value
         stringBox.setValue("first");
         assertTrue(stringBox.isValueAlreadySet());
         assertEquals("first", stringBox.getValue());
-        
+
         // Update value
         stringBox.setValue("second");
         assertTrue(stringBox.isValueAlreadySet());
         assertEquals("second", stringBox.getValue());
-        
+
         // Clear
         stringBox.clear();
         assertFalse(stringBox.isValueAlreadySet());
-        
+
         // Set with expiration
         stringBox.setValue("third", 1000);
         assertTrue(stringBox.isValueAlreadySet());
         assertEquals("third", stringBox.getValue());
-        
+
         // Update expiration
         stringBox.setValue("fourth", 2000);
         assertTrue(stringBox.isValueAlreadySet());

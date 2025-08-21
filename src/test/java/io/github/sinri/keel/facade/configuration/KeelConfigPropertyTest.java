@@ -1,14 +1,23 @@
 package io.github.sinri.keel.facade.configuration;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class KeelConfigPropertyTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelConfigPropertyTest extends KeelJUnit5Test {
+
+    public KeelConfigPropertyTest(Vertx vertx) {
+        super(vertx);
+    }
+    
     @Test
     void testConstructor() {
         KeelConfigProperty property = new KeelConfigProperty();

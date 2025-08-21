@@ -1,21 +1,24 @@
 package io.github.sinri.keel.facade;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.core.helper.KeelHelpersInterface;
+import io.github.sinri.keel.facade.async.KeelAsyncMixin;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.github.sinri.keel.web.http.requester.KeelWebRequestMixin;
+import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
-import org.junit.jupiter.api.Test;
+import io.vertx.junit5.VertxExtension;
+import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeelInstanceTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelInstanceTest extends KeelJUnit5Test {
 
-    private KeelInstance keelInstance;
-
-    @BeforeEach
-    @Override
-    public void setUp() {
-        keelInstance = KeelInstance.Keel;
+    public KeelInstanceTest(Vertx vertx) {
+        super(vertx);
     }
 
     @Test
@@ -31,7 +34,7 @@ class KeelInstanceTest extends KeelUnitTest {
     @Test
     @DisplayName("Test getConfiguration")
     void testGetConfiguration() {
-        var config = keelInstance.getConfiguration();
+        var config = KeelInstance.Keel.getConfiguration();
         
         assertNotNull(config);
         assertEquals("", config.getName());
@@ -40,7 +43,7 @@ class KeelInstanceTest extends KeelUnitTest {
     @Test
     @DisplayName("Test config method with empty key")
     void testConfigWithEmptyKey() {
-        String result = keelInstance.config("");
+        String result = KeelInstance.Keel.config("");
         
         assertNull(result);
     }
@@ -48,7 +51,7 @@ class KeelInstanceTest extends KeelUnitTest {
     @Test
     @DisplayName("Test config method with non-existent key")
     void testConfigWithNonExistentKey() {
-        String result = keelInstance.config("non.existent.key");
+        String result = KeelInstance.Keel.config("non.existent.key");
         
         assertNull(result);
     }
@@ -58,14 +61,14 @@ class KeelInstanceTest extends KeelUnitTest {
     void testIsVertxInitializedBeforeInit() {
         // 由于KeelInstance是单例，可能在其他地方已经被初始化
         // 我们只验证方法能正常调用
-        boolean initialized = keelInstance.isVertxInitialized();
+        boolean initialized = KeelInstance.Keel.isVertxInitialized();
         assertTrue(initialized || !initialized); // 总是为真，只是验证方法调用
     }
 
     @Test
     @DisplayName("Test isRunningInVertxCluster before initialization")
     void testIsRunningInVertxClusterBeforeInit() {
-        assertFalse(keelInstance.isRunningInVertxCluster());
+        assertFalse(KeelInstance.Keel.isRunningInVertxCluster());
     }
 
     @Test
@@ -74,7 +77,7 @@ class KeelInstanceTest extends KeelUnitTest {
         // 由于KeelInstance是单例，可能在其他地方已经被初始化
         // 我们只验证方法能正常调用
         try {
-            keelInstance.getVertx();
+            KeelInstance.Keel.getVertx();
             // 如果没有抛出异常，说明已经初始化了
         } catch (NullPointerException e) {
             // 如果抛出异常，说明还没有初始化
@@ -84,39 +87,46 @@ class KeelInstanceTest extends KeelUnitTest {
     @Test
     @DisplayName("Test getClusterManager before initialization")
     void testGetClusterManagerBeforeInit() {
-        assertNull(keelInstance.getClusterManager());
+        assertNull(KeelInstance.Keel.getClusterManager());
     }
 
     @Test
     @DisplayName("Test initializeVertxStandalone")
-    void testInitializeVertxStandalone() {
+    void testInitializeVertxStandalone(VertxTestContext testContext) {
         VertxOptions options = new VertxOptions();
-        keelInstance.initializeVertxStandalone(options);
-        
-        assertTrue(keelInstance.isVertxInitialized());
-        assertFalse(keelInstance.isRunningInVertxCluster());
-        assertNotNull(keelInstance.getVertx());
-        assertNull(keelInstance.getClusterManager());
+        KeelInstance.Keel.initializeVertxStandalone(options);
+
+        assertTrue(KeelInstance.Keel.isVertxInitialized());
+        assertFalse(KeelInstance.Keel.isRunningInVertxCluster());
+        assertNotNull(KeelInstance.Keel.getVertx());
+        assertNull(KeelInstance.Keel.getClusterManager());
+
+        testContext.completeNow();
     }
 
     @Test
     @DisplayName("Test initializeVertx with null cluster manager")
-    void testInitializeVertxWithNullClusterManager() {
+    void testInitializeVertxWithNullClusterManager(VertxTestContext testContext) {
         VertxOptions options = new VertxOptions();
-        
-        keelInstance.initializeVertx(options, null)
-                .toCompletionStage().toCompletableFuture().join();
-        
-        assertTrue(keelInstance.isVertxInitialized());
-        assertFalse(keelInstance.isRunningInVertxCluster());
-        assertNotNull(keelInstance.getVertx());
-        assertNull(keelInstance.getClusterManager());
+
+        KeelInstance.Keel.initializeVertx(options, null)
+                         .onComplete(ar -> {
+                             if (ar.succeeded()) {
+                                 assertTrue(KeelInstance.Keel.isVertxInitialized());
+                                 assertFalse(KeelInstance.Keel.isRunningInVertxCluster());
+                                 assertNotNull(KeelInstance.Keel.getVertx());
+                                 assertNull(KeelInstance.Keel.getClusterManager());
+                                 testContext.completeNow();
+                             } else {
+                                 testContext.failNow(ar.cause());
+                             }
+                         });
     }
 
     @Test
     @DisplayName("Test getLogger")
     void testGetLogger() {
-        var logger = keelInstance.getLogger();
+        var logger = KeelInstance.Keel.getLogger();
         
         assertNotNull(logger);
         assertEquals("Keel", logger.topic());
@@ -126,18 +136,18 @@ class KeelInstanceTest extends KeelUnitTest {
     @DisplayName("Test helper methods availability")
     void testHelperMethodsAvailability() {
         // 验证实现了KeelHelpersInterface
-        assertNotNull(keelInstance.binaryHelper());
-        assertNotNull(keelInstance.datetimeHelper());
-        assertNotNull(keelInstance.fileHelper());
-        assertNotNull(keelInstance.jsonHelper());
-        assertNotNull(keelInstance.netHelper());
-        assertNotNull(keelInstance.reflectionHelper());
-        assertNotNull(keelInstance.stringHelper());
-        assertNotNull(keelInstance.cryptographyHelper());
-        assertNotNull(keelInstance.digestHelper());
-        assertNotNull(keelInstance.runtimeHelper());
-        assertNotNull(keelInstance.authenticationHelper());
-        assertNotNull(keelInstance.randomHelper());
+        assertNotNull(KeelInstance.Keel.binaryHelper());
+        assertNotNull(KeelInstance.Keel.datetimeHelper());
+        assertNotNull(KeelInstance.Keel.fileHelper());
+        assertNotNull(KeelInstance.Keel.jsonHelper());
+        assertNotNull(KeelInstance.Keel.netHelper());
+        assertNotNull(KeelInstance.Keel.reflectionHelper());
+        assertNotNull(KeelInstance.Keel.stringHelper());
+        assertNotNull(KeelInstance.Keel.cryptographyHelper());
+        assertNotNull(KeelInstance.Keel.digestHelper());
+        assertNotNull(KeelInstance.Keel.runtimeHelper());
+        assertNotNull(KeelInstance.Keel.authenticationHelper());
+        assertNotNull(KeelInstance.Keel.randomHelper());
     }
 
     @Test
@@ -151,8 +161,8 @@ class KeelInstanceTest extends KeelUnitTest {
     @DisplayName("Test instance implements required interfaces")
     void testInstanceImplementsInterfaces() {
         // 验证实现了必要的接口
-        assertTrue(keelInstance instanceof io.github.sinri.keel.core.helper.KeelHelpersInterface);
-        assertTrue(keelInstance instanceof io.github.sinri.keel.facade.async.KeelAsyncMixin);
-        assertTrue(keelInstance instanceof io.github.sinri.keel.web.http.requester.KeelWebRequestMixin);
+        assertInstanceOf(KeelHelpersInterface.class, KeelInstance.Keel);
+        assertInstanceOf(KeelAsyncMixin.class, KeelInstance.Keel);
+        assertInstanceOf(KeelWebRequestMixin.class, KeelInstance.Keel);
     }
 } 

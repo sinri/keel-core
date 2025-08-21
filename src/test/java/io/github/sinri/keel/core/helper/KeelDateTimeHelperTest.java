@@ -1,9 +1,12 @@
 package io.github.sinri.keel.core.helper;
 
 import io.github.sinri.keel.core.cron.KeelCronExpression;
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -14,7 +17,12 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeelDateTimeHelperTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelDateTimeHelperTest extends KeelJUnit5Test {
+
+    public KeelDateTimeHelperTest(Vertx vertx) {
+        super(vertx);
+    }
 
     private KeelDateTimeHelper helper;
 

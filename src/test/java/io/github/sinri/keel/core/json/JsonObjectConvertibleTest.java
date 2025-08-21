@@ -1,10 +1,13 @@
 package io.github.sinri.keel.core.json;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,11 +17,16 @@ import static org.junit.jupiter.api.Assertions.*;
  * This test class verifies the contract and behavior of the JsonObjectConvertible interface
  * by testing a concrete implementation and ensuring all methods work correctly.
  */
-class JsonObjectConvertibleTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class JsonObjectConvertibleTest extends KeelJUnit5Test {
 
     private TestJsonObjectConvertible emptyConvertible;
     private TestJsonObjectConvertible populatedConvertible;
     private JsonObject testJsonObject;
+
+    public JsonObjectConvertibleTest(Vertx vertx) {
+        super(vertx);
+    }
 
     @BeforeEach
     public void setUp() {

@@ -1,14 +1,22 @@
 package io.github.sinri.keel.core;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
-import org.junit.jupiter.api.Test;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import javax.annotation.Nonnull;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class SelfInterfaceTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class SelfInterfaceTest extends KeelJUnit5Test {
+
+    public SelfInterfaceTest(Vertx vertx) {
+        super(vertx);
+    }
 
     // 测试实现类
     private static class TestImplementation implements SelfInterface<TestImplementation> {

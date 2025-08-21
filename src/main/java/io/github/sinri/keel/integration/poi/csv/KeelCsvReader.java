@@ -1,8 +1,6 @@
 package io.github.sinri.keel.integration.poi.csv;
 
-import io.vertx.core.Completable;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -22,7 +20,7 @@ import java.util.function.Function;
  *
  * @since 3.1.1
  */
-public class KeelCsvReader implements io.vertx.core.Closeable {
+public class KeelCsvReader implements Closeable {
     private final BufferedReader br;
     /**
      * TODO: make it final.
@@ -113,7 +111,12 @@ public class KeelCsvReader implements io.vertx.core.Closeable {
                      .eventually(() -> {
                          KeelCsvReader keelCsvReader = ref.get();
                          if (keelCsvReader != null) {
-                             return keelCsvReader.close();
+                             try {
+                                 keelCsvReader.close();
+                                 return Future.succeededFuture();
+                             } catch (IOException e) {
+                                 return Future.failedFuture(e);
+                             }
                          } else {
                              return Future.succeededFuture();
                          }
@@ -248,27 +251,8 @@ public class KeelCsvReader implements io.vertx.core.Closeable {
                      });
     }
 
-    /**
-     * @param completion the promise to signal when close has completed
-     * @since 4.1.1
-     */
     @Override
-    public void close(Completable<Void> completion) {
-        try {
-            this.br.close();
-            completion.succeed();
-        } catch (IOException e) {
-            completion.fail(e);
-        }
-    }
-
-    /**
-     * @since 4.1.1
-     */
-    @Nonnull
-    public Future<Void> close() {
-        Promise<Void> promise = Promise.promise();
-        close(promise);
-        return promise.future();
+    public void close() throws IOException {
+        if (br != null) br.close();
     }
 }

@@ -1,7 +1,10 @@
 package io.github.sinri.keel.core.helper;
 
-import io.github.sinri.keel.facade.tesuto.unit.KeelUnitTest;
+import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
+import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,7 +15,12 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class KeelReflectionHelperTest extends KeelUnitTest {
+@ExtendWith(VertxExtension.class)
+class KeelReflectionHelperTest extends KeelJUnit5Test {
+
+    public KeelReflectionHelperTest(Vertx vertx) {
+        super(vertx);
+    }
 
     // Test annotations for reflection testing
     @Retention(RetentionPolicy.RUNTIME)

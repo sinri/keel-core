@@ -32,6 +32,9 @@ Keel Logger 是一个功能完整的日志记录系统，提供了结构化日�
 - **异常** - 关联的异常对象
 - **消息** - 日志消息内容
 - **上下文** - 上下文信息
+- **线程信息** - 线程详细信息（4.1.0版本新增）
+
+该类实现了 `IssueRecordMessageMixin<T>` 和 `IssueRecordContextMixin<T>` 接口，通过Mixin模式提供消息和上下文处理功能。
 
 #### KeelIssueRecordCenter
 问题记录中心，负责管理记录器的创建和配置：
@@ -47,6 +50,17 @@ Keel Logger 是一个功能完整的日志记录系统，提供了结构化日�
 - 支持异常记录
 - 支持旁路记录器（bypass recorder）
 - 支持记录格式化器
+- 继承 `KeelIssueRecorderCommonMixin` 和 `KeelIssueRecorderJsonMixin`
+- 通过 `build()` 方法创建实例
+- 支持转换为事件记录器（`toEventLogger()`）
+
+**KeelIssueRecorderImpl**
+
+- `KeelIssueRecorder` 接口的默认实现
+- 管理问题记录中心、记录构建器和主题
+- 实现可见级别控制和旁路记录器管理
+- 集成所有Mixin接口功能
+- 默认可见级别为 `INFO`
 
 #### 核心Mixin接口
 
@@ -54,26 +68,46 @@ Keel Logger 是一个功能完整的日志记录系统，提供了结构化日�
 - 定义记录器的核心功能
 - 提供各级别日志记录方法（debug、info、notice、warning、error、fatal）
 - 支持异常记录和自定义处理器
+- 管理可见级别和记录格式化器
+- 支持旁路记录器功能
+- 实现级别过滤逻辑
 
 **KeelIssueRecorderCommonMixin**
+
+- 继承自 `KeelIssueRecorderCore`
 - 提供常用的日志记录便捷方法
 - 支持简单字符串消息记录
 - 支持异常和消息组合记录
 
 **KeelIssueRecorderJsonMixin**
+
+- 继承自 `KeelIssueRecorderCore`
 - 提供JSON上下文支持的日志记录方法
 - 支持JsonObject上下文参数
 - 支持Handler\<JsonObject>形式的上下文构建
+- 提供两种上下文传递方式：直接JsonObject和Handler回调
 
 #### 记录相关Mixin接口
 
 **IssueRecordMessageMixin**
+
+- 包级别可见的接口
 - 处理日志消息的设置和获取
-- 定义消息属性的常量
+- 定义消息属性常量 `AttributeMessage`
 
 **IssueRecordContextMixin**
+
+- 包级别可见的接口
 - 处理日志上下文信息
 - 支持JsonObject形式的上下文数据
+- 定义上下文属性常量 `AttributeContext`
+- 提供便捷的上下文构建方法
+
+**KeelIssueRecordCore**（记录核心接口）
+
+- 定义基础记录属性（时间戳、级别、分类、异常等）
+- 继承自 `SelfInterface<T>` 实现流式API
+- 定义保留属性常量（classification、level、exception）
 
 ### 3. 事件日志系统 (Event Logger System)
 
@@ -160,6 +194,34 @@ KeelIssueRecorder<KeelEventLog> eventLogger = someRecorder.toEventLogger();
 - 不执行任何记录操作
 - 支持旁路记录器功能
 - 用于性能敏感或测试场景
+- 可见级别固定为 `SILENT`
+- `issueRecordBuilder` 返回 `null`
+- 主题固定为 "silent"
+- 通过 `KeelIssueRecorder.buildSilentIssueRecorder()` 创建
+
+### 8. SLF4J集成支持 (SLF4J Integration)
+
+#### KeelSLF4JServiceProvider
+
+- SLF4J服务提供者实现
+- 支持标准SLF4J API集成
+- 技术预览功能（4.1.1版本引入）
+- 通过META-INF/services自动加载
+- 可自定义问题记录中心
+
+#### KeelLoggerFactory
+
+- SLF4J Logger工厂实现
+- 缓存Logger实例避免重复创建
+- 使用 `KeelEverlastingCacheInterface` 管理缓存
+- 默认可见级别为 `DEBUG`
+
+#### KeelSlf4jLogger
+
+- 标准SLF4J Logger接口实现
+- 基于 `KeelEventLog` 的日志记录
+- 支持所有SLF4J日志级别映射
+- 技术预览功能
 
 ## 使用示例
 
@@ -209,6 +271,14 @@ recorder.info("处理请求", new JsonObject()
 recorder.warning("性能警告", context -> {
     context.put("responseTime", 2500);
     context.put("threshold", 2000);
+});
+
+// 使用核心API进行更复杂的记录
+recorder.info(issue -> {
+    issue.message("用户操作")
+         .classification("user", "operation")
+         .context("action", "login")
+         .context("timestamp", System.currentTimeMillis());
 });
 ```
 
@@ -273,7 +343,40 @@ KeelIssueRecorder<KeelIssueRecord> silentRecorder =
 silentRecorder.addBypassIssueRecorder(normalRecorder);
 ```
 
+### SLF4J集成使用
+
+```java
+// 通过标准SLF4J API使用
+Logger logger = LoggerFactory.getLogger("MyClass");
+logger.info("这是一条通过SLF4J记录的日志");
+logger.error("错误信息", exception);
+
+// 自定义服务提供者
+public class CustomKeelSLF4JServiceProvider extends KeelSLF4JServiceProvider {
+    @Override
+    protected KeelIssueRecordCenter buildIssueRecordCenter() {
+        // 返回自定义的问题记录中心
+        return KeelIssueRecordCenter.build(customAdapter);
+    }
+}
+```
+
 ## 版本变更说明
+
+### 4.1.1 版本变更
+
+- 引入SLF4J集成支持（技术预览）
+- 添加 `KeelSLF4JServiceProvider`、`KeelLoggerFactory` 和 `KeelSlf4jLogger`
+- 支持标准SLF4J API
+
+### 4.1.0 版本变更
+
+- 为 `KeelIssueRecord` 添加线程信息支持（`getThreadInfo()`）
+
+### 4.0.1 版本变更
+
+- 增强类型约束，`KeelIssueRecorder<T>` 中的T严格继承自 `KeelIssueRecord<T>`
+- 重构Mixin接口层次结构
 
 ### 4.0.0 版本变更（重大重构）
 - 将 `KeelIssueRecord` 改为抽象类，增强类型安全性
@@ -282,6 +385,7 @@ silentRecorder.addBypassIssueRecorder(normalRecorder);
 - 增加静默记录器实现
 - 增强事件日志系统，支持从基础记录创建事件日志
 - 添加记录器转换功能（`toEventLogger()`）
+- 包级别保护的Mixin接口（`IssueRecordMessageMixin`、`IssueRecordContextMixin`）
 
 ### 3.2.0 版本
 - 引入了基于 `KeelIssueRecorder` 的事件日志系统
@@ -298,6 +402,62 @@ silentRecorder.addBypassIssueRecorder(normalRecorder);
 5. **测试环境** - 在测试中使用静默适配器或静默记录器避免日志干扰
 6. **监控集成** - 使用指标记录器集成监控系统
 7. **类型安全** - 使用具体的记录类型（如 `KeelEventLog`）而不是泛型基类
+8. **Mixin接口使用** - 优先使用JsonMixin和CommonMixin提供的便捷方法
+9. **旁路记录器** - 利用旁路记录器实现条件性日志输出和日志路由
+10. **SLF4J集成** - 在需要与现有SLF4J生态集成时使用技术预览功能
+11. **线程信息** - 利用自动记录的线程信息进行调试和问题定位
+
+## 包结构说明
+
+### 核心包结构
+
+```
+io.github.sinri.keel.logger/
+├── KeelLogLevel.java                    # 日志级别枚举
+├── event/
+│   └── KeelEventLog.java               # 事件日志记录类
+├── metric/
+│   ├── KeelMetricRecord.java           # 指标记录类
+│   └── KeelMetricRecorder.java         # 抽象指标记录器
+└── issue/
+    ├── center/
+    │   └── KeelIssueRecordCenter.java   # 问题记录中心接口
+    ├── record/
+    │   ├── KeelIssueRecord.java         # 抽象问题记录类
+    │   ├── KeelIssueRecordCore.java     # 记录核心接口
+    │   ├── IssueRecordMessageMixin.java # 消息处理Mixin（包级别）
+    │   └── IssueRecordContextMixin.java # 上下文处理Mixin（包级别）
+    ├── recorder/
+    │   ├── KeelIssueRecorder.java       # 记录器主接口
+    │   ├── KeelIssueRecorderCore.java   # 记录器核心接口
+    │   ├── KeelIssueRecorderCommonMixin.java # 通用记录Mixin
+    │   ├── KeelIssueRecorderJsonMixin.java   # JSON记录Mixin
+    │   ├── KeelIssueRecorderImpl.java   # 默认记录器实现
+    │   ├── SilentIssueRecorder.java     # 静默记录器实现
+    │   ├── adapter/
+    │   │   ├── KeelIssueRecorderAdapter.java    # 适配器接口
+    │   │   ├── SyncStdoutAdapter.java           # 同步标准输出适配器
+    │   │   ├── AsyncStdoutAdapter.java          # 异步标准输出适配器
+    │   │   ├── SilentAdapter.java               # 静默适配器
+    │   │   └── AliyunSLSIssueAdapter.java       # 阿里云SLS适配器
+    │   └── render/
+    │       ├── KeelIssueRecordRender.java       # 渲染器接口
+    │       ├── KeelIssueRecordStringRender.java # 字符串渲染器
+    │       └── KeelIssueRecordJsonObjectRender.java # JSON渲染器
+    └── slf4j/
+        ├── KeelSLF4JServiceProvider.java # SLF4J服务提供者
+        ├── KeelLoggerFactory.java        # Logger工厂
+        └── KeelSlf4jLogger.java          # SLF4J Logger实现
+```
+
+### 设计模式说明
+
+- **Mixin模式**：通过多个Mixin接口组合功能，避免单一继承限制
+- **适配器模式**：通过适配器抽象不同的输出方式（控制台、网络、文件等）
+- **建造者模式**：通过流式API构建复杂的日志记录
+- **单例模式**：适配器实例采用单例模式减少资源消耗
+- **模板方法模式**：抽象记录器定义处理流程，子类实现具体逻辑
+- **策略模式**：不同的渲染器实现不同的输出格式策略
 
 ## 注意事项
 
@@ -306,3 +466,9 @@ silentRecorder.addBypassIssueRecorder(normalRecorder);
 - 日志级别比较基于枚举的序号顺序
 - 4.0.0版本进行了重大重构，建议查看最新API文档
 - 静默记录器仍支持旁路记录器功能，可实现条件性日志输出
+- `KeelIssueRecord` 是抽象类，必须通过子类实例化
+- 记录相关的Mixin接口（`IssueRecordMessageMixin`、`IssueRecordContextMixin`）是包级别可见的
+- SLF4J集成功能目前为技术预览状态，API可能会发生变化
+- 线程信息在记录创建时自动捕获，反映创建时的线程状态
+- 保留属性名称（classification、level、exception、message、context）不能用作自定义属性
+- 异步适配器使用 `KeelIntravenous` 进行批量处理，适合高并发场景

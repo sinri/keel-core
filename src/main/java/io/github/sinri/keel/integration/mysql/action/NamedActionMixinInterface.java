@@ -21,6 +21,11 @@ import javax.annotation.Nonnull;
  */
 public interface NamedActionMixinInterface<C extends NamedMySQLConnection, W>
         extends SelfInterface<W> {
+    /**
+     * Retrieves the associated named MySQL connection.
+     *
+     * @return the named MySQL connection instance associated with this action; never null
+     */
     @Nonnull
     C getNamedSqlConnection();
 }

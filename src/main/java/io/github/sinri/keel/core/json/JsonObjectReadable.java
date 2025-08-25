@@ -20,6 +20,16 @@ public interface JsonObjectReadable extends Iterable<Map.Entry<String, Object>> 
     @Nullable
     <T> T read(@Nonnull Function<JsonPointer, Class<T>> func);
 
+    /**
+     * Reads a string value from a JSON structure using the specified JSON Pointer arguments.
+     * This method constructs the JSON Pointer dynamically using the provided arguments
+     * and attempts to retrieve the string value at the resulting location.
+     *
+     * @param args The sequence of string arguments used to build the JSON Pointer.
+     *             Each argument represents a step in the JSON path to the desired value.
+     * @return The string value found at the JSON Pointer's location, or null if the value is not present
+     *         or cannot be read as a string.
+     */
     default @Nullable String readString(String... args) {
         return read(jsonPointer -> {
             for (var arg : args) {
@@ -42,6 +52,16 @@ public interface JsonObjectReadable extends Iterable<Map.Entry<String, Object>> 
         return r;
     }
 
+    /**
+     * Reads a number value from a JSON structure using the specified JSON Pointer arguments.
+     * This method constructs the JSON Pointer dynamically using the provided arguments
+     * and attempts to retrieve the number value at the resulting location.
+     *
+     * @param args The sequence of string arguments used to build the JSON Pointer.
+     *             Each argument represents a step in the JSON path to the desired value.
+     * @return The number value found at the JSON Pointer's location, or null if the value is not present
+     *         or cannot be read as a number.
+     */
     default @Nullable Number readNumber(String... args) {
         return read(jsonPointer -> {
             for (var arg : args) {

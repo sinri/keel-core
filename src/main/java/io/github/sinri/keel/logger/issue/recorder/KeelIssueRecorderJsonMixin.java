@@ -7,7 +7,11 @@ import io.vertx.core.json.JsonObject;
 import javax.annotation.Nonnull;
 
 /**
- * @param <T>
+ * A mixin interface providing extensions to the core issue recording functionality, specifically tailored
+ * for handling issues with additional JSON context information. This interface is designed to facilitate
+ * logging messages or exceptions with JSON-based context data.
+ *
+ * @param <T> The type of the {@link KeelIssueRecord} used by this recorder.
  * @since 4.0.1
  */
 public interface KeelIssueRecorderJsonMixin<T extends KeelIssueRecord<T>> extends KeelIssueRecorderCore<T> {

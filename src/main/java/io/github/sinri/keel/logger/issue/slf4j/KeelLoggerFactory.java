@@ -4,22 +4,23 @@ import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.core.cache.KeelEverlastingCacheInterface;
 import io.github.sinri.keel.core.cache.NotCached;
 import io.github.sinri.keel.logger.KeelLogLevel;
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
+import io.github.sinri.keel.logger.issue.recorder.adapter.KeelIssueRecorderAdapter;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
+import java.util.function.Supplier;
 
 /**
  * @since 4.1.1
  */
 @TechnicalPreview(since = "4.1.1")
 public class KeelLoggerFactory implements ILoggerFactory {
-    private final @Nonnull KeelIssueRecordCenter issueRecordCenter;
+    private final @Nonnull Supplier<KeelIssueRecorderAdapter> adapterSupplier;
     private final KeelEverlastingCacheInterface<String, Logger> loggerCache = KeelEverlastingCacheInterface.createDefaultInstance();
 
-    public KeelLoggerFactory(@Nonnull KeelIssueRecordCenter issueRecordCenter) {
-        this.issueRecordCenter = issueRecordCenter;
+    public KeelLoggerFactory(@Nonnull Supplier<KeelIssueRecorderAdapter> adapterSupplier) {
+        this.adapterSupplier = adapterSupplier;
     }
 
     @Override
@@ -27,8 +28,8 @@ public class KeelLoggerFactory implements ILoggerFactory {
         try {
             return loggerCache.read(name);
         } catch (NotCached e) {
-            synchronized (loggerCache) {
-                var logger = new KeelSlf4jLogger(this.issueRecordCenter, KeelLogLevel.DEBUG, name);
+            synchronized (adapterSupplier) {
+                var logger = new KeelSlf4jLogger(this.adapterSupplier.get(), KeelLogLevel.DEBUG, name);
                 loggerCache.save(name, logger);
                 return logger;
             }

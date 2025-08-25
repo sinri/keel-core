@@ -16,10 +16,20 @@ import javax.annotation.Nonnull;
 public abstract class AbstractNamedMixinAction<C extends NamedMySQLConnection, W> implements NamedActionMixinInterface<C, W> {
     private final @Nonnull C namedSqlConnection;
 
+    /**
+     * Constructs an AbstractNamedMixinAction with the specified named MySQL connection.
+     *
+     * @param namedSqlConnection the named MySQL connection instance to be associated with this action; must not be null
+     */
     public AbstractNamedMixinAction(@Nonnull C namedSqlConnection) {
         this.namedSqlConnection = namedSqlConnection;
     }
 
+    /**
+     * Retrieves the named MySQL connection associated with this action.
+     *
+     * @return the named MySQL connection instance tied to this action; never null
+     */
     @Nonnull
     @Override
     public final C getNamedSqlConnection() {

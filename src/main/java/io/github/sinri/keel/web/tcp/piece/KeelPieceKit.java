@@ -7,9 +7,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 /**
- * 配合 KeelSisiodosi 食用。
+ * An abstract class representing a processing kit for handling chunks of data, known as KeelPiece objects,
+ * from an incoming buffer. This class is designed to be thread-safe and provides mechanisms for managing
+ * and parsing buffers while maintaining a queue of processed pieces.
  *
- * @param <P>
+ * @param <P> The type of KeelPiece being processed. It extends the KeelPiece interface.
  * @since 2.8
  */
 public abstract class KeelPieceKit<P extends KeelPiece> implements Consumer<Buffer> {

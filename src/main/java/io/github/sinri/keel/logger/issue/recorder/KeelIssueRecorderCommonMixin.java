@@ -5,7 +5,10 @@ import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import javax.annotation.Nonnull;
 
 /**
- * @param <T>
+ * A mixin interface for simplifying the usage of {@link KeelIssueRecorderCore} by providing
+ * default implementations of common methods for recording issues at various log levels and exceptions.
+ *
+ * @param <T> The type of the {@link KeelIssueRecord} used by this recorder.
  * @since 4.0.1
  */
 public interface KeelIssueRecorderCommonMixin<T extends KeelIssueRecord<T>> extends KeelIssueRecorderCore<T> {

@@ -11,7 +11,12 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * @param <T>
+ * An interface for recording issues, providing core functionality for issue management and logging
+ * at various levels with support for customization and delegation.
+ * This interface is designed to facilitate detailed issue recording and can be extended for
+ * additional functionality.
+ *
+ * @param <T> The type of the {@link KeelIssueRecord} used by this recorder.
  * @since 4.0.1
  */
 public interface KeelIssueRecorderCore<T extends KeelIssueRecord<T>> {

@@ -98,3 +98,6 @@ src/test/java/io/github/sinri/keel/test/mysql/ag
 src/test/resources/runtime/
 pom-shade.xml
 .vscode/settings.json
+/file-uploads/
+/.cursor/
+/.vscode/

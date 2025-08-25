@@ -9,8 +9,7 @@ import java.math.BigDecimal;
 /**
  * As of 4.1.1, number parsing is executed lazily when requested, not
  * precomputed.
- * <p>
- * 
+ *
  * @since 3.1.1
  */
 public class CsvCell {

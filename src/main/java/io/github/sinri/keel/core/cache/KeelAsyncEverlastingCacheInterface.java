@@ -7,9 +7,13 @@ import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Map;
 
+
 /**
- * @param <K>
- * @param <V>
+ * An interface for an asynchronous, everlasting cache mechanism that supports non-blocking operations
+ * and provides functionalities to manage cached key-value pairs.
+ *
+ * @param <K> the type of keys used for the cache
+ * @param <V> the type of values stored in the cache
  * @since 2.9
  */
 public interface KeelAsyncEverlastingCacheInterface<K, V> {

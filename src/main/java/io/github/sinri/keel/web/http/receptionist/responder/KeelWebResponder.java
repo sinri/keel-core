@@ -46,6 +46,7 @@ public interface KeelWebResponder {
     }
 
     /**
+     * @param throwable the thrown {@link KeelWebApiError} instance
      * @since 4.1.0
      */
     default void respondOnFailure(@Nonnull KeelWebApiError throwable) {

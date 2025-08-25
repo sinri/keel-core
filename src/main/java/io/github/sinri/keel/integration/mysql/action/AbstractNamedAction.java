@@ -14,10 +14,20 @@ import javax.annotation.Nonnull;
 public abstract class AbstractNamedAction<C extends NamedMySQLConnection> implements NamedActionInterface<C> {
     private final @Nonnull C namedSqlConnection;
 
+    /**
+     * Constructs an AbstractNamedAction with the specified named MySQL connection.
+     *
+     * @param namedSqlConnection the named MySQL connection instance to be associated with this action; must not be null
+     */
     public AbstractNamedAction(@Nonnull C namedSqlConnection) {
         this.namedSqlConnection = namedSqlConnection;
     }
 
+    /**
+     * Retrieves the named MySQL connection associated with this action.
+     *
+     * @return the instance of named MySQL connection associated with this action; never null
+     */
     @Nonnull
     @Override
     public C getNamedSqlConnection() {

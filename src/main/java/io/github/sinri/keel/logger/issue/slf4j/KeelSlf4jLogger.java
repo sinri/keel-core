@@ -3,7 +3,7 @@ package io.github.sinri.keel.logger.issue.slf4j;
 import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.logger.KeelLogLevel;
 import io.github.sinri.keel.logger.event.KeelEventLog;
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
+import io.github.sinri.keel.logger.issue.recorder.adapter.KeelIssueRecorderAdapter;
 import io.vertx.core.Handler;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
@@ -20,24 +20,19 @@ import java.util.List;
 @TechnicalPreview(since = "4.1.1")
 public class KeelSlf4jLogger implements Logger {
     @Nonnull
-    private final KeelIssueRecordCenter issueRecordCenter;
+    private final KeelIssueRecorderAdapter adapter;
     @Nonnull
     private final String topic;
     @Nonnull
     private final KeelLogLevel visibleBaseLevel;
 
     KeelSlf4jLogger(
-            @Nonnull KeelIssueRecordCenter issueRecordCenter,
+            @Nonnull KeelIssueRecorderAdapter adapter,
             @Nonnull KeelLogLevel visibleBaseLevel,
             @Nonnull String topic) {
-        this.issueRecordCenter = issueRecordCenter;
+        this.adapter = adapter;
         this.topic = topic;
         this.visibleBaseLevel = visibleBaseLevel;
-    }
-
-    @Nonnull
-    protected KeelIssueRecordCenter getIssueRecordCenter() {
-        return issueRecordCenter;
     }
 
     @Override
@@ -59,7 +54,7 @@ public class KeelSlf4jLogger implements Logger {
     protected void record(@Nonnull Handler<KeelEventLog> issueHandler) {
         KeelEventLog issue = new KeelEventLog();
         issueHandler.handle(issue);
-        getIssueRecordCenter().getAdapter().record(getName(), issue);
+        adapter.record(getName(), issue);
     }
 
     @Override

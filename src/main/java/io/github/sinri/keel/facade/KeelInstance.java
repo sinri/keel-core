@@ -75,6 +75,9 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
             @Nonnull VertxOptions vertxOptions,
             @Nullable ClusterManager clusterManager
     ) {
+        if (isVertxInitialized()) {
+            throw new IllegalStateException("Vertx has been initialized!");
+        }
         this.clusterManager = clusterManager;
         if (this.clusterManager == null) {
             this.vertx = Vertx.builder().with(vertxOptions).withClusterManager(null).build();
@@ -89,24 +92,11 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
     }
 
     public void initializeVertxStandalone(@Nonnull VertxOptions vertxOptions) {
+        if (isVertxInitialized()) {
+            throw new IllegalStateException("Vertx has been initialized!");
+        }
         this.clusterManager = null;
         this.vertx = Vertx.builder().with(vertxOptions).build();
-    }
-
-    /**
-     * This method is designed for Unit Test with JUnit5, in {@code @BeforeEach} methods.
-     * <p>
-     * Do not call this method in your own code.
-     *
-     * @param vertx the vertx instance to replace the current one.
-     * @since 4.1.1
-     */
-    @TechnicalPreview(since = "4.1.1")
-    public void replaceVertxInstance(@Nonnull Vertx vertx) {
-        if (this.vertx != null) {
-            this.vertx.close();
-        }
-        this.vertx = vertx;
     }
 
     /**
@@ -118,6 +108,9 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
      */
     @TechnicalPreview(since = "4.1.1")
     public void initializeVertx(@Nonnull Vertx vertx) {
+        if (isVertxInitialized()) {
+            throw new IllegalStateException("Vertx has been initialized!");
+        }
         this.vertx = vertx;
     }
 
@@ -143,7 +136,14 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
         Promise<Void> promise = Promise.promise();
         promiseHandler.handle(promise);
         return promise.future()
-                      .compose(v -> getVertx().close());
+                      .compose(v -> {
+                          return getVertx().close();
+                      })
+                      .compose(closed -> {
+                          this.vertx = null;
+                          this.clusterManager = null;
+                          return Future.succeededFuture();
+                      });
     }
 
     public Future<Void> close() {

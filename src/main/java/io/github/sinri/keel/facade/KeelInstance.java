@@ -31,16 +31,29 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
      */
     private final @Nonnull KeelConfigElement configuration;
     /**
+     * @since 4.1.1
+     */
+    private @Nonnull KeelIssueRecordCenter issueRecordCenter;
+    /**
+     * As of 4.1.1, it is not final.
+     *
      * @since 4.0.0
      */
-    private final KeelIssueRecorder<KeelEventLog> logger;
+    private KeelIssueRecorder<KeelEventLog> logger;
     private @Nullable Vertx vertx;
     private @Nullable ClusterManager clusterManager;
 
     private KeelInstance() {
         this.configuration = new KeelConfigElement("");
-        this.logger = KeelIssueRecordCenter.outputCenter().generateIssueRecorder("Keel", KeelEventLog::new);
-        this.logger.setVisibleLevel(KeelLogLevel.WARNING);
+        setIssueRecordCenter(KeelIssueRecordCenter.outputCenter());
+    }
+
+    /**
+     * @since 4.1.1
+     */
+    public void setIssueRecordCenter(@Nonnull KeelIssueRecordCenter issueRecordCenter) {
+        this.issueRecordCenter = issueRecordCenter;
+        this.resetLogger();
     }
 
     @Nonnull
@@ -131,6 +144,13 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
         return logger;
     }
 
+    /**
+     * @since 4.1.1
+     */
+    private void resetLogger() {
+        this.logger = this.issueRecordCenter.generateIssueRecorder("Keel", KeelEventLog::new);
+        this.logger.setVisibleLevel(KeelLogLevel.WARNING);
+    }
 
     public Future<Void> gracefullyClose(@Nonnull io.vertx.core.Handler<Promise<Void>> promiseHandler) {
         Promise<Void> promise = Promise.promise();

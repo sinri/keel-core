@@ -9,6 +9,8 @@ import org.slf4j.spi.SLF4JServiceProvider;
 import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
+
 
 @TechnicalPreview(since = "4.1.1")
 public abstract class KeelSLF4JServiceProvider implements SLF4JServiceProvider {
@@ -90,21 +92,14 @@ public abstract class KeelSLF4JServiceProvider implements SLF4JServiceProvider {
     }
 
     /**
-     * 获取问题记录器适配器提供者。
-     * <p>
-     * 这是一个抽象方法，子类必须实现以提供具体的适配器实例。
-     * 适配器负责将 SLF4J 的日志调用转换为 Keel 日志系统的记录操作。
-     * <p>
-     * 返回的适配器将被用于创建 {@link KeelLoggerFactory} 实例，
-     * 从而确保所有通过 SLF4J 创建的日志记录器都能正确地将日志
-     * 路由到 Keel 日志系统。
-     * <p>
-     * 实现类应该确保返回的适配器不为 {@code null}，并且能够
-     * 正确处理日志记录的转换和输出。
+     * Provides a supplier for obtaining a {@link KeelIssueRecorderAdapter} instance.
      *
-     * @return 问题记录器适配器提供者，不能为 {@code null}
+     * @return a {@code Supplier} that supplies the {@code KeelIssueRecorderAdapter}
+     *         obtained from the {@code issueRecordCenter} of the Keel logger.
      */
     @Nonnull
-    protected abstract Supplier<KeelIssueRecorderAdapter> getAdapterSupplier();
+    protected Supplier<KeelIssueRecorderAdapter> getAdapterSupplier() {
+        return () -> Keel.getLogger().issueRecordCenter().getAdapter();
+    }
 
 }

@@ -2,11 +2,16 @@ package io.github.sinri.keel.facade.cli;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 public class Option {
+    private final static Pattern VALID_ALAIS_PATTERN = Pattern.compile("^[A-Za-z0-9_.][A-Za-z0-9_.-]*$");
+    private final static Pattern VALID_SHORT_PATTERN = Pattern.compile("^-[A-Za-z0-9_]$");
+    private final static Pattern VALID_LONG_PATTERN = Pattern.compile("^--[A-Za-z0-9_.][A-Za-z0-9_.-]*$");
     @Nonnull
     private final String id;
     @Nonnull
@@ -16,10 +21,30 @@ public class Option {
     private boolean flag;
     @Nullable
     private String value;
-
     public Option() {
         this.id = UUID.randomUUID().toString();
         this.aliasSet = new HashSet<>();
+    }
+
+    @Nullable
+    public static String parseOptionName(@Nonnull String argument) {
+        if (argument.startsWith("--")) {
+            if (VALID_LONG_PATTERN.matcher(argument).matches()) {
+                return argument.substring(2);
+            }
+        }
+        if (argument.startsWith("-")) {
+            if (VALID_SHORT_PATTERN.matcher(argument).matches()) {
+                return argument.substring(1);
+            }
+        }
+        return null;
+    }
+
+    public static void validateAlias(String alias) {
+        if (alias == null || !VALID_ALAIS_PATTERN.matcher(alias).matches()) {
+            throw new IllegalArgumentException("Alias cannot be null");
+        }
     }
 
     public final String id() {
@@ -45,12 +70,13 @@ public class Option {
     }
 
     public Option alias(@Nonnull String alias) {
+        validateAlias(alias);
         this.aliasSet.add(alias);
         return this;
     }
 
     public Set<String> getAliasSet() {
-        return aliasSet;
+        return Collections.unmodifiableSet(aliasSet);
     }
 
     @Nullable

@@ -8,9 +8,11 @@ import javax.annotation.Nonnull;
 /**
  * Support to parse command-line arguments like:
  * <p>
- * {@code java -jar my-app.jar --option1 value1 --option2=value2 -p value3 -q=value4 --no-output -f -- Parameter1
- * Parameter2}
- * <br>
+ * Mixed Format: options and flags ahead, then, if needed, a {@code --} mark (which is required) and parameters. <br>
+ * {@code java -jar my-app.jar
+ * --long-option-name long-option-value -s short-option-value --flag-name -f -- Parameter1 Parameter2}
+ * <p>
+ * Parameter Only Format: no options nor flags, parameters only, {@code --} mark is not required.<br>
  * {@code java -jar my-app.jar Parameter1 Parameter2}
  * <p>
  * Definitions:<br>
@@ -23,6 +25,10 @@ import javax.annotation.Nonnull;
  */
 @TechnicalPreview(since = "4.1.1")
 public interface CommandLineParser {
+    static CommandLineParser create() {
+        return new CommandLineParserImpl();
+    }
+
     /**
      * Parses the given array of command-line arguments and returns a result
      * containing the parsed options, flags, and arguments.
@@ -33,21 +39,6 @@ public interface CommandLineParser {
      */
     @Nonnull
     CommandLineParsedResult parse(String[] args) throws CommandLineParserParseError;
-
-    /**
-     * Whether the parser is strict, meaning that it will throw an exception if any undefined option is found.
-     *
-     * @return true if strict, false otherwise
-     */
-    boolean isStrictMode();
-
-    /**
-     * Sets whether the parser should operate in strict mode. In strict mode, the parser will
-     * throw an exception if any undefined option is encountered during parsing.
-     *
-     * @param strictOrNot true to enable strict mode, false to disable it
-     */
-    void setStrictMode(boolean strictOrNot);
 
     void addOption(@Nonnull Option option) throws CommandLineParserBuildError;
 

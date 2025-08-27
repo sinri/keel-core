@@ -18,8 +18,7 @@ class CommandLineParsedResultImpl implements CommandLineParsedResult {
     public void recordOption(@Nonnull Option option) {
         Set<String> aliasSet = option.getAliasSet();
         for (var alias : aliasSet) {
-            if (alias == null) continue;
-            if (alias.isEmpty()) continue;
+            if (alias == null || alias.isEmpty()) continue;
             if (alias.length() == 1) {
                 shortMap.put(alias.charAt(0), option);
             } else {
@@ -40,6 +39,10 @@ class CommandLineParsedResultImpl implements CommandLineParsedResult {
     @Nullable
     @Override
     public String readOption(@Nonnull String longName) {
+        if (longName.trim().isEmpty()) {
+            return null;
+        }
+        
         Option option = longMap.get(longName);
         if (option == null) return null;
         if (option.isFlag()) return "";
@@ -48,22 +51,24 @@ class CommandLineParsedResultImpl implements CommandLineParsedResult {
 
     @Override
     public boolean readFlag(char shortName) {
-        return readOption(shortName) != null;
+        return shortMap.containsKey(shortName);
     }
 
     @Override
     public boolean readFlag(@Nonnull String longName) {
-        return readOption(longName) != null;
+        if (longName.trim().isEmpty()) {
+            return false;
+        }
+        return longMap.containsKey(longName);
     }
 
     @Nullable
     @Override
     public String readParameter(int index) {
-        try {
-            return parameters.get(index);
-        } catch (IndexOutOfBoundsException ignored) {
+        if (index < 0 || index >= parameters.size()) {
             return null;
         }
+        return parameters.get(index);
     }
 
     @Override

@@ -32,7 +32,7 @@ public abstract class KeelJUnit5Test implements KeelJUnit5TestCore {
      * Here, {@link JsonifiableSerializer#register()} would be called, and a {@link KeelIssueRecorder} would be created.
      */
     public KeelJUnit5Test(Vertx vertx) {
-        // System.out.println("KeelJUnit5Test: " + vertx);
+        // System.out.println("KeelJUnit5Test constructor with vertx " + vertx);
 
         JsonifiableSerializer.register();
         Keel.initializeVertx(vertx);

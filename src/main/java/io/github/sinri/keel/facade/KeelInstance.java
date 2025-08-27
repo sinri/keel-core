@@ -113,15 +113,15 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
     }
 
     /**
-     * This method is designed for Unit Test with JUnit5, in {@code @BeforeEach} methods.
+     * This method is designed for Unit Test with JUnit5, in {@code @BeforeEach} methods or constructor.
      * <p>
-     * Do not call this method in your own code.
+     * Do not call this method in your own code!
      *
      * @since 4.1.1
      */
     @TechnicalPreview(since = "4.1.1")
     public void initializeVertx(@Nonnull Vertx vertx) {
-        if (isVertxInitialized()) {
+        if (isVertxInitialized() && this.vertx != vertx) {
             throw new IllegalStateException("Vertx has been initialized!");
         }
         this.vertx = vertx;

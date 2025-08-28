@@ -8,61 +8,50 @@ import java.util.*;
 
 @TechnicalPreview(since = "4.1.1")
 class KeelCliArgsImpl implements KeelCliArgs, KeelCliArgsWriter {
-    private final Map<Character, KeelCliOption> shortMap;
-    private final Map<String, KeelCliOption> longMap;
-    private final List<String> parameters;
+    /**
+     * Map option id to option.
+     */
+    private final Map<String, KeelCliOption> idToOptionMap = new HashMap<>();
+    /**
+     * Map long name to option id.
+     */
+    private final Map<String, String> nameToOptionIdMap = new HashMap<>();
+    /**
+     * Map option id to option value (if the option is a flag, the value is null).
+     */
+    private final Map<String, String> idToOptionValueMap = new HashMap<>();
+    /**
+     * List of parameters.
+     */
+    private final List<String> parameters = new ArrayList<>();
 
     public KeelCliArgsImpl() {
-        this.shortMap = new HashMap<>();
-        this.longMap = new HashMap<>();
-        this.parameters = new ArrayList<>();
     }
 
-    public void recordOption(@Nonnull KeelCliOption option) {
+    public void recordOption(@Nonnull KeelCliOption option, @Nullable String value) {
+        idToOptionMap.put(option.id(), option);
         Set<String> aliasSet = option.getAliasSet();
         for (var alias : aliasSet) {
             if (alias == null || alias.isEmpty()) continue;
-            if (alias.length() == 1) {
-                shortMap.put(alias.charAt(0), option);
-            } else {
-                longMap.put(alias, option);
-            }
+            nameToOptionIdMap.put(alias, option.id());
         }
-    }
-
-    @Nullable
-    @Override
-    public String readOption(char shortName) {
-        KeelCliOption option = shortMap.get(shortName);
-        if (option == null) return null;
-        if (option.isFlag()) return "";
-        return option.getValue();
+        idToOptionValueMap.put(option.id(), value);
     }
 
     @Nullable
     @Override
     public String readOption(@Nonnull String longName) {
-        if (longName.trim().isEmpty()) {
-            return null;
-        }
-
-        KeelCliOption option = longMap.get(longName);
+        String optionId = nameToOptionIdMap.get(longName);
+        if (optionId == null) return null;
+        KeelCliOption option = idToOptionMap.get(optionId);
         if (option == null) return null;
         if (option.isFlag()) return "";
-        return option.getValue();
-    }
-
-    @Override
-    public boolean readFlag(char shortName) {
-        return shortMap.containsKey(shortName);
+        return idToOptionValueMap.get(optionId);
     }
 
     @Override
     public boolean readFlag(@Nonnull String longName) {
-        if (longName.trim().isEmpty()) {
-            return false;
-        }
-        return longMap.containsKey(longName);
+        return readOption(longName) != null;
     }
 
     @Nullable

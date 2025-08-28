@@ -5,10 +5,6 @@ import java.util.*;
 import java.util.function.Function;
 
 class KeelCliArgsParserImpl implements KeelCliArgsParser {
-    //    private static final Pattern WHITE_CHARS = Pattern.compile("\\s");
-    //    private static final Pattern SHORT_NAMED_ARGUMENT_PATTERN = Pattern.compile("^-([A-Za-z0-9_])(?:=(.*))?$");
-    //    private static final Pattern LONG_NAMED_ARGUMENT_PATTERN = Pattern.compile("^--([A-Za-z0-9_.][A-Za-z0-9_.-]*)(?:=(.*))?$");
-
     private final Map<String, KeelCliOption> optionMap = new HashMap<>();
     private final Map<String, String> nameToOptionIdMap = new HashMap<>();
 
@@ -45,16 +41,17 @@ class KeelCliArgsParserImpl implements KeelCliArgsParser {
         List<String> parameters = new ArrayList<>();
 
         /*
-         mode=0: before options and parameters
-         mode=1: met option name, start option
-         mode=2: met option value, or confirmed flag, end option
-         mode=3: met -- or parameter
+         * mode=0: before options and parameters
+         * mode=1: met option name, start option
+         * mode=2: met option value, or confirmed flag, end option
+         * mode=3: met -- or parameter
          */
 
         int mode = 0;
         KeelCliOption currentOption = null;
         for (String arg : args) {
-            if (arg == null) continue;
+            if (arg == null)
+                continue;
             if (mode == 0 || mode == 2) {
                 if ("--".equals(arg)) {
                     mode = 3;
@@ -77,8 +74,9 @@ class KeelCliArgsParserImpl implements KeelCliArgsParser {
                         if (currentOption == null) {
                             throw new KeelCliArgsParseError("Option " + parsedOptionName + " not found");
                         }
-                        options.put(currentOption.id(), null);
                         if (currentOption.isFlag()) {
+                            options.put(currentOption.id(), null);
+                            currentOption = null;
                             mode = 2;
                         } else {
                             mode = 1;
@@ -86,7 +84,9 @@ class KeelCliArgsParserImpl implements KeelCliArgsParser {
                     }
                 }
             } else if (mode == 1) {
-                currentOption.setValue(arg);
+                if (currentOption == null) {
+                    throw new KeelCliArgsParseError("Invalid option: " + arg);
+                }
                 options.put(currentOption.id(), arg);
                 mode = 2;
                 currentOption = null;
@@ -95,24 +95,27 @@ class KeelCliArgsParserImpl implements KeelCliArgsParser {
             }
         }
 
-        if (currentOption != null && currentOption.isFlag() && currentOption.getValue() == null) {
-            throw new KeelCliArgsParseError("Invalid option: " + currentOption.id());
+        if (mode == 1 && currentOption != null) {
+            throw new KeelCliArgsParseError("Invalid option: " + currentOption);
         }
 
-        for (String optionId : options.keySet()) {
+        for (var entry : options.entrySet()) {
+            String optionId = entry.getKey();
+            String optionValue = entry.getValue();
             KeelCliOption option = optionMap.get(optionId);
             Function<String, Boolean> valueValidator = option.getValueValidator();
             if (valueValidator != null && !option.isFlag()) {
-                boolean valueValid = valueValidator.apply(option.getValue());
+                boolean valueValid = valueValidator.apply(optionValue);
                 if (!valueValid) {
-                    throw new KeelCliArgsParseError("Value for option " + (String.join("/", option.getAliasSet())) + " is not valid.");
+                    throw new KeelCliArgsParseError(
+                            "Value for option " + (String.join("/", option.getAliasSet())) + " is not valid.");
                 }
             }
-            System.out.printf("option[%s]: %s\n", optionId, option);
-            parsedResult.recordOption(option);
+            // System.out.printf("option[%s]: %s\n", optionId, option);
+            parsedResult.recordOption(option, optionValue);
         }
         for (String p : parameters) {
-            System.out.printf("parameter: %s\n", p);
+            // System.out.printf("parameter: %s\n", p);
             parsedResult.recordParameter(p);
         }
 

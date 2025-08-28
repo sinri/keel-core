@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Set;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -188,22 +189,166 @@ class KeelCliArgsParserTest extends KeelJUnit5Test {
 
     @Test
     @DisplayName("测试选项值为null的情况")
-    void testOptionWithNullValue() throws KeelCliArgsDefinitionError, KeelCliArgsParseError {
+    void testOptionWithNullValue() throws KeelCliArgsDefinitionError {
         parser.addOption(new KeelCliOption().alias("f"));
 
-        // 测试最后一个选项没有值
-        KeelCliArgs result = parser.parse(new String[]{"-f"});
-        assertNull(result.readOption('f'));
+        // 测试最后一个选项没有值 - 应该抛出异常
+        assertThrows(KeelCliArgsParseError.class, () -> 
+            parser.parse(new String[]{"-f"}));
+    }
+
+    @Test
+    @DisplayName("测试Flag选项功能")
+    void testFlagOptions() throws KeelCliArgsDefinitionError, KeelCliArgsParseError {
+        parser.addOption(new KeelCliOption().alias("v").alias("verbose").flag());
+        parser.addOption(new KeelCliOption().alias("h").alias("help").flag());
+        parser.addOption(new KeelCliOption().alias("f").alias("file")); // 非flag选项
+
+        // 测试flag选项解析
+        KeelCliArgs result = parser.parse(new String[]{"-v", "--help", "-f", "test.txt"});
+        
+        // flag选项应该返回空字符串
+        assertEquals("", result.readOption('v'));
+        assertEquals("", result.readOption("verbose"));
+        assertEquals("", result.readOption('h'));
+        assertEquals("", result.readOption("help"));
+        
+        // flag选项的readFlag应该返回true
+        assertTrue(result.readFlag('v'));
+        assertTrue(result.readFlag("verbose"));
+        assertTrue(result.readFlag('h'));
+        assertTrue(result.readFlag("help"));
+        
+        // 非flag选项正常处理
+        assertEquals("test.txt", result.readOption('f'));
+    }
+
+    @Test
+    @DisplayName("测试Flag选项的isFlag方法")
+    void testFlagOptionProperties() {
+        KeelCliOption flagOption = new KeelCliOption().alias("v").flag();
+        KeelCliOption normalOption = new KeelCliOption().alias("f");
+        
+        assertTrue(flagOption.isFlag());
+        assertFalse(normalOption.isFlag());
+    }
+
+    @Test
+    @DisplayName("测试未设置的Flag选项")
+    void testUnsetFlagOptions() throws KeelCliArgsDefinitionError, KeelCliArgsParseError {
+        parser.addOption(new KeelCliOption().alias("v").flag());
+        parser.addOption(new KeelCliOption().alias("h").flag());
+        
+        KeelCliArgs result = parser.parse(new String[]{"param1", "param2"});
+        
+        // 未设置的flag选项应该返回null和false
+        assertNull(result.readOption('v'));
+        assertNull(result.readOption('h'));
+        assertFalse(result.readFlag('v'));
+        assertFalse(result.readFlag('h'));
+    }
+
+    @Test
+    @DisplayName("测试值验证器功能")
+    void testValueValidatorFunction() throws KeelCliArgsDefinitionError, KeelCliArgsParseError {
+        // 创建一个只接受数字的验证器
+        KeelCliOption numericOption = new KeelCliOption()
+                .alias("n")
+                .alias("number")
+                .setValueValidator(value -> value != null && value.matches("\\d+"));
+        
+        parser.addOption(numericOption);
+        
+        // 测试有效数字值
+        KeelCliArgs result = parser.parse(new String[]{"-n", "123"});
+        assertEquals("123", result.readOption('n'));
+        
+        // 测试无效值应该抛出异常
+        assertThrows(KeelCliArgsParseError.class, () ->
+                parser.parse(new String[]{"-n", "abc"}));
+    }
+
+    @Test
+    @DisplayName("测试值验证器为null的情况")
+    void testNullValueValidator() throws KeelCliArgsDefinitionError, KeelCliArgsParseError {
+        KeelCliOption option = new KeelCliOption()
+                .alias("f")
+                .setValueValidator(null); // 设置为null
+        
+        parser.addOption(option);
+        
+        // 没有验证器时应该接受任何值
+        KeelCliArgs result = parser.parse(new String[]{"-f", "any_value"});
+        assertEquals("any_value", result.readOption('f'));
+    }
+
+    @Test
+    @DisplayName("测试Flag选项不使用值验证器")
+    void testFlagOptionIgnoresValidator() throws KeelCliArgsDefinitionError, KeelCliArgsParseError {
+        KeelCliOption flagOption = new KeelCliOption()
+                .alias("v")
+                .flag()
+                .setValueValidator(value -> false); // 设置一个总是返回false的验证器
+        
+        parser.addOption(flagOption);
+        
+        // Flag选项应该忽略验证器
+        KeelCliArgs result = parser.parse(new String[]{"-v"});
+        assertEquals("", result.readOption('v'));
+        assertTrue(result.readFlag('v'));
+    }
+
+    @Test
+    @DisplayName("测试值验证器getter方法")
+    void testValueValidatorGetter() {
+        KeelCliOption option = new KeelCliOption();
+        
+        // 默认应该是null
+        assertNull(option.getValueValidator());
+        
+        // 设置验证器后应该能获取到
+        Function<String, Boolean> validator = (String value) -> true;
+        option.setValueValidator(validator);
+        assertEquals(validator, option.getValueValidator());
     }
 
     @Test
     @DisplayName("测试使用Handler添加选项")
-    void testAddOptionWithHandler() throws KeelCliArgsDefinitionError {
+    void testAddOptionWithHandler() throws KeelCliArgsDefinitionError, KeelCliArgsParseError {
+        // 使用Handler添加普通选项
         assertDoesNotThrow(() -> parser.addOption(option ->
                 option.alias("v").alias("verbose").description("Verbose output")));
 
+        // 使用Handler添加Flag选项
         assertDoesNotThrow(() -> parser.addOption(option ->
-                option.alias("f").alias("file").description("Input file")));
+                option.alias("h").alias("help").description("Show help").flag()));
+
+        // 使用Handler添加带验证器的选项
+        assertDoesNotThrow(() -> parser.addOption(option ->
+                option.alias("n").alias("number")
+                      .description("Numeric value")
+                      .setValueValidator(value -> value != null && value.matches("\\d+"))));
+
+        // 验证Handler添加的选项能正常工作
+        KeelCliArgs result = parser.parse(new String[]{
+                "--verbose", "output_value", "--help", "--number", "42"
+        });
+
+        assertEquals("output_value", result.readOption("verbose"));
+        assertTrue(result.readFlag("help"));
+        assertEquals("42", result.readOption("number"));
+    }
+
+    @Test
+    @DisplayName("测试Handler添加选项时的异常处理")
+    void testAddOptionWithHandlerExceptions() {
+        // Handler内部添加无效别名应该抛出异常
+        assertThrows(KeelCliArgsDefinitionError.class, () ->
+                parser.addOption(option -> option.alias("-invalid")));
+
+        // Handler内部添加空别名应该抛出异常
+        assertThrows(KeelCliArgsDefinitionError.class, () ->
+                parser.addOption(option -> option.alias("")));
     }
 
     @Test
@@ -260,9 +405,9 @@ class KeelCliArgsParserTest extends KeelJUnit5Test {
         result = parser.parse(new String[]{""});
         assertEquals("", result.readParameter(0));
 
-        // 测试只有选项名没有值的情况
-        result = parser.parse(new String[]{"--test"});
-        assertNull(result.readOption("test"));
+        // 测试只有选项名没有值的情况 - 应该抛出异常
+        assertThrows(KeelCliArgsParseError.class, () -> 
+            parser.parse(new String[]{"--test"}));
     }
 
     @Test
@@ -277,7 +422,6 @@ class KeelCliArgsParserTest extends KeelJUnit5Test {
         // 测试默认值
         assertNull(option.description());
         assertFalse(option.isFlag());
-        assertNull(option.getValue());
         assertTrue(option.getAliasSet().isEmpty());
 
         // 测试链式调用
@@ -334,29 +478,6 @@ class KeelCliArgsParserTest extends KeelJUnit5Test {
 
         // 测试添加以-开头的别名
         assertThrows(KeelCliArgsDefinitionError.class, () -> option.alias("-test"));
-    }
-
-    @Test
-    @DisplayName("测试Option设置值")
-    void testOptionSetValue() {
-        KeelCliOption option = new KeelCliOption();
-
-        // 测试设置null值
-        option.setValue(null);
-        assertNull(option.getValue());
-
-        // 测试设置空字符串值
-        option.setValue("");
-        assertEquals("", option.getValue());
-
-        // 测试设置正常值
-        option.setValue("test_value");
-        assertEquals("test_value", option.getValue());
-
-        // 测试链式调用
-        KeelCliOption result = option.setValue("new_value");
-        assertSame(option, result);
-        assertEquals("new_value", option.getValue());
     }
 
     @Test
@@ -464,6 +585,68 @@ class KeelCliArgsParserTest extends KeelJUnit5Test {
     }
 
     @Test
+    @DisplayName("测试更多异常处理场景")
+    void testAdditionalExceptionScenarios() throws KeelCliArgsDefinitionError {
+        // 测试添加重复选项到已有选项的情况
+        KeelCliOption option1 = new KeelCliOption().alias("duplicate");
+        parser.addOption(option1);
+        
+        // 尝试添加相同的选项实例应该抛出异常
+        assertThrows(KeelCliArgsDefinitionError.class, () -> parser.addOption(option1));
+        
+        // 测试解析时选项缺少值的各种情况
+        parser.addOption(new KeelCliOption().alias("value-required"));
+        
+        // 长选项缺少值
+        assertThrows(KeelCliArgsParseError.class, () ->
+                parser.parse(new String[]{"--value-required"}));
+        
+        // 选项后面直接跟-- (实际上--会作为选项的值)
+        try {
+            KeelCliArgs result = parser.parse(new String[]{"--value-required", "--"});
+            assertEquals("--", result.readOption("value-required"));
+        } catch (KeelCliArgsParseError e) {
+            fail("Should not throw exception when -- is used as value");
+        }
+        
+        // 选项后面跟另一个选项 (实际上另一个选项会作为第一个选项的值)
+        try {
+            KeelCliArgs result2 = parser.parse(new String[]{"--value-required", "--duplicate"});
+            assertEquals("--duplicate", result2.readOption("value-required"));
+        } catch (KeelCliArgsParseError e) {
+            fail("Should not throw exception when another option is used as value");
+        }
+    }
+
+    @Test
+    @DisplayName("测试值验证失败的详细异常信息")
+    void testValueValidationExceptionDetails() throws KeelCliArgsDefinitionError {
+        KeelCliOption option = new KeelCliOption()
+                .alias("port")
+                .alias("p")
+                .setValueValidator(value -> {
+                    try {
+                        int port = Integer.parseInt(value);
+                        return port > 0 && port < 65536;
+                    } catch (NumberFormatException e) {
+                        return false;
+                    }
+                });
+        parser.addOption(option);
+        
+        // 测试无效端口号
+        KeelCliArgsParseError exception = assertThrows(KeelCliArgsParseError.class, () ->
+                parser.parse(new String[]{"--port", "70000"}));
+        
+        // 验证异常消息包含选项信息
+        assertTrue(exception.getMessage().contains("port") || exception.getMessage().contains("p"));
+        
+        // 测试非数字值
+        assertThrows(KeelCliArgsParseError.class, () ->
+                parser.parse(new String[]{"-p", "not_a_number"}));
+    }
+
+    @Test
     @DisplayName("测试Option唯一ID生成")
     void testOptionUniqueIdGeneration() {
         KeelCliOption option1 = new KeelCliOption();
@@ -496,10 +679,7 @@ class KeelCliArgsParserTest extends KeelJUnit5Test {
         // 第二次解析不同的参数，应该返回新的结果
         KeelCliArgs result2 = parser.parse(new String[]{"-f", "value2"});
         assertEquals("value2", result2.readOption('f'));
-
-        // 注意：当前实现有一个bug，Option对象的值在解析过程中被修改，
-        // 所以之前的结果也会受影响。这是实现的问题，但测试需要反映当前行为。
-        assertEquals("value2", result1.readOption('f')); // 受当前实现bug影响
+        assertEquals("value1", result1.readOption('f'));
 
         // 第三次解析空参数
         KeelCliArgs result3 = parser.parse(new String[]{});
@@ -535,8 +715,7 @@ class KeelCliArgsParserTest extends KeelJUnit5Test {
 
         // 测试记录选项
         KeelCliOption option = new KeelCliOption().alias("v").alias("verbose");
-        option.setValue("test_value");
-        resultWriter.recordOption(option);
+        resultWriter.recordOption(option,"test_value");
 
         assertEquals("test_value", result.readOption('v'));
         assertEquals("test_value", result.readOption("verbose"));
@@ -576,5 +755,141 @@ class KeelCliArgsParserTest extends KeelJUnit5Test {
         assertEquals("config.ini", result2.readOption('c'));
         assertEquals("/home/user/output", result2.readOption('o'));
         assertEquals("debug", result2.readOption("mode"));
+    }
+
+    @Test
+    @DisplayName("测试特殊字符在参数中的处理")
+    void testSpecialCharactersInParameters() throws KeelCliArgsParseError {
+        KeelCliArgs result = parser.parse(new String[]{
+                "param with spaces", "param\twith\ttabs", "param\nwith\nnewlines", "param\"with\"quotes"
+        });
+
+        assertEquals("param with spaces", result.readParameter(0));
+        assertEquals("param\twith\ttabs", result.readParameter(1));
+        assertEquals("param\nwith\nnewlines", result.readParameter(2));
+        assertEquals("param\"with\"quotes", result.readParameter(3));
+    }
+
+    @Test
+    @DisplayName("测试极长参数和选项值")
+    void testVeryLongValuesAndParameters() throws KeelCliArgsDefinitionError, KeelCliArgsParseError {
+        parser.addOption(new KeelCliOption().alias("long"));
+        
+        String veryLongValue = "a".repeat(10000);
+        String veryLongParam = "b".repeat(5000);
+        
+        KeelCliArgs result = parser.parse(new String[]{
+                "--long", veryLongValue, "--", veryLongParam
+        });
+
+        assertEquals(veryLongValue, result.readOption("long"));
+        assertEquals(veryLongParam, result.readParameter(0));
+    }
+
+    @Test
+    @DisplayName("测试选项名称的边界情况")
+    void testOptionNameEdgeCases() throws KeelCliArgsDefinitionError, KeelCliArgsParseError {
+        // 测试单字符选项
+        parser.addOption(new KeelCliOption().alias("a"));
+        parser.addOption(new KeelCliOption().alias("Z"));
+        parser.addOption(new KeelCliOption().alias("9"));
+        
+        // 测试数字开头的长选项
+        parser.addOption(new KeelCliOption().alias("1st"));
+        parser.addOption(new KeelCliOption().alias("2nd-option"));
+        
+        KeelCliArgs result = parser.parse(new String[]{
+                "-a", "value_a", "-Z", "value_Z", "-9", "value_9",
+                "--1st", "first", "--2nd-option", "second"
+        });
+
+        assertEquals("value_a", result.readOption('a'));
+        assertEquals("value_Z", result.readOption('Z'));
+        assertEquals("value_9", result.readOption('9'));
+        assertEquals("first", result.readOption("1st"));
+        assertEquals("second", result.readOption("2nd-option"));
+    }
+
+    @Test
+    @DisplayName("测试混合Flag和选项的复杂场景")
+    void testComplexMixedFlagsAndOptions() throws KeelCliArgsDefinitionError, KeelCliArgsParseError {
+        parser.addOption(new KeelCliOption().alias("v").alias("verbose").flag());
+        parser.addOption(new KeelCliOption().alias("q").alias("quiet").flag());
+        parser.addOption(new KeelCliOption().alias("f").alias("file"));
+        parser.addOption(new KeelCliOption().alias("o").alias("output"));
+        parser.addOption(new KeelCliOption().alias("mode"));
+
+        KeelCliArgs result = parser.parse(new String[]{
+                "-v", "-f", "input.txt", "--quiet", "--output", "result.txt",
+                "--mode", "production", "--", "param1", "param2"
+        });
+
+        assertTrue(result.readFlag('v'));
+        assertTrue(result.readFlag("verbose"));
+        assertTrue(result.readFlag('q'));
+        assertTrue(result.readFlag("quiet"));
+        assertEquals("input.txt", result.readOption('f'));
+        assertEquals("result.txt", result.readOption("output"));
+        assertEquals("production", result.readOption("mode"));
+        assertEquals("param1", result.readParameter(0));
+        assertEquals("param2", result.readParameter(1));
+    }
+
+    @Test
+    @DisplayName("测试解析器状态隔离")
+    void testParserStateIsolation() throws KeelCliArgsDefinitionError, KeelCliArgsParseError {
+        parser.addOption(new KeelCliOption().alias("test"));
+        
+        // 创建第二个解析器实例
+        KeelCliArgsParser parser2 = KeelCliArgsParser.create();
+        parser2.addOption(new KeelCliOption().alias("test2"));
+        
+        // 两个解析器应该独立工作
+        KeelCliArgs result1 = parser.parse(new String[]{"--test", "value1"});
+        KeelCliArgs result2 = parser2.parse(new String[]{"--test2", "value2"});
+        
+        assertEquals("value1", result1.readOption("test"));
+        assertNull(result1.readOption("test2"));
+        
+        assertEquals("value2", result2.readOption("test2"));
+        assertNull(result2.readOption("test"));
+        
+        // 解析器1不应该识别解析器2的选项
+        assertThrows(KeelCliArgsParseError.class, () ->
+                parser.parse(new String[]{"--test2", "value"}));
+    }
+
+    @Test
+    @DisplayName("测试UTF-8和特殊Unicode字符")
+    void testUnicodeCharacters() throws KeelCliArgsDefinitionError, KeelCliArgsParseError {
+        parser.addOption(new KeelCliOption().alias("unicode"));
+        
+        String unicodeValue = "测试中文🚀émojis";
+        String unicodeParam = "参数τεστ🌟";
+        
+        KeelCliArgs result = parser.parse(new String[]{
+                "--unicode", unicodeValue, "--", unicodeParam
+        });
+
+        assertEquals(unicodeValue, result.readOption("unicode"));
+        assertEquals(unicodeParam, result.readParameter(0));
+    }
+
+    @Test
+    @DisplayName("测试大量选项定义")
+    void testManyOptionDefinitions() throws KeelCliArgsDefinitionError, KeelCliArgsParseError {
+        // 添加大量选项
+        for (int i = 0; i < 100; i++) {
+            parser.addOption(new KeelCliOption().alias("opt" + i));
+        }
+        
+        // 测试能正确解析
+        KeelCliArgs result = parser.parse(new String[]{
+                "--opt0", "value0", "--opt50", "value50", "--opt99", "value99"
+        });
+        
+        assertEquals("value0", result.readOption("opt0"));
+        assertEquals("value50", result.readOption("opt50"));
+        assertEquals("value99", result.readOption("opt99"));
     }
 }

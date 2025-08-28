@@ -30,8 +30,8 @@ import java.util.regex.Pattern;
  * @since 4.1.1
  */
 @TechnicalPreview(since = "4.1.1")
-public final class KeelCliOption {
-    private final static Pattern VALID_ALAIS_PATTERN = Pattern.compile("^[A-Za-z0-9_.][A-Za-z0-9_.-]*$");
+public class KeelCliOption {
+    private final static Pattern VALID_ALIAS_PATTERN = Pattern.compile("^[A-Za-z0-9_.][A-Za-z0-9_.-]*$");
     private final static Pattern VALID_SHORT_PATTERN = Pattern.compile("^-[A-Za-z0-9_]$");
     private final static Pattern VALID_LONG_PATTERN = Pattern.compile("^--[A-Za-z0-9_.][A-Za-z0-9_.-]*$");
     @Nonnull
@@ -41,8 +41,6 @@ public final class KeelCliOption {
     @Nullable
     private String description;
     private boolean flag;
-    @Nullable
-    private String value;
     @Nullable
     private Function<String, Boolean> valueValidator;
 
@@ -91,7 +89,7 @@ public final class KeelCliOption {
      * @throws IllegalArgumentException if the alias is null or does not match the valid alias pattern
      */
     public static String validatedAlias(String alias) {
-        if (alias == null || !VALID_ALAIS_PATTERN.matcher(alias).matches()) {
+        if (alias == null || !VALID_ALIAS_PATTERN.matcher(alias).matches()) {
             throw new IllegalArgumentException("Alias cannot be null");
         }
         return alias;
@@ -201,31 +199,5 @@ public final class KeelCliOption {
      */
     public Set<String> getAliasSet() {
         return Collections.unmodifiableSet(aliasSet);
-    }
-
-    /**
-     * Retrieves the value associated with this command-line option.
-     * The value may represent a parameter provided by the user during the command execution.
-     * <p>
-     * For flags, the value is always {@code null}.
-     *
-     * @return the value of this option as a string, or {@code null} if no value is set
-     */
-    @Nullable
-    public String getValue() {
-        return value;
-    }
-
-    /**
-     * Sets the value for this command-line option.
-     * This method allows specifying a value that the option represents or holds.
-     * The provided value can be nullable.
-     *
-     * @param value the value to set for this option, or {@code null} if no value is to be set
-     * @return the current instance of {@code KeelCliOption} for method chaining
-     */
-    KeelCliOption setValue(@Nullable String value) {
-        this.value = value;
-        return this;
     }
 }

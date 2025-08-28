@@ -10,8 +10,8 @@ import io.github.sinri.keel.core.TechnicalPreview;
  * @since 4.1.1
  */
 @TechnicalPreview(since = "4.1.1")
-public class CommandLineParserBuildError extends Exception {
-    public CommandLineParserBuildError(String msg) {
+public class KeelCliArgsDefinitionError extends RuntimeException {
+    public KeelCliArgsDefinitionError(String msg) {
         super(msg);
     }
 }

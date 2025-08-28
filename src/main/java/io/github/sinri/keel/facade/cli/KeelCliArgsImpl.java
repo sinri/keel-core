@@ -1,21 +1,24 @@
 package io.github.sinri.keel.facade.cli;
 
+import io.github.sinri.keel.core.TechnicalPreview;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
-class CommandLineParsedResultImpl implements CommandLineParsedResult {
-    private final Map<Character, Option> shortMap;
-    private final Map<String, Option> longMap;
+@TechnicalPreview(since = "4.1.1")
+class KeelCliArgsImpl implements KeelCliArgs, KeelCliArgsWriter {
+    private final Map<Character, KeelCliOption> shortMap;
+    private final Map<String, KeelCliOption> longMap;
     private final List<String> parameters;
 
-    public CommandLineParsedResultImpl() {
+    public KeelCliArgsImpl() {
         this.shortMap = new HashMap<>();
         this.longMap = new HashMap<>();
         this.parameters = new ArrayList<>();
     }
 
-    public void recordOption(@Nonnull Option option) {
+    public void recordOption(@Nonnull KeelCliOption option) {
         Set<String> aliasSet = option.getAliasSet();
         for (var alias : aliasSet) {
             if (alias == null || alias.isEmpty()) continue;
@@ -30,7 +33,7 @@ class CommandLineParsedResultImpl implements CommandLineParsedResult {
     @Nullable
     @Override
     public String readOption(char shortName) {
-        Option option = shortMap.get(shortName);
+        KeelCliOption option = shortMap.get(shortName);
         if (option == null) return null;
         if (option.isFlag()) return "";
         return option.getValue();
@@ -42,8 +45,8 @@ class CommandLineParsedResultImpl implements CommandLineParsedResult {
         if (longName.trim().isEmpty()) {
             return null;
         }
-        
-        Option option = longMap.get(longName);
+
+        KeelCliOption option = longMap.get(longName);
         if (option == null) return null;
         if (option.isFlag()) return "";
         return option.getValue();
@@ -74,5 +77,10 @@ class CommandLineParsedResultImpl implements CommandLineParsedResult {
     @Override
     public void recordParameter(@Nonnull String parameter) {
         parameters.add(parameter);
+    }
+
+    @Override
+    public KeelCliArgs toResult() {
+        return this;
     }
 }

@@ -12,7 +12,7 @@ import javax.annotation.Nonnull;
  * {@code java -jar my-app.jar
  * --long-option-name long-option-value -s short-option-value --flag-name -f -- Parameter1 Parameter2}
  * <p>
- * Parameter Only Format: no options nor flags, parameters only, {@code --} mark is not required.<br>
+ * Parameter-Only Format: no options nor flags, parameters only, {@code --} mark is not required.<br>
  * {@code java -jar my-app.jar Parameter1 Parameter2}
  * <p>
  * Definitions:<br>
@@ -24,9 +24,9 @@ import javax.annotation.Nonnull;
  * @since 4.1.1
  */
 @TechnicalPreview(since = "4.1.1")
-public interface CommandLineParser {
-    static CommandLineParser create() {
-        return new CommandLineParserImpl();
+public interface KeelCliArgsParser {
+    static KeelCliArgsParser create() {
+        return new KeelCliArgsParserImpl();
     }
 
     /**
@@ -35,15 +35,15 @@ public interface CommandLineParser {
      *
      * @param args the array of command-line arguments to parse, from a main method's args parameter
      * @return a result object representing the parsed command-line options, flags, and arguments
-     * @throws CommandLineParserParseError if the parsing fails
+     * @throws KeelCliArgsParseError if the parsing fails
      */
     @Nonnull
-    CommandLineParsedResult parse(String[] args) throws CommandLineParserParseError;
+    KeelCliArgs parse(String[] args) throws KeelCliArgsParseError;
 
-    void addOption(@Nonnull Option option) throws CommandLineParserBuildError;
+    void addOption(@Nonnull KeelCliOption option) throws KeelCliArgsDefinitionError;
 
-    default void addOption(@Nonnull Handler<Option> optionHandler) throws CommandLineParserBuildError {
-        Option option = new Option();
+    default void addOption(@Nonnull Handler<KeelCliOption> optionHandler) throws KeelCliArgsDefinitionError {
+        KeelCliOption option = new KeelCliOption();
         optionHandler.handle(option);
         addOption(option);
     }

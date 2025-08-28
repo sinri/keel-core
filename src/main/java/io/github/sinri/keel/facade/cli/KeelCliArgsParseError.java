@@ -12,8 +12,8 @@ import io.github.sinri.keel.core.TechnicalPreview;
  * @since 4.1.1
  */
 @TechnicalPreview(since = "4.1.1")
-public class CommandLineParserParseError extends Exception {
-    public CommandLineParserParseError(String message) {
+public class KeelCliArgsParseError extends Exception {
+    public KeelCliArgsParseError(String message) {
         super(message);
     }
 }

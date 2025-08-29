@@ -7,7 +7,6 @@ import io.github.sinri.keel.logger.KeelLogLevel;
 import io.github.sinri.keel.logger.issue.recorder.adapter.KeelIssueRecorderAdapter;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
-import org.slf4j.event.Level;
 
 import javax.annotation.Nonnull;
 import java.util.function.Supplier;

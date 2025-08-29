@@ -60,32 +60,33 @@ public class KeelSlf4jLogger implements Logger {
 
     @Override
     public boolean isTraceEnabled() {
+        // TRACE is not supported in Keel logger system
         return false;
     }
 
     @Override
     public void trace(String msg) {
-
+        // TRACE is not supported in Keel logger system
     }
 
     @Override
     public void trace(String format, Object arg) {
-
+        // TRACE is not supported in Keel logger system
     }
 
     @Override
     public void trace(String format, Object arg1, Object arg2) {
-
+        // TRACE is not supported in Keel logger system
     }
 
     @Override
     public void trace(String format, Object... arguments) {
-
+        // TRACE is not supported in Keel logger system
     }
 
     @Override
     public void trace(String msg, Throwable t) {
-
+        // TRACE is not supported in Keel logger system
     }
 
     @Override
@@ -95,32 +96,32 @@ public class KeelSlf4jLogger implements Logger {
 
     @Override
     public void trace(Marker marker, String msg) {
-
+        // TRACE is not supported in Keel logger system
     }
 
     @Override
     public void trace(Marker marker, String format, Object arg) {
-
+        // TRACE is not supported in Keel logger system
     }
 
     @Override
     public void trace(Marker marker, String format, Object arg1, Object arg2) {
-
+        // TRACE is not supported in Keel logger system
     }
 
     @Override
     public void trace(Marker marker, String format, Object... argArray) {
-
+        // TRACE is not supported in Keel logger system
     }
 
     @Override
     public void trace(Marker marker, String msg, Throwable t) {
-
+        // TRACE is not supported in Keel logger system
     }
 
     @Override
     public boolean isDebugEnabled() {
-        return getVisibleBaseLevel().isEnoughSeriousAs(KeelLogLevel.DEBUG);
+        return KeelLogLevel.DEBUG.isEnoughSeriousAs(getVisibleBaseLevel());
     }
 
     @Override
@@ -217,18 +218,20 @@ public class KeelSlf4jLogger implements Logger {
 
     private List<String> transformMarkerToClassification(Marker marker) {
         List<String> classification = new ArrayList<>();
-        classification.add(marker.getName());
-        if (marker.hasReferences()) {
-            marker.iterator().forEachRemaining(x -> {
-                classification.add(x.getName());
-            });
+        if (marker != null) {
+            classification.add(marker.getName());
+            if (marker.hasReferences()) {
+                marker.iterator().forEachRemaining(x -> {
+                    classification.add(x.getName());
+                });
+            }
         }
         return classification;
     }
 
     @Override
     public boolean isInfoEnabled() {
-        return visibleBaseLevel.isEnoughSeriousAs(KeelLogLevel.INFO);
+        return KeelLogLevel.INFO.isEnoughSeriousAs(getVisibleBaseLevel());
     }
 
     @Override
@@ -325,7 +328,7 @@ public class KeelSlf4jLogger implements Logger {
 
     @Override
     public boolean isWarnEnabled() {
-        return visibleBaseLevel.isEnoughSeriousAs(KeelLogLevel.WARNING);
+        return KeelLogLevel.WARNING.isEnoughSeriousAs(getVisibleBaseLevel());
     }
 
     @Override
@@ -422,7 +425,7 @@ public class KeelSlf4jLogger implements Logger {
 
     @Override
     public boolean isErrorEnabled() {
-        return this.getVisibleBaseLevel().isEnoughSeriousAs(KeelLogLevel.ERROR);
+        return KeelLogLevel.ERROR.isEnoughSeriousAs(this.getVisibleBaseLevel());
     }
 
     @Override

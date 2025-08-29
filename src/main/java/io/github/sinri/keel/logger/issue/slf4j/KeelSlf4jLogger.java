@@ -90,7 +90,7 @@ public class KeelSlf4jLogger implements Logger {
 
     @Override
     public boolean isTraceEnabled(Marker marker) {
-        return false;
+        return isTraceEnabled();
     }
 
     @Override
@@ -166,7 +166,7 @@ public class KeelSlf4jLogger implements Logger {
 
     @Override
     public boolean isDebugEnabled(Marker marker) {
-        return true;
+        return isDebugEnabled();
     }
 
     @Override
@@ -228,7 +228,7 @@ public class KeelSlf4jLogger implements Logger {
 
     @Override
     public boolean isInfoEnabled() {
-        return false;
+        return visibleBaseLevel.isEnoughSeriousAs(KeelLogLevel.INFO);
     }
 
     @Override
@@ -274,7 +274,7 @@ public class KeelSlf4jLogger implements Logger {
 
     @Override
     public boolean isInfoEnabled(Marker marker) {
-        return false;
+        return isInfoEnabled();
     }
 
     @Override
@@ -325,7 +325,7 @@ public class KeelSlf4jLogger implements Logger {
 
     @Override
     public boolean isWarnEnabled() {
-        return false;
+        return visibleBaseLevel.isEnoughSeriousAs(KeelLogLevel.WARNING);
     }
 
     @Override
@@ -371,7 +371,7 @@ public class KeelSlf4jLogger implements Logger {
 
     @Override
     public boolean isWarnEnabled(Marker marker) {
-        return false;
+        return isWarnEnabled();
     }
 
     @Override
@@ -422,7 +422,7 @@ public class KeelSlf4jLogger implements Logger {
 
     @Override
     public boolean isErrorEnabled() {
-        return false;
+        return this.getVisibleBaseLevel().isEnoughSeriousAs(KeelLogLevel.ERROR);
     }
 
     @Override
@@ -468,7 +468,7 @@ public class KeelSlf4jLogger implements Logger {
 
     @Override
     public boolean isErrorEnabled(Marker marker) {
-        return false;
+        return isErrorEnabled();
     }
 
     @Override

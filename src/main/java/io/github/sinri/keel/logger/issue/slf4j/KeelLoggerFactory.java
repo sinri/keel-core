@@ -7,6 +7,7 @@ import io.github.sinri.keel.logger.KeelLogLevel;
 import io.github.sinri.keel.logger.issue.recorder.adapter.KeelIssueRecorderAdapter;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.event.Level;
 
 import javax.annotation.Nonnull;
 import java.util.function.Supplier;
@@ -29,7 +30,7 @@ public class KeelLoggerFactory implements ILoggerFactory {
             return loggerCache.read(name);
         } catch (NotCached e) {
             synchronized (adapterSupplier) {
-                var logger = new KeelSlf4jLogger(this.adapterSupplier.get(), KeelLogLevel.DEBUG, name);
+                var logger = new KeelSlf4jLogger(this.adapterSupplier.get(), KeelLogLevel.INFO, name);
                 loggerCache.save(name, logger);
                 return logger;
             }

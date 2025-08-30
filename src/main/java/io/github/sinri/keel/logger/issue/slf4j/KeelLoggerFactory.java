@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
+
 /**
  * A factory implementation for creating SLF4J Logger instances that integrate with the Keel logging framework.
  * <p>
@@ -28,7 +30,7 @@ import java.util.function.Supplier;
  * <pre>{@code
  * // Create a factory with a stdout adapter
  * KeelLoggerFactory factory = new KeelLoggerFactory(() -> SyncStdoutAdapter.getInstance());
- * 
+ *
  * // Get a logger instance
  * Logger logger = factory.getLogger("com.example.MyClass");
  * }</pre>
@@ -40,7 +42,7 @@ import java.util.function.Supplier;
  */
 @TechnicalPreview(since = "4.1.1")
 public class KeelLoggerFactory implements ILoggerFactory {
-    
+
     /**
      * Supplier for obtaining the {@link KeelIssueRecorderAdapter} instance used by created loggers.
      * <p>
@@ -49,7 +51,7 @@ public class KeelLoggerFactory implements ILoggerFactory {
      * consistent logging behavior across the application.
      */
     private final @Nonnull Supplier<KeelIssueRecorderAdapter> adapterSupplier;
-    
+
     /**
      * Cache for storing created logger instances to ensure singleton behavior per logger name.
      * <p>
@@ -67,7 +69,7 @@ public class KeelLoggerFactory implements ILoggerFactory {
      * adapter instance or instances with compatible configuration.
      *
      * @param adapterSupplier the supplier for obtaining issue recorder adapter instances;
-     *                       must not be null and should return non-null adapters
+     *                        must not be null and should return non-null adapters
      * @throws NullPointerException if adapterSupplier is null
      */
     public KeelLoggerFactory(@Nonnull Supplier<KeelIssueRecorderAdapter> adapterSupplier) {
@@ -100,6 +102,7 @@ public class KeelLoggerFactory implements ILoggerFactory {
         } catch (NotCached e) {
             synchronized (adapterSupplier) {
                 var logger = new KeelSlf4jLogger(this.adapterSupplier, KeelLogLevel.INFO, name);
+                Keel.getLogger().info("Keel Logging for slf4j built logger for [" + name + "]");
                 loggerCache.save(name, logger);
                 return logger;
             }

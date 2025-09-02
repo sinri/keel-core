@@ -305,11 +305,6 @@ public class KeelSheet {
         return blockReadAllRowsToTemplatedMatrix(0, 0, SheetRowFilter.toThrowEmptyRows());
     }
 
-    @Deprecated(since = "3.0.20", forRemoval = true)
-    public final KeelSheetTemplatedMatrix blockReadAllRowsToTemplatedMatrix(int headerRowIndex, int maxColumns) {
-        return blockReadAllRowsToTemplatedMatrix(headerRowIndex, maxColumns, null);
-    }
-
     /**
      * Fetch the templated matrix, the rows before header row would be thrown!
      *
@@ -380,13 +375,8 @@ public class KeelSheet {
         return readAllRowsToMatrix(0, 0, SheetRowFilter.toThrowEmptyRows());
     }
 
-    @Deprecated(since = "3.0.20", forRemoval = true)
-    public final Future<KeelSheetMatrix> readAllRowsToMatrix(int headerRowIndex, int maxColumns) {
-        return readAllRowsToMatrix(headerRowIndex, maxColumns, null);
-    }
-
     /**
-     * Fetch the  matrix, the rows before header row would be thrown!
+     * Fetch the matrix, the rows before header row would be thrown!
      *
      * @param headerRowIndex 0 for first row, etc.
      * @param maxColumns     For predictable, one or more columns; if auto-detection is needed, zero or less.
@@ -435,11 +425,6 @@ public class KeelSheet {
      */
     public final Future<KeelSheetTemplatedMatrix> readAllRowsToTemplatedMatrix() {
         return readAllRowsToTemplatedMatrix(0, 0, SheetRowFilter.toThrowEmptyRows());
-    }
-
-    @Deprecated(since = "3.0.20", forRemoval = true)
-    public final Future<KeelSheetTemplatedMatrix> readAllRowsToTemplatedMatrix(int headerRowIndex, int maxColumns) {
-        return readAllRowsToTemplatedMatrix(headerRowIndex, maxColumns, null);
     }
 
     /**

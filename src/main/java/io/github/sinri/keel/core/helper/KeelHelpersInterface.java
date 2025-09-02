@@ -4,9 +4,6 @@ package io.github.sinri.keel.core.helper;
  * @since 3.1.0
  */
 public interface KeelHelpersInterface {
-    @Deprecated(forRemoval = true, since = "4.0.0")
-    KeelHelpersInterface KeelHelpers = new KeelHelpersInterface() {
-    };
 
     default KeelBinaryHelper binaryHelper() {
         return KeelBinaryHelper.getInstance();

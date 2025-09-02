@@ -107,14 +107,6 @@ abstract public class KeelAbstractSocketWrapper {
         issueRecorder.setRecordFormatter(r -> r.classification("socket_id:" + socketID));
     }
 
-    /**
-     * Do not use raw instance of NetSocket.
-     */
-    @Deprecated
-    protected NetSocket getSocket() {
-        return socket;
-    }
-
     public String getSocketID() {
         return socketID;
     }

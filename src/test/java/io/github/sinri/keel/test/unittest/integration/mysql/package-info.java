@@ -1,1 +1,0 @@
-package io.github.sinri.keel.test.unittest.integration.mysql;

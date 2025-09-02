@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.json;
 
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.pointer.JsonPointer;
 
@@ -79,15 +78,6 @@ public class UnmodifiableJsonifiableEntityImpl implements UnmodifiableJsonifiabl
         } catch (ClassCastException castException) {
             return null;
         }
-    }
-
-    /**
-     * @since 2.8
-     * @since 3.1.10 make it abstract.
-     */
-    @Override
-    public Buffer toBuffer() {
-        return jsonObject.toBuffer();
     }
 
     @Nonnull

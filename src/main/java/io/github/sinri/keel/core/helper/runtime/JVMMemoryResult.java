@@ -25,6 +25,11 @@ public class JVMMemoryResult implements RuntimeStatResult<JVMMemoryResult> {
         return statTime;
     }
 
+    @Override
+    public JVMMemoryResult since(JVMMemoryResult start) {
+        throw new UnsupportedOperationException("Meaningless operation");
+    }
+
     public long getRuntimeHeapAllocatedBytes() {
         return runtimeHeapAllocatedBytes;
     }
@@ -86,12 +91,6 @@ public class JVMMemoryResult implements RuntimeStatResult<JVMMemoryResult> {
     public JVMMemoryResult setPhysicalUsedBytes(long physicalUsedBytes) {
         this.physicalUsedBytes = physicalUsedBytes;
         return this;
-    }
-
-    @Override
-    @Deprecated
-    public JVMMemoryResult since(JVMMemoryResult start) {
-        throw new RuntimeException("DO NOT USE THIS");
     }
 
     @Override

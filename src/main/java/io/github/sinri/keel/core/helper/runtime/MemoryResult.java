@@ -44,12 +44,8 @@ public class MemoryResult implements RuntimeStatResult<MemoryResult> {
     }
 
     @Override
-    @Deprecated
     public MemoryResult since(MemoryResult start) {
-        throw new RuntimeException("DO NOT USE THIS");
-//        return new MemoryResult(getStatTime())
-//                .setAvailableByte(getAvailableByte() - start.getAvailableByte())
-//                .setTotalByte(getTotalByte());
+        throw new UnsupportedOperationException("Meaningless operation");
     }
 
     public double getMemoryUsage() {

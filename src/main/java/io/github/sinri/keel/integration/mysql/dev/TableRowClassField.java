@@ -20,14 +20,11 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 class TableRowClassField {
     private static final Pattern patternForLooseEnum;
     private static final Pattern patternForStrictEnum;
-    @Deprecated(since = "4.1.1")
-    private static final Pattern patternForAESEnvelope;
     private static final Pattern patternForAnyEnvelope;
 
     static {
         patternForLooseEnum = Pattern.compile("Enum\\{([A-Za-z0-9_, ]+)}");
         patternForStrictEnum = Pattern.compile("Enum<([A-Za-z0-9_.]+)>");
-        patternForAESEnvelope = Pattern.compile("AES<([A-Za-z0-9_.]+)>");
         patternForAnyEnvelope = Pattern.compile("Envelope<([A-Za-z0-9_.]+)>");
     }
 
@@ -46,7 +43,6 @@ class TableRowClassField {
     private String readMethod;
     private @Nullable TableRowClassFieldLooseEnum looseEnum;
     private @Nullable TableRowClassFieldStrictEnum strictEnum;
-    private @Nullable TableRowClassFieldAesEncryption aesEncryption;
     /**
      * @since 4.1.1
      */
@@ -130,14 +126,6 @@ class TableRowClassField {
             if (matcherForStrict.find()) {
                 String enumClassPathTail = matcherForStrict.group(1);
                 strictEnum = new TableRowClassFieldStrictEnum(field, strictEnumPackage, enumClassPathTail);
-            }
-
-            // AES Envelope
-            // todo (added in 4.1.1) remove it in future version, use AnyEnvelope instead.
-            Matcher matcherForAESEnvelope = patternForAESEnvelope.matcher(comment);
-            if (matcherForAESEnvelope.find()) {
-                String aes = matcherForAESEnvelope.group(1);
-                aesEncryption = new TableRowClassFieldAesEncryption(aes, Objects.requireNonNull(this.envelopePackage));
             }
 
             // Any Envelope
@@ -241,22 +229,6 @@ class TableRowClassField {
                 .append(nullable ? "" : "Objects.requireNonNull(")
                 .append(readMethod).append("(\"").append(field).append("\")")
                 .append(nullable ? "" : ")").append(";\n")
-                .append("\t}\n");
-        }
-
-        if (aesEncryption != null) {
-            code.append("\t/**\n")
-                .append("\t * AES DECRYPTED VALUE of {@code ").append(tableExpression).append(".").append(field)
-                .append("}.\n");
-            if (comment != null) {
-                code.append("\t * ").append(actualComment).append("\n")
-                    .append("\t * <p>\n");
-            }
-            code.append("\t */\n")
-                .append("\t@Nullable\n")
-                .append("\tpublic ").append("String").append(" ").append(getter).append("Decrypted() {\n")
-                .append("\t\treturn ")
-                .append(aesEncryption.buildCallClassMethodCode(readMethod + "(\"" + field + "\")")).append("\n")
                 .append("\t}\n");
         }
 

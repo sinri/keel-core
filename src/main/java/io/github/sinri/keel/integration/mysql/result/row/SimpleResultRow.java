@@ -17,18 +17,12 @@ public class SimpleResultRow implements ResultRow {
     private JsonObject row;
 
     public SimpleResultRow(@Nonnull JsonObject tableRow) {
-        this.reloadDataFromJsonObject(tableRow);
+        this.reloadData(tableRow);
     }
 
     @Override
     public final @Nonnull JsonObject toJsonObject() {
         return row;
-    }
-
-    @Deprecated(since = "4.1.1", forRemoval = true)
-    public final @Nonnull ResultRow reloadDataFromJsonObject(@Nonnull JsonObject jsonObject) {
-        reloadData(jsonObject);
-        return this;
     }
 
     @Override

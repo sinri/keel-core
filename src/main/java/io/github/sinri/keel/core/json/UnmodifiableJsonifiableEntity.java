@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.json;
 
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.Shareable;
 
@@ -35,14 +34,4 @@ public interface UnmodifiableJsonifiableEntity
         return new JsonObject(toJsonExpression());
     }
 
-    /**
-     * As of 3.1.10 make it abstract.
-     * <p> As of 4.0.0 add default.
-     *
-     * @since 2.8
-     */
-    @Deprecated(since = "4.1.1")
-    default Buffer toBuffer() {
-        return cloneAsJsonObject().toBuffer();
-    }
 }

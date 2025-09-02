@@ -43,7 +43,7 @@ public abstract class KeelJUnit5Test implements KeelJUnit5TestCore {
 
     @Nonnull
     protected KeelIssueRecorder<KeelEventLog> buildUnitTestLogger() {
-        return KeelIssueRecordCenter.outputCenter().generateIssueRecorder("KeelUnitTest", KeelEventLog::new);
+        return KeelIssueRecordCenter.outputCenter().generateIssueRecorder("KeelJUnit5Test", KeelEventLog::new);
     }
 
     @Override

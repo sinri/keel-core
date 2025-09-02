@@ -22,10 +22,7 @@ import java.util.function.Function;
  */
 public class KeelCsvReader implements Closeable {
     private final BufferedReader br;
-    /**
-     * TODO: make it final.
-     */
-    private String separator;
+    private final String separator;
 
     /**
      * @since 4.1.1
@@ -48,40 +45,6 @@ public class KeelCsvReader implements Closeable {
 
     public KeelCsvReader(@Nonnull BufferedReader br) {
         this(br, ",");
-    }
-
-    /**
-     * @deprecated it is not necessary to be asynchronous, use the constructor of {@link KeelCsvReader} directly.
-     */
-    @Deprecated(since = "4.1.1", forRemoval = true)
-    public static Future<KeelCsvReader> create(@Nonnull InputStream inputStream, @Nonnull Charset charset) {
-        var x = new KeelCsvReader(inputStream, charset);
-        return Future.succeededFuture(x);
-    }
-
-    /**
-     * @deprecated it is not necessary to be asynchronous, use the constructor of {@link KeelCsvReader} directly.
-     */
-    @Deprecated(since = "4.1.1", forRemoval = true)
-    public static Future<KeelCsvReader> create(@Nonnull File file, @Nonnull Charset charset) {
-        return Future.succeededFuture()
-                     .compose(v -> {
-                         try {
-                             var fis = new FileInputStream(file);
-                             return create(fis, charset);
-                         } catch (IOException e) {
-                             return Future.failedFuture(e);
-                         }
-                     });
-
-    }
-
-    /**
-     * @deprecated it is not necessary to be asynchronous, use the constructor of {@link KeelCsvReader} directly.
-     */
-    @Deprecated(since = "4.1.1", forRemoval = true)
-    public static Future<KeelCsvReader> create(@Nonnull String file, @Nonnull Charset charset) {
-        return create(new File(file), charset);
     }
 
     /**
@@ -123,18 +86,6 @@ public class KeelCsvReader implements Closeable {
                      });
     }
 
-    /**
-     * Set the separator.
-     * <p>
-     * The separator is expected to be set in the constructor now.
-     *
-     * @deprecated This method should be called before any read action.
-     */
-    @Deprecated(since = "4.1.1", forRemoval = true)
-    public KeelCsvReader setSeparator(String separator) {
-        this.separator = separator;
-        return this;
-    }
 
     /**
      * @return the next row parsed from csv source, or null if no any more rows there.
@@ -145,30 +96,6 @@ public class KeelCsvReader implements Closeable {
         String line = br.readLine();
         if (line == null) return null;
         return consumeOneLine(null, null, 0, line);
-    }
-
-    /**
-     * Reads one complete CSV row from the input stream in a blocking manner.
-     * <p>
-     * This method parses CSV data according to standard CSV rules:
-     * <p>
-     * - Fields are separated by the configured separator (default: comma)
-     * <p>
-     * - Fields containing the separator or newlines must be enclosed in double quotes
-     * <p>
-     * - Double quotes within quoted fields are escaped by doubling them
-     * <p>
-     * - A single row may span multiple lines if it contains quoted fields with newlines
-     * <p>
-     * The method returns null when the end of the input stream is reached.
-     *
-     * @return a CsvRow containing the parsed cells, or null if no more rows are available
-     * @throws IOException if an I/O error occurs while reading from the input stream
-     * @deprecated use {@link KeelCsvReader#next()} instead.
-     */
-    @Deprecated(since = "4.1.1", forRemoval = true)
-    public @Nullable CsvRow blockReadRow() throws IOException {
-        return next();
     }
 
     /**
@@ -233,22 +160,6 @@ public class KeelCsvReader implements Closeable {
             }
             return consumeOneLine(row, buffer, quoterFlag, nextLine);
         }
-    }
-
-    /**
-     * @deprecated use {@link KeelCsvReader#blockReadRow()} directly.
-     */
-    @Deprecated(since = "4.1.1", forRemoval = true)
-    public Future<CsvRow> readRow() {
-        return Future.succeededFuture()
-                     .compose(v -> {
-                         try {
-                             var row = this.blockReadRow();
-                             return Future.succeededFuture(row);
-                         } catch (IOException e) {
-                             return Future.failedFuture(e);
-                         }
-                     });
     }
 
     @Override

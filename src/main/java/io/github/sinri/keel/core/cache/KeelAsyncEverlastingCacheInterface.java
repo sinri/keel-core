@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.cache;
 
-import io.github.sinri.keel.core.cache.impl.KeelCacheGimel;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
@@ -17,10 +16,6 @@ import java.util.Map;
  * @since 2.9
  */
 public interface KeelAsyncEverlastingCacheInterface<K, V> {
-    @Deprecated(since = "4.1.1", forRemoval = true)
-    static <K, V> KeelAsyncEverlastingCacheInterface<K, V> createDefaultInstance() {
-        return new KeelCacheGimel<>();
-    }
 
     default long getLockWaitMs() {
         return 100;

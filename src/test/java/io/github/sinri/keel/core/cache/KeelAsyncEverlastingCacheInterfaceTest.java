@@ -12,6 +12,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import javax.annotation.Nonnull;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 @ExtendWith(VertxExtension.class)
 class KeelAsyncEverlastingCacheInterfaceTest extends KeelJUnit5Test {
     @RegisterExtension
@@ -20,7 +25,70 @@ class KeelAsyncEverlastingCacheInterfaceTest extends KeelJUnit5Test {
 
     KeelAsyncEverlastingCacheInterfaceTest(Vertx vertx) {
         super(vertx);
-        cache = KeelAsyncEverlastingCacheInterface.createDefaultInstance();
+        cache = new MockAsyncEverlastingCache<>();
+    }
+
+    /**
+     * Mock implementation of KeelAsyncEverlastingCacheInterface for testing
+     */
+    private static class MockAsyncEverlastingCache<K, V> implements KeelAsyncEverlastingCacheInterface<K, V> {
+        private final Map<K, V> map = new ConcurrentHashMap<>();
+
+        @Override
+        public Future<Void> save(@Nonnull K k, V v) {
+            if (v == null) {
+                map.remove(k);
+            } else {
+                map.put(k, v);
+            }
+            return Future.succeededFuture();
+        }
+
+        @Override
+        public Future<Void> save(@Nonnull Map<K, V> appendEntries) {
+            map.putAll(appendEntries);
+            return Future.succeededFuture();
+        }
+
+        @Override
+        public Future<V> read(@Nonnull K k, V v) {
+            V result = map.get(k);
+            if (result == null) {
+                return Future.succeededFuture(v);
+            }
+            return Future.succeededFuture(result);
+        }
+
+        @Override
+        public Future<Void> remove(@Nonnull K key) {
+            map.remove(key);
+            return Future.succeededFuture();
+        }
+
+        @Override
+        public Future<Void> remove(@Nonnull Collection<K> keys) {
+            keys.forEach(map::remove);
+            return Future.succeededFuture();
+        }
+
+        @Override
+        public Future<Void> removeAll() {
+            map.clear();
+            return Future.succeededFuture();
+        }
+
+        @Override
+        public Future<Void> replaceAll(@Nonnull Map<K, V> newEntries) {
+            map.clear();
+            map.putAll(newEntries);
+            return Future.succeededFuture();
+        }
+
+        @Override
+        @Nonnull
+        public Map<K, V> getSnapshotMap() {
+            return new ConcurrentHashMap<>(map);
+        }
     }
 
     @BeforeEach

@@ -1,7 +1,5 @@
 package io.github.sinri.keel.core.cache;
 
-import io.github.sinri.keel.core.cache.impl.KeelCacheAlef;
-import io.github.sinri.keel.core.cache.impl.KeelCacheBet;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
@@ -21,23 +19,6 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 1.14
  */
 public interface KeelAsyncCacheInterface<K, V> {
-    /**
-     * Creates a default instance of the {@code KeelAsyncCacheInterface}.
-     * This implementation uses the {@link KeelCacheBet} class, which is deprecated and slated for removal in future
-     * versions.
-     *
-     * @param <K> the type of keys maintained by this cache
-     * @param <V> the type of cached values
-     * @return a new instance of {@code KeelAsyncCacheInterface<K, V>} based on {@code KeelCacheBet}
-     * @since 2.5
-     * @deprecated This method returns an instance of {@link KeelCacheBet}, which is based on a local memory map.
-     *         Use alternative implementations, such as {@link KeelCacheAlef}, that better adhere to
-     *         {@link KeelCacheInterface}.
-     */
-    @Deprecated(since = "4.1.1", forRemoval = true)
-    static <K, V> KeelAsyncCacheInterface<K, V> createDefaultInstance() {
-        return new KeelCacheBet<>();
-    }
 
     /**
      * Save an item (as key and value pair) into cache, keep it available for a

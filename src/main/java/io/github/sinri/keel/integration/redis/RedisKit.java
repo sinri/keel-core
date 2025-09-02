@@ -2,14 +2,11 @@ package io.github.sinri.keel.integration.redis;
 
 import io.github.sinri.keel.facade.configuration.KeelConfigElement;
 import io.github.sinri.keel.integration.redis.mixin.*;
-import io.vertx.core.Future;
 import io.vertx.redis.client.Redis;
-import io.vertx.redis.client.RedisAPI;
 import io.vertx.redis.client.RedisOptions;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
-import java.util.function.Function;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
@@ -28,21 +25,6 @@ public class RedisKit implements RedisScalarMixin, RedisListMixin, RedisBitMixin
 
     public Redis getClient() {
         return client;
-    }
-
-    /**
-     * 此方法直接返回RedisAPI实例但不管理连接的生命周期，可能导致连接泄漏。
-     * 应使用{@link RedisApiMixin#api(Function)}代替，它能自动管理Redis连接的获取和释放：
-     * 1. 自动创建新的连接
-     * 2. 执行完Redis命令后自动关闭连接
-     * 3. 即使命令执行失败也能确保连接被正确关闭
-     *
-     * @return RedisAPI实例，但不推荐使用
-     * @deprecated do not use this method, use {@link RedisApiMixin#api(Function)} instead.
-     */
-    @Deprecated(since = "4.0.12", forRemoval = true)
-    public Future<RedisAPI> api() {
-        return Future.succeededFuture(RedisAPI.api(client));
     }
 
     /**

@@ -4,7 +4,9 @@ import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.io.*;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -27,14 +29,8 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 public class KeelCsvWriter implements Closeable {
     private final OutputStream outputStream;
     private final AtomicBoolean atLineBeginningRef;
-    /**
-     * TODO: make it final
-     */
-    private String separator;
-    /**
-     * TODO: make it final
-     */
-    private Charset charset;
+    private final String separator;
+    private final Charset charset;
 
     public KeelCsvWriter(@Nonnull OutputStream outputStream) {
         this(outputStream, ",", StandardCharsets.UTF_8);
@@ -48,40 +44,6 @@ public class KeelCsvWriter implements Closeable {
         this.separator = separator;
         this.charset = charset;
         this.atLineBeginningRef = new AtomicBoolean(true);
-    }
-
-
-    /**
-     * @deprecated use {@link KeelCsvWriter#write(OutputStream, String, Charset, Function)} instead.
-     */
-    @Deprecated(since = "4.1.1", forRemoval = true)
-    public static Future<KeelCsvWriter> create(@Nonnull String file) {
-        return create(new File(file));
-    }
-
-    /**
-     * @deprecated use {@link KeelCsvWriter#write(OutputStream, String, Charset, Function)} instead.
-     */
-    @Deprecated(since = "4.1.1", forRemoval = true)
-    public static Future<KeelCsvWriter> create(@Nonnull File file) {
-        return Future.succeededFuture()
-                     .compose(v -> {
-                         try {
-                             FileOutputStream outputStream = new FileOutputStream(file);
-                             return create(outputStream);
-                         } catch (FileNotFoundException e) {
-                             return Future.failedFuture(e);
-                         }
-                     });
-    }
-
-    /**
-     * @deprecated use {@link KeelCsvWriter#write(OutputStream, String, Charset, Function)} instead.
-     */
-    @Deprecated(since = "4.1.1", forRemoval = true)
-    public static Future<KeelCsvWriter> create(@Nonnull OutputStream outputStream) {
-        var x = new KeelCsvWriter(outputStream);
-        return Future.succeededFuture(x);
     }
 
     /**
@@ -137,32 +99,6 @@ public class KeelCsvWriter implements Closeable {
     }
 
     /**
-     * Set the separator.
-     * <p>
-     * The separator is expected to be set in the constructor now.
-     *
-     * @deprecated This method should be called before any read action.
-     */
-    @Deprecated(since = "4.1.1", forRemoval = true)
-    public KeelCsvWriter setSeparator(@Nonnull String separator) {
-        this.separator = separator;
-        return this;
-    }
-
-    /**
-     * Set the charset.
-     * <p>
-     * The charset is expected to be set in the constructor now.
-     *
-     * @deprecated This method should be called before any read action.
-     */
-    @Deprecated(since = "4.1.1", forRemoval = true)
-    public KeelCsvWriter setCharset(Charset charset) {
-        this.charset = charset;
-        return this;
-    }
-
-    /**
      * Write a quoted string and a separator to the output stream as a csv cell.
      * <p> This method would write a comma as suffix, so the number of columns would be one more than the actual size.
      * If you care about this, avoid use this method and use {@link KeelCsvWriter#blockWriteRow(List)} instead.
@@ -210,22 +146,6 @@ public class KeelCsvWriter implements Closeable {
             var line = Keel.stringHelper().joinStringArray(components, separator) + "\n";
             writeToOutputStream(line);
         }
-    }
-
-    /**
-     * @deprecated use {@link KeelCsvWriter#blockWriteRow(List)} directly.
-     */
-    @Deprecated(since = "4.1.1", forRemoval = true)
-    public Future<Void> writeRow(List<String> row) {
-        return Future.succeededFuture()
-                     .compose(v -> {
-                         try {
-                             blockWriteRow(row);
-                             return Future.succeededFuture();
-                         } catch (IOException e) {
-                             return Future.failedFuture(e);
-                         }
-                     });
     }
 
     private String quote(@Nullable String s) {

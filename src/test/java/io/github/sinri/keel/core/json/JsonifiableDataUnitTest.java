@@ -494,7 +494,8 @@ class JsonifiableDataUnitTest extends KeelJUnit5Test {
 
     @Test
     void testToBuffer() {
-        Buffer buffer = dataUnit.toBuffer();
+        Buffer buffer = Buffer.buffer();
+        dataUnit.writeToBuffer(buffer);
         assertNotNull(buffer);
         assertTrue(buffer.length() > 0);
     }

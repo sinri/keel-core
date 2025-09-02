@@ -20,7 +20,7 @@ class KeelAsyncCacheInterfaceTest extends KeelJUnit5Test {
         super(vertx);
         System.out.println("KeelAsyncCacheInterfaceTest: " + vertx);
 
-        cache = KeelAsyncCacheInterface.createDefaultInstance();
+        cache = new TestKeelAsyncCache<>();
         cache.startEndlessCleanUp(3000);
     }
 

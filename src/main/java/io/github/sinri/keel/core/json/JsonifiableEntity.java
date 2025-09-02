@@ -112,15 +112,6 @@ public interface JsonifiableEntity<E>
     }
 
     /**
-     * @since 2.8
-     * @deprecated as of 4.1.1
-     */
-    @Deprecated(since = "4.1.1")
-    default void fromBuffer(@Nonnull Buffer buffer) {
-        this.reloadData(new JsonObject(buffer));
-    }
-
-    /**
      * @param buffer the buffer to write to, should not be null
      * @since 2.8
      */
@@ -140,17 +131,6 @@ public interface JsonifiableEntity<E>
         int i = jsonObject.readFromBuffer(pos, buffer);
         this.reloadData(jsonObject);
         return i;
-    }
-
-    /**
-     * As of 3.1.10, moved here from UnmodifiableJsonifiableEntity.
-     *
-     * @since 2.8
-     * @deprecated as of 4.1.1
-     */
-    @Deprecated(since = "4.1.1")
-    default Buffer toBuffer() {
-        return toJsonObject().toBuffer();
     }
 
     /**

@@ -88,12 +88,6 @@ Future<Void> generate(String packagePath)
 
 用于处理严格枚举字段的辅助类。通过字段注释中的 `Enum<EnumClass>` 标记来使用。
 
-#### TableRowClassFieldAesEncryption
-
-**位置**: `io.github.sinri.keel.integration.mysql.dev.TableRowClassFieldAesEncryption`
-
-用于处理AES加密字段的辅助类。通过字段注释中的 `AES<EnvelopeClass>` 标记来使用。
-
 #### TableRowClassFieldLooseEnum
 
 **位置**: `io.github.sinri.keel.integration.mysql.dev.TableRowClassFieldLooseEnum`

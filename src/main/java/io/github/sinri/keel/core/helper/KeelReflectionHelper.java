@@ -125,7 +125,8 @@ public class KeelReflectionHelper {
         Set<Class<? extends R>> descendantClasses = new HashSet<>();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         // in file system
-        String packagePath = packageName.replace('.', '/');
+
+        String packagePath = packageName.replace('.', File.separatorChar);
         try {
             // Assuming classes are in a directory on the file system (e.g., not in a JAR)
             URL resource = classLoader.getResource(packagePath);
@@ -137,7 +138,7 @@ public class KeelReflectionHelper {
                     @Override
                     public FileVisitResult visitFile(@Nonnull Path file, @Nonnull BasicFileAttributes attrs) {
                         if (file.toString().endsWith(".class")) {
-                            String className = file.toString().replace(".class", "").replace("/", ".");
+                            String className = file.toString().replace(".class", "").replace(File.separator, ".");
                             className = className.substring(className.indexOf(packageName));
 
                             try {

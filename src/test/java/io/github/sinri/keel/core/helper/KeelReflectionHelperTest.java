@@ -211,6 +211,10 @@ class KeelReflectionHelperTest extends KeelJUnit5Test {
             "io.github.sinri.keel.core.helper", 
             BaseClass.class
         );
+
+        descendants.forEach(clazz -> {
+            getUnitTestLogger().info("Found class in io.github.sinri.keel.core.helper: "+clazz.getName());
+        });
         
         // Should find our test classes
         assertNotNull(descendants);
@@ -232,6 +236,10 @@ class KeelReflectionHelperTest extends KeelJUnit5Test {
         );
         assertNotNull(objectDescendants);
         assertTrue(objectDescendants.size() > 0);
+
+        objectDescendants.forEach(clazz -> {
+            getUnitTestLogger().info("Found class in io.github.sinri.keel.core.helper: "+clazz.getName());
+        });
     }
 
     @Test

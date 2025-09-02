@@ -29,7 +29,6 @@ public abstract class KeelJUnit5Test implements KeelJUnit5TestCore {
 
     /**
      * The constructor would run after {@code @BeforeAll} annotated method.
-     * Here, {@link JsonifiableSerializer#register()} would be called, and a {@link KeelIssueRecorder} would be created.
      */
     public KeelJUnit5Test(Vertx vertx) {
         // System.out.println("KeelJUnit5Test constructor with vertx " + vertx);

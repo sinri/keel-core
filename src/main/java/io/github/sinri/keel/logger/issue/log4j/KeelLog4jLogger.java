@@ -4,6 +4,7 @@ import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.logger.KeelLogLevel;
 import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.recorder.adapter.KeelIssueRecorderAdapter;
+import io.vertx.core.Handler;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.ThreadContext;
@@ -11,6 +12,7 @@ import org.apache.logging.log4j.message.Message;
 import org.apache.logging.log4j.spi.AbstractLogger;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 @TechnicalPreview(since = "4.1.3")
@@ -18,15 +20,19 @@ public final class KeelLog4jLogger extends AbstractLogger {
     private final Supplier<KeelIssueRecorderAdapter> adapterSupplier;
     private final String topic;
     private final KeelLogLevel visibleBaseLevel;
+    @Nullable
+    private final Handler<KeelEventLog> issueRecordInitializer;
 
     public KeelLog4jLogger(
             @Nonnull Supplier<KeelIssueRecorderAdapter> adapterSupplier,
             @Nonnull KeelLogLevel visibleBaseLevel,
-            @Nonnull String topic) {
+            @Nonnull String topic,
+            @Nullable Handler<KeelEventLog> issueRecordInitializer) {
         super(topic, null, null);
         this.adapterSupplier = adapterSupplier;
         this.topic = topic;
         this.visibleBaseLevel = visibleBaseLevel;
+        this.issueRecordInitializer = issueRecordInitializer;
     }
 
     private static KeelLogLevel transLevel(Level level) {
@@ -151,7 +157,12 @@ public final class KeelLog4jLogger extends AbstractLogger {
     @Override
     public void logMessage(String fqcn, Level level, Marker marker, Message message, Throwable t) {
         KeelIssueRecorderAdapter adapter = this.adapterSupplier.get();
+        if (adapter == null) return;
+
         KeelEventLog keelEventLog = new KeelEventLog();
+        if (issueRecordInitializer != null) {
+            issueRecordInitializer.handle(keelEventLog);
+        }
         keelEventLog.classification(fqcn);
         keelEventLog.level(transLevel(level));
         if (t != null) {

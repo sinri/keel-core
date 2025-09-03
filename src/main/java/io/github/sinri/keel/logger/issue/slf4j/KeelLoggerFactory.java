@@ -4,11 +4,14 @@ import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.core.cache.KeelEverlastingCacheInterface;
 import io.github.sinri.keel.core.cache.NotCached;
 import io.github.sinri.keel.logger.KeelLogLevel;
+import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.recorder.adapter.KeelIssueRecorderAdapter;
+import io.vertx.core.Handler;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
@@ -50,7 +53,10 @@ public class KeelLoggerFactory implements ILoggerFactory {
      * The same supplier instance is shared among all loggers created by this factory, enabling
      * consistent logging behavior across the application.
      */
-    private final @Nonnull Supplier<KeelIssueRecorderAdapter> adapterSupplier;
+    @Nonnull
+    private final Supplier<KeelIssueRecorderAdapter> adapterSupplier;
+    @Nullable
+    private final Handler<KeelEventLog> issueRecordInitializer;
 
     /**
      * Cache for storing created logger instances to ensure singleton behavior per logger name.
@@ -72,8 +78,11 @@ public class KeelLoggerFactory implements ILoggerFactory {
      *                        must not be null and should return non-null adapters
      * @throws NullPointerException if adapterSupplier is null
      */
-    public KeelLoggerFactory(@Nonnull Supplier<KeelIssueRecorderAdapter> adapterSupplier) {
+    public KeelLoggerFactory(
+            @Nonnull Supplier<KeelIssueRecorderAdapter> adapterSupplier,
+            @Nullable Handler<KeelEventLog> issueRecordInitializer) {
         this.adapterSupplier = adapterSupplier;
+        this.issueRecordInitializer = issueRecordInitializer;
     }
 
     /**
@@ -101,7 +110,7 @@ public class KeelLoggerFactory implements ILoggerFactory {
             return loggerCache.read(name);
         } catch (NotCached e) {
             synchronized (adapterSupplier) {
-                var logger = new KeelSlf4jLogger(this.adapterSupplier, KeelLogLevel.INFO, name);
+                var logger = new KeelSlf4jLogger(adapterSupplier, KeelLogLevel.INFO, name, issueRecordInitializer);
                 Keel.getLogger().notice("Keel Logging for slf4j built logger for [" + name + "]");
                 loggerCache.save(name, logger);
                 return logger;

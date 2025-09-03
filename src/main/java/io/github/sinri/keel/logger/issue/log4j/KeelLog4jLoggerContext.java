@@ -2,12 +2,15 @@ package io.github.sinri.keel.logger.issue.log4j;
 
 import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.logger.KeelLogLevel;
+import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.recorder.adapter.KeelIssueRecorderAdapter;
+import io.vertx.core.Handler;
 import org.apache.logging.log4j.message.MessageFactory;
 import org.apache.logging.log4j.spi.ExtendedLogger;
 import org.apache.logging.log4j.spi.LoggerContext;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -21,14 +24,18 @@ public final class KeelLog4jLoggerContext implements LoggerContext {
     private final Supplier<KeelIssueRecorderAdapter> adapterSupplier;
     @Nonnull
     private final KeelLogLevel visibleBaseLevel;
+    @Nullable
+    private final Handler<KeelEventLog> issueRecordInitializer;
 
     public KeelLog4jLoggerContext(
             @Nonnull Supplier<KeelIssueRecorderAdapter> adapterSupplier,
-            @Nonnull KeelLogLevel visibleBaseLevel
+            @Nonnull KeelLogLevel visibleBaseLevel,
+            @Nullable Handler<KeelEventLog> issueRecordInitializer
     ) {
         this.loggerMap = new ConcurrentHashMap<>();
         this.adapterSupplier = adapterSupplier;
         this.visibleBaseLevel = visibleBaseLevel;
+        this.issueRecordInitializer = issueRecordInitializer;
     }
 
     @Override
@@ -44,7 +51,7 @@ public final class KeelLog4jLoggerContext implements LoggerContext {
             synchronized (loggerMap) {
                 KeelLog4jLogger existed = loggerMap.get(name);
                 if (existed == null) {
-                    var logger = new KeelLog4jLogger(this.adapterSupplier, visibleBaseLevel, name);
+                    var logger = new KeelLog4jLogger(this.adapterSupplier, visibleBaseLevel, name, issueRecordInitializer);
                     loggerMap.put(name, logger);
                     Keel.getLogger().notice("Keel Logging for log4j built logger for [" + name + "]");
                     return logger;

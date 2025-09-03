@@ -2,8 +2,10 @@ package io.github.sinri.keel.logger.issue.log4j;
 
 import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.logger.KeelLogLevel;
+import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.adapter.KeelIssueRecorderAdapter;
+import io.vertx.core.Handler;
 import org.apache.logging.log4j.spi.LoggerContextFactory;
 import org.apache.logging.log4j.spi.Provider;
 
@@ -33,7 +35,9 @@ public class KeelLog4jProvider extends Provider {
                 if (loggerContextFactory == null) {
                     loggerContextFactory = new KeelLog4jLoggerContextFactory(
                             getAdapterSupplier(),
-                            getVisibleBaseLevel());
+                            getVisibleBaseLevel(),
+                            getIssueRecordInitializer()
+                    );
                 }
             }
         }
@@ -76,5 +80,10 @@ public class KeelLog4jProvider extends Provider {
     @Nonnull
     protected Supplier<KeelIssueRecorderAdapter> getAdapterSupplier() {
         return () -> KeelIssueRecordCenter.outputCenter().getAdapter();
+    }
+
+    @Nullable
+    protected Handler<KeelEventLog> getIssueRecordInitializer() {
+        return null;
     }
 }

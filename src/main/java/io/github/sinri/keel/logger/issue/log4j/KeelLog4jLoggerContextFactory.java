@@ -2,11 +2,14 @@ package io.github.sinri.keel.logger.issue.log4j;
 
 import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.logger.KeelLogLevel;
+import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.recorder.adapter.KeelIssueRecorderAdapter;
+import io.vertx.core.Handler;
 import org.apache.logging.log4j.spi.LoggerContext;
 import org.apache.logging.log4j.spi.LoggerContextFactory;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.function.Supplier;
 
@@ -15,9 +18,12 @@ public final class KeelLog4jLoggerContextFactory implements LoggerContextFactory
 
     private final KeelLog4jLoggerContext loggerContext;
 
-    public KeelLog4jLoggerContextFactory(@Nonnull Supplier<KeelIssueRecorderAdapter> adapterSupplier,
-                                         @Nonnull KeelLogLevel visibleBaseLevel) {
-        this.loggerContext = new KeelLog4jLoggerContext(adapterSupplier, visibleBaseLevel);
+    public KeelLog4jLoggerContextFactory(
+            @Nonnull Supplier<KeelIssueRecorderAdapter> adapterSupplier,
+            @Nonnull KeelLogLevel visibleBaseLevel,
+            @Nullable Handler<KeelEventLog> issueRecordInitializer
+    ) {
+        this.loggerContext = new KeelLog4jLoggerContext(adapterSupplier, visibleBaseLevel, issueRecordInitializer);
     }
 
     @Override

@@ -1,12 +1,15 @@
 package io.github.sinri.keel.logger.issue.slf4j;
 
 import io.github.sinri.keel.core.TechnicalPreview;
+import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.recorder.adapter.KeelIssueRecorderAdapter;
+import io.vertx.core.Handler;
 import org.slf4j.IMarkerFactory;
 import org.slf4j.spi.MDCAdapter;
 import org.slf4j.spi.SLF4JServiceProvider;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
@@ -40,11 +43,11 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * </ul>
  *
  * @author Sinri Edogawa
- * @since 4.1.1
  * @see SLF4JServiceProvider
  * @see KeelLoggerFactory
  * @see KeelSlf4jLogger
  * @see KeelIssueRecorderAdapter
+ * @since 4.1.1
  */
 @TechnicalPreview(since = "4.1.1")
 public abstract class KeelSLF4JServiceProvider implements SLF4JServiceProvider {
@@ -122,7 +125,7 @@ public abstract class KeelSLF4JServiceProvider implements SLF4JServiceProvider {
      */
     @Override
     public final void initialize() {
-        loggerFactory = new KeelLoggerFactory(getAdapterSupplier());
+        loggerFactory = new KeelLoggerFactory(getAdapterSupplier(), getIssueRecordInitializer());
     }
 
     /**
@@ -143,4 +146,8 @@ public abstract class KeelSLF4JServiceProvider implements SLF4JServiceProvider {
         return () -> Keel.getLogger().issueRecordCenter().getAdapter();
     }
 
+    @Nullable
+    protected Handler<KeelEventLog> getIssueRecordInitializer() {
+        return null;
+    }
 }

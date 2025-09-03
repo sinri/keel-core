@@ -10,6 +10,7 @@ import org.slf4j.Marker;
 import org.slf4j.helpers.MessageFormatter;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -27,39 +28,44 @@ public class KeelSlf4jLogger implements Logger {
      */
     @Nonnull
     private final Supplier<KeelIssueRecorderAdapter> adapterSupplier;
-    
+
     /**
      * The topic/name of this logger instance, typically representing the class or component being logged.
      */
     @Nonnull
     private final String topic;
-    
+
     /**
      * The minimum log level that will be processed by this logger.
      * Log events below this level will be filtered out.
      */
     @Nonnull
     private final KeelLogLevel visibleBaseLevel;
+    @Nullable
+    private final Handler<KeelEventLog> issueRecordInitializer;
 
     /**
      * Constructs a new KeelSlf4jLogger instance.
-     * 
-     * @param adapterSupplier supplier for obtaining the issue recorder adapter
+     *
+     * @param adapterSupplier  supplier for obtaining the issue recorder adapter
      * @param visibleBaseLevel the minimum log level that will be processed
-     * @param topic the name/topic of this logger instance
+     * @param topic            the name/topic of this logger instance
      */
     KeelSlf4jLogger(
             @Nonnull Supplier<KeelIssueRecorderAdapter> adapterSupplier,
             @Nonnull KeelLogLevel visibleBaseLevel,
-            @Nonnull String topic) {
+            @Nonnull String topic,
+            @Nullable Handler<KeelEventLog> issueRecordInitializer
+    ) {
         this.adapterSupplier = adapterSupplier;
         this.topic = topic;
         this.visibleBaseLevel = visibleBaseLevel;
+        this.issueRecordInitializer = issueRecordInitializer;
     }
 
     /**
      * Returns the name of this logger instance.
-     * 
+     *
      * @return the logger name/topic
      */
     @Override
@@ -69,12 +75,20 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Gets the minimum log level that will be processed by this logger.
-     * 
+     *
      * @return the visible base log level
      */
     @Nonnull
     protected KeelLogLevel getVisibleBaseLevel() {
         return visibleBaseLevel;
+    }
+
+    private KeelEventLog createIssueRecordTemplate() {
+        var x = new KeelEventLog();
+        if (this.issueRecordInitializer != null) {
+            this.issueRecordInitializer.handle(x);
+        }
+        return x;
     }
 
     /**
@@ -84,7 +98,7 @@ public class KeelSlf4jLogger implements Logger {
      * @param issueHandler the handler to modify the base issue.
      */
     protected void record(@Nonnull Handler<KeelEventLog> issueHandler) {
-        KeelEventLog issue = new KeelEventLog();
+        KeelEventLog issue = createIssueRecordTemplate();
         issueHandler.handle(issue);
         KeelIssueRecorderAdapter adapter = adapterSupplier.get();
         if (adapter != null) {
@@ -95,7 +109,7 @@ public class KeelSlf4jLogger implements Logger {
     /**
      * Checks if TRACE level logging is enabled.
      * TRACE level is not supported in the Keel logger system.
-     * 
+     *
      * @return always false, as TRACE level is not supported
      */
     @Override
@@ -107,7 +121,7 @@ public class KeelSlf4jLogger implements Logger {
     /**
      * Logs a message at TRACE level.
      * TRACE level is not supported in the Keel logger system, so this method does nothing.
-     * 
+     *
      * @param msg the message to log (ignored)
      */
     @Override
@@ -118,9 +132,9 @@ public class KeelSlf4jLogger implements Logger {
     /**
      * Logs a formatted message at TRACE level.
      * TRACE level is not supported in the Keel logger system, so this method does nothing.
-     * 
+     *
      * @param format the format string (ignored)
-     * @param arg the argument (ignored)
+     * @param arg    the argument (ignored)
      */
     @Override
     public void trace(String format, Object arg) {
@@ -130,10 +144,10 @@ public class KeelSlf4jLogger implements Logger {
     /**
      * Logs a formatted message at TRACE level.
      * TRACE level is not supported in the Keel logger system, so this method does nothing.
-     * 
+     *
      * @param format the format string (ignored)
-     * @param arg1 the first argument (ignored)
-     * @param arg2 the second argument (ignored)
+     * @param arg1   the first argument (ignored)
+     * @param arg2   the second argument (ignored)
      */
     @Override
     public void trace(String format, Object arg1, Object arg2) {
@@ -143,8 +157,8 @@ public class KeelSlf4jLogger implements Logger {
     /**
      * Logs a formatted message at TRACE level.
      * TRACE level is not supported in the Keel logger system, so this method does nothing.
-     * 
-     * @param format the format string (ignored)
+     *
+     * @param format    the format string (ignored)
      * @param arguments the arguments (ignored)
      */
     @Override
@@ -155,9 +169,9 @@ public class KeelSlf4jLogger implements Logger {
     /**
      * Logs a message with an exception at TRACE level.
      * TRACE level is not supported in the Keel logger system, so this method does nothing.
-     * 
+     *
      * @param msg the message to log (ignored)
-     * @param t the exception (ignored)
+     * @param t   the exception (ignored)
      */
     @Override
     public void trace(String msg, Throwable t) {
@@ -167,7 +181,7 @@ public class KeelSlf4jLogger implements Logger {
     /**
      * Checks if TRACE level logging is enabled for the given marker.
      * TRACE level is not supported in the Keel logger system.
-     * 
+     *
      * @param marker the marker (ignored)
      * @return always false, as TRACE level is not supported
      */
@@ -179,9 +193,9 @@ public class KeelSlf4jLogger implements Logger {
     /**
      * Logs a message with marker at TRACE level.
      * TRACE level is not supported in the Keel logger system, so this method does nothing.
-     * 
+     *
      * @param marker the marker (ignored)
-     * @param msg the message to log (ignored)
+     * @param msg    the message to log (ignored)
      */
     @Override
     public void trace(Marker marker, String msg) {
@@ -191,10 +205,10 @@ public class KeelSlf4jLogger implements Logger {
     /**
      * Logs a formatted message with marker at TRACE level.
      * TRACE level is not supported in the Keel logger system, so this method does nothing.
-     * 
+     *
      * @param marker the marker (ignored)
      * @param format the format string (ignored)
-     * @param arg the argument (ignored)
+     * @param arg    the argument (ignored)
      */
     @Override
     public void trace(Marker marker, String format, Object arg) {
@@ -204,11 +218,11 @@ public class KeelSlf4jLogger implements Logger {
     /**
      * Logs a formatted message with marker at TRACE level.
      * TRACE level is not supported in the Keel logger system, so this method does nothing.
-     * 
+     *
      * @param marker the marker (ignored)
      * @param format the format string (ignored)
-     * @param arg1 the first argument (ignored)
-     * @param arg2 the second argument (ignored)
+     * @param arg1   the first argument (ignored)
+     * @param arg2   the second argument (ignored)
      */
     @Override
     public void trace(Marker marker, String format, Object arg1, Object arg2) {
@@ -218,9 +232,9 @@ public class KeelSlf4jLogger implements Logger {
     /**
      * Logs a formatted message with marker at TRACE level.
      * TRACE level is not supported in the Keel logger system, so this method does nothing.
-     * 
-     * @param marker the marker (ignored)
-     * @param format the format string (ignored)
+     *
+     * @param marker   the marker (ignored)
+     * @param format   the format string (ignored)
      * @param argArray the arguments (ignored)
      */
     @Override
@@ -231,10 +245,10 @@ public class KeelSlf4jLogger implements Logger {
     /**
      * Logs a message with marker and exception at TRACE level.
      * TRACE level is not supported in the Keel logger system, so this method does nothing.
-     * 
+     *
      * @param marker the marker (ignored)
-     * @param msg the message to log (ignored)
-     * @param t the exception (ignored)
+     * @param msg    the message to log (ignored)
+     * @param t      the exception (ignored)
      */
     @Override
     public void trace(Marker marker, String msg, Throwable t) {
@@ -243,7 +257,7 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Checks if DEBUG level logging is enabled.
-     * 
+     *
      * @return true if DEBUG level is enabled based on the visible base level
      */
     @Override
@@ -253,7 +267,7 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a message at DEBUG level.
-     * 
+     *
      * @param msg the message to log
      */
     @Override
@@ -266,9 +280,9 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message at DEBUG level.
-     * 
+     *
      * @param format the format string
-     * @param arg the argument to be formatted
+     * @param arg    the argument to be formatted
      */
     @Override
     public void debug(String format, Object arg) {
@@ -280,10 +294,10 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message at DEBUG level.
-     * 
+     *
      * @param format the format string
-     * @param arg1 the first argument to be formatted
-     * @param arg2 the second argument to be formatted
+     * @param arg1   the first argument to be formatted
+     * @param arg2   the second argument to be formatted
      */
     @Override
     public void debug(String format, Object arg1, Object arg2) {
@@ -295,8 +309,8 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message at DEBUG level.
-     * 
-     * @param format the format string
+     *
+     * @param format    the format string
      * @param arguments the arguments to be formatted
      */
     @Override
@@ -309,9 +323,9 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a message with an exception at DEBUG level.
-     * 
+     *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t   the exception to log
      */
     @Override
     public void debug(String msg, Throwable t) {
@@ -324,7 +338,7 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Checks if DEBUG level logging is enabled for the given marker.
-     * 
+     *
      * @param marker the marker (currently ignored in level determination)
      * @return true if DEBUG level is enabled based on the visible base level
      */
@@ -335,9 +349,9 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a message with marker at DEBUG level.
-     * 
+     *
      * @param marker the marker for classification
-     * @param msg the message to log
+     * @param msg    the message to log
      */
     @Override
     public void debug(Marker marker, String msg) {
@@ -350,10 +364,10 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message with marker at DEBUG level.
-     * 
+     *
      * @param marker the marker for classification
      * @param format the format string
-     * @param arg the argument to be formatted
+     * @param arg    the argument to be formatted
      */
     @Override
     public void debug(Marker marker, String format, Object arg) {
@@ -366,11 +380,11 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message with marker at DEBUG level.
-     * 
+     *
      * @param marker the marker for classification
      * @param format the format string
-     * @param arg1 the first argument to be formatted
-     * @param arg2 the second argument to be formatted
+     * @param arg1   the first argument to be formatted
+     * @param arg2   the second argument to be formatted
      */
     @Override
     public void debug(Marker marker, String format, Object arg1, Object arg2) {
@@ -383,9 +397,9 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message with marker at DEBUG level.
-     * 
-     * @param marker the marker for classification
-     * @param format the format string
+     *
+     * @param marker    the marker for classification
+     * @param format    the format string
      * @param arguments the arguments to be formatted
      */
     @Override
@@ -399,10 +413,10 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a message with marker and exception at DEBUG level.
-     * 
+     *
      * @param marker the marker for classification
-     * @param msg the message to log
-     * @param t the exception to log
+     * @param msg    the message to log
+     * @param t      the exception to log
      */
     @Override
     public void debug(Marker marker, String msg, Throwable t) {
@@ -417,7 +431,7 @@ public class KeelSlf4jLogger implements Logger {
     /**
      * Transforms an SLF4J Marker into a list of classification strings.
      * The marker name and all referenced marker names are included in the classification.
-     * 
+     *
      * @param marker the SLF4J marker to transform, may be null
      * @return a list of classification strings, empty if marker is null
      */
@@ -436,7 +450,7 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Checks if INFO level logging is enabled.
-     * 
+     *
      * @return true if INFO level is enabled based on the visible base level
      */
     @Override
@@ -446,7 +460,7 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a message at INFO level.
-     * 
+     *
      * @param msg the message to log
      */
     @Override
@@ -459,9 +473,9 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message at INFO level.
-     * 
+     *
      * @param format the format string
-     * @param arg the argument to be formatted
+     * @param arg    the argument to be formatted
      */
     @Override
     public void info(String format, Object arg) {
@@ -473,10 +487,10 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message at INFO level.
-     * 
+     *
      * @param format the format string
-     * @param arg1 the first argument to be formatted
-     * @param arg2 the second argument to be formatted
+     * @param arg1   the first argument to be formatted
+     * @param arg2   the second argument to be formatted
      */
     @Override
     public void info(String format, Object arg1, Object arg2) {
@@ -488,8 +502,8 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message at INFO level.
-     * 
-     * @param format the format string
+     *
+     * @param format    the format string
      * @param arguments the arguments to be formatted
      */
     @Override
@@ -502,9 +516,9 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a message with an exception at INFO level.
-     * 
+     *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t   the exception to log
      */
     @Override
     public void info(String msg, Throwable t) {
@@ -517,7 +531,7 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Checks if INFO level logging is enabled for the given marker.
-     * 
+     *
      * @param marker the marker (currently ignored in level determination)
      * @return true if INFO level is enabled based on the visible base level
      */
@@ -528,9 +542,9 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a message with marker at INFO level.
-     * 
+     *
      * @param marker the marker for classification
-     * @param msg the message to log
+     * @param msg    the message to log
      */
     @Override
     public void info(Marker marker, String msg) {
@@ -543,10 +557,10 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message with marker at INFO level.
-     * 
+     *
      * @param marker the marker for classification
      * @param format the format string
-     * @param arg the argument to be formatted
+     * @param arg    the argument to be formatted
      */
     @Override
     public void info(Marker marker, String format, Object arg) {
@@ -559,11 +573,11 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message with marker at INFO level.
-     * 
+     *
      * @param marker the marker for classification
      * @param format the format string
-     * @param arg1 the first argument to be formatted
-     * @param arg2 the second argument to be formatted
+     * @param arg1   the first argument to be formatted
+     * @param arg2   the second argument to be formatted
      */
     @Override
     public void info(Marker marker, String format, Object arg1, Object arg2) {
@@ -576,9 +590,9 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message with marker at INFO level.
-     * 
-     * @param marker the marker for classification
-     * @param format the format string
+     *
+     * @param marker    the marker for classification
+     * @param format    the format string
      * @param arguments the arguments to be formatted
      */
     @Override
@@ -592,10 +606,10 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a message with marker and exception at INFO level.
-     * 
+     *
      * @param marker the marker for classification
-     * @param msg the message to log
-     * @param t the exception to log
+     * @param msg    the message to log
+     * @param t      the exception to log
      */
     @Override
     public void info(Marker marker, String msg, Throwable t) {
@@ -609,7 +623,7 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Checks if WARN level logging is enabled.
-     * 
+     *
      * @return true if WARN level is enabled based on the visible base level
      */
     @Override
@@ -619,7 +633,7 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a message at WARN level.
-     * 
+     *
      * @param msg the message to log
      */
     @Override
@@ -632,9 +646,9 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message at WARN level.
-     * 
+     *
      * @param format the format string
-     * @param arg the argument to be formatted
+     * @param arg    the argument to be formatted
      */
     @Override
     public void warn(String format, Object arg) {
@@ -646,8 +660,8 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message at WARN level.
-     * 
-     * @param format the format string
+     *
+     * @param format    the format string
      * @param arguments the arguments to be formatted
      */
     @Override
@@ -660,10 +674,10 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message at WARN level.
-     * 
+     *
      * @param format the format string
-     * @param arg1 the first argument to be formatted
-     * @param arg2 the second argument to be formatted
+     * @param arg1   the first argument to be formatted
+     * @param arg2   the second argument to be formatted
      */
     @Override
     public void warn(String format, Object arg1, Object arg2) {
@@ -675,9 +689,9 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a message with an exception at WARN level.
-     * 
+     *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t   the exception to log
      */
     @Override
     public void warn(String msg, Throwable t) {
@@ -690,7 +704,7 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Checks if WARN level logging is enabled for the given marker.
-     * 
+     *
      * @param marker the marker (currently ignored in level determination)
      * @return true if WARN level is enabled based on the visible base level
      */
@@ -701,9 +715,9 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a message with marker at WARN level.
-     * 
+     *
      * @param marker the marker for classification
-     * @param msg the message to log
+     * @param msg    the message to log
      */
     @Override
     public void warn(Marker marker, String msg) {
@@ -716,10 +730,10 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message with marker at WARN level.
-     * 
+     *
      * @param marker the marker for classification
      * @param format the format string
-     * @param arg the argument to be formatted
+     * @param arg    the argument to be formatted
      */
     @Override
     public void warn(Marker marker, String format, Object arg) {
@@ -732,11 +746,11 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message with marker at WARN level.
-     * 
+     *
      * @param marker the marker for classification
      * @param format the format string
-     * @param arg1 the first argument to be formatted
-     * @param arg2 the second argument to be formatted
+     * @param arg1   the first argument to be formatted
+     * @param arg2   the second argument to be formatted
      */
     @Override
     public void warn(Marker marker, String format, Object arg1, Object arg2) {
@@ -749,9 +763,9 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message with marker at WARN level.
-     * 
-     * @param marker the marker for classification
-     * @param format the format string
+     *
+     * @param marker    the marker for classification
+     * @param format    the format string
      * @param arguments the arguments to be formatted
      */
     @Override
@@ -765,10 +779,10 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a message with marker and exception at WARN level.
-     * 
+     *
      * @param marker the marker for classification
-     * @param msg the message to log
-     * @param t the exception to log
+     * @param msg    the message to log
+     * @param t      the exception to log
      */
     @Override
     public void warn(Marker marker, String msg, Throwable t) {
@@ -782,7 +796,7 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Checks if ERROR level logging is enabled.
-     * 
+     *
      * @return true if ERROR level is enabled based on the visible base level
      */
     @Override
@@ -792,7 +806,7 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a message at ERROR level.
-     * 
+     *
      * @param msg the message to log
      */
     @Override
@@ -805,9 +819,9 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message at ERROR level.
-     * 
+     *
      * @param format the format string
-     * @param arg the argument to be formatted
+     * @param arg    the argument to be formatted
      */
     @Override
     public void error(String format, Object arg) {
@@ -819,10 +833,10 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message at ERROR level.
-     * 
+     *
      * @param format the format string
-     * @param arg1 the first argument to be formatted
-     * @param arg2 the second argument to be formatted
+     * @param arg1   the first argument to be formatted
+     * @param arg2   the second argument to be formatted
      */
     @Override
     public void error(String format, Object arg1, Object arg2) {
@@ -834,8 +848,8 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message at ERROR level.
-     * 
-     * @param format the format string
+     *
+     * @param format    the format string
      * @param arguments the arguments to be formatted
      */
     @Override
@@ -848,9 +862,9 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a message with an exception at ERROR level.
-     * 
+     *
      * @param msg the message to log
-     * @param t the exception to log
+     * @param t   the exception to log
      */
     @Override
     public void error(String msg, Throwable t) {
@@ -863,7 +877,7 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Checks if ERROR level logging is enabled for the given marker.
-     * 
+     *
      * @param marker the marker (currently ignored in level determination)
      * @return true if ERROR level is enabled based on the visible base level
      */
@@ -874,9 +888,9 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a message with marker at ERROR level.
-     * 
+     *
      * @param marker the marker for classification
-     * @param msg the message to log
+     * @param msg    the message to log
      */
     @Override
     public void error(Marker marker, String msg) {
@@ -889,10 +903,10 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message with marker at ERROR level.
-     * 
+     *
      * @param marker the marker for classification
      * @param format the format string
-     * @param arg the argument to be formatted
+     * @param arg    the argument to be formatted
      */
     @Override
     public void error(Marker marker, String format, Object arg) {
@@ -905,11 +919,11 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message with marker at ERROR level.
-     * 
+     *
      * @param marker the marker for classification
      * @param format the format string
-     * @param arg1 the first argument to be formatted
-     * @param arg2 the second argument to be formatted
+     * @param arg1   the first argument to be formatted
+     * @param arg2   the second argument to be formatted
      */
     @Override
     public void error(Marker marker, String format, Object arg1, Object arg2) {
@@ -922,9 +936,9 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a formatted message with marker at ERROR level.
-     * 
-     * @param marker the marker for classification
-     * @param format the format string
+     *
+     * @param marker    the marker for classification
+     * @param format    the format string
      * @param arguments the arguments to be formatted
      */
     @Override
@@ -938,10 +952,10 @@ public class KeelSlf4jLogger implements Logger {
 
     /**
      * Logs a message with marker and exception at ERROR level.
-     * 
+     *
      * @param marker the marker for classification
-     * @param msg the message to log
-     * @param t the exception to log
+     * @param msg    the message to log
+     * @param t      the exception to log
      */
     @Override
     public void error(Marker marker, String msg, Throwable t) {

@@ -1,0 +1,1 @@
+package io.github.sinri.keel.logger.issue.log4j2;

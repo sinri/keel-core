@@ -24,7 +24,19 @@ import java.util.Objects;
  * @since 4.0.0 make it final and implement KeelAsyncMixin.
  */
 public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin, KeelWebRequestMixin {
-    public final static KeelInstance Keel = new KeelInstance();
+    public final static KeelInstance Keel;
+
+    static {
+        Keel = new KeelInstance();
+
+        // As of 4.1.3
+        String loggingProperty = System.getProperty("vertx.logger-delegate-factory-class-name");
+        if (loggingProperty == null) {
+            // 显式设置 Vert.x 日志提供者，避免自动探测失败导致 LoggerFactory 初始化异常
+            // 必须在任何 Vert.x 类被加载之前设置此属性
+            System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.JULLogDelegateFactory");
+        }
+    }
 
     /**
      * @since 3.2.3

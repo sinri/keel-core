@@ -7,8 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.helpers.MessageFormatter;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @ExtendWith(VertxExtension.class)
 class KeelSlf4jLoggerTest extends KeelJUnit5Test {
 
@@ -19,6 +17,8 @@ class KeelSlf4jLoggerTest extends KeelJUnit5Test {
     @Test
     void test1(){
         String s = MessageFormatter.arrayFormat("Hello {}", new Object[]{"World"}).getMessage();
-        getUnitTestLogger().info(s);
+        getUnitTestLogger().info(s, ctx -> {
+            ctx.put("a", "b");
+        });
     }
 }

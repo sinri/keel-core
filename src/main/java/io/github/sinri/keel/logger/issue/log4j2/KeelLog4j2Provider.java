@@ -1,4 +1,4 @@
-package io.github.sinri.keel.logger.issue.log4j;
+package io.github.sinri.keel.logger.issue.log4j2;
 
 import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.logger.KeelLogLevel;
@@ -14,16 +14,16 @@ import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 @TechnicalPreview(since = "4.1.3")
-public class KeelLog4jProvider extends Provider {
+public class KeelLog4j2Provider extends Provider {
     public static final int DEFAULT_PRIORITY = 50;
     public static final String DEFAULT_VERSIONS = "2.x";
-    private volatile KeelLog4jLoggerContextFactory loggerContextFactory;
+    private volatile KeelLog4j2LoggerContextFactory loggerContextFactory;
 
-    public KeelLog4jProvider() {
+    public KeelLog4j2Provider() {
         this(DEFAULT_PRIORITY, DEFAULT_VERSIONS);
     }
 
-    protected KeelLog4jProvider(int priority, String versions) {
+    protected KeelLog4j2Provider(int priority, String versions) {
         super(priority, versions);
     }
 
@@ -33,7 +33,7 @@ public class KeelLog4jProvider extends Provider {
         if (loggerContextFactory == null) {
             synchronized (this) {
                 if (loggerContextFactory == null) {
-                    loggerContextFactory = new KeelLog4jLoggerContextFactory(
+                    loggerContextFactory = new KeelLog4j2LoggerContextFactory(
                             getAdapterSupplier(),
                             getVisibleBaseLevel(),
                             getIssueRecordInitializer()
@@ -48,7 +48,7 @@ public class KeelLog4jProvider extends Provider {
     public @Nullable Class<? extends LoggerContextFactory> loadLoggerContextFactory() {
         // 按照 Log4j SPI 的设计原意，此方法只负责返回工厂类型
         // 实际的实例化工作由 getLoggerContextFactory() 负责
-        return KeelLog4jLoggerContextFactory.class;
+        return KeelLog4j2LoggerContextFactory.class;
     }
 
     /**

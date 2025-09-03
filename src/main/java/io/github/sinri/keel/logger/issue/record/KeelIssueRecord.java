@@ -124,19 +124,26 @@ public abstract class KeelIssueRecord<T> implements IssueRecordMessageMixin<T>, 
         return getImplementation();
     }
 
+    @Nonnull
+    private JsonObject ensureContextAttribute() {
+        if (this.attributes.containsKey(AttributeContext)) {
+            return this.attributes.getJsonObject(AttributeContext);
+        }
+
+        synchronized (this.attributes) {
+            if (this.attributes.containsKey(AttributeContext)) {
+                return this.attributes.getJsonObject(AttributeContext);
+            }
+
+            JsonObject j = new JsonObject();
+            this.attribute(AttributeContext, j);
+            return j;
+        }
+    }
+
     @Override
     public T context(@Nonnull Handler<JsonObject> contextHandler) {
-        JsonObject j = this.attributes.getJsonObject(AttributeContext);
-        if (j == null) {
-            synchronized (this.attributes) {
-                j = this.attributes.getJsonObject(AttributeContext);
-                if (j == null) {
-                    j = new JsonObject();
-                    this.attribute(AttributeContext, j);
-                }
-            }
-        }
-        contextHandler.handle(j);
+        contextHandler.handle(ensureContextAttribute());
         return this.getImplementation();
     }
 

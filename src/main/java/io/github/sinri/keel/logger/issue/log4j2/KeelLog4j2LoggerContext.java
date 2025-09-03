@@ -1,4 +1,4 @@
-package io.github.sinri.keel.logger.issue.log4j;
+package io.github.sinri.keel.logger.issue.log4j2;
 
 import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.logger.KeelLogLevel;
@@ -18,8 +18,8 @@ import java.util.function.Supplier;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 @TechnicalPreview(since = "4.1.3")
-public final class KeelLog4jLoggerContext implements LoggerContext {
-    private final Map<String, KeelLog4jLogger> loggerMap;
+public final class KeelLog4j2LoggerContext implements LoggerContext {
+    private final Map<String, KeelLog4j2Logger> loggerMap;
     @Nonnull
     private final Supplier<KeelIssueRecorderAdapter> adapterSupplier;
     @Nonnull
@@ -27,7 +27,7 @@ public final class KeelLog4jLoggerContext implements LoggerContext {
     @Nullable
     private final Handler<KeelEventLog> issueRecordInitializer;
 
-    public KeelLog4jLoggerContext(
+    public KeelLog4j2LoggerContext(
             @Nonnull Supplier<KeelIssueRecorderAdapter> adapterSupplier,
             @Nonnull KeelLogLevel visibleBaseLevel,
             @Nullable Handler<KeelEventLog> issueRecordInitializer
@@ -49,9 +49,9 @@ public final class KeelLog4jLoggerContext implements LoggerContext {
             return loggerMap.get(name);
         } else {
             synchronized (loggerMap) {
-                KeelLog4jLogger existed = loggerMap.get(name);
+                KeelLog4j2Logger existed = loggerMap.get(name);
                 if (existed == null) {
-                    var logger = new KeelLog4jLogger(this.adapterSupplier, visibleBaseLevel, name, issueRecordInitializer);
+                    var logger = new KeelLog4j2Logger(this.adapterSupplier, visibleBaseLevel, name, issueRecordInitializer);
                     loggerMap.put(name, logger);
                     Keel.getLogger().notice("Keel Logging for log4j built logger for [" + name + "]");
                     return logger;

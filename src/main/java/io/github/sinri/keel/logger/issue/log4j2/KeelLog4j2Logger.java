@@ -1,4 +1,4 @@
-package io.github.sinri.keel.logger.issue.log4j;
+package io.github.sinri.keel.logger.issue.log4j2;
 
 import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.logger.KeelLogLevel;
@@ -16,14 +16,14 @@ import javax.annotation.Nullable;
 import java.util.function.Supplier;
 
 @TechnicalPreview(since = "4.1.3")
-public final class KeelLog4jLogger extends AbstractLogger {
+public final class KeelLog4j2Logger extends AbstractLogger {
     private final Supplier<KeelIssueRecorderAdapter> adapterSupplier;
     private final String topic;
     private final KeelLogLevel visibleBaseLevel;
     @Nullable
     private final Handler<KeelEventLog> issueRecordInitializer;
 
-    public KeelLog4jLogger(
+    public KeelLog4j2Logger(
             @Nonnull Supplier<KeelIssueRecorderAdapter> adapterSupplier,
             @Nonnull KeelLogLevel visibleBaseLevel,
             @Nonnull String topic,

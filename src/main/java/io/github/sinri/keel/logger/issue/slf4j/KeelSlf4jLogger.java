@@ -21,7 +21,7 @@ import java.util.function.Supplier;
  * @since 4.1.1
  */
 @TechnicalPreview(since = "4.1.1")
-public class KeelSlf4jLogger implements Logger {
+public final class KeelSlf4jLogger implements Logger {
     /**
      * Supplier for obtaining the issue recorder adapter used to handle log events.
      * This allows for lazy initialization and dynamic adapter switching.
@@ -79,7 +79,7 @@ public class KeelSlf4jLogger implements Logger {
      * @return the visible base log level
      */
     @Nonnull
-    protected KeelLogLevel getVisibleBaseLevel() {
+    private KeelLogLevel getVisibleBaseLevel() {
         return visibleBaseLevel;
     }
 
@@ -97,12 +97,15 @@ public class KeelSlf4jLogger implements Logger {
      *
      * @param issueHandler the handler to modify the base issue.
      */
-    protected void record(@Nonnull Handler<KeelEventLog> issueHandler) {
+    private void record(@Nonnull Handler<KeelEventLog> issueHandler) {
         KeelEventLog issue = createIssueRecordTemplate();
         issueHandler.handle(issue);
-        KeelIssueRecorderAdapter adapter = adapterSupplier.get();
-        if (adapter != null) {
-            adapter.record(getName(), issue);
+
+        if (issue.level().isEnoughSeriousAs(getVisibleBaseLevel())) {
+            KeelIssueRecorderAdapter adapter = adapterSupplier.get();
+            if (adapter != null) {
+                adapter.record(getName(), issue);
+            }
         }
     }
 

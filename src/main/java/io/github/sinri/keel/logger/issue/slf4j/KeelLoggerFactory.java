@@ -44,7 +44,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 4.1.1
  */
 @TechnicalPreview(since = "4.1.1")
-public class KeelLoggerFactory implements ILoggerFactory {
+public final class KeelLoggerFactory implements ILoggerFactory {
 
     /**
      * Supplier for obtaining the {@link KeelIssueRecorderAdapter} instance used by created loggers.

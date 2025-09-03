@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
+
 @TechnicalPreview(since = "4.1.3")
 public final class KeelLog4jLoggerContext implements LoggerContext {
     private final Map<String, KeelLog4jLogger> loggerMap;
@@ -44,6 +46,7 @@ public final class KeelLog4jLoggerContext implements LoggerContext {
                 if (existed == null) {
                     var logger = new KeelLog4jLogger(this.adapterSupplier, visibleBaseLevel, name);
                     loggerMap.put(name, logger);
+                    Keel.getLogger().notice("Keel Logging for log4j built logger for [" + name + "]");
                     return logger;
                 } else {
                     return existed;

@@ -149,7 +149,7 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
      */
     private void resetLogger() {
         this.logger = this.issueRecordCenter.generateIssueRecorder("Keel", KeelEventLog::new);
-        this.logger.setVisibleLevel(KeelLogLevel.WARNING);
+        this.logger.setVisibleLevel(KeelLogLevel.NOTICE);
     }
 
     public Future<Void> gracefullyClose(@Nonnull io.vertx.core.Handler<Promise<Void>> promiseHandler) {

@@ -102,7 +102,7 @@ public class KeelLoggerFactory implements ILoggerFactory {
         } catch (NotCached e) {
             synchronized (adapterSupplier) {
                 var logger = new KeelSlf4jLogger(this.adapterSupplier, KeelLogLevel.INFO, name);
-                Keel.getLogger().info("Keel Logging for slf4j built logger for [" + name + "]");
+                Keel.getLogger().notice("Keel Logging for slf4j built logger for [" + name + "]");
                 loggerCache.save(name, logger);
                 return logger;
             }

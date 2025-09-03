@@ -161,7 +161,15 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
      */
     private void resetLogger() {
         this.logger = this.issueRecordCenter.generateIssueRecorder("Keel", KeelEventLog::new);
-        this.logger.setVisibleLevel(KeelLogLevel.NOTICE);
+
+        String level = System.getProperty("keel.default-logger-level", "WARNING");
+        KeelLogLevel keelLogLevel;
+        try {
+            keelLogLevel = KeelLogLevel.valueOf(level);
+        } catch (IllegalArgumentException e) {
+            keelLogLevel = KeelLogLevel.WARNING;
+        }
+        this.logger.setVisibleLevel(keelLogLevel);
     }
 
     public Future<Void> gracefullyClose(@Nonnull io.vertx.core.Handler<Promise<Void>> promiseHandler) {

@@ -2,6 +2,7 @@ package io.github.sinri.keel.logger.issue.record;
 
 import io.github.sinri.keel.core.json.UnmodifiableJsonifiableEntity;
 import io.github.sinri.keel.logger.KeelLogLevel;
+import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
@@ -124,8 +125,18 @@ public abstract class KeelIssueRecord<T> implements IssueRecordMessageMixin<T>, 
     }
 
     @Override
-    public T context(@Nonnull JsonObject context) {
-        this.attribute(AttributeContext, context);
+    public T context(@Nonnull Handler<JsonObject> contextHandler) {
+        JsonObject j = this.attributes.getJsonObject(AttributeContext);
+        if (j == null) {
+            synchronized (this.attributes) {
+                j = this.attributes.getJsonObject(AttributeContext);
+                if (j == null) {
+                    j = new JsonObject();
+                    this.attribute(AttributeContext, j);
+                }
+            }
+        }
+        contextHandler.handle(j);
         return this.getImplementation();
     }
 

@@ -4,9 +4,7 @@ import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
 import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
-import io.vertx.core.Closeable;
-import io.vertx.core.Completable;
-import io.vertx.core.Future;
+import io.vertx.core.*;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
@@ -121,5 +119,22 @@ abstract public class KeelHttpServer extends KeelVerticleImpl implements Closeab
                       completion.fail(ar.cause());
                   }
               });
+    }
+
+
+    /**
+     * Deploys the current verticle with an appropriate threading model configuration.
+     * If virtual threads are available, the deployment options will be set to use the virtual threading model.
+     *
+     * @return a {@link Future} that completes with the deployment ID if the deployment is successful,
+     *         or fails with an exception if the deployment fails.
+     * @since 4.1.3
+     */
+    public Future<String> deployMe() {
+        DeploymentOptions deploymentOptions = new DeploymentOptions();
+        if (Keel.reflectionHelper().isVirtualThreadsAvailable()) {
+            deploymentOptions.setThreadingModel(ThreadingModel.VIRTUAL_THREAD);
+        }
+        return super.deployMe(deploymentOptions);
     }
 }

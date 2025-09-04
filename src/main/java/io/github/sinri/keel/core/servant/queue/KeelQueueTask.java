@@ -3,9 +3,13 @@ package io.github.sinri.keel.core.servant.queue;
 import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.ThreadingModel;
 
 import javax.annotation.Nonnull;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 2.1
@@ -45,6 +49,10 @@ public abstract class KeelQueueTask extends KeelVerticleImpl {
         return queueTaskIssueRecorder;
     }
 
+    /**
+     * As of 4.1.3, if a worker thread is required, the threading model is set to WORKER;
+     * otherwise, the threading model is set to VIRTUAL_THREAD if possible.
+     */
     @Override
     protected Future<Void> startVerticle() {
         this.queueTaskIssueRecorder = buildQueueTaskIssueRecorder();
@@ -80,5 +88,35 @@ public abstract class KeelQueueTask extends KeelVerticleImpl {
 
     protected void notifyBeforeUndeploy() {
         getQueueTaskIssueRecorder().debug("KeelQueueTask.notifyBeforeUndeploy");
+    }
+
+    /**
+     * Determines whether the current task requires execution on a worker thread.
+     *
+     * @return true if a worker thread is required for this task, false otherwise.
+     * @since 4.1.3
+     */
+    public boolean isWorkerThreadRequired() {
+        return true;
+    }
+
+    /**
+     * Deploys the current task with proper threading model based on the configuration.
+     * If a worker thread is required, the threading model is set to WORKER.
+     * If virtual threads are available and no worker thread is required, the threading model is set to VIRTUAL_THREAD.
+     * Delegates to the superclass deployMe method with configured DeploymentOptions.
+     *
+     * @return a future that completes with the deployment ID if the deployment is successful,
+     *         or fails with an exception if the deployment fails
+     * @since 4.1.3
+     */
+    public Future<String> deployMe() {
+        var deploymentOptions = new DeploymentOptions();
+        if (this.isWorkerThreadRequired()) {
+            deploymentOptions.setThreadingModel(ThreadingModel.WORKER);
+        } else if (Keel.reflectionHelper().isVirtualThreadsAvailable()) {
+            deploymentOptions.setThreadingModel(ThreadingModel.VIRTUAL_THREAD);
+        }
+        return super.deployMe(deploymentOptions);
     }
 }

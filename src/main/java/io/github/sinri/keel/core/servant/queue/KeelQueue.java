@@ -144,26 +144,26 @@ public abstract class KeelQueue extends KeelVerticleImpl
                                     .compose(task -> {
                                         if (task == null) {
                                             // 队列里已经空了，不必再找
-                                            getQueueManageIssueRecorder().debug(r -> r.message("No more task " +
-                                                    "todo"));
+                                            getQueueManageIssueRecorder().debug(r -> r
+                                                    .message("No more task todo"));
                                             // 通知 FutureUntil 结束
                                             routineResult.stop();
                                             return Future.succeededFuture();
                                         }
 
                                         // 队列里找出来一个task, deploy it (至于能不能跑起来有没有锁就不管了)
-                                        getQueueManageIssueRecorder().info(r -> r.message("To run task: " + task.getTaskReference()));
-                                        getQueueManageIssueRecorder().info(r -> r.message("Trusted that task " +
-                                                "is already locked " +
-                                                "by seeker: " + task.getTaskReference()));
+                                        getQueueManageIssueRecorder().info(r -> r
+                                                .message("To run task: " + task.getTaskReference()));
+                                        getQueueManageIssueRecorder().info(r -> r
+                                                .message("Trusted that task  is already locked by seeker: " + task.getTaskReference()));
 
                                         // since 3.0.9
                                         task.setQueueWorkerPoolManager(this.queueWorkerPoolManager);
 
                                         return Future.succeededFuture()
-                                                     .compose(v -> task.deployMe(new DeploymentOptions()
-                                                             .setThreadingModel(ThreadingModel.WORKER)
-                                                     ))
+                                                     .compose(v -> {
+                                                         return task.deployMe();
+                                                     })
                                                      .compose(
                                                              deploymentID -> {
                                                                  getQueueManageIssueRecorder().info(r -> r.message(
@@ -193,5 +193,16 @@ public abstract class KeelQueue extends KeelVerticleImpl
     public void stop(Promise<Void> stopPromise) {
         this.queueStatus = KeelQueueStatus.STOPPED;
         stopPromise.complete();
+    }
+
+    /**
+     * Deploys the current queue verticle on the worker threading model.
+     *
+     * @return a future that completes with the deployment ID if the deployment is successful,
+     *         or fails with an exception if the deployment fails
+     * @since 4.1.3
+     */
+    public final Future<String> deployMe() {
+        return super.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));
     }
 }

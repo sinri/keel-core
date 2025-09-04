@@ -70,13 +70,7 @@ public abstract class KeelSundial extends KeelVerticleImpl {
                         .context("plan_cron", plan.cronExpression().getRawCronExpression())
                         .context("now", parsedCalenderElements.toString())
                 );
-
-                // since 3.2.5
-                var deploymentOptions = new DeploymentOptions();
-                if (plan.isWorkerThreadRequired()) {
-                    deploymentOptions.setThreadingModel(ThreadingModel.WORKER);
-                }
-                new KeelSundialVerticle(plan, now, getSundialIssueRecorder()).deployMe(deploymentOptions);
+                new KeelSundialVerticle(plan, now, getSundialIssueRecorder()).deployMe();
             } else {
                 getSundialIssueRecorder().debug(x -> x
                         .message("Sundial Plan Not Match")
@@ -127,5 +121,17 @@ public abstract class KeelSundial extends KeelVerticleImpl {
             Keel.getVertx().cancelTimer(this.timerID);
         }
         stopPromise.complete();
+    }
+
+    /**
+     * Deploys the current verticle using a deployment option configured with a worker threading model.
+     *
+     * @return a future representing the result of the deployment. The future completes with the deployment ID if
+     *         the deployment is successful or fails with an exception if an error occurs during deployment.
+     * @since 4.1.3
+     */
+    public final Future<String> deployMe() {
+        return super.deployMe(new DeploymentOptions()
+                .setThreadingModel(ThreadingModel.WORKER));
     }
 }

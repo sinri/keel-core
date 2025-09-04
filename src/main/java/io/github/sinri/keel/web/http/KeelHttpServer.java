@@ -4,8 +4,9 @@ import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
 import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
+import io.vertx.core.Closeable;
+import io.vertx.core.Completable;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.JsonObject;
@@ -15,10 +16,9 @@ import javax.annotation.Nonnull;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
-abstract public class KeelHttpServer extends KeelVerticleImpl {
+abstract public class KeelHttpServer extends KeelVerticleImpl implements Closeable {
     public static final String CONFIG_HTTP_SERVER_PORT = "http_server_port";
     public static final String CONFIG_HTTP_SERVER_OPTIONS = "http_server_options";
-    public static final String CONFIG_IS_MAIN_SERVICE = "is_main_service";
     protected HttpServer server;
     private KeelIssueRecorder<KeelEventLog> httpServerLogger;
 
@@ -36,10 +36,6 @@ abstract public class KeelHttpServer extends KeelVerticleImpl {
         }
     }
 
-    protected boolean isMainService() {
-        return this.config().getBoolean(CONFIG_IS_MAIN_SERVICE, true);
-    }
-
     protected abstract void configureRoutes(Router router);
 
     /**
@@ -53,6 +49,20 @@ abstract public class KeelHttpServer extends KeelVerticleImpl {
      * @since 4.1.3
      */
     protected Future<Void> beforeStartServer() {
+        return Future.succeededFuture();
+    }
+
+    /**
+     * Executes tasks or cleanup operations after the HTTP server has shut down.
+     * This method is invoked to perform any necessary post-shutdown activities,
+     * such as releasing resources or logging the shutdown event.
+     *
+     * @return a {@link Future} that completes with {@code null} upon the successful
+     *         completion of all post-shutdown tasks, or fails with an exception if
+     *         an error occurs during the execution of these tasks.
+     * @since 4.1.3
+     */
+    protected Future<Void> afterShutdownServer() {
         return Future.succeededFuture();
     }
 
@@ -76,18 +86,7 @@ abstract public class KeelHttpServer extends KeelVerticleImpl {
                                      return Future.succeededFuture();
                                  }, throwable -> {
                                      getHttpServerLogger().exception(throwable, r -> r.message("Listen failed"));
-
-                                     return Future.succeededFuture()
-                                                  .compose(v -> {
-                                                      if (this.isMainService()) {
-                                                          return Keel.gracefullyClose(Promise::complete);
-                                                      } else {
-                                                          return Future.succeededFuture();
-                                                      }
-                                                  })
-                                                  .compose(v -> {
-                                                      return Future.failedFuture(throwable);
-                                                  });
+                                     return Future.failedFuture(throwable);
                                  });
                 });
     }
@@ -107,21 +106,19 @@ abstract public class KeelHttpServer extends KeelVerticleImpl {
         return httpServerLogger;
     }
 
-    public void terminate(Promise<Void> promise) {
-        server.close().andThen(ar -> {
+    @Override
+    public void close(Completable<Void> completion) {
+        server.close()
+              .andThen(ar -> {
                   if (ar.succeeded()) {
                       getHttpServerLogger().info(r -> r.message("HTTP Server Closed"));
-                      promise.complete();
+                      afterShutdownServer()
+                              .onComplete(completion);
                   } else {
                       getHttpServerLogger().exception(ar.cause(),
                               r -> r.message("HTTP Server Closing Failure: " + ar.cause()
                                                                                  .getMessage()));
-                      promise.fail(ar.cause());
-                  }
-              })
-              .andThen(ar -> {
-                  if (this.isMainService()) {
-                      Keel.gracefullyClose(Promise::complete);
+                      completion.fail(ar.cause());
                   }
               });
     }

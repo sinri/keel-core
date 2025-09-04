@@ -42,6 +42,20 @@ abstract public class KeelHttpServer extends KeelVerticleImpl {
 
     protected abstract void configureRoutes(Router router);
 
+    /**
+     * Executes tasks or setup logic that needs to be completed before the HTTP server starts.
+     * This method returns a future that signifies the completion of any preparatory operations
+     * required prior to initializing the server.
+     *
+     * @return a {@link Future} that completes with {@code null} upon successful completion of all pre-server-start
+     *         tasks,
+     *         or fails with an exception if any errors occur during the process.
+     * @since 4.1.3
+     */
+    protected Future<Void> beforeStartServer() {
+        return Future.succeededFuture();
+    }
+
     @Override
     protected Future<Void> startVerticle() {
         this.httpServerLogger = buildHttpServerIssueRecorder();
@@ -51,28 +65,31 @@ abstract public class KeelHttpServer extends KeelVerticleImpl {
         Router router = Router.router(Keel.getVertx());
         this.configureRoutes(router);
 
-        return server.requestHandler(router)
-                     .exceptionHandler(throwable -> getHttpServerLogger().exception(throwable, r -> r.message("KeelHttpServer Exception")))
-                     .listen()
-                     .compose(httpServer -> {
-                         int actualPort = httpServer.actualPort();
-                         getHttpServerLogger().info(r -> r.message("HTTP Server Established, Actual Port: " + actualPort));
-                         return Future.succeededFuture();
-                     }, throwable -> {
-                         getHttpServerLogger().exception(throwable, r -> r.message("Listen failed"));
+        return beforeStartServer()
+                .compose(v0 -> {
+                    return server.requestHandler(router)
+                                 .exceptionHandler(throwable -> getHttpServerLogger().exception(throwable, r -> r.message("KeelHttpServer Exception")))
+                                 .listen()
+                                 .compose(httpServer -> {
+                                     int actualPort = httpServer.actualPort();
+                                     getHttpServerLogger().info(r -> r.message("HTTP Server Established, Actual Port: " + actualPort));
+                                     return Future.succeededFuture();
+                                 }, throwable -> {
+                                     getHttpServerLogger().exception(throwable, r -> r.message("Listen failed"));
 
-                         return Future.succeededFuture()
-                                      .compose(v -> {
-                                          if (this.isMainService()) {
-                                              return Keel.gracefullyClose(Promise::complete);
-                                          } else {
-                                              return Future.succeededFuture();
-                                          }
-                                      })
-                                      .compose(v -> {
-                                          return Future.failedFuture(throwable);
-                                      });
-                     });
+                                     return Future.succeededFuture()
+                                                  .compose(v -> {
+                                                      if (this.isMainService()) {
+                                                          return Keel.gracefullyClose(Promise::complete);
+                                                      } else {
+                                                          return Future.succeededFuture();
+                                                      }
+                                                  })
+                                                  .compose(v -> {
+                                                      return Future.failedFuture(throwable);
+                                                  });
+                                 });
+                });
     }
 
     /**

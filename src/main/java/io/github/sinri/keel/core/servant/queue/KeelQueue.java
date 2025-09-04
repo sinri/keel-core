@@ -67,11 +67,26 @@ public abstract class KeelQueue extends KeelVerticleImpl
         return new QueueWorkerPoolManager(0);
     }
 
+    /**
+     * Callback method invoked before the queue starts its processing routine.
+     * This method can be overridden to define any preparatory logic or initialization
+     * steps required before the queue begins processing tasks.
+     *
+     * @return a Future that completes successfully when the preparatory logic is completed.
+     * @since 4.1.3
+     */
+    protected Future<Void> beforeQueueStart() {
+        return Future.succeededFuture();
+    }
+
     @Override
     protected Future<Void> startVerticle() {
         this.queueStatus = KeelQueueStatus.RUNNING;
-        routine();
-        return Future.succeededFuture();
+        return beforeQueueStart()
+                .compose(v -> {
+                    routine();
+                    return Future.succeededFuture();
+                });
     }
 
     protected final void routine() {

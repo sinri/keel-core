@@ -1,6 +1,7 @@
 package io.github.sinri.keel.facade.cli;
 
 import io.github.sinri.keel.core.TechnicalPreview;
+import io.github.sinri.keel.core.json.JsonifiableSerializer;
 import io.github.sinri.keel.core.json.JsonifiedThrowable;
 
 import javax.annotation.Nonnull;
@@ -18,6 +19,8 @@ public abstract class KeelCliProgram {
     abstract protected KeelCliArgsParser buildCliArgParser();
 
     public final void launch(String[] args) {
+        JsonifiableSerializer.register();
+
         try {
             var argsParser = buildCliArgParser();
             if (argsParser != null) {

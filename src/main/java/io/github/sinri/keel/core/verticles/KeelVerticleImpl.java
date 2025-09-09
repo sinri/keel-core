@@ -3,6 +3,7 @@ package io.github.sinri.keel.core.verticles;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.ThreadingModel;
 
 /**
  * An abstract implementation of the {@link KeelVerticle} interface, extending from {@link AbstractVerticle}.
@@ -23,6 +24,15 @@ import io.vertx.core.Promise;
  */
 public abstract class KeelVerticleImpl extends AbstractVerticle implements KeelVerticle {
 
+    /**
+     * Retrieves the threading model associated with the current context of the verticle.
+     *
+     * @return the threading model of the current context
+     * @since 4.1.3
+     */
+    public final ThreadingModel getContextThreadModal() {
+        return this.context.threadingModel();
+    }
 
     /**
      * This method is the entry point for the verticle's lifecycle. It is called by the Vert.x framework when the

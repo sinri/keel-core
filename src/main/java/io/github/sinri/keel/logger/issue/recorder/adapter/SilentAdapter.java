@@ -2,7 +2,7 @@ package io.github.sinri.keel.logger.issue.recorder.adapter;
 
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.github.sinri.keel.logger.issue.recorder.render.KeelIssueRecordRender;
-import io.vertx.core.Promise;
+import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -31,13 +31,8 @@ public final class SilentAdapter implements KeelIssueRecorderAdapter {
     }
 
     @Override
-    public void close(@Nonnull Promise<Void> promise) {
-        promise.complete();
-    }
-
-    @Override
-    public boolean isStopped() {
-        return false;
+    public Future<Void> gracefullyClose() {
+        return Future.succeededFuture();
     }
 
     @Override

@@ -5,7 +5,6 @@ import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.github.sinri.keel.logger.issue.recorder.render.KeelIssueRecordRender;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.ThreadingModel;
 
 import javax.annotation.Nonnull;
@@ -19,7 +18,6 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 public class AsyncStdoutAdapter implements KeelIssueRecorderAdapter {
     private static final AsyncStdoutAdapter instance = new AsyncStdoutAdapter();
     private final KeelIntravenous<WrappedIssueRecord> intravenous;
-    private volatile boolean stopped = false;
     private volatile boolean closed;
 
     private AsyncStdoutAdapter() {
@@ -51,16 +49,12 @@ public class AsyncStdoutAdapter implements KeelIssueRecorderAdapter {
     }
 
     @Override
-    public void close(@Nonnull Promise<Void> promise) {
-        this.stopped = true;
-        this.intravenous.shutdown();
-        promise.complete();
-        // todo add a watcher to see if this.intravenous is undeployed
-    }
-
-    @Override
-    public boolean isStopped() {
-        return stopped;
+    public Future<Void> gracefullyClose() {
+        return this.intravenous.shutdownAndAwait()
+                               .compose(v -> {
+                                   closed = true;
+                                   return Future.succeededFuture();
+                               });
     }
 
     @Override

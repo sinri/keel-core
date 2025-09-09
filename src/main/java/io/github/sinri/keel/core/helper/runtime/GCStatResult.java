@@ -37,6 +37,8 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
         // G1 (Garbage-First) Collector： "G1 Young Generation"（年轻代），"G1 Old Generation"（老年代）
         minorGCNames.add("G1 Young Generation");
         majorGCNames.add("G1 Old Generation");
+        ignoreGCNames.add("G1 Concurrent GC"); // for JDK21
+        majorGCNames.add("G1 Mixed Generation");// for JDK21
         // ZGC (Z Garbage Collector)： "ZGC"
         // @see  https://armsword.com/2023/08/10/es-jdk17-and-zgc/
         //minorGCNames.add("ZGC");
@@ -184,7 +186,7 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
         } else if (!ignoreGCNames.contains(gc.getName())) {
             Keel.getLogger().error(log -> log
                     .message("Found Unknown GarbageCollectorMXBean Name")
-                    .context(new JsonObject()
+                    .context(ctx -> ctx
                             .put("class", gc.getClass().getName())
                             .put("name", gc.getName())
                             .put("memoryPoolNames", Keel.stringHelper().joinStringArray(gc.getMemoryPoolNames(), ","))

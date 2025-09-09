@@ -6,6 +6,8 @@ import io.vertx.core.Future;
 import javax.annotation.Nonnull;
 import java.util.List;
 
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
+
 /**
  * Handle tasks to process certain type of objects in order.
  * <p>
@@ -46,6 +48,21 @@ public interface KeelIntravenous<D> extends KeelVerticle {
     boolean isStopped();
 
     void shutdown();
+
+    /**
+     * @since 4.1.3
+     */
+    default Future<Void> shutdownAndAwait() {
+        shutdown();
+        return Keel.asyncCallRepeatedly(repeatedlyCallTask -> {
+            if (isUndeployed()) {
+                repeatedlyCallTask.stop();
+                return Future.succeededFuture();
+            } else {
+                return Keel.asyncSleep(1000L);
+            }
+        });
+    }
 
     /**
      * When the verticle is undeployed.

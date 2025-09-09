@@ -2,7 +2,7 @@ package io.github.sinri.keel.logger.issue.recorder.adapter;
 
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.github.sinri.keel.logger.issue.recorder.render.KeelIssueRecordRender;
-import io.vertx.core.Promise;
+import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -29,21 +29,16 @@ public class SyncStdoutAdapter implements KeelIssueRecorderAdapter {
 
     @Override
     public void record(@Nonnull String topic, @Nullable KeelIssueRecord<?> issueRecord) {
-        if (issueRecord != null) {
+        if (issueRecord != null && !closed) {
             String s = this.issueRecordRender().renderIssueRecord(topic, issueRecord);
             System.out.println(s);
         }
     }
 
     @Override
-    public void close(@Nonnull Promise<Void> promise) {
+    public Future<Void> gracefullyClose() {
         closed = true;
-        promise.complete();
-    }
-
-    @Override
-    public boolean isStopped() {
-        return closed;
+        return Future.succeededFuture();
     }
 
     @Override

@@ -90,9 +90,12 @@ public abstract class KeelWebReceptionist {
 
     /**
      * As of 4.0.4, this method is not overrideable. Use {@link KeelWebReceptionist#getResponder()}.
+     * <p>
+     * As of 4.1.3, no usage in Keel, to remove.
      *
      * @since 3.0.12 add request_id to output json object
      */
+    @Deprecated(since = "4.1.3", forRemoval = true)
     protected final void respondOnSuccess(@Nullable Object data) {
         getResponder().respondOnSuccess(data);
         getIssueRecorder().info(r -> r.message("SUCCESS, TO RESPOND."));
@@ -100,11 +103,19 @@ public abstract class KeelWebReceptionist {
 
     /**
      * As of 4.0.4, this method is not overrideable. Use {@link KeelWebReceptionist#getResponder()}.
+     * <p>
+     * As of 4.1.3, no usage in Keel, to remove.
      *
      * @since 3.0.12 add request_id to output json object
+     *
      */
+    @Deprecated(since = "4.1.3", forRemoval = true)
     protected final void respondOnFailure(@Nonnull Throwable throwable) {
-        getResponder().respondOnFailure(KeelWebApiError.wrap(throwable));
+        if (throwable instanceof KeelWebApiError) {
+            getResponder().respondOnFailure((KeelWebApiError) throwable);
+        } else {
+            getResponder().respondOnFailure(KeelWebApiError.wrap(throwable));
+        }
         getIssueRecorder().exception(throwable, r -> r.message("FAILED, TO RESPOND."));
     }
 

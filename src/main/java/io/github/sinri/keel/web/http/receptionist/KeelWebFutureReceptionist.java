@@ -1,5 +1,6 @@
 package io.github.sinri.keel.web.http.receptionist;
 
+import io.github.sinri.keel.web.http.receptionist.responder.KeelWebApiError;
 import io.vertx.core.Future;
 import io.vertx.ext.web.RoutingContext;
 
@@ -20,26 +21,31 @@ abstract public class KeelWebFutureReceptionist extends KeelWebReceptionist {
         getIssueRecorder().info(log -> log.message("TO HANDLE REQUEST"));
 
         Future.succeededFuture()
-                .compose(v -> handleForFuture())
-                .andThen(ar -> {
-                    try {
-                        if (ar.failed()) {
-                            this.respondOnFailure(ar.cause());
-                        } else {
-                            this.respondOnSuccess(ar.result());
-                        }
-                    } catch (Throwable throwable) {
-                        getIssueRecorder().exception(throwable, event -> event
-                                .message("RoutingContext has been dealt by others")
-                                .setRespondInfo(
-                                        getRoutingContext().response().getStatusCode(),
-                                        getRoutingContext().response().getStatusMessage(),
-                                        getRoutingContext().response().ended(),
-                                        getRoutingContext().response().closed()
-                                )
-                        );
-                    }
-                });
+              .compose(v -> handleForFuture())
+              .andThen(ar -> {
+                  try {
+                      if (ar.failed()) {
+                          var throwable = ar.cause();
+                          if (throwable instanceof KeelWebApiError) {
+                              getResponder().respondOnFailure((KeelWebApiError) throwable);
+                          } else {
+                              getResponder().respondOnFailure(KeelWebApiError.wrap(throwable));
+                          }
+                      } else {
+                          this.getResponder().respondOnSuccess(ar.result());
+                      }
+                  } catch (Throwable throwable) {
+                      getIssueRecorder().exception(throwable, event -> event
+                              .message("RoutingContext has been dealt by others")
+                              .setRespondInfo(
+                                      getRoutingContext().response().getStatusCode(),
+                                      getRoutingContext().response().getStatusMessage(),
+                                      getRoutingContext().response().ended(),
+                                      getRoutingContext().response().closed()
+                              )
+                      );
+                  }
+              });
     }
 
     abstract protected Future<Object> handleForFuture();

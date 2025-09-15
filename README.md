@@ -10,7 +10,7 @@ A Java framework with VERT.X eco, for projects for web, job and more.
 <dependency>
     <groupId>io.github.sinri</groupId>
     <artifactId>Keel</artifactId>
-    <version>4.1.3-rc.3</version>
+    <version>4.1.3</version>
 </dependency>
 ```
 

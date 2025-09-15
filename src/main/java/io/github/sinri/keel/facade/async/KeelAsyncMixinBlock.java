@@ -8,6 +8,7 @@ import io.vertx.core.*;
 import javax.annotation.Nonnull;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
@@ -25,33 +26,24 @@ interface KeelAsyncMixinBlock extends KeelAsyncMixinLogic {
     }
 
     /**
-     * Runs the provided function in a verticle deployed on a virtual thread using the Keel framework.
+     * Executes a supplier function within a KeelVerticle deployed on a virtual thread, allowing for non-blocking
+     * operations while isolating logic in a virtual-threaded Vert.x verticle.
      * <p>
-     * <strong>Use Cases:</strong> Asynchronous task isolation, high-performance concurrency in JDK 21+, 
-     * batch processing, API calls, and other high-concurrency scenarios.
-     * <p>
-     * <strong>Key Points:</strong>
-     * <ul>
-     *   <li>Requires JDK 21+ (technical preview feature)</li>
-     *   <li>Creates a new verticle instance for each call</li>
-     *   <li>Verticles auto-stop after task completion</li>
-     *   <li>Returned Future indicates deployment success, not task completion</li>
-     *   <li>Implement error handling within the provided function</li>
-     * </ul>
-     * <p>
-     * <strong>Best Practices:</strong> Use only when needed, set concurrency limits, 
-     * monitor resources, consider {@code executeBlocking} for simpler tasks.
+     * As of 4.1.3, use {@link KeelVerticle#instant(Function)} to implement.
      *
-     * @param function a supplier that provides a future representing the async process to execute.
-     *                 Must handle exceptions internally as they won't propagate to the returned Future.
-     * @return a future that completes when deployment succeeds, not when the task completes
+     * @param function a supplier that provides a {@link Future} representing the asynchronous operation
+     *                 to be executed within the virtual thread.
+     * @return a {@link Future} that completes when the execution of the supplier function finishes,
+     *         either successfully or with a failure.
      * @since 4.1.1
      */
     @TechnicalPreview(since = "4.1.1", notice = "Require JDK 21+")
     @Nonnull
     default Future<Void> runInVerticleOnVirtualThread(@Nonnull Supplier<Future<Void>> function) {
-        return KeelVerticle.instant(() -> Future.succeededFuture()
-                                                .compose(v -> function.get()))
+        return KeelVerticle.instant(promise -> Future.succeededFuture()
+                                                     .compose(v -> function.get())
+                                                     .onComplete(promise)
+                           )
                            .deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.VIRTUAL_THREAD))
                            .compose(s -> Future.succeededFuture());
     }

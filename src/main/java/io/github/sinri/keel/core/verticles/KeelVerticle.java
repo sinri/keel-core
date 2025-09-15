@@ -19,6 +19,9 @@ public interface KeelVerticle extends Verticle {
 
     /**
      * Creates a new instance of {@link KeelVerticle} that wraps the provided start future supplier.
+     * <p>
+     * If you need to know when the verticle is deployed, so that you can undeploy it, use {@link #instant(Function)}
+     * instead.
      *
      * @param startFutureSupplier a supplier that provides a future which represents the start operation of the verticle
      * @return a new instance of {@link KeelVerticle} wrapping the provided start future supplier

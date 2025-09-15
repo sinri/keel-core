@@ -22,12 +22,13 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  */
 public interface ReadStatementMixin extends AnyStatement {
     /**
+     * As of 3.0.18 Finished Technical Preview.
+     *
      * @param namedMySQLConnection NamedMySQLConnection
      * @param classT               class of type of result object
      * @param <T>                  type of result object
      * @return 查询到数据，异步返回第一行数据封装的指定类实例；查询不到时异步返回null。
      * @since 3.0.11
-     * @since 3.0.18 Finished Technical Preview.
      */
     default <T extends ResultRow> Future<T> queryForOneRow(@Nonnull NamedMySQLConnection namedMySQLConnection, @Nonnull Class<T> classT) {
         return execute(namedMySQLConnection)
@@ -106,22 +107,22 @@ public interface ReadStatementMixin extends AnyStatement {
             @Nonnull ResultStreamReader resultStreamReader
     ) {
         return namedMySQLConnection.getSqlConnection()
-                .prepare(toString())
-                .compose(preparedStatement -> {
-                    Cursor cursor = preparedStatement.cursor();
+                                   .prepare(toString())
+                                   .compose(preparedStatement -> {
+                                       Cursor cursor = preparedStatement.cursor();
 
-                    return Keel.asyncCallRepeatedly(routineResult -> {
-                                if (!cursor.hasMore()) {
-                                    routineResult.stop();
-                                    return Future.succeededFuture();
-                                }
+                                       return Keel.asyncCallRepeatedly(routineResult -> {
+                                                      if (!cursor.hasMore()) {
+                                                          routineResult.stop();
+                                                          return Future.succeededFuture();
+                                                      }
 
-                                return cursor.read(1)
-                                        .compose(rows -> Keel.asyncCallIteratively(rows, resultStreamReader::read));
-                            })
-                            .eventually(cursor::close)
-                            .eventually(preparedStatement::close);
-                });
+                                                      return cursor.read(1)
+                                                                   .compose(rows -> Keel.asyncCallIteratively(rows, resultStreamReader::read));
+                                                  })
+                                                  .eventually(cursor::close)
+                                                  .eventually(preparedStatement::close);
+                                   });
     }
 
 

@@ -12,9 +12,10 @@ import javax.annotation.Nonnull;
 public interface ModifyStatementMixin extends AnyStatement {
 
     /**
+     * As of 3.0.18 Finished Technical Preview.
+     *
      * @return future with affected rows; failed future when failed
      * @since 3.0.11
-     * @since 3.0.18 Finished Technical Preview.
      */
     default Future<Integer> executeForAffectedRows(@Nonnull NamedMySQLConnection namedMySQLConnection) {
         return execute(namedMySQLConnection)

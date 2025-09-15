@@ -1,8 +1,10 @@
 package io.github.sinri.keel.logger.issue.recorder.adapter;
 
+import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
 import io.github.sinri.keel.logger.issue.recorder.render.KeelIssueRecordRender;
 import io.vertx.core.Future;
+import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
@@ -11,6 +13,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
@@ -19,9 +22,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  */
 abstract public class AliyunSLSIssueAdapter implements KeelIssueRecorderAdapter {
     private final Map<String, Queue<KeelIssueRecord<?>>> issueRecordQueueMap = new ConcurrentHashMap<>();
-    //private final AtomicReference<CountDownLatch> countDownLatchAtomicReference = new AtomicReference<>(null);
-
-    private boolean closed = false;
+    private final AtomicReference<Promise<Void>> closePromiseBox = new AtomicReference<>();
 
     @Override
     public void record(@Nonnull String topic, @Nullable KeelIssueRecord<?> issueRecord) {
@@ -37,10 +38,6 @@ abstract public class AliyunSLSIssueAdapter implements KeelIssueRecorderAdapter 
 
     public final void start() {
         Future.succeededFuture()
-              //              .compose(v1 -> {
-              //                  countDownLatchAtomicReference.set(new CountDownLatch(1));
-              //                  return Future.succeededFuture();
-              //              })
               .compose(v2 -> {
                   return Keel.asyncCallRepeatedly(routineResult -> {
                       Set<String> topics = Collections.unmodifiableSet(this.issueRecordQueueMap.keySet());
@@ -75,21 +72,38 @@ abstract public class AliyunSLSIssueAdapter implements KeelIssueRecorderAdapter 
               })
               .onFailure(throwable -> Keel.getLogger().exception(throwable, "AliyunSLSIssueAdapter routine exception"))
               .andThen(ar -> {
-                  closed = true;
-                  // countDownLatchAtomicReference.get().countDown();
+                  gracefullyClose();
               });
     }
 
     /**
+     * Await the records enqueued to be cleared,
+     * used in the {@link AliyunSLSIssueAdapter#gracefullyClose} to make sure all the records could be recorded.
+     * <p>
+     * As this method does not block the new records incoming, so use this method to make sure all the records could be
+     * recorded, such as in the ending of a task.
      *
      * @since 4.1.3
      */
+    @TechnicalPreview(since = "4.1.3")
     protected final Future<Void> awaitClose() {
-        if (closed) return Future.succeededFuture();
-        return Keel.asyncSleep(100L).compose(v -> {
-            if (closed) return Future.succeededFuture();
-            return awaitClose();
-        });
+        if (isClosed()) return Future.succeededFuture();
+
+        if (this.closePromiseBox.get() == null) {
+            synchronized (this.closePromiseBox) {
+                if (this.closePromiseBox.get() == null) {
+                    Promise<Void> closePromise = Promise.promise();
+                    this.closePromiseBox.set(closePromise);
+                    Keel.getVertx().setPeriodic(100L, id -> {
+                        if (isClosed()) {
+                            closePromise.tryComplete();
+                            Keel.getVertx().cancelTimer(id);
+                        }
+                    });
+                }
+            }
+        }
+        return closePromiseBox.get().future();
     }
 
     protected int bufferSize() {

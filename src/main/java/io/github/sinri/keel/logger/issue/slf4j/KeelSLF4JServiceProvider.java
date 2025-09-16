@@ -33,7 +33,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * <br>
  * 子类需要实现具体的服务提供者逻辑，通常通过 Java SPI 机制自动发现和加载。
  * 在 {@code META-INF/services/org.slf4j.spi.SLF4JServiceProvider} 文件中
- * 声明具体的实现类。
+ * 声明具体的实现类。自版本4.1.4起，本类不再为抽象类。
  * <p>
  * <strong>限制说明：</strong>
  * <ul>
@@ -50,7 +50,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 4.1.1
  */
 @TechnicalPreview(since = "4.1.1")
-public abstract class KeelSLF4JServiceProvider implements SLF4JServiceProvider {
+public class KeelSLF4JServiceProvider implements SLF4JServiceProvider {
     /**
      * Keel 日志记录器工厂实例。
      * <p>

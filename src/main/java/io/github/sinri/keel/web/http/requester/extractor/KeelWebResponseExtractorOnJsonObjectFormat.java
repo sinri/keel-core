@@ -18,12 +18,12 @@ import java.util.Objects;
  * @since 4.0.3
  */
 public class KeelWebResponseExtractorOnJsonObjectFormat extends KeelWebResponseExtractor<JsonObject> {
-    public KeelWebResponseExtractorOnJsonObjectFormat(HttpResponse<Buffer> response) {
-        super(response);
+    public KeelWebResponseExtractorOnJsonObjectFormat(@Nonnull String requestLabel, HttpResponse<Buffer> response) {
+        super(requestLabel, response);
     }
 
-    public KeelWebResponseExtractorOnJsonObjectFormat(int responseStatusCode, @Nullable Buffer responseBody) {
-        super(responseStatusCode, responseBody);
+    public KeelWebResponseExtractorOnJsonObjectFormat(@Nonnull String requestLabel, int responseStatusCode, @Nullable Buffer responseBody) {
+        super(requestLabel, responseStatusCode, responseBody);
     }
 
     @Override
@@ -33,14 +33,14 @@ public class KeelWebResponseExtractorOnJsonObjectFormat extends KeelWebResponseE
         var responseBody = this.getResponseBody();
 
         if (responseStatusCode != 200) {
-            throw new ReceivedAbnormalStatusResponse(responseStatusCode, responseBody);
+            throw new ReceivedAbnormalStatusResponse(getRequestLabel(), responseStatusCode, responseBody);
         }
 
         try {
             Objects.requireNonNull(responseBody);
             return responseBody.toJsonObject();
         } catch (Exception e) {
-            throw new ReceivedUnexpectedFormatResponse(responseStatusCode, responseBody);
+            throw new ReceivedUnexpectedFormatResponse(getRequestLabel(), responseStatusCode, responseBody);
         }
     }
 }

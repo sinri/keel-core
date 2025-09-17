@@ -3,6 +3,7 @@ package io.github.sinri.keel.web.http.requester.error;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -12,8 +13,8 @@ import javax.annotation.Nullable;
  * @since 4.0.3
  */
 public final class ReceivedFailedResponse extends ReceivedUnexpectedResponse {
-    public ReceivedFailedResponse(int responseStatusCode, @Nullable Buffer responseBody) {
-        super("received response with code as Failed", responseStatusCode, responseBody);
+    public ReceivedFailedResponse(@Nonnull String requestLabel, int responseStatusCode, @Nullable Buffer responseBody) {
+        super(requestLabel, "received response with code as Failed", responseStatusCode, responseBody);
     }
 
     @Nullable

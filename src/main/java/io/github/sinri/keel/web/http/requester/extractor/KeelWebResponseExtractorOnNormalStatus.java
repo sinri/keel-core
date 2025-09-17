@@ -5,6 +5,7 @@ import io.github.sinri.keel.web.http.requester.error.ReceivedUnexpectedResponse;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.web.client.HttpResponse;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -13,12 +14,12 @@ import javax.annotation.Nullable;
  * @since 4.0.3
  */
 public class KeelWebResponseExtractorOnNormalStatus extends KeelWebResponseExtractor<Buffer> {
-    public KeelWebResponseExtractorOnNormalStatus(HttpResponse<Buffer> response) {
-        super(response);
+    public KeelWebResponseExtractorOnNormalStatus(@Nonnull String requestLabel, HttpResponse<Buffer> response) {
+        super(requestLabel, response);
     }
 
-    public KeelWebResponseExtractorOnNormalStatus(int responseStatusCode, @Nullable Buffer responseBody) {
-        super(responseStatusCode, responseBody);
+    public KeelWebResponseExtractorOnNormalStatus(@Nonnull String requestLabel, int responseStatusCode, @Nullable Buffer responseBody) {
+        super(requestLabel, responseStatusCode, responseBody);
     }
 
     @Override
@@ -26,7 +27,7 @@ public class KeelWebResponseExtractorOnNormalStatus extends KeelWebResponseExtra
     public Buffer extract() throws ReceivedUnexpectedResponse {
         var responseStatusCode = this.getResponseStatusCode();
         if (responseStatusCode != 200) {
-            throw new ReceivedAbnormalStatusResponse(responseStatusCode, this.getResponseBody());
+            throw new ReceivedAbnormalStatusResponse(getRequestLabel(), responseStatusCode, this.getResponseBody());
         }
         return this.getResponseBody();
     }

@@ -2,28 +2,30 @@ package io.github.sinri.keel.web.http.requester.extractor;
 
 import io.github.sinri.keel.web.http.requester.error.ReceivedUnexpectedResponse;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.client.HttpResponse;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
- * Validate the response of web requests, and extract the content if validated.
+ * Validate the response of web requests and extract the content if validated.
+ * <p>
+ * As of 4.1.4, the fields are changed.
  *
  * @since 4.0.3
  */
 public abstract class KeelWebResponseExtractor<T> {
+    @Nonnull
+    private final String requestLabel;
     private final int responseStatusCode;
     private final @Nullable Buffer responseBody;
-    private @Nullable HttpMethod requestMethod;
-    private @Nullable String requestTarget;
-    private @Nullable Buffer requestBody;
 
-    public KeelWebResponseExtractor(HttpResponse<Buffer> response) {
-        this(response.statusCode(), response.body());
+    public KeelWebResponseExtractor(@Nonnull String requestLabel, HttpResponse<Buffer> response) {
+        this(requestLabel, response.statusCode(), response.body());
     }
 
-    public KeelWebResponseExtractor(int responseStatusCode, @Nullable Buffer responseBody) {
+    public KeelWebResponseExtractor(@Nonnull String requestLabel, int responseStatusCode, @Nullable Buffer responseBody) {
+        this.requestLabel = requestLabel;
         this.responseStatusCode = responseStatusCode;
         this.responseBody = responseBody;
     }
@@ -33,36 +35,16 @@ public abstract class KeelWebResponseExtractor<T> {
     }
 
 
-    @Nullable
-    public Buffer getRequestBody() {
-        return requestBody;
+    @Nonnull
+    public String getRequestLabel() {
+        return requestLabel;
     }
-
 
     @Nullable
     public Buffer getResponseBody() {
         return responseBody;
     }
 
-    @Nullable
-    public HttpMethod getRequestMethod() {
-        return requestMethod;
-    }
-
-    public KeelWebResponseExtractor<T> setRequestMethod(@Nullable HttpMethod requestMethod) {
-        this.requestMethod = requestMethod;
-        return this;
-    }
-
-    @Nullable
-    public String getRequestTarget() {
-        return requestTarget;
-    }
-
-    public KeelWebResponseExtractor<T> setRequestTarget(@Nullable String requestTarget) {
-        this.requestTarget = requestTarget;
-        return this;
-    }
 
     public abstract T extract() throws ReceivedUnexpectedResponse;
 }

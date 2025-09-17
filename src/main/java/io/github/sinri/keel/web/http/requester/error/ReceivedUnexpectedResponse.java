@@ -3,6 +3,7 @@ package io.github.sinri.keel.web.http.requester.error;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -16,8 +17,8 @@ public class ReceivedUnexpectedResponse extends RuntimeException {
     private final int responseStatusCode;
     private final @Nullable Buffer responseBody;
 
-    public ReceivedUnexpectedResponse(String message, int responseStatusCode, @Nullable Buffer responseBody) {
-        super(message);
+    public ReceivedUnexpectedResponse(@Nonnull String requestLabel, @Nonnull String message, int responseStatusCode, @Nullable Buffer responseBody) {
+        super("{" + requestLabel + "} " + message);
         this.responseStatusCode = responseStatusCode;
         this.responseBody = responseBody;
     }

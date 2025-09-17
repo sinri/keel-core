@@ -17,12 +17,12 @@ import java.util.Objects;
  * @since 4.0.3
  */
 public class KeelWebResponseExtractorOnOKCode extends KeelWebResponseExtractorOnJsonObjectFormat {
-    public KeelWebResponseExtractorOnOKCode(HttpResponse<Buffer> response) {
-        super(response);
+    public KeelWebResponseExtractorOnOKCode(@Nonnull String requestLabel, HttpResponse<Buffer> response) {
+        super(requestLabel, response);
     }
 
-    public KeelWebResponseExtractorOnOKCode(int responseStatusCode, @Nullable Buffer responseBody) {
-        super(responseStatusCode, responseBody);
+    public KeelWebResponseExtractorOnOKCode(@Nonnull String requestLabel, int responseStatusCode, @Nullable Buffer responseBody) {
+        super(requestLabel, responseStatusCode, responseBody);
     }
 
     @Nonnull
@@ -31,7 +31,7 @@ public class KeelWebResponseExtractorOnOKCode extends KeelWebResponseExtractorOn
         JsonObject j = super.extract();
         String code = j.getString("code");
         if (!Objects.equals("OK", code)) {
-            throw new ReceivedFailedResponse(getResponseStatusCode(), getResponseBody());
+            throw new ReceivedFailedResponse(getRequestLabel(), getResponseStatusCode(), getResponseBody());
         }
         return j;
     }

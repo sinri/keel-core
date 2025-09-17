@@ -134,7 +134,8 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
     @TechnicalPreview(since = "4.1.1")
     public void initializeVertx(@Nonnull Vertx vertx) {
         if (isVertxInitialized() && this.vertx != vertx) {
-            throw new IllegalStateException("Vertx has been initialized!");
+            Keel.getLogger().info("Re-initialize Vertx from " + this.vertx + " to " + vertx + ".");
+            this.vertx.close();
         }
         this.vertx = vertx;
     }

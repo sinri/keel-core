@@ -20,6 +20,7 @@ public class TestKeelAsyncCache<K, V> implements KeelAsyncCacheInterface<K, V> {
         return Future.succeededFuture();
     }
 
+    @Nonnull
     @Override
     public Future<V> read(@Nonnull K key) {
         CacheEntry<V> entry = cache.get(key);
@@ -32,6 +33,13 @@ public class TestKeelAsyncCache<K, V> implements KeelAsyncCacheInterface<K, V> {
         return Future.succeededFuture(entry.getValue());
     }
 
+    @Nonnull
+    @Override
+    public Future<Void> save(@Nonnull K k, V v) {
+        return save(k, v, 10);
+    }
+
+    @Nonnull
     @Override
     public Future<V> read(@Nonnull K key, V fallbackValue) {
         return read(key)

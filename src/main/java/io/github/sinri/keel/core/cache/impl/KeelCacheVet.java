@@ -56,7 +56,8 @@ public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
     }
 
     @Override
-    public V read(@Nonnull K k, V v) {
+    @Nullable
+    public V read(@Nonnull K k, @Nullable V v) {
         lock.readLock().lock();
         try {
             var cached = readImpl(k);
@@ -71,11 +72,11 @@ public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
     }
 
     @Override
-    public synchronized V computed(@Nonnull K key, @Nonnull Function<V, V> computation) {
+    public synchronized V computed(@Nonnull K key, @Nonnull Function<K, V> computation) {
         lock.writeLock().lock();
         try {
             var v = readImpl(key);
-            var r = computation.apply(v);
+            var r = computation.apply(key);
             saveImpl(key, r);
             return r;
         } finally {

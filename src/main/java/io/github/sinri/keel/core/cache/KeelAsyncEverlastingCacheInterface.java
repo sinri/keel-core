@@ -15,40 +15,13 @@ import java.util.Map;
  * @param <V> the type of values stored in the cache
  * @since 2.9
  */
-public interface KeelAsyncEverlastingCacheInterface<K, V> {
+public interface KeelAsyncEverlastingCacheInterface<K, V> extends KeelAsyncCacheAlike<K, V> {
 
     default long getLockWaitMs() {
         return 100;
     }
 
-    /**
-     * Save the item to cache.
-     */
-    Future<Void> save(@Nonnull K k, V v);
-
     Future<Void> save(@Nonnull Map<K, V> appendEntries);
-
-    /**
-     * @return async: cache value, or an exception `NotCached`.
-     * @since 2.9.4 return Future
-     */
-    default Future<V> read(@Nonnull K k) {
-        return read(k, null)
-                .compose(v -> {
-                    if (v == null) {
-                        return Future.failedFuture(new NotCached(k.toString()));
-                    }
-                    return Future.succeededFuture(v);
-                });
-    }
-
-    /**
-     * @param k key
-     * @param v default value for the situation that key not existed
-     * @return @return cache value or default when not-existed
-     * @since 2.9.4 return Future
-     */
-    Future<V> read(@Nonnull K k, V v);
 
     /**
      * Remove the cached item with key.

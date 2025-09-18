@@ -18,7 +18,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @param <V> The type of mapped values.
  * @since 1.14
  */
-public interface KeelAsyncCacheInterface<K, V> {
+public interface KeelAsyncCacheInterface<K, V> extends KeelAsyncCacheAlike<K, V> {
 
     /**
      * Save an item (as key and value pair) into cache, keep it available for a
@@ -29,28 +29,6 @@ public interface KeelAsyncCacheInterface<K, V> {
      * @param lifeInSeconds The lifetime of the cache item, in seconds.
      */
     Future<Void> save(@Nonnull K key, V value, long lifeInSeconds);
-
-    /**
-     * Read an available cached item with key in returned future,
-     * or return a failed future of NotCached.
-     *
-     * @param key key
-     * @return async: value of found available cached item, or an exception
-     *         `NotCache`.
-     */
-    Future<V> read(@Nonnull K key);
-
-    /**
-     * Read an available cached item with key, or return `fallbackValue` when not
-     * found;
-     * no failed future.
-     *
-     * @param key           key
-     * @param fallbackValue the certain value returned when not found
-     * @return async: value of found available cached item, or the provided
-     *         fallbackValue.
-     */
-    Future<V> read(@Nonnull K key, V fallbackValue);
 
     /**
      * Read an available cached item with key;

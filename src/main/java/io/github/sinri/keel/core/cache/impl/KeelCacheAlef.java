@@ -68,7 +68,7 @@ public class KeelCacheAlef<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public V read(@Nonnull K key, V fallbackValue) {
+    public V read(@Nonnull K key, @Nullable V fallbackValue) {
         lock.readLock().lock();
         try {
             V v = readImpl(key);
@@ -100,11 +100,11 @@ public class KeelCacheAlef<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public V computed(@Nonnull K key, @Nonnull Function<V, V> computation) {
+    public V computed(@Nonnull K key, @Nonnull Function<K, V> computation) {
         this.lock.writeLock().lock();
         try {
             V v = readImpl(key);
-            V r = computation.apply(v);
+            V r = computation.apply(key);
             saveImpl(key, r, defaultLifeInSeconds);
             return r;
         } finally {

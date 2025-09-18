@@ -4,6 +4,7 @@ import io.github.sinri.keel.core.cache.KeelCacheInterface;
 import io.github.sinri.keel.core.cache.NotCached;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -38,12 +39,12 @@ public class KeelCacheDummy<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public V computed(@Nonnull K key, @Nonnull Function<V, V> computation) {
-        return computation.apply(null);
+    public V computed(@Nonnull K key, @Nonnull Function<K, V> computation) {
+        return computation.apply(key);
     }
 
     @Override
-    public V read(@Nonnull K key, V fallbackValue) {
+    public V read(@Nonnull K key, @Nullable V fallbackValue) {
         return fallbackValue;
     }
 

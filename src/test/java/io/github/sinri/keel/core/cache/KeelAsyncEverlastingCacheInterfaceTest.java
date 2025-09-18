@@ -34,6 +34,7 @@ class KeelAsyncEverlastingCacheInterfaceTest extends KeelJUnit5Test {
     private static class MockAsyncEverlastingCache<K, V> implements KeelAsyncEverlastingCacheInterface<K, V> {
         private final Map<K, V> map = new ConcurrentHashMap<>();
 
+        @Nonnull
         @Override
         public Future<Void> save(@Nonnull K k, V v) {
             if (v == null) {
@@ -50,6 +51,7 @@ class KeelAsyncEverlastingCacheInterfaceTest extends KeelJUnit5Test {
             return Future.succeededFuture();
         }
 
+        @Nonnull
         @Override
         public Future<V> read(@Nonnull K k, V v) {
             V result = map.get(k);

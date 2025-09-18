@@ -15,31 +15,65 @@ import javax.annotation.Nonnull;
  * @since 4.0.1
  */
 public interface KeelIssueRecorderJsonMixin<T extends KeelIssueRecord<T>> extends KeelIssueRecorderCore<T> {
+    /**
+     * @deprecated as of 4.1.5, it should not be used in production,
+     *         as fully rewrite context is dangerous and not commended.
+     */
+    @Deprecated(since = "4.1.5", forRemoval = true)
     default void exception(@Nonnull Throwable throwable, @Nonnull String message, JsonObject context) {
         exception(throwable, t -> t.message(message).context(context));
     }
 
-
+    /**
+     * @deprecated as of 4.1.5, it should not be used in production,
+     *         as fully rewrite context is dangerous and not commended.
+     */
+    @Deprecated(since = "4.1.5", forRemoval = true)
     default void debug(@Nonnull String message, JsonObject context) {
         debug(t -> t.message(message).context(context));
     }
 
+    /**
+     * @deprecated as of 4.1.5, it should not be used in production,
+     *         as fully rewrite context is dangerous and not commended.
+     */
+    @Deprecated(since = "4.1.5", forRemoval = true)
     default void info(@Nonnull String message, JsonObject context) {
         info(t -> t.message(message).context(context));
     }
 
+    /**
+     * @deprecated as of 4.1.5, it should not be used in production,
+     *         as fully rewrite context is dangerous and not commended.
+     */
+    @Deprecated(since = "4.1.5", forRemoval = true)
     default void notice(@Nonnull String message, JsonObject context) {
         notice(t -> t.message(message).context(context));
     }
 
+    /**
+     * @deprecated as of 4.1.5, it should not be used in production,
+     *         as fully rewrite context is dangerous and not commended.
+     */
+    @Deprecated(since = "4.1.5", forRemoval = true)
     default void warning(@Nonnull String message, JsonObject context) {
         warning(t -> t.message(message).context(context));
     }
 
+    /**
+     * @deprecated as of 4.1.5, it should not be used in production,
+     *         as fully rewrite context is dangerous and not commended.
+     */
+    @Deprecated(since = "4.1.5", forRemoval = true)
     default void error(@Nonnull String message, JsonObject context) {
         error(t -> t.message(message).context(context));
     }
 
+    /**
+     * @deprecated as of 4.1.5, it should not be used in production,
+     *         as fully rewrite context is dangerous and not commended.
+     */
+    @Deprecated(since = "4.1.5", forRemoval = true)
     default void fatal(@Nonnull String message, JsonObject context) {
         fatal(t -> t.message(message).context(context));
     }

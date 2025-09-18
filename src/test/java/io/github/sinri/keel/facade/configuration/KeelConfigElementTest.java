@@ -50,14 +50,14 @@ class KeelConfigElementTest extends KeelJUnit5Test {
         assertEquals("root", root.getName());
         assertEquals("root_value", root.getValueAsString());
         assertEquals("root_value", root.getValueAsStringElse("default"));
-        
+
         KeelConfigElement child = root.getChild("child1");
         assertNotNull(child);
         assertEquals("value1", child.getValueAsString());
-        
+
         // Test non-existent child
         assertNull(root.getChild("nonexistent"));
-        
+
         // Test remove child
         root.removeChild("child1");
         assertNull(root.getChild("child1"));
@@ -67,16 +67,16 @@ class KeelConfigElementTest extends KeelJUnit5Test {
     void testValueTypeConversions() {
         KeelConfigElement child2 = root.getChild("child2");
         assertNotNull(child2);
-        
+
         // Integer conversions
         assertEquals(123, child2.getValueAsInteger());
         assertEquals(123, child2.getValueAsIntegerElse(0));
-        
+
         // Test with invalid number
         KeelConfigElement invalidNumber = new KeelConfigElement("invalid");
         invalidNumber.setValue("not_a_number");
         assertEquals(0, invalidNumber.getValueAsIntegerElse(0));
-        
+
         // Test null value
         KeelConfigElement nullValue = new KeelConfigElement("null");
         assertNull(nullValue.getValueAsInteger());
@@ -87,14 +87,14 @@ class KeelConfigElementTest extends KeelJUnit5Test {
     void testHierarchicalAccess() {
         // Test single level access
         assertEquals("value1", root.readString(List.of("child1")));
-        
+
         // Test multi-level access
         assertEquals("true", root.readString(List.of("child1", "grandChild")));
-        
+
         // Test non-existent path
         assertNull(root.readString(List.of("nonexistent")));
         assertEquals("default", root.readString(List.of("nonexistent"), "default"));
-        
+
         // Test with varargs
         assertEquals("true", root.extract("child1", "grandChild").getValueAsString());
     }
@@ -102,11 +102,11 @@ class KeelConfigElementTest extends KeelJUnit5Test {
     @Test
     void testJsonConversion() {
         JsonObject json = root.toJsonObject();
-        
+
         assertEquals("root", json.getString("name"));
         assertEquals("root_value", json.getString("value"));
         assertTrue(json.getJsonArray("children").size() > 0);
-        
+
         // Test reconstruction from JSON
         KeelConfigElement reconstructed = KeelConfigElement.fromJsonObject(json);
         assertEquals(root.getName(), reconstructed.getName());
@@ -138,7 +138,7 @@ class KeelConfigElementTest extends KeelJUnit5Test {
     @Test
     void testCopyConstructor() {
         KeelConfigElement copy = new KeelConfigElement(root);
-        
+
         assertEquals(root.getName(), copy.getName());
         assertEquals(root.getValueAsString(), copy.getValueAsString());
         assertEquals(root.getChildren().size(), copy.getChildren().size());
@@ -148,10 +148,10 @@ class KeelConfigElementTest extends KeelJUnit5Test {
     void testBooleanOperations() {
         KeelConfigElement child = root.extract("child1", "grandChild");
         assertNotNull(child);
-        
+
         assertTrue(child.getValueAsBoolean());
         assertTrue(child.getValueAsBooleanElse(false));
-        
+
         // Test with invalid boolean
         KeelConfigElement invalidBool = new KeelConfigElement("invalid");
         invalidBool.setValue("not_a_boolean");
@@ -188,13 +188,13 @@ class KeelConfigElementTest extends KeelJUnit5Test {
 
         // Test single level
         assertEquals("value", config.readString(List.of("simple")));
-        
+
         // Test multi-level
         assertEquals("nested_value", config.readString(List.of("nested", "deep", "value")));
-        
+
         // Test key with dots in value
         assertEquals("value.with.dots", config.readString(List.of("key", "with", "dots")));
-        
+
         // Verify the structure is correct
         assertNotNull(config.getChild("simple"));
         assertNotNull(config.getChild("nested"));
@@ -206,14 +206,12 @@ class KeelConfigElementTest extends KeelJUnit5Test {
         // 测试基本功能：将子节点转换为属性列表
         List<KeelConfigProperty> properties = root.transformChildrenToPropertyList();
 
-        getUnitTestLogger().info("root as json", root.toJsonObject());
-        getUnitTestLogger().info("root as properties", new JsonObject()
+        getUnitTestLogger().info("root as json", ctx -> ctx.put("root", root.toJsonObject()));
+        getUnitTestLogger().info("root as properties", ctx -> ctx.put("root", new JsonObject()
                 .put("array", new JsonArray(
-                        properties.stream().map(kcp -> {
-                            return kcp.toString();
-                        }).collect(Collectors.toList()))
+                        properties.stream().map(KeelConfigProperty::toString).collect(Collectors.toList()))
                 )
-        );
+        ));
 
         // 验证返回的属性数量（应该有3个属性：child1, child1.grandChild, child2）
         assertEquals(3, properties.size());

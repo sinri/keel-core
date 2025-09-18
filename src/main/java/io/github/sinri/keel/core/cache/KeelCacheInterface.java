@@ -15,7 +15,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @param <V> class for key
  * @since 1.9
  */
-public interface KeelCacheInterface<K, V> {
+public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
     /**
      * @param <K> class for key
      * @param <V> class for value
@@ -56,33 +56,9 @@ public interface KeelCacheInterface<K, V> {
     /**
      * @since 2.8
      */
+    @Override
     default void save(@Nonnull K key, V value) {
         save(key, value, getDefaultLifeInSeconds());
-    }
-
-    /**
-     * Read an available cached item with key, or return `fallbackValue` when not found.
-     *
-     * @param key           key
-     * @param fallbackValue the certain value returned when not found
-     * @return value of found available cached item, or `fallbackValue`
-     */
-    V read(@Nonnull K key, V fallbackValue);
-
-    /**
-     * Read an available cached item with key, or return `null` when not found.
-     *
-     * @param key key
-     * @return value of found available cached item, or `null`
-     * @throws NotCached when the key is not mapped with cached value.
-     */
-    @Nonnull
-    default V read(@Nonnull K key) throws NotCached {
-        var v = this.read(key, null);
-        if (v == null) {
-            throw new NotCached(key.toString());
-        }
-        return v;
     }
 
     /**
@@ -97,12 +73,13 @@ public interface KeelCacheInterface<K, V> {
      * new value to save back and return.
      * <p>The given compute function should take the value read by the key as input, compute for a
      * result, save it to map the key, and finally outputs it.
+     * <p> Fix the computation definition bug as of version 4.1.5.
      *
      * @param key         the target key
      * @param computation a compute function takes a nullable cached value as input, and returns a nullable value.
      * @since 4.1.1
      */
-    V computed(@Nonnull K key, @Nonnull Function<V, V> computation);
+    V computed(@Nonnull K key, @Nonnull Function<K, V> computation);
 
     /**
      * Remove the cached item with the key.
@@ -129,7 +106,7 @@ public interface KeelCacheInterface<K, V> {
     Map<K, V> getSnapshotMap();
 
     /**
-     * Start an endless for cleaning up.
+     * Start an endless process for cleaning up.
      * Use it manually if needed.
      *
      * @since 3.0.4

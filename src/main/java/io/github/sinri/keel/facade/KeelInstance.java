@@ -20,8 +20,13 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**
+ * As of 4.0.0, make it final and implement KeelAsyncMixin.
+ * <p>
+ * As of 4.1.5, the interface {@link KeelWebRequestMixin} is deprecated and would not implement by this class in the
+ * future.
+ *
  * @since 3.1.0
- * @since 4.0.0 make it final and implement KeelAsyncMixin.
+ *
  */
 public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin, KeelWebRequestMixin {
     public final static KeelInstance Keel;

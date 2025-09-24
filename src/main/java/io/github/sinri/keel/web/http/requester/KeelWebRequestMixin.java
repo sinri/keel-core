@@ -11,8 +11,11 @@ import java.util.function.Function;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
+ *
  * @since 4.0.3
+ * @deprecated This should be a philósophy, not be a fixed implementation.
  */
+@Deprecated(since = "4.1.5")
 public interface KeelWebRequestMixin {
 
     /**

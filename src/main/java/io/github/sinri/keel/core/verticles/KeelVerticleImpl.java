@@ -5,6 +5,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.ThreadingModel;
 
+import javax.annotation.Nullable;
+
 /**
  * An abstract implementation of the {@link KeelVerticle} interface, extending from {@link AbstractVerticle}.
  * This class provides a structured way to implement custom verticles within the Keel framework.
@@ -30,7 +32,10 @@ public abstract class KeelVerticleImpl extends AbstractVerticle implements KeelV
      * @return the threading model of the current context
      * @since 4.1.3
      */
+    @Override
+    @Nullable
     public final ThreadingModel contextThreadModel() {
+        if (this.context == null) return null;
         return this.context.threadingModel();
     }
 
@@ -60,7 +65,7 @@ public abstract class KeelVerticleImpl extends AbstractVerticle implements KeelV
     public final void start(Promise<Void> startPromise) {
         Future.succeededFuture()
               .compose(v -> {
-                  start();
+                  // start();
                   return startVerticle();
               })
               .andThen(ar -> {

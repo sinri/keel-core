@@ -102,6 +102,10 @@ public interface KeelVerticle extends Verticle {
      *         exception if the deployment fails
      */
     default Future<String> deployMe(DeploymentOptions deploymentOptions) {
+        String deploymentID = deploymentID();
+        if (deploymentID != null) {
+            throw new IllegalStateException("This verticle has been deployed already!");
+        }
         return Keel.getVertx().deployVerticle(this, deploymentOptions);
     }
 
@@ -113,6 +117,10 @@ public interface KeelVerticle extends Verticle {
      * @since 2.8 add default implementation
      */
     default Future<Void> undeployMe() {
-        return Keel.getVertx().undeploy(deploymentID());
+        String deploymentID = deploymentID();
+        if (deploymentID == null) {
+            throw new IllegalStateException("This verticle has not been deployed yet!");
+        }
+        return Keel.getVertx().undeploy(deploymentID);
     }
 }

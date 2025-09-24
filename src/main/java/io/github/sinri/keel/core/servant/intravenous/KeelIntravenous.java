@@ -9,11 +9,11 @@ import java.util.List;
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
- * Handle tasks to process certain type of objects in order.
+ * Handle tasks to process objects of a certain type in order.
  * <p>
  * Extracted since 4.0.7.
- * </p>
  *
+ * @param <D> the type of the object to be processed.
  * @since 4.0.7
  */
 public interface KeelIntravenous<D> extends KeelVerticle {
@@ -65,8 +65,7 @@ public interface KeelIntravenous<D> extends KeelVerticle {
     }
 
     /**
-     * When the verticle is undeployed.
-     *
+     * @return Whether the verticle is undeployed.
      * @since 4.0.11
      */
     boolean isUndeployed();

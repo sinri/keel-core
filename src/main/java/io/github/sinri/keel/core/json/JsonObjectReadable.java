@@ -484,6 +484,7 @@ public interface JsonObjectReadable extends Iterable<Map.Entry<String, Object>> 
      *         object, or null if the operation fails
      * @since 2.7
      */
+    @Deprecated(since = "4.1.5", forRemoval = true)
     default @Nullable <B extends JsonifiableEntity<?>> B readJsonifiableEntity(@Nonnull Class<B> bClass,
                                                                                String... args) {
         JsonObject jsonObject = readJsonObject(args);

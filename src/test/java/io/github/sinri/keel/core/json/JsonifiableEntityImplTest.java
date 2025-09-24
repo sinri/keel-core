@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -473,6 +474,7 @@ class JsonifiableEntityImplTest extends KeelJUnit5Test {
             super();
         }
 
+        @Nonnull
         @Override
         public TestJsonifiableEntity getImplementation() {
             return this;

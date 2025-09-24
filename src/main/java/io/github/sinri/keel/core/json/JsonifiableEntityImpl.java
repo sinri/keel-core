@@ -6,7 +6,9 @@ import javax.annotation.Nonnull;
 
 /**
  * @since 4.0.12
+ * @deprecated since 4.1.5, use {@link JsonifiableDataUnitImpl} instead.
  */
+@Deprecated(since = "4.1.5")
 public abstract class JsonifiableEntityImpl<E> implements JsonifiableEntity<E> {
     private JsonObject jsonObject;
 

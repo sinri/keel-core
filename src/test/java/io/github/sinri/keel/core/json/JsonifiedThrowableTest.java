@@ -298,35 +298,6 @@ class JsonifiedThrowableTest extends KeelJUnit5Test {
     }
 
     @Test
-    void testGetImplementation() {
-        // 测试getImplementation方法
-        JsonifiedThrowable jsonifiedThrowable = JsonifiedThrowable.wrap(simpleException);
-        JsonifiedThrowable implementation = jsonifiedThrowable.getImplementation();
-
-        assertNotNull(implementation);
-        assertSame(jsonifiedThrowable, implementation);
-
-        getUnitTestLogger().info("getImplementation方法测试通过");
-    }
-
-    @Test
-    void testCallStackItemGetImplementation() {
-        // 测试堆栈项的getImplementation方法
-        JsonifiedThrowable jsonifiedThrowable = JsonifiedThrowable.wrap(simpleException);
-        var stackItems = jsonifiedThrowable.getThrowableStack();
-
-        assertFalse(stackItems.isEmpty());
-
-        JsonifiedThrowable.JsonifiedCallStackItem firstItem = stackItems.get(0);
-        JsonifiedThrowable.JsonifiedCallStackItem implementation = firstItem.getImplementation();
-
-        assertNotNull(implementation);
-        assertSame(firstItem, implementation);
-
-        getUnitTestLogger().info("堆栈项getImplementation方法测试通过");
-    }
-
-    @Test
     void testNullThrowable() {
         // 测试传入null的情况（虽然方法标注了@Nonnull，但测试边界情况）
         assertThrows(NullPointerException.class, () -> {

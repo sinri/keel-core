@@ -38,7 +38,9 @@ import java.util.function.Function;
  *
  * @param <E> the type of the entity implementing this interface
  * @since 1.14
+ * @deprecated since 4.1.5, use {@link JsonifiableDataUnit} instead.
  */
+@Deprecated(since = "4.1.5")
 public interface JsonifiableEntity<E>
         extends JsonObjectConvertible, JsonObjectReloadable, JsonObjectWritable,
         UnmodifiableJsonifiableEntity, ClusterSerializable, SelfInterface<E> {

@@ -28,7 +28,7 @@ public class KeelFunnel extends KeelVerticleImpl {
     private final AtomicReference<Promise<Void>> interruptRef;
     private final Queue<Supplier<Future<Void>>> queue;
     private final AtomicLong sleepTimeRef;
-    private KeelIssueRecorder<KeelEventLog> funnelLogger;
+    private final KeelIssueRecorder<KeelEventLog> funnelLogger;
 
     public KeelFunnel() {
         this.sleepTimeRef = new AtomicLong(1_000L);

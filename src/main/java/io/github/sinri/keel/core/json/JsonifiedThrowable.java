@@ -16,10 +16,13 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * A JSON CODEC REGISTER action is required, i.e.
  * {@link JsonifiableSerializer#register()}, to ensure this class to work
  * correctly.
+ * <p>
+ * As of 4.1.5, it extends {@link JsonifiableDataUnitImpl} to provide a non generic JSON data class.
  *
  * @since 4.1.0
+ *
  */
-public class JsonifiedThrowable extends JsonifiableEntityImpl<JsonifiedThrowable> {
+public class JsonifiedThrowable extends JsonifiableDataUnitImpl {
 
     private JsonifiedThrowable() {
         super();
@@ -130,19 +133,13 @@ public class JsonifiedThrowable extends JsonifiableEntityImpl<JsonifiedThrowable
             return (JsonifiedThrowable) cause;
         } else if (cause instanceof JsonObject) {
             JsonifiedThrowable jsonifiedThrowable = new JsonifiedThrowable();
-            jsonifiedThrowable.reloadDataFromJsonObject((JsonObject) cause);
+            jsonifiedThrowable.reloadData((JsonObject) cause);
             return jsonifiedThrowable;
         }
         return null;
     }
 
-    @Nonnull
-    @Override
-    public JsonifiedThrowable getImplementation() {
-        return this;
-    }
-
-    public static class JsonifiedCallStackItem extends JsonifiableEntityImpl<JsonifiedCallStackItem> {
+    public static class JsonifiedCallStackItem extends JsonifiableDataUnitImpl {
         private JsonifiedCallStackItem(JsonObject jsonObject) {
             super(jsonObject);
         }
@@ -189,12 +186,6 @@ public class JsonifiedThrowable extends JsonifiableEntityImpl<JsonifiedThrowable
 
         public String getCallStackLine() {
             return readString("line");
-        }
-
-        @Nonnull
-        @Override
-        public JsonifiedCallStackItem getImplementation() {
-            return this;
         }
     }
 }

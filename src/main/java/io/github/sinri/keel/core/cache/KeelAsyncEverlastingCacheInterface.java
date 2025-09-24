@@ -4,7 +4,11 @@ import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 
 /**
@@ -17,14 +21,10 @@ import java.util.Map;
  */
 public interface KeelAsyncEverlastingCacheInterface<K, V> extends KeelAsyncCacheAlike<K, V> {
 
-    default long getLockWaitMs() {
-        return 100;
-    }
-
     Future<Void> save(@Nonnull Map<K, V> appendEntries);
 
     /**
-     * Remove the cached item with key.
+     * Remove the cached item with the key.
      *
      * @param key key
      */
@@ -38,7 +38,7 @@ public interface KeelAsyncEverlastingCacheInterface<K, V> extends KeelAsyncCache
     Future<Void> removeAll();
 
     /**
-     * Replace all entries in cache map with new entries.
+     * Replace all entries in the cache map with new entries.
      *
      * @param newEntries new map of entries
      */
@@ -48,6 +48,35 @@ public interface KeelAsyncEverlastingCacheInterface<K, V> extends KeelAsyncCache
      * @return ConcurrentMap K → V alive value only
      * @since 1.14
      */
+    @Deprecated(since = "4.1.5", forRemoval = true)
     @Nonnull
-    Map<K, V> getSnapshotMap();
+    default Future<Map<K, V>> getSnapshotMap() {
+        return getCachedKeySet()
+                .compose(ks -> {
+                    if (ks.isEmpty()) {
+                        return Future.succeededFuture(Map.of());
+                    }
+                    Map<K, V> map = new HashMap<>();
+                    return Keel.parallelForAllComplete(ks, k -> {
+                                   return read(k)
+                                           .compose(v -> {
+                                               map.put(k, v);
+                                               return Future.succeededFuture();
+                                           }, throwable -> {
+                                               return Future.succeededFuture();
+                                           });
+                               })
+                               .compose(v -> Future.succeededFuture(map));
+                });
+    }
+
+    /**
+     * Retrieves the current set of keys present in the cache.
+     * The set represents a snapshot of all keys corresponding to cached items at the time of invocation.
+     *
+     * @return a non-null set containing the keys of currently cached items
+     * @since 4.1.5
+     */
+    @Nonnull
+    Future<Set<K>> getCachedKeySet();
 }

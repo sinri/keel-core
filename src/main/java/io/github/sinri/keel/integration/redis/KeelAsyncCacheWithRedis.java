@@ -6,8 +6,8 @@ import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -84,7 +84,7 @@ public class KeelAsyncCacheWithRedis implements KeelAsyncCacheInterface<String, 
     }
 
     @Override
-    public Future<Map<String, String>> getSnapshotMap() {
+    public Future<Set<String>> getCachedKeySet() {
         // KEYS pattern
         // Redis KEYS 命令用于查找所有匹配给定模式 pattern 的 key 。
         // 尽管这个操作的时间复杂度是 O(N)，但是常量时间相当小。

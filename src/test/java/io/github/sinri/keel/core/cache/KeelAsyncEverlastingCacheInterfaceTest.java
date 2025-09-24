@@ -14,7 +14,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @ExtendWith(VertxExtension.class)
@@ -26,6 +28,38 @@ class KeelAsyncEverlastingCacheInterfaceTest extends KeelJUnit5Test {
     KeelAsyncEverlastingCacheInterfaceTest(Vertx vertx) {
         super(vertx);
         cache = new MockAsyncEverlastingCache<>();
+    }
+
+    @BeforeEach
+    public void beforeEach(VertxTestContext testContext) {
+        cache.removeAll();
+        testContext.completeNow();
+    }
+
+    @Test
+    public void test(VertxTestContext testContext) {
+        cache.save("a", 1);
+        cache.save("b", 2);
+
+        Future.all(
+                      cache.read("a")
+                           .compose(a -> {
+                               Assertions.assertEquals(1, a);
+                               return Future.succeededFuture();
+                           }, throwable -> {
+                               Assertions.fail(throwable);
+                               return Future.succeededFuture();
+                           }),
+                      cache.read("c")
+                           .compose(c -> {
+                               Assertions.fail();
+                               return Future.succeededFuture();
+                           }, throwable -> {
+                               Assertions.assertInstanceOf(NotCached.class, throwable);
+                               return Future.succeededFuture();
+                           })
+              )
+              .onComplete(testContext.succeedingThenComplete());
     }
 
     /**
@@ -86,42 +120,10 @@ class KeelAsyncEverlastingCacheInterfaceTest extends KeelJUnit5Test {
             return Future.succeededFuture();
         }
 
-        @Override
         @Nonnull
-        public Map<K, V> getSnapshotMap() {
-            return new ConcurrentHashMap<>(map);
+        @Override
+        public Future<Set<K>> getCachedKeySet() {
+            return Future.succeededFuture(new HashSet<>(map.keySet()));
         }
-    }
-
-    @BeforeEach
-    public void beforeEach(VertxTestContext testContext) {
-        cache.removeAll();
-        testContext.completeNow();
-    }
-
-    @Test
-    public void test(VertxTestContext testContext) {
-        cache.save("a", 1);
-        cache.save("b", 2);
-
-        Future.all(
-                      cache.read("a")
-                           .compose(a -> {
-                               Assertions.assertEquals(1, a);
-                               return Future.succeededFuture();
-                           }, throwable -> {
-                               Assertions.fail(throwable);
-                               return Future.succeededFuture();
-                           }),
-                      cache.read("c")
-                           .compose(c -> {
-                               Assertions.fail();
-                               return Future.succeededFuture();
-                           }, throwable -> {
-                               Assertions.assertInstanceOf(NotCached.class, throwable);
-                               return Future.succeededFuture();
-                           })
-              )
-              .onComplete(testContext.succeedingThenComplete());
     }
 }

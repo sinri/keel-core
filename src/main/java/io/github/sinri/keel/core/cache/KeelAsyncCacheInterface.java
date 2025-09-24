@@ -3,7 +3,9 @@ package io.github.sinri.keel.core.cache;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
@@ -66,10 +68,35 @@ public interface KeelAsyncCacheInterface<K, V> extends KeelAsyncCacheAlike<K, V>
      * @return ConcurrentMap K → V alive value only
      * @since 1.14
      */
-    Future<Map<K, V>> getSnapshotMap();
+    @Deprecated(since = "4.1.5", forRemoval = true)
+    default Future<Map<K, V>> getSnapshotMap() {
+        Map<K, V> map = new HashMap<>();
+        return getCachedKeySet()
+                .compose(ks -> {
+                    return Keel.parallelForAllComplete(ks, k -> {
+                        return read(k)
+                                .compose(v -> {
+                                    map.put(k, v);
+                                    return Future.succeededFuture();
+                                }, throwable -> {
+                                    return Future.succeededFuture();
+                                });
+                    });
+                })
+                .compose(v -> {
+                    return Future.succeededFuture(map);
+                });
+    }
 
     /**
-     * Start an endless for cleaning up.
+     * Retrieves a set of all currently cached keys.
+     *
+     * @return A future representing the set of all keys currently stored in the cache.
+     */
+    Future<Set<K>> getCachedKeySet();
+
+    /**
+     * Start an endless routine for cleaning up.
      * Use it manually if needed.
      *
      * @since 3.0.4

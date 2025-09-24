@@ -4,6 +4,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
+ * An interface for a synchronous cache mechanism that supports synchronous operations
+ * and provides functionalities to handle basic read and write operations for cached key-value pairs.
+ *
  * @param <K> the type of key
  * @param <V> the type of value
  * @since 4.1.5

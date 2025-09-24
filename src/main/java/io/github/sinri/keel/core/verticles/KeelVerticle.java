@@ -4,6 +4,7 @@ import io.vertx.core.*;
 import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -27,6 +28,7 @@ public interface KeelVerticle extends Verticle {
      * @return a new instance of {@link KeelVerticle} wrapping the provided start future supplier
      * @since 4.0.2
      */
+    @Nonnull
     static KeelVerticle instant(@Nonnull Supplier<Future<Void>> startFutureSupplier) {
         return new KeelVerticleWrap(startFutureSupplier);
     }
@@ -39,6 +41,7 @@ public interface KeelVerticle extends Verticle {
      * @return a new instance of {@link KeelVerticle} wrapping the provided starter function
      * @since 4.0.12
      */
+    @Nonnull
     static KeelVerticle instant(@Nonnull Function<Promise<Void>, Future<Void>> starter) {
         return new KeelVerticleWrap(starter);
     }
@@ -46,22 +49,26 @@ public interface KeelVerticle extends Verticle {
     /**
      * Retrieves the threading model associated with the current execution context of the verticle.
      *
-     * @return the threading model of the current context
-     * @since 4.1.3
+     * @return the threading model of the current context, or {@code null} if not deployed yet.
+     * @since 4.1.5
      */
-    ThreadingModel getContextThreadModal();
+    @Nullable
+    ThreadingModel contextThreadModel();
 
     /**
      * Returns the unique identifier for the deployment of this verticle.
      *
-     * @return the deployment ID as a string
+     * @return the deployment ID as a string, or {@code null} if not deployed yet.
      * @since 2.8
      */
+    @Nullable
     String deploymentID();
 
 
     /**
      * Retrieves the configuration for this verticle.
+     * <p>
+     * As a declaration of {@link AbstractVerticle#config()}.
      *
      * @return a {@link JsonObject} containing the configuration settings for the verticle
      */
@@ -75,13 +82,16 @@ public interface KeelVerticle extends Verticle {
      *             <li>class: the fully qualified name of the class implementing this verticle</li>
      *             <li>config: the configuration settings for the verticle as a {@link JsonObject}</li>
      *             <li>deployment_id: the unique identifier for the deployment of this verticle</li>
+     *             <li>thread_model: the threading model of the current context, or {@code null} if not deployed yet</li>
      *         </ul>
      */
     default JsonObject getVerticleInfo() {
+        ThreadingModel threadingModel = contextThreadModel();
         return new JsonObject()
                 .put("class", this.getClass().getName())
                 .put("config", this.config())
-                .put("deployment_id", this.deploymentID());
+                .put("deployment_id", this.deploymentID())
+                .put("thread_model", threadingModel == null ? null : threadingModel.name());
     }
 
     /**

@@ -6,13 +6,13 @@ import io.github.sinri.keel.core.cache.ValueWrapper;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * An implementation of KeelCacheInterface, using ConcurrentHashMap.
@@ -81,31 +81,14 @@ public class KeelCacheAlef<K, V> implements KeelCacheInterface<K, V> {
         }
     }
 
-    /**
-     * @since 4.0.0
-     */
     @Override
-    public V read(@Nonnull K key, Supplier<V> generator, long lifeInSeconds) {
+    public V computeIfAbsent(@Nonnull K key, @Nonnull Function<K, V> computation, long lifeInSeconds) {
         this.lock.writeLock().lock();
         try {
             V v = readImpl(key);
-            if (v == null) {
-                v = generator.get();
-                saveImpl(key, v, lifeInSeconds);
-            }
-            return v;
-        } finally {
-            this.lock.writeLock().unlock();
-        }
-    }
-
-    @Override
-    public V computed(@Nonnull K key, @Nonnull Function<K, V> computation) {
-        this.lock.writeLock().lock();
-        try {
-            V v = readImpl(key);
+            if (v != null) return v;
             V r = computation.apply(key);
-            saveImpl(key, r, defaultLifeInSeconds);
+            saveImpl(key, r, lifeInSeconds);
             return r;
         } finally {
             this.lock.writeLock().unlock();
@@ -159,20 +142,23 @@ public class KeelCacheAlef<K, V> implements KeelCacheInterface<K, V> {
         }
     }
 
-    @Override
+    /**
+     * @since 4.1.5
+     */
     @Nonnull
-    public Map<K, V> getSnapshotMap() {
+    @Override
+    public Set<K> getCachedKeySet() {
         this.lock.writeLock().lock();
         try {
             cleanUpImpl();
-            HashMap<K, V> snapshotMap = new HashMap<>();
+            Set<K> keySet = new HashSet<>();
             for (Map.Entry<K, ValueWrapper<V>> entry : map.entrySet()) {
                 V value = entry.getValue().getValue();
                 if (value != null) {
-                    snapshotMap.put(entry.getKey(), value);
+                    keySet.add(entry.getKey());
                 }
             }
-            return Collections.unmodifiableMap(snapshotMap);
+            return Collections.unmodifiableSet(keySet);
         } finally {
             this.lock.writeLock().unlock();
         }

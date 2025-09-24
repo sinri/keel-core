@@ -14,13 +14,15 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 /**
  * An extension of KeelCacheVet that provides an embedded verticle for periodic full updates and deployment management.
  * <p>
- * The class can be initialized with a callback to fetch the latest data and a time period for regular updates. It deploys
+ * The class can be initialized with a callback to fetch the latest data and a time period for regular updates. It
+ * deploys
  * a verticle that will periodically update the cache using the provided callback, if any.
  * </p>
  *
  * @param <K> the type of keys maintained by this cache
  * @param <V> the type of mapped values
  */
+@Deprecated(since = "4.1.5")
 public class KeelCacheDalet<K, V> extends KeelCacheVet<K, V> {
     @Nullable
     private final Supplier<Future<Map<K, V>>> fullyUpdateCallback;

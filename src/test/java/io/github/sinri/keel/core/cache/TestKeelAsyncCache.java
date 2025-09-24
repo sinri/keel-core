@@ -3,7 +3,8 @@ package io.github.sinri.keel.core.cache;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -75,12 +76,9 @@ public class TestKeelAsyncCache<K, V> implements KeelAsyncCacheInterface<K, V> {
     }
 
     @Override
-    public Future<Map<K, V>> getSnapshotMap() {
-        Map<K, V> snapshot = new ConcurrentHashMap<>();
-        cache.entrySet().stream()
-             .filter(entry -> !entry.getValue().isExpired())
-             .forEach(entry -> snapshot.put(entry.getKey(), entry.getValue().getValue()));
-        return Future.succeededFuture(snapshot);
+    public Future<Set<K>> getCachedKeySet() {
+        Set<K> ks = cache.keySet();
+        return Future.succeededFuture(new HashSet<>(ks));
     }
 
     private static class CacheEntry<V> {

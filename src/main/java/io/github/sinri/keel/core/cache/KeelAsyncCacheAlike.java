@@ -6,6 +6,11 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
+ * An interface for an asynchronous cache mechanism that supports non-blocking
+ * operations
+ * and provides functionalities to handle basic read and write operations for
+ * cached key-value pairs.
+ *
  * @param <K> the type of key
  * @param <V> the type of value
  * @since 4.1.5
@@ -38,7 +43,8 @@ public interface KeelAsyncCacheAlike<K, V> {
      * Read an available cached item with the provided key asynchronously
      *
      * @param k the key
-     * @return the future of read operation, holding a non-null value when succeeded, otherwise failed with
+     * @return the future of read operation, holding a non-null value when
+     *         succeeded, otherwise failed with
      *         {@link NotCached}.
      */
     @Nonnull

@@ -30,7 +30,7 @@ public abstract class KeelVerticleImpl extends AbstractVerticle implements KeelV
      * @return the threading model of the current context
      * @since 4.1.3
      */
-    public final ThreadingModel getContextThreadModal() {
+    public final ThreadingModel contextThreadModel() {
         return this.context.threadingModel();
     }
 

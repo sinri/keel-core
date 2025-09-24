@@ -4,10 +4,7 @@ import io.github.sinri.keel.core.cache.KeelEverlastingCacheInterface;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
 
@@ -72,13 +69,18 @@ public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
     }
 
     @Override
-    public synchronized V computed(@Nonnull K key, @Nonnull Function<K, V> computation) {
+    public V computeIfAbsent(@Nonnull K key, @Nonnull Function<K, V> computation) {
         lock.writeLock().lock();
         try {
             var v = readImpl(key);
-            var r = computation.apply(key);
-            saveImpl(key, r);
-            return r;
+            // As of 4.1.5, the bug is fixed that the computation function would only be called when the key is not cached.
+            if (v == null) {
+                var r = computation.apply(key);
+                saveImpl(key, r);
+                return r;
+            } else {
+                return v;
+            }
         } finally {
             lock.writeLock().unlock();
         }
@@ -137,12 +139,13 @@ public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
         }
     }
 
-    @Override
     @Nonnull
-    public Map<K, V> getSnapshotMap() {
+    @Override
+    public Set<K> getCachedKeySet() {
         lock.readLock().lock();
         try {
-            return Collections.unmodifiableMap(map);
+            HashSet<K> ks = new HashSet<>(map.keySet());
+            return Collections.unmodifiableSet(ks);
         } finally {
             lock.readLock().unlock();
         }

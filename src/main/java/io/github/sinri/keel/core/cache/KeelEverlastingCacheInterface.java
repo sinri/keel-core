@@ -4,10 +4,17 @@ import io.github.sinri.keel.core.cache.impl.KeelCacheVet;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
+ * An interface for an everlasting cache mechanism that supports non-blocking operations
+ * and provides functionalities to manage cached key-value pairs.
+ *
+ * @param <K> the type of key
+ * @param <V> the type of value
  * @since 2.9
  */
 public interface KeelEverlastingCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
@@ -18,17 +25,15 @@ public interface KeelEverlastingCacheInterface<K, V> extends KeelSyncCacheAlike<
     void save(@Nonnull Map<K, V> appendEntries);
 
     /**
-     * Atomically, read the cached nullable value with the given key, then call the given compute function to generate a
-     * new value to save back and return.
-     * <p>The given compute function should take the value read by the key as input, compute for a
-     * result, save it to map the key, and finally outputs it.
-     * <p> Fix the computation definition bug as of version 4.1.5.
+     * Computes and retrieves a value associated with the provided key. If the key is not already
+     * cached, the computation function is executed to produce the value, which is then stored in the cache.
      *
-     * @param key         the target key
-     * @param computation a compute function takes a nullable cached value as input, and returns a nullable value.
-     * @since 4.1.1
+     * @param key         the key for which the value is being computed or retrieved; must not be null
+     * @param computation the function to compute the value if it is not already cached; must not be null
+     * @return the computed or cached value associated with the specified key
+     * @since 4.1.5
      */
-    V computed(@Nonnull K key, @Nonnull Function<K, V> computation);
+    V computeIfAbsent(@Nonnull K key, @Nonnull Function<K, V> computation);
 
     /**
      * Remove the cached item with key.
@@ -55,7 +60,27 @@ public interface KeelEverlastingCacheInterface<K, V> extends KeelSyncCacheAlike<
      * @return ConcurrentMap K → V alive value only
      * @since 1.14
      */
+    @Deprecated(since = "4.1.5", forRemoval = true)
     @Nonnull
-    Map<K, V> getSnapshotMap();
+    default Map<K, V> getSnapshotMap() {
+        Map<K, V> map = new HashMap<>();
+        getCachedKeySet().forEach(k -> {
+            try {
+                map.put(k, read(k));
+            } catch (NotCached e) {
+                // do nothing
+            }
+        });
+        return map;
+    }
+
+    /**
+     * Retrieves the set of all keys currently cached in the everlasting cache.
+     *
+     * @return a non-null set of keys representing all the items currently stored in the cache
+     * @since 4.1.5
+     */
+    @Nonnull
+    Set<K> getCachedKeySet();
 
 }

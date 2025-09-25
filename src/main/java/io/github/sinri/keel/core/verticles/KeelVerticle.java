@@ -70,8 +70,9 @@ public interface KeelVerticle extends Verticle {
      * <p>
      * As a declaration of {@link AbstractVerticle#config()}.
      *
-     * @return a {@link JsonObject} containing the configuration settings for the verticle
+     * @return a {@link JsonObject} containing the configuration settings for the verticle, might be null.
      */
+    @Nullable
     JsonObject config();
 
     /**

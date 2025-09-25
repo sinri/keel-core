@@ -4,6 +4,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.ThreadingModel;
+import io.vertx.core.json.JsonObject;
 
 import javax.annotation.Nullable;
 
@@ -37,6 +38,26 @@ public abstract class KeelVerticleImpl extends AbstractVerticle implements KeelV
     public final ThreadingModel contextThreadModel() {
         if (this.context == null) return null;
         return this.context.threadingModel();
+    }
+
+    /**
+     * @since 4.1.5
+     */
+    @Nullable
+    @Override
+    public String deploymentID() {
+        if (this.context == null) return null;
+        return context.deploymentID();
+    }
+
+    /**
+     * @since 4.1.5
+     */
+    @Nullable
+    @Override
+    public JsonObject config() {
+        if (this.context == null) return null;
+        return context.config();
     }
 
     /**

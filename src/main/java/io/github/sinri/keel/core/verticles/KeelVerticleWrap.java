@@ -78,14 +78,19 @@ public final class KeelVerticleWrap extends KeelVerticleImpl {
                 .compose(v -> {
                     if (stopperPromise != null) {
                         stopperPromise.future()
-                                .compose(stopped -> this.undeployMe())
-                                .onFailure(throwable -> {
-                                    // Log the error but don't fail the start process
-                                    // The verticle will be stopped by the framework if needed
-                                    Keel.getLogger()
-                                            .exception(throwable,
-                                                    "Deploy Verticle planned in `io.github.sinri.keel.core.verticles.KeelVerticleWrap.startVerticle` failed.");
-                                });
+                                      .andThen(stopped -> {
+                                          Keel.getVertx().setTimer(100L, timer -> {
+                                              String deploymentID = deploymentID();
+                                              if (deploymentID != null) {
+                                                  this.undeployMe()
+                                                      .onFailure(throwable -> {
+                                                          Keel.getLogger()
+                                                              .exception(throwable, "Try to undeploy verticle [" + deploymentID + "] failed");
+                                                      });
+                                              }
+                                          });
+                                      });
+
                     }
                     return Future.succeededFuture();
                 });

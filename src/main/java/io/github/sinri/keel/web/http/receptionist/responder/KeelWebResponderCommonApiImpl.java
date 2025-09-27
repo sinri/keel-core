@@ -10,6 +10,8 @@ import io.vertx.ext.web.RoutingContext;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
+
 /**
  * @since 4.0.4
  */

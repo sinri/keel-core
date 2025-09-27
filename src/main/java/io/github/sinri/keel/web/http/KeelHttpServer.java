@@ -90,11 +90,20 @@ abstract public class KeelHttpServer extends KeelVerticleImpl implements Closeab
     }
 
     /**
+     * Override this method to use a customized issue record center.
+     *
+     * @since 4.1.5
+     */
+    public KeelIssueRecordCenter getIssueRecordCenter() {
+        return KeelIssueRecordCenter.outputCenter();
+    }
+
+    /**
      * @since 4.0.2
      */
     @Nonnull
     protected KeelIssueRecorder<KeelEventLog> buildHttpServerIssueRecorder() {
-        return KeelIssueRecordCenter.outputCenter().generateIssueRecorder("KeelHttpServer", KeelEventLog::new);
+        return getIssueRecordCenter().generateIssueRecorder("KeelHttpServer", KeelEventLog::new);
     }
 
     /**

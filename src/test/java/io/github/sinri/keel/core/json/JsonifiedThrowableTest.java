@@ -221,6 +221,8 @@ class JsonifiedThrowableTest extends KeelJUnit5Test {
         JsonifiedThrowable jsonifiedThrowable = JsonifiedThrowable.wrap(simpleException);
         String jsonExpression = jsonifiedThrowable.toJsonExpression();
 
+        getUnitTestLogger().info("jsonExpression: "+jsonExpression);
+
         assertNotNull(jsonExpression);
         assertTrue(jsonExpression.contains("java.lang.RuntimeException"));
         assertTrue(jsonExpression.contains("这是一个简单的运行时异常"));
@@ -233,6 +235,8 @@ class JsonifiedThrowableTest extends KeelJUnit5Test {
         // 测试转换为格式化的JSON字符串
         JsonifiedThrowable jsonifiedThrowable = JsonifiedThrowable.wrap(simpleException);
         String formattedJson = jsonifiedThrowable.toFormattedJsonExpression();
+
+        getUnitTestLogger().info("formattedJson: "+formattedJson);
 
         assertNotNull(formattedJson);
         assertTrue(formattedJson.contains("java.lang.RuntimeException"));

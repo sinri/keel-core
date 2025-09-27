@@ -20,7 +20,11 @@ public interface JsonSerializable {
      * Should return same content with {@link JsonSerializable#toJsonExpression()}
      *
      * @return The JSON Object expression.
+     * @see JsonSerializable#toJsonExpression()
+     * @deprecated do not rely on this method to retrieve JSON expression, use
+     *         {@link JsonSerializable#toJsonExpression()} instead to avoid risks.
      */
+    @Deprecated(since = "4.1.5")
     @Override
     String toString();
 

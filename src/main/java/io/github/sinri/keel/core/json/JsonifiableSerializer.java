@@ -27,12 +27,12 @@ public class JsonifiableSerializer extends JsonSerializer<JsonSerializable> {
     public static void register() {
         // 注册序列化器
         DatabindCodec.mapper().registerModule(new SimpleModule()
-                .addSerializer(UnmodifiableJsonifiableEntity.class, new JsonifiableSerializer()));
+                .addSerializer(JsonSerializable.class, new JsonifiableSerializer()));
     }
 
     @Override
     public void serialize(JsonSerializable value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-        JsonNode jsonNode = objectMapper.readTree(value.toString());
+        JsonNode jsonNode = objectMapper.readTree(value.toJsonExpression());
         gen.writeTree(jsonNode);
     }
 }

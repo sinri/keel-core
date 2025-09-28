@@ -20,7 +20,7 @@ public abstract class KeelWebResponseExtractor<T> {
     private final int responseStatusCode;
     private final @Nullable Buffer responseBody;
 
-    public KeelWebResponseExtractor(@Nonnull String requestLabel, HttpResponse<Buffer> response) {
+    public KeelWebResponseExtractor(@Nonnull String requestLabel, @Nonnull HttpResponse<Buffer> response) {
         this(requestLabel, response.statusCode(), response.body());
     }
 

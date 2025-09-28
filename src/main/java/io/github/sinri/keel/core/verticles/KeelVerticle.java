@@ -13,10 +13,15 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 /**
  * An extension of the {@link Verticle} interface, providing additional functionality and convenience methods.
  * This interface is designed to be implemented by verticles that are part of the Keel framework.
+ * <p>
+ * Note: a possibility to base this class on {@link Deployable}.
  *
  * @since 3.2.0
  */
 public interface KeelVerticle extends Verticle {
+
+
+    String CONFIG_KEY_OF_VERTICLE_IDENTITY = "verticle_identity";
 
     /**
      * Creates a new instance of {@link KeelVerticle} that wraps the provided start future supplier.
@@ -63,7 +68,6 @@ public interface KeelVerticle extends Verticle {
      */
     @Nullable
     String deploymentID();
-
 
     /**
      * Retrieves the configuration for this verticle.
@@ -123,5 +127,29 @@ public interface KeelVerticle extends Verticle {
             throw new IllegalStateException("This verticle has not been deployed yet!");
         }
         return Keel.getVertx().undeploy(deploymentID);
+    }
+
+    /**
+     * Retrieves the unique identifier or "identity" of the current verticle instance.
+     * The identity is determined by checking the configuration for a specific key, and if not found,
+     * it constructs a default identity string combining the fully qualified class name of the verticle
+     * and its deployment ID.
+     *
+     * @return the identity of the verticle as a string. If the configuration key is absent or null,
+     *         a string in the format of "className@deploymentID" is returned.
+     * @since 4.1.5
+     */
+    @Nonnull
+    default String verticleIdentity() {
+        String mark = this.getClass().getName();
+        JsonObject config = config();
+        if (config != null) {
+            String s = config.getString(CONFIG_KEY_OF_VERTICLE_IDENTITY);
+            if (s != null) {
+                mark = s;
+            }
+        }
+
+        return String.format("%s@%s", mark, deploymentID());
     }
 }

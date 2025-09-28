@@ -6,7 +6,9 @@ import io.vertx.core.Promise;
 import io.vertx.core.ThreadingModel;
 import io.vertx.core.json.JsonObject;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.UUID;
 
 /**
  * An abstract implementation of the {@link KeelVerticle} interface, extending from {@link AbstractVerticle}.
@@ -22,10 +24,14 @@ import javax.annotation.Nullable;
  * {@code start(Promise<Void> startPromise)}
  * method is implemented to handle the asynchronous startup process, including calling the `startVerticle` method
  * and handling the completion or failure of the startup process.
+ * <p>
+ * Note: a possibility to base this class on {@link io.vertx.core.VerticleBase}.
  *
  * @since 4.0.2 remove the logging embeddings.
  */
 public abstract class KeelVerticleImpl extends AbstractVerticle implements KeelVerticle {
+
+    private String deploymentInstanceCode;
 
     /**
      * Retrieves the threading model associated with the current context of the verticle.
@@ -35,6 +41,7 @@ public abstract class KeelVerticleImpl extends AbstractVerticle implements KeelV
      */
     @Override
     @Nullable
+
     public final ThreadingModel contextThreadModel() {
         if (this.context == null) return null;
         return this.context.threadingModel();
@@ -87,6 +94,7 @@ public abstract class KeelVerticleImpl extends AbstractVerticle implements KeelV
         Future.succeededFuture()
               .compose(v -> {
                   // start();
+                  deploymentInstanceCode = UUID.randomUUID().toString();
                   return startVerticle();
               })
               .andThen(ar -> {
@@ -106,4 +114,11 @@ public abstract class KeelVerticleImpl extends AbstractVerticle implements KeelV
      *         or fails with an exception if the startup process fails
      */
     protected abstract Future<Void> startVerticle();
+
+    @Nonnull
+    @Override
+    public String verticleIdentity() {
+        return KeelVerticle.super.verticleIdentity()
+                + ":" + deploymentInstanceCode;
+    }
 }

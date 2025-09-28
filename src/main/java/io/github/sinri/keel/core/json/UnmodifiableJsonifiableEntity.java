@@ -4,17 +4,41 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.Shareable;
 
 import javax.annotation.Nonnull;
+import java.lang.reflect.InvocationTargetException;
 
 
 /**
  * An interface representing an unmodifiable entity that can be converted to a JSON object.
  * This interface extends {@link Iterable} and {@link Shareable}, providing methods to read various types of values from
  * the underlying JSON structure.
+ * <p>
+ * The implementation is expected to provide a constructor accept one only parameter as {@link JsonObject}.
  *
  * @since 3.0.0
  */
 public interface UnmodifiableJsonifiableEntity
         extends JsonObjectReadable, JsonSerializable, Shareable {
+
+    /**
+     * Wraps a {@link JsonObject} into an instance of the specified class, which must be a subtype of
+     * {@link UnmodifiableJsonifiableEntity}. The specified class must have a constructor that accepts a
+     * {@link JsonObject} as its parameter.
+     *
+     * @param <U>        the type of the class to wrap the {@link JsonObject} into, extending
+     *                   {@link UnmodifiableJsonifiableEntity}
+     * @param jsonObject a non-null {@link JsonObject} that will be wrapped
+     * @param clazz      the class type of the resulting object, must have a constructor accepting a {@link JsonObject}
+     * @return an instance of the specified class wrapping the provided {@link JsonObject}
+     * @throws NoSuchMethodException     if the specified class does not have the required constructor
+     * @throws InvocationTargetException if the constructor throws an exception
+     * @throws InstantiationException    if the specified class cannot be instantiated
+     * @throws IllegalAccessException    if the constructor is not accessible
+     * @since 4.1.5
+     */
+    static <U extends UnmodifiableJsonifiableEntity> U wrap(@Nonnull JsonObject jsonObject, Class<U> clazz) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        return clazz.getConstructor(JsonObject.class).newInstance(jsonObject);
+    }
+
     static UnmodifiableJsonifiableEntity wrap(@Nonnull JsonObject jsonObject) {
         return new UnmodifiableJsonifiableEntityImpl(jsonObject);
     }

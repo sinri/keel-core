@@ -39,4 +39,14 @@ public class JsonifiableDataUnitImpl implements JsonifiableDataUnit {
     public String toFormattedJsonExpression() {
         return jsonObject.encodePrettily();
     }
+
+    /**
+     * As of 4.1.5, provide default implementation.
+     *
+     * @return a JSON expression of this data unit, following {@link #toJsonExpression()}.
+     */
+    @Override
+    public String toString() {
+        return toJsonExpression();
+    }
 }

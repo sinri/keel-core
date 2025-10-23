@@ -9,6 +9,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -94,8 +95,10 @@ public class KeelReflectionHelper {
      * @since 3.0.6
      * @since 3.2.12.1 rewrite
      */
-    public <R> Set<Class<? extends R>> seekClassDescendantsInPackage(@Nonnull String packageName,
-                                                                     @Nonnull Class<R> baseClass) {
+    public <R> Set<Class<? extends R>> seekClassDescendantsInPackage(
+            @Nonnull String packageName,
+            @Nonnull Class<R> baseClass
+    ) {
         // Reflections reflections = new Reflections(packageName);
         // return reflections.getSubTypesOf(baseClass);
 
@@ -103,6 +106,7 @@ public class KeelReflectionHelper {
 
         List<String> classPathList = Keel.fileHelper().getClassPathList();
         for (String classPath : classPathList) {
+            Keel.getLogger().debug("[1] Seeking classes in class path: " + classPath);
             if (classPath.endsWith(".jar")) {
                 Set<Class<? extends R>> classes = seekClassDescendantsInPackageForProvidedJar(classPath, packageName,
                         baseClass);
@@ -117,6 +121,8 @@ public class KeelReflectionHelper {
     }
 
     /**
+     * As of 4.1.5, use {@link ClassLoader#getResources(String)} to fix the bug that test scope is not supported.
+     *
      * @since 3.2.11
      */
     protected <R> Set<Class<? extends R>> seekClassDescendantsInPackageForFileSystem(
@@ -127,16 +133,26 @@ public class KeelReflectionHelper {
         // in file system
 
         String packagePath = packageName.replace('.', File.separatorChar);
+        Keel.getLogger().debug("[2] Seeking classes in package through file system: " + packagePath);
         try {
             // Assuming classes are in a directory on the file system (e.g., not in a JAR)
-            URL resource = classLoader.getResource(packagePath);
-            if (resource != null) {
+            Enumeration<URL> resources = classLoader.getResources(packagePath);
+            if (!resources.hasMoreElements()) {
+                Keel.getLogger()
+                    .debug("classLoader.getResource found null for package through file system: " + packagePath);
+            }
+            while (resources.hasMoreElements()) {
+                var resource = resources.nextElement();
+                Keel.getLogger().debug("[3] resource: " + resource.toString());
+
                 URI uri = resource.toURI();
                 Path startPath = Paths.get(uri);
+                Keel.getLogger().debug("[4] startPath: " + startPath);
                 Files.walkFileTree(startPath, new SimpleFileVisitor<>() {
                     @Nonnull
                     @Override
                     public FileVisitResult visitFile(@Nonnull Path file, @Nonnull BasicFileAttributes attrs) {
+                        Keel.getLogger().debug("[5] Visiting file: " + file);
                         if (file.toString().endsWith(".class")) {
                             String className = file.toString().replace(".class", "").replace(File.separator, ".");
                             className = className.substring(className.indexOf(packageName));
@@ -163,6 +179,7 @@ public class KeelReflectionHelper {
                         return FileVisitResult.CONTINUE;
                     }
                 });
+
             }
         } catch (Exception e) {
             Keel.getLogger().exception(e);

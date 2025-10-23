@@ -44,7 +44,7 @@ class KeelReflectionHelperTest extends KeelJUnit5Test {
 
     // Test classes for inheritance testing
     @TestAnnotation("base")
-    static class BaseClass {
+    public static class BaseClass {
         @TestAnnotation("baseMethod")
         public void baseMethod() {}
     }
@@ -52,16 +52,16 @@ class KeelReflectionHelperTest extends KeelJUnit5Test {
     @TestAnnotation("derived")
     @TestRepeatableAnnotation("first")
     @TestRepeatableAnnotation("second")
-    static class DerivedClass extends BaseClass {
+    public static class DerivedClass extends BaseClass {
         @TestAnnotation("derivedMethod")
         public void derivedMethod() {}
     }
 
-    static class AnotherDerivedClass extends BaseClass {
+    public static class AnotherDerivedClass extends BaseClass {
         public void anotherMethod() {}
     }
 
-    static class UnrelatedClass {
+    public static class UnrelatedClass {
         public void unrelatedMethod() {}
     }
 

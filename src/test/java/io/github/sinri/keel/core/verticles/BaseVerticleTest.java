@@ -22,11 +22,17 @@ public class BaseVerticleTest extends KeelJUnit5Test {
 
     @Test
     public void test1(VertxTestContext testContext) {
-        Keel.getVertx().deployVerticle(new V())
+        var v = new V();
+        Keel.getVertx().deployVerticle(v)
             .andThen(ar -> {
                 getUnitTestLogger().info("deployed: " + ar.result());
+                Keel.getVertx().undeploy(ar.result())
+                    .onSuccess(undeployed -> {
+                        getUnitTestLogger().info("undeployed, id: " + v.deploymentID());
+                    });
             });
         Keel.getVertx().setTimer(5000L, t -> {
+            getUnitTestLogger().info("slept, id: " + v.deploymentID());
             testContext.completeNow();
         });
     }

@@ -6,8 +6,8 @@
 
     <groupId>io.github.sinri</groupId>
     <artifactId>Keel</artifactId>
-    <!--    <version>4.1.5-SNAPSHOT</version>-->
-    <version>4.1.5-rc.4</version>
+    <version>4.1.5-SNAPSHOT</version>
+    <!--    <version>4.1.5-rc.4</version>-->
 
     <name>Keel</name>
     <description>
@@ -38,7 +38,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <vertxVersion>5.0.4</vertxVersion>
+        <vertxVersion>5.0.5</vertxVersion>
         <commonmarkVersion>0.21.0</commonmarkVersion>
         <jacksonVersion>2.18.2</jacksonVersion>
         <poiVersion>5.4.1</poiVersion>

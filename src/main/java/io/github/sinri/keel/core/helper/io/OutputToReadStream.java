@@ -27,12 +27,12 @@ import java.util.concurrent.atomic.AtomicReference;
  * It is recommended to use this class in the context of a blocking try-with-resources block, to
  * ensure that streams are closed properly. For example:
  *
- * <tt><pre>
+ * <pre>{@code
  * try (final OutputToReadStream os = new OutputToReadStream(vertx); final InputStream is = getInput()) {
  *   os.pipeTo(someWriteStream);
  *   is.transferTo(os);
  * }
- * </pre></tt>
+ * }</pre>
  *
  * @see <a href="https://github.com/cloudonix/vertx-java.io">original project by guss77 (MIT)</a>
  * @since 4.1.5

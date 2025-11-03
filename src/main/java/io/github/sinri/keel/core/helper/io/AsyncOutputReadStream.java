@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.helper.io;
 
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.ReadStream;
@@ -19,4 +20,9 @@ public interface AsyncOutputReadStream extends ReadStream<Buffer> {
 
     @Nonnull
     Promise<Long> getReadOverPromise();
+
+    @Nonnull
+    default Future<Long> readOver() {
+        return getReadOverPromise().future();
+    }
 }

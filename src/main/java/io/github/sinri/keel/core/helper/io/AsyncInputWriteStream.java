@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.helper.io;
 
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.WriteStream;
@@ -19,4 +20,9 @@ public interface AsyncInputWriteStream extends WriteStream<Buffer> {
 
     @Nonnull
     Promise<Void> getWriteOverPromise();
+
+    @Nonnull
+    default Future<Void> writeOver() {
+        return getWriteOverPromise().future();
+    }
 }

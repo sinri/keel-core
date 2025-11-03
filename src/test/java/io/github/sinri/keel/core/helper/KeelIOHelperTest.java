@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.helper;
 
+import io.github.sinri.keel.core.helper.io.AsyncOutputReadStream;
 import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -46,10 +47,10 @@ class KeelIOHelperTest extends KeelJUnit5Test {
         byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
         InputStream is = new ByteArrayInputStream(bytes);
 
-        Promise<Long> transferred = Promise.promise();
+
         ByteArrayOutputStream collector = new ByteArrayOutputStream();
 
-        helper.toReadStream(is, rs -> {
+        AsyncOutputReadStream readStream = helper.toReadStream(is, rs -> {
             rs.exceptionHandler(testContext::failNow);
             rs.handler(buf -> {
                 try {
@@ -61,7 +62,8 @@ class KeelIOHelperTest extends KeelJUnit5Test {
             rs.endHandler(v -> {
                 // end of stream reached
             });
-        }, transferred);
+        });
+        Promise<Long> transferred = readStream.getReadOverPromise();
 
         transferred.future().onComplete(ar -> {
             if (ar.failed()) {
@@ -90,16 +92,17 @@ class KeelIOHelperTest extends KeelJUnit5Test {
             }
         };
 
-        Promise<Long> transferred = Promise.promise();
+
         AtomicReference<Throwable> rsError = new AtomicReference<>();
 
-        helper.toReadStream(failingIs, rs -> {
+        AsyncOutputReadStream readStream = helper.toReadStream(failingIs, rs -> {
             rs.exceptionHandler(rsError::set);
             rs.handler(buf -> {
             }); // no-op
             rs.endHandler(v -> {
             });
-        }, transferred);
+        });
+        Promise<Long> transferred = readStream.getReadOverPromise();
 
         transferred.future().onComplete(ar -> {
             assertTrue(ar.failed(), "Promise should fail when InputStream throws");
@@ -116,10 +119,11 @@ class KeelIOHelperTest extends KeelJUnit5Test {
         var helper = KeelIOHelper.getInstance();
         ByteArrayOutputStream os = new ByteArrayOutputStream();
 
-        Promise<Void> completed = Promise.promise();
+
         var ws = helper.toWriteStream(os, writeStream -> {
             writeStream.exceptionHandler(testContext::failNow);
-        }, completed);
+        });
+        Promise<Void> completed = ws.getWriteOverPromise();
 
         String s1 = "Alpha";
         String s2 = "Beta";
@@ -153,11 +157,12 @@ class KeelIOHelperTest extends KeelJUnit5Test {
             }
         };
 
-        Promise<Void> completed = Promise.promise();
+
         AtomicReference<Throwable> wsError = new AtomicReference<>();
         var ws = helper.toWriteStream(failingOs, writeStream -> {
             writeStream.exceptionHandler(wsError::set);
-        }, completed);
+        });
+        Promise<Void> completed = ws.getWriteOverPromise();
 
         ws.write(Buffer.buffer("data"))
           .compose(v -> ws.end());

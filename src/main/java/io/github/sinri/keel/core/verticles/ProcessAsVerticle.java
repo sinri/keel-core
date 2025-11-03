@@ -3,7 +3,6 @@ package io.github.sinri.keel.core.verticles;
 import io.github.sinri.keel.core.TechnicalPreview;
 import io.github.sinri.keel.core.helper.io.OutputToReadStream;
 import io.vertx.core.*;
-import io.vertx.core.buffer.Buffer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -20,24 +19,26 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 @TechnicalPreview(since = "4.1.5")
 public class ProcessAsVerticle extends KeelVerticleImpl {
-    private static final long IO_AWAIT_MS = 10L;
+    // private static final long IO_AWAIT_MS = 10L;
     @Nonnull
     private final ProcessBuilder processBuilder;
     @Nullable
-    private final Function<Buffer, Future<Void>> stdoutProcessor;
+    private final Handler<OutputToReadStream> stdoutStreamHandler;
     @Nullable
-    private final Function<Buffer, Future<Void>> stderrProcessor;
+    private final Handler<OutputToReadStream> stderrStreamHandler;
     @Nullable
     private final Function<Process, Future<Void>> processExitProcessor;
     @Nullable
     private volatile Process process;
+    private OutputToReadStream stdoutStream;
+    private OutputToReadStream stderrStream;
 
     public ProcessAsVerticle(
             @Nonnull List<String> command,
             @Nullable File workingDirectory,
             @Nullable Handler<Map<String, String>> environmentHandler,
-            @Nullable Function<Buffer, Future<Void>> stdoutProcessor,
-            @Nullable Function<Buffer, Future<Void>> stderrProcessor,
+            @Nullable Handler<OutputToReadStream> stdoutStreamHandler,
+            @Nullable Handler<OutputToReadStream> stderrStreamHandler,
             @Nullable Function<Process, Future<Void>> processExitProcessor) {
         if (command.isEmpty()) {
             throw new IllegalArgumentException("Command is empty!");
@@ -54,46 +55,64 @@ public class ProcessAsVerticle extends KeelVerticleImpl {
             var env = processBuilder.environment();
             environmentHandler.handle(env);
         }
-        this.stdoutProcessor = stdoutProcessor;
-        this.stderrProcessor = stderrProcessor;
+        this.stdoutStreamHandler = stdoutStreamHandler;
+        this.stderrStreamHandler = stderrStreamHandler;
         this.processExitProcessor = processExitProcessor;
     }
 
-    private static void processProcessOutputStream(
-            Process process,
+    private static Future<OutputToReadStream> processProcessOutputStream(
             InputStream inputStream,
-            Function<Buffer, Future<Void>> outputProcessor
+            //Function<Buffer, Future<Void>> outputProcessor,
+            Handler<OutputToReadStream> streamHandler
     ) {
-        if (outputProcessor != null) {
-            OutputToReadStream outputToReadStream = new OutputToReadStream(Keel.getVertx());
-            outputToReadStream.handler(buffer -> {
-                                  outputProcessor.apply(buffer);
-                              })
-                              .endHandler(v -> {
-                                  Keel.getLogger().fatal("processProcessOutputStream endHandler");
-                              })
-                              .exceptionHandler(throwable -> {
-                                  Keel.getLogger().exception(throwable, "processProcessOutputStream exceptionHandler");
-                              });
-
-            Keel.getVertx().executeBlocking(() -> {
+        if (streamHandler != null) {
+            return Keel.getVertx().executeBlocking(() -> {
                 try {
-                    var x = inputStream.transferTo(outputToReadStream);
-                    // Keel.getLogger().fatal("processProcessOutputStream transferTo end: " + x);
-                    return null;
+                    OutputToReadStream outputToReadStream = new OutputToReadStream();
+                    outputToReadStream.pause();
+                    streamHandler.handle(outputToReadStream);
+                    //                    outputToReadStream.handler(outputProcessor::apply)
+                    //                                      .endHandler(v -> {
+                    //                                          //Keel.getLogger().fatal("processProcessOutputStream endHandler");
+                    //                                          try {
+                    //                                              outputToReadStream.close();
+                    //                                          } catch (IOException e) {
+                    //                                              throw new RuntimeException(e);
+                    //                                          }
+                    //                                      })
+                    //                                      .exceptionHandler(throwable -> {
+                    //                                          Keel.getLogger()
+                    //                                              .exception(throwable, "processProcessOutputStream exceptionHandler");
+                    //                                          try {
+                    //                                              outputToReadStream.close();
+                    //                                          } catch (IOException e) {
+                    //                                              throw new RuntimeException(e);
+                    //                                          }
+                    //                                      });
+                    outputToReadStream.resume();
+                    inputStream.transferTo(outputToReadStream);
+                    return outputToReadStream;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             });
         }
+        // stream is ignored
+        return Future.succeededFuture(null);
     }
 
     @Override
     protected Future<Void> startVerticle() {
         try {
             var process = processBuilder.start();
-            processProcessOutputStream(process, process.getInputStream(), stdoutProcessor);
-            processProcessOutputStream(process, process.getErrorStream(), stderrProcessor);
+            processProcessOutputStream(process.getInputStream(), stdoutStreamHandler)
+                    .onSuccess(stream -> {
+                        this.stdoutStream = stream;
+                    });
+            processProcessOutputStream(process.getErrorStream(), stderrStreamHandler)
+                    .onSuccess(stream -> {
+                        this.stderrStream = stream;
+                    });
 
             CompletableFuture<Process> processCompletableFuture = process.onExit();
             Keel.asyncTransformCompletableFuture(processCompletableFuture)
@@ -139,10 +158,22 @@ public class ProcessAsVerticle extends KeelVerticleImpl {
             if (process != null) {
                 var p = Objects.requireNonNull(process);
                 if (p.isAlive()) {
-                    p.destroyForcibly();
-                    p.getOutputStream().close();
-                    p.getInputStream().close();
-                    p.getErrorStream().close();
+                    try {
+                        p.destroyForcibly();
+                    } catch (Throwable ignored) {
+                    }
+                }
+            }
+            if (this.stdoutStream != null) {
+                try {
+                    this.stdoutStream.close();
+                } catch (Throwable ignored) {
+                }
+            }
+            if (this.stderrStream != null) {
+                try {
+                    this.stderrStream.close();
+                } catch (Throwable ignored) {
                 }
             }
         } catch (Exception e) {

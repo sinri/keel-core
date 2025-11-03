@@ -4,7 +4,6 @@ import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.Test;
@@ -65,16 +64,18 @@ class ProcessAsVerticleTest extends KeelJUnit5Test {
                 null,
                 null,
                 // stdout processor
-                (Buffer buf) -> {
-                    getUnitTestLogger().info("stdout buffer: " + buf.toString());
-                    stdout.append(buf);
-                    return Future.succeededFuture();
+                stdoutStream -> {
+                    stdoutStream.handler(stdout::append)
+                                .exceptionHandler(throwable -> {
+                                    getUnitTestLogger().exception(throwable, "stdoutStream exceptionHandler");
+                                });
                 },
                 // stderr processor
-                (Buffer buf) -> {
-                    getUnitTestLogger().info("stderr buffer: " + buf.toString());
-                    stderr.append(buf);
-                    return Future.succeededFuture();
+                stderrStream -> {
+                    stderrStream.handler(stderr::append)
+                                .exceptionHandler(throwable -> {
+                                    getUnitTestLogger().exception(throwable, "stderrStream exceptionHandler");
+                                });
                 },
                 // exit processor
                 (Process p) -> {
@@ -119,9 +120,9 @@ class ProcessAsVerticleTest extends KeelJUnit5Test {
                 null,
                 null,
                 // stdout
-                (Buffer buf) -> Future.succeededFuture(),
+                null,
                 // stderr
-                (Buffer buf) -> Future.succeededFuture(),
+                null,
                 // on exit
                 (Process p) -> {
                     exitCalled.set(true);

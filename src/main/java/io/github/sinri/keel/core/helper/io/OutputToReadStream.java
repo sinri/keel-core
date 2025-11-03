@@ -15,6 +15,8 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
+
 /**
  * A conversion utility to help move data from a Java classic blocking IO to a Vert.x asynchronous Stream.
  * <p>
@@ -52,6 +54,10 @@ public class OutputToReadStream extends OutputStream implements ReadStream<Buffe
 
     public OutputToReadStream(Vertx vertx) {
         context = vertx.getOrCreateContext();
+    }
+
+    public OutputToReadStream() {
+        this(Keel.getVertx());
     }
 
     /**

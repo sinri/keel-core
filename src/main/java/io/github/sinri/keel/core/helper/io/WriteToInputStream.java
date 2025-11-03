@@ -12,6 +12,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static io.github.sinri.keel.facade.KeelInstance.Keel;
+
 /**
  * A conversion utility to help move data from a Vert.x asynchronous stream to Java classic blocking IO.
  * <p>
@@ -25,20 +27,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class WriteToInputStream extends InputStream implements WriteStream<Buffer> {
 
+    private final ConcurrentLinkedQueue<PendingWrite> buffer = new ConcurrentLinkedQueue<>();
+    private final AtomicBoolean everFull = new AtomicBoolean();
+    private final ConcurrentLinkedQueue<CountDownLatch> readsWaiting = new ConcurrentLinkedQueue<>();
+    private final Context context;
     private Handler<Void> drainHandler = __ -> {
     };
     private Handler<Throwable> errorHandler = t -> {
     };
     private volatile int maxSize = 1000;
     private volatile int maxBufferSize = Integer.MAX_VALUE;
-    private final ConcurrentLinkedQueue<PendingWrite> buffer = new ConcurrentLinkedQueue<>();
-    private final AtomicBoolean everFull = new AtomicBoolean();
     private volatile boolean closed = false;
-    private final ConcurrentLinkedQueue<CountDownLatch> readsWaiting = new ConcurrentLinkedQueue<>();
-    private final Context context;
 
     public WriteToInputStream(Vertx vertx) {
         context = vertx.getOrCreateContext();
+    }
+
+    public WriteToInputStream() {
+        this(Keel.getVertx());
     }
 
     /**

@@ -12,14 +12,12 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 @TechnicalPreview(since = "4.1.5")
 public class ProcessAsVerticle extends KeelVerticleImpl {
-    // private static final long IO_AWAIT_MS = 10L;
     @Nonnull
     private final ProcessBuilder processBuilder;
     @Nullable
@@ -62,7 +60,6 @@ public class ProcessAsVerticle extends KeelVerticleImpl {
 
     private static Future<OutputToReadStream> processProcessOutputStream(
             InputStream inputStream,
-            //Function<Buffer, Future<Void>> outputProcessor,
             Handler<OutputToReadStream> streamHandler
     ) {
         if (streamHandler != null) {
@@ -71,24 +68,6 @@ public class ProcessAsVerticle extends KeelVerticleImpl {
                     OutputToReadStream outputToReadStream = new OutputToReadStream();
                     outputToReadStream.pause();
                     streamHandler.handle(outputToReadStream);
-                    //                    outputToReadStream.handler(outputProcessor::apply)
-                    //                                      .endHandler(v -> {
-                    //                                          //Keel.getLogger().fatal("processProcessOutputStream endHandler");
-                    //                                          try {
-                    //                                              outputToReadStream.close();
-                    //                                          } catch (IOException e) {
-                    //                                              throw new RuntimeException(e);
-                    //                                          }
-                    //                                      })
-                    //                                      .exceptionHandler(throwable -> {
-                    //                                          Keel.getLogger()
-                    //                                              .exception(throwable, "processProcessOutputStream exceptionHandler");
-                    //                                          try {
-                    //                                              outputToReadStream.close();
-                    //                                          } catch (IOException e) {
-                    //                                              throw new RuntimeException(e);
-                    //                                          }
-                    //                                      });
                     outputToReadStream.resume();
                     inputStream.transferTo(outputToReadStream);
                     return outputToReadStream;
@@ -106,16 +85,11 @@ public class ProcessAsVerticle extends KeelVerticleImpl {
         try {
             var process = processBuilder.start();
             processProcessOutputStream(process.getInputStream(), stdoutStreamHandler)
-                    .onSuccess(stream -> {
-                        this.stdoutStream = stream;
-                    });
+                    .onSuccess(stream -> this.stdoutStream = stream);
             processProcessOutputStream(process.getErrorStream(), stderrStreamHandler)
-                    .onSuccess(stream -> {
-                        this.stderrStream = stream;
-                    });
+                    .onSuccess(stream -> this.stderrStream = stream);
 
-            CompletableFuture<Process> processCompletableFuture = process.onExit();
-            Keel.asyncTransformCompletableFuture(processCompletableFuture)
+            Keel.asyncTransformCompletableFuture(process.onExit())
                 .compose(exitedProcess -> {
                     if (this.processExitProcessor != null) {
                         return this.processExitProcessor.apply(exitedProcess);

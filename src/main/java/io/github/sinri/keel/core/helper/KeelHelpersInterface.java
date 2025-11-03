@@ -53,4 +53,11 @@ public interface KeelHelpersInterface {
     default KeelRandomHelper randomHelper() {
         return KeelRandomHelper.getInstance();
     }
+
+    /**
+     * @since 4.1.5
+     */
+    default KeelIOHelper ioHelper() {
+        return KeelIOHelper.getInstance();
+    }
 }

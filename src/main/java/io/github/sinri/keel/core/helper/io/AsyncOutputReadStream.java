@@ -5,6 +5,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.ReadStream;
 import io.vertx.core.streams.WriteStream;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -30,34 +31,51 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * ensure that streams are closed properly. For example:
  *
  * <pre>{@code
- * try (final OutputToReadStream os = new OutputToReadStream(vertx); final InputStream is = getInput()) {
+ * try (final AsyncOutputReadStream os = new AsyncOutputReadStream(vertx); final InputStream is = getInput()) {
  *   os.pipeTo(someWriteStream);
  *   is.transferTo(os);
  * }
  * }</pre>
  *
- * @see <a href="https://github.com/cloudonix/vertx-java.io">original project by guss77 (MIT)</a>
+ * <pre>{@code
+ *   final AsyncOutputReadStream os = new AsyncOutputReadStream(vertx);
+ *   try (final InputStream is = getInput()) {
+ *     os.handler(...);
+ *     os.wrapInputStream(is);
+ *   }
+ * }</pre>
+ *
+ * @see <a href="https://github.com/cloudonix/vertx-java.io">original project by guss77 (MIT): OutputToReadStream</a>
  * @since 4.1.5
  */
-public class OutputToReadStream extends OutputStream implements ReadStream<Buffer> {
+public class AsyncOutputReadStream extends OutputStream implements ReadStream<Buffer> {
 
     private final AtomicReference<CountDownLatch> paused = new AtomicReference<>(new CountDownLatch(0));
-    private boolean closed;
     private final AtomicLong demand = new AtomicLong(0);
+    private final Context context;
+    private boolean closed;
     private Handler<Void> endHandler = v -> {
     };
     private Handler<Buffer> dataHandler = d -> {
     };
     private Handler<Throwable> errorHandler = t -> {
     };
-    private final Context context;
+    private boolean started = false;
 
-    public OutputToReadStream(Vertx vertx) {
+    public AsyncOutputReadStream(Vertx vertx) {
         context = vertx.getOrCreateContext();
     }
 
-    public OutputToReadStream() {
+    public AsyncOutputReadStream() {
         this(Keel.getVertx());
+    }
+
+    public ReadStream<Buffer> wrapInputStream(@Nonnull InputStream inputStream) {
+        if (started) {
+            throw new IllegalStateException("Stream has already started");
+        }
+        Keel.getVertx().executeBlocking(() -> inputStream.transferTo(this));
+        return this;
     }
 
     /**
@@ -124,7 +142,7 @@ public class OutputToReadStream extends OutputStream implements ReadStream<Buffe
     /* ReadStream stuff */
 
     @Override
-    public OutputToReadStream exceptionHandler(Handler<Throwable> handler) {
+    public AsyncOutputReadStream exceptionHandler(Handler<Throwable> handler) {
         // we are usually not propagating exceptions as OutputStream has no mechanism for propagating exceptions down,
         // except when wrapping an input stream, in which case we can forward InputStream read errors to the error handler.
         errorHandler = Objects.requireNonNullElse(handler, t -> {
@@ -133,33 +151,33 @@ public class OutputToReadStream extends OutputStream implements ReadStream<Buffe
     }
 
     @Override
-    public OutputToReadStream handler(Handler<Buffer> handler) {
+    public AsyncOutputReadStream handler(Handler<Buffer> handler) {
         this.dataHandler = Objects.requireNonNullElse(handler, d -> {
         });
         return this;
     }
 
     @Override
-    public OutputToReadStream pause() {
+    public AsyncOutputReadStream pause() {
         paused.getAndSet(new CountDownLatch(1)).countDown();
         return this;
     }
 
     @Override
-    public OutputToReadStream resume() {
+    public AsyncOutputReadStream resume() {
         paused.getAndSet(new CountDownLatch(0)).countDown();
         return this;
     }
 
     @Override
-    public OutputToReadStream fetch(long amount) {
+    public AsyncOutputReadStream fetch(long amount) {
         resume();
         demand.addAndGet(amount);
         return null;
     }
 
     @Override
-    public OutputToReadStream endHandler(Handler<Void> endHandler) {
+    public AsyncOutputReadStream endHandler(Handler<Void> endHandler) {
         this.endHandler = Objects.requireNonNullElse(endHandler, v -> {
         });
         return this;
@@ -208,6 +226,7 @@ public class OutputToReadStream extends OutputStream implements ReadStream<Buffe
 
     private void push(Buffer data) {
         // Keel.getLogger().fatal("OutputToReadStream push data: "+data);
+        this.started = true;
 
         var awaiter = new CountDownLatch(1);
         context.runOnContext(v -> {
@@ -227,4 +246,5 @@ public class OutputToReadStream extends OutputStream implements ReadStream<Buffe
         } catch (InterruptedException e) {
         }
     }
+
 }

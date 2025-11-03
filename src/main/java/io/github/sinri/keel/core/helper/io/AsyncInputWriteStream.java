@@ -22,10 +22,10 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * <p>
  * The default queue size is 1000 writes, but it can be changed using {@link #setWriteQueueMaxSize(int)}
  *
- * @see <a href="https://github.com/cloudonix/vertx-java.io">original project by guss77 (MIT)</a>
+ * @see <a href="https://github.com/cloudonix/vertx-java.io">original project by guss77 (MIT): WriteToInputStream</a>
  * @since 4.1.5
  */
-public class WriteToInputStream extends InputStream implements WriteStream<Buffer> {
+public class AsyncInputWriteStream extends InputStream implements WriteStream<Buffer> {
 
     private final ConcurrentLinkedQueue<PendingWrite> buffer = new ConcurrentLinkedQueue<>();
     private final AtomicBoolean everFull = new AtomicBoolean();
@@ -39,11 +39,11 @@ public class WriteToInputStream extends InputStream implements WriteStream<Buffe
     private volatile int maxBufferSize = Integer.MAX_VALUE;
     private volatile boolean closed = false;
 
-    public WriteToInputStream(Vertx vertx) {
+    public AsyncInputWriteStream(Vertx vertx) {
         context = vertx.getOrCreateContext();
     }
 
-    public WriteToInputStream() {
+    public AsyncInputWriteStream() {
         this(Keel.getVertx());
     }
 
@@ -70,7 +70,7 @@ public class WriteToInputStream extends InputStream implements WriteStream<Buffe
     }
 
     @Override
-    public WriteToInputStream drainHandler(Handler<Void> handler) {
+    public AsyncInputWriteStream drainHandler(Handler<Void> handler) {
         this.drainHandler = handler;
         return this;
     }
@@ -83,7 +83,7 @@ public class WriteToInputStream extends InputStream implements WriteStream<Buffe
     }
 
     @Override
-    public WriteToInputStream exceptionHandler(Handler<Throwable> handler) {
+    public AsyncInputWriteStream exceptionHandler(Handler<Throwable> handler) {
         // we don't have a way to propagate errors as we don't actually handle writing out and InputStream provides no feedback mechanism.
         errorHandler = handler;
         return this;
@@ -109,12 +109,12 @@ public class WriteToInputStream extends InputStream implements WriteStream<Buffe
     }
 
     @Override
-    public WriteToInputStream setWriteQueueMaxSize(int maxSize) {
+    public AsyncInputWriteStream setWriteQueueMaxSize(int maxSize) {
         this.maxSize = maxSize;
         return this;
     }
 
-    public WriteToInputStream setMaxChunkSize(int maxSize) {
+    public AsyncInputWriteStream setMaxChunkSize(int maxSize) {
         maxBufferSize = maxSize;
         return this;
     }

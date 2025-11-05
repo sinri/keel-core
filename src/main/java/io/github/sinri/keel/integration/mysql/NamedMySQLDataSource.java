@@ -101,7 +101,6 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
     private void initializeConnection(
             @Nonnull SqlConnection sqlConnection,
             @Nullable Function<SqlConnection, Future<Void>> connectionSetUpFunction
-            // AtomicReference<String> fullVersionRef
     ) {
         Future.succeededFuture()
               .compose(v -> {
@@ -259,7 +258,7 @@ public final class NamedMySQLDataSource<C extends NamedMySQLConnection> {
         this.pool.close().onComplete(ar);
     }
 
-    protected Future<C> fetchMySQLConnection() {
+    private Future<C> fetchMySQLConnection() {
         return Future.succeededFuture()
                      .compose(v -> pool.getConnection())
                      .compose(

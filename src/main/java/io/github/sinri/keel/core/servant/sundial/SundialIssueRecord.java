@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.servant.sundial;
 
-import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
+import io.github.sinri.keel.logger.issue.record.AbstractIssueRecord;
 import io.github.sinri.keel.utils.time.cron.ParsedCalenderElements;
 
 import javax.annotation.Nonnull;
@@ -9,7 +9,7 @@ import java.util.Calendar;
 /**
  * @since 4.0.0
  */
-public class SundialIssueRecord extends KeelIssueRecord<SundialIssueRecord> {
+public class SundialIssueRecord extends AbstractIssueRecord<SundialIssueRecord> {
     public static final String TopicSundial = "Sundial";
 
     public SundialIssueRecord() {

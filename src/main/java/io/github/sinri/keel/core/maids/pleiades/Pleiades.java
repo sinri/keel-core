@@ -2,7 +2,7 @@ package io.github.sinri.keel.core.maids.pleiades;
 
 import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
-import io.github.sinri.keel.logger.event.KeelEventLog;
+import io.github.sinri.keel.logger.issue.record.KeelEventLog;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;

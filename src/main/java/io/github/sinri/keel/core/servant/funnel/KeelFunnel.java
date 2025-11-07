@@ -1,8 +1,8 @@
 package io.github.sinri.keel.core.servant.funnel;
 
 import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
-import io.github.sinri.keel.logger.event.KeelEventLog;
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
+import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenterBuilder;
+import io.github.sinri.keel.logger.issue.record.KeelEventLog;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -42,7 +42,7 @@ public class KeelFunnel extends KeelVerticleImpl {
      */
     @Nonnull
     protected KeelIssueRecorder<KeelEventLog> buildFunnelLogger() {
-        return KeelIssueRecordCenter.outputCenter().generateIssueRecorder("Funnel", KeelEventLog::new);
+        return KeelIssueRecordCenterBuilder.outputCenter().generateIssueRecorder("Funnel", KeelEventLog::new);
     }
 
     /**

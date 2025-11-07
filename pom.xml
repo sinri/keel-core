@@ -52,6 +52,7 @@
             <groupId>io.github.sinri</groupId>
             <artifactId>keel-test</artifactId>
             <version>5.0.0-SNAPSHOT</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.sinri</groupId>

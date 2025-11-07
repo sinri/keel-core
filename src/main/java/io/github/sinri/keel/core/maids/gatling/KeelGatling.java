@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.maids.gatling;
 
 import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
-import io.github.sinri.keel.logger.event.KeelEventLog;
+import io.github.sinri.keel.logger.issue.record.KeelEventLog;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;

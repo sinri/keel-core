@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.servant.intravenous;
 
-import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
-import io.github.sinri.keel.facade.async.RepeatedlyCallTask;
+import io.github.sinri.keel.base.async.RepeatedlyCallTask;
+import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 

@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.maids.watchman;
 
-import io.github.sinri.keel.core.verticles.KeelVerticle;
+import io.github.sinri.keel.base.verticles.KeelVerticle;
 import io.vertx.core.Handler;
 
 /**

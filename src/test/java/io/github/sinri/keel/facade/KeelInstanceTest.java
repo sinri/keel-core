@@ -1,9 +1,7 @@
 package io.github.sinri.keel.facade;
 
-import io.github.sinri.keel.core.helper.KeelHelpersInterface;
 import io.github.sinri.keel.facade.async.KeelAsyncMixin;
 import io.github.sinri.keel.facade.tesuto.unit.KeelJUnit5Test;
-import io.github.sinri.keel.web.http.requester.KeelWebRequestMixin;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import io.vertx.junit5.VertxExtension;
@@ -163,6 +161,5 @@ class KeelInstanceTest extends KeelJUnit5Test {
         // 验证实现了必要的接口
         assertInstanceOf(KeelHelpersInterface.class, KeelInstance.Keel);
         assertInstanceOf(KeelAsyncMixin.class, KeelInstance.Keel);
-        assertInstanceOf(KeelWebRequestMixin.class, KeelInstance.Keel);
     }
 } 

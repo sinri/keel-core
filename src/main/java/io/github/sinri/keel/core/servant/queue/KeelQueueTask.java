@@ -1,15 +1,14 @@
 package io.github.sinri.keel.core.servant.queue;
 
-import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
+import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
+import io.github.sinri.keel.utils.ReflectionUtils;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
 
 import javax.annotation.Nonnull;
-
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 2.1
@@ -114,7 +113,7 @@ public abstract class KeelQueueTask extends KeelVerticleImpl {
         var deploymentOptions = new DeploymentOptions();
         if (this.isWorkerThreadRequired()) {
             deploymentOptions.setThreadingModel(ThreadingModel.WORKER);
-        } else if (Keel.reflectionHelper().isVirtualThreadsAvailable()) {
+        } else if (ReflectionUtils.isVirtualThreadsAvailable()) {
             deploymentOptions.setThreadingModel(ThreadingModel.VIRTUAL_THREAD);
         }
         return super.deployMe(deploymentOptions);

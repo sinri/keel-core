@@ -1,6 +1,6 @@
 package io.github.sinri.keel.facade.cli;
 
-import io.github.sinri.keel.core.TechnicalPreview;
+import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.core.json.JsonifiableSerializer;
 import io.github.sinri.keel.core.json.JsonifiedThrowable;
 

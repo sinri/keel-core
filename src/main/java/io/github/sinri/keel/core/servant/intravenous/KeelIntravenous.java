@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.servant.intravenous;
 
-import io.github.sinri.keel.core.verticles.KeelVerticle;
+import io.github.sinri.keel.base.verticles.KeelVerticle;
 import io.vertx.core.Future;
 
 import javax.annotation.Nonnull;

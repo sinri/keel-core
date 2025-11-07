@@ -1,6 +1,7 @@
 package io.github.sinri.keel.integration.elasticsearch;
 
-import io.github.sinri.keel.facade.configuration.KeelConfigElement;
+
+import io.github.sinri.keel.base.configuration.KeelConfigElement;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

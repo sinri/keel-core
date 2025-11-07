@@ -1,6 +1,6 @@
 package io.github.sinri.keel.facade.cli;
 
-import io.github.sinri.keel.core.TechnicalPreview;
+import io.github.sinri.keel.base.annotations.TechnicalPreview;
 
 /**
  * An exception that represents an error occurring during the parsing of command-line arguments

@@ -1,6 +1,6 @@
 package io.github.sinri.keel.integration.email.smtp;
 
-import io.github.sinri.keel.facade.configuration.KeelConfigElement;
+import io.github.sinri.keel.base.configuration.KeelConfigElement;
 import io.vertx.ext.mail.MailConfig;
 
 import javax.annotation.Nonnull;

@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.cache.impl;
 
-import io.github.sinri.keel.core.verticles.KeelVerticle;
+import io.github.sinri.keel.base.verticles.KeelVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;

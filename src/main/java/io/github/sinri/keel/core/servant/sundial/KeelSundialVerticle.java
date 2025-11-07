@@ -1,15 +1,14 @@
 package io.github.sinri.keel.core.servant.sundial;
 
-import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
+import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
+import io.github.sinri.keel.utils.ReflectionUtils;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
 
 import javax.annotation.Nonnull;
 import java.util.Calendar;
-
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 3.2.4
@@ -58,7 +57,7 @@ final class KeelSundialVerticle extends KeelVerticleImpl {
         var deploymentOptions = new DeploymentOptions();
         if (sundialPlan.isWorkerThreadRequired()) {
             deploymentOptions.setThreadingModel(ThreadingModel.WORKER);
-        } else if (Keel.reflectionHelper().isVirtualThreadsAvailable()) {
+        } else if (ReflectionUtils.isVirtualThreadsAvailable()) {
             deploymentOptions.setThreadingModel(ThreadingModel.VIRTUAL_THREAD);
         }
         return super.deployMe(deploymentOptions);

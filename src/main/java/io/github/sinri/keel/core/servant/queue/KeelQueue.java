@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.servant.queue;
 
-import io.github.sinri.keel.core.verticles.KeelVerticleImpl;
+import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
 import io.vertx.core.DeploymentOptions;

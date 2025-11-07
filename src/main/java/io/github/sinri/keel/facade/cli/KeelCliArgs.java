@@ -1,6 +1,7 @@
 package io.github.sinri.keel.facade.cli;
 
-import io.github.sinri.keel.core.TechnicalPreview;
+
+import io.github.sinri.keel.base.annotations.TechnicalPreview;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

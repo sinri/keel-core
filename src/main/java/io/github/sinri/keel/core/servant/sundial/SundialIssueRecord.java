@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.servant.sundial;
 
-import io.github.sinri.keel.core.cron.ParsedCalenderElements;
 import io.github.sinri.keel.logger.issue.record.KeelIssueRecord;
+import io.github.sinri.keel.utils.time.cron.ParsedCalenderElements;
 
 import javax.annotation.Nonnull;
 import java.util.Calendar;

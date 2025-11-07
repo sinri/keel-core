@@ -1,14 +1,13 @@
 package io.github.sinri.keel.facade;
 
-import io.github.sinri.keel.core.TechnicalPreview;
-import io.github.sinri.keel.core.helper.KeelHelpersInterface;
-import io.github.sinri.keel.facade.async.KeelAsyncMixin;
-import io.github.sinri.keel.facade.configuration.KeelConfigElement;
+import io.github.sinri.keel.base.KeelBase;
+import io.github.sinri.keel.base.annotations.TechnicalPreview;
+import io.github.sinri.keel.base.async.KeelAsyncMixin;
+import io.github.sinri.keel.base.configuration.KeelConfigElement;
 import io.github.sinri.keel.logger.KeelLogLevel;
 import io.github.sinri.keel.logger.event.KeelEventLog;
 import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
 import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
-import io.github.sinri.keel.web.http.requester.KeelWebRequestMixin;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -21,14 +20,11 @@ import java.util.Objects;
 
 /**
  * As of 4.0.0, make it final and implement KeelAsyncMixin.
- * <p>
- * As of 4.1.5, the interface {@link KeelWebRequestMixin} is deprecated and would not implement by this class in the
- * future.
  *
  * @since 3.1.0
  *
  */
-public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin, KeelWebRequestMixin {
+public final class KeelInstance implements KeelAsyncMixin {
     public final static KeelInstance Keel;
 
     static {
@@ -44,10 +40,6 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
     }
 
     /**
-     * @since 3.2.3
-     */
-    private final @Nonnull KeelConfigElement configuration;
-    /**
      * @since 4.1.1
      */
     private @Nonnull KeelIssueRecordCenter issueRecordCenter;
@@ -57,11 +49,9 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
      * @since 4.0.0
      */
     private KeelIssueRecorder<KeelEventLog> logger;
-    private @Nullable Vertx vertx;
     private @Nullable ClusterManager clusterManager;
 
     private KeelInstance() {
-        this.configuration = new KeelConfigElement("");
         setIssueRecordCenter(KeelIssueRecordCenter.outputCenter());
     }
 
@@ -75,12 +65,12 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
 
     @Nonnull
     public KeelConfigElement getConfiguration() {
-        return configuration;
+        return KeelBase.getConfiguration();
     }
 
     public @Nullable String config(@Nonnull String dotJoinedKeyChain) {
         String[] split = dotJoinedKeyChain.split("\\.");
-        KeelConfigElement keelConfigElement = this.configuration.extract(split);
+        KeelConfigElement keelConfigElement = this.getConfiguration().extract(split);
         if (keelConfigElement == null) {
             return null;
         }
@@ -88,13 +78,16 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
     }
 
     public @Nonnull Vertx getVertx() {
-        Objects.requireNonNull(vertx);
-        return vertx;
+        return KeelBase.getVertx();
     }
 
     @Nullable
     public ClusterManager getClusterManager() {
         return clusterManager;
+    }
+
+    public boolean isVertxInitialized() {
+        return KeelBase.isVertxInitialized();
     }
 
     public Future<Void> initializeVertx(@Nonnull VertxOptions vertxOptions) {
@@ -110,12 +103,13 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
         }
         this.clusterManager = clusterManager;
         if (this.clusterManager == null) {
-            this.vertx = Vertx.builder().with(vertxOptions).withClusterManager(null).build();
+            var vertx = Vertx.builder().with(vertxOptions).withClusterManager(null).build();
+            KeelBase.setVertx(vertx);
             return Future.succeededFuture();
         } else {
             return Vertx.builder().with(vertxOptions).withClusterManager(clusterManager).buildClustered()
-                        .compose(x -> {
-                            this.vertx = x;
+                        .compose(vertx -> {
+                            KeelBase.setVertx(vertx);
                             return Future.succeededFuture();
                         });
         }
@@ -126,7 +120,8 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
             throw new IllegalStateException("Vertx has been initialized!");
         }
         this.clusterManager = null;
-        this.vertx = Vertx.builder().with(vertxOptions).build();
+        var vertx = Vertx.builder().with(vertxOptions).build();
+        KeelBase.setVertx(vertx);
     }
 
     /**
@@ -138,19 +133,22 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
      */
     @TechnicalPreview(since = "4.1.1")
     public void initializeVertx(@Nonnull Vertx vertx) {
-        if (isVertxInitialized() && this.vertx != vertx) {
-            Keel.getLogger().info("Re-initialize Vertx from " + this.vertx + " to " + vertx + ".");
-            this.vertx.close();
-        }
-        this.vertx = vertx;
-    }
+        try {
+            Vertx vertxOld = this.getVertx();
+            if (Objects.equals(vertxOld, vertx)) {
+                return;
+            } else {
+                Keel.getLogger().info("Re-initialize Vertx from " + vertxOld + " to " + vertx + ".");
+                vertxOld.close();
+            }
+        } catch (NullPointerException ignored) {
 
-    public boolean isVertxInitialized() {
-        return vertx != null;
+        }
+        KeelBase.setVertx(vertx);
     }
 
     public boolean isRunningInVertxCluster() {
-        return isVertxInitialized() && getVertx().isClustered();
+        return getVertx().isClustered();
     }
 
     /**
@@ -182,11 +180,9 @@ public final class KeelInstance implements KeelHelpersInterface, KeelAsyncMixin,
         Promise<Void> promise = Promise.promise();
         promiseHandler.handle(promise);
         return promise.future()
-                      .compose(v -> {
-                          return getVertx().close();
-                      })
+                      .compose(v -> getVertx().close())
                       .compose(closed -> {
-                          this.vertx = null;
+                          KeelBase.setVertx(null);
                           this.clusterManager = null;
                           return Future.succeededFuture();
                       });

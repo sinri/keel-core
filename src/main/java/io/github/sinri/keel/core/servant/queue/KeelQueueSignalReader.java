@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.servant.queue;
 
-import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
+import io.github.sinri.keel.logger.api.issue.IssueRecorder;
 import io.vertx.core.Future;
 
 /**
@@ -10,7 +10,7 @@ public interface KeelQueueSignalReader {
     /**
      * @since 4.0.0
      */
-    KeelIssueRecorder<QueueManageIssueRecord> getQueueManageIssueRecorder();
+    IssueRecorder<QueueManageIssueRecord> getQueueManageIssueRecorder();
 
     Future<KeelQueueSignal> readSignal();
 }

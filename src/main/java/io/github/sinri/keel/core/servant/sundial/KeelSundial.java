@@ -1,13 +1,12 @@
 package io.github.sinri.keel.core.servant.sundial;
 
 import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
+import io.github.sinri.keel.logger.api.factory.RecorderFactory;
+import io.github.sinri.keel.logger.api.issue.IssueRecorder;
 import io.github.sinri.keel.utils.time.cron.KeelCronExpression;
 import io.github.sinri.keel.utils.time.cron.ParsedCalenderElements;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.ThreadingModel;
 
 import javax.annotation.Nonnull;
@@ -27,25 +26,25 @@ public abstract class KeelSundial extends KeelVerticleImpl {
     /**
      * @since 4.0.2
      */
-    private KeelIssueRecorder<SundialIssueRecord> sundialIssueRecorder;
+    private IssueRecorder<SundialIssueRecord> sundialIssueRecorder;
 
     /**
      * @since 4.0.0
      */
-    abstract protected KeelIssueRecordCenter getIssueRecordCenter();
+    abstract protected RecorderFactory getIssueRecordCenter();
 
     /**
      * @since 4.0.0
      */
     @Nonnull
-    protected KeelIssueRecorder<SundialIssueRecord> buildIssueRecorder() {
-        return getIssueRecordCenter().generateIssueRecorder(SundialIssueRecord.TopicSundial, SundialIssueRecord::new);
+    protected IssueRecorder<SundialIssueRecord> buildIssueRecorder() {
+        return getIssueRecordCenter().createIssueRecorder(SundialIssueRecord.TopicSundial, SundialIssueRecord::new);
     }
 
     /**
      * @since 4.0.2
      */
-    public KeelIssueRecorder<SundialIssueRecord> getSundialIssueRecorder() {
+    public IssueRecorder<SundialIssueRecord> getSundialIssueRecorder() {
         return sundialIssueRecorder;
     }
 
@@ -116,11 +115,11 @@ public abstract class KeelSundial extends KeelVerticleImpl {
     abstract protected Future<Collection<KeelSundialPlan>> fetchPlans();
 
     @Override
-    public void stop(Promise<Void> stopPromise) {
+    protected Future<Void> stopVerticle() {
         if (this.timerID != null) {
             Keel.getVertx().cancelTimer(this.timerID);
         }
-        stopPromise.complete();
+        return Future.succeededFuture();
     }
 
     /**

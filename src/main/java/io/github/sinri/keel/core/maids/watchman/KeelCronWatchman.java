@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.maids.watchman;
 
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
+import io.github.sinri.keel.logger.api.factory.RecorderFactory;
 import io.github.sinri.keel.utils.time.cron.KeelCronExpression;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -28,7 +28,7 @@ public class KeelCronWatchman extends KeelWatchmanImpl {
     protected KeelCronWatchman(
             String watchmanName,
             Function<String, Future<Void>> cronTabUpdateStartup,
-            KeelIssueRecordCenter issueRecordCenter
+            RecorderFactory issueRecordCenter
     ) {
         super(watchmanName, issueRecordCenter);
         this.handler = now -> {
@@ -39,8 +39,7 @@ public class KeelCronWatchman extends KeelWatchmanImpl {
 
             readAsyncMapForEventHandlers(calendar)
                     .onSuccess(list -> list.forEach(x -> x.handle(now)))
-                    .onFailure(throwable -> getWatchmanLogger().exception(throwable, r -> {
-                    }));
+                    .onFailure(throwable -> getWatchmanLogger().exception(throwable));
         };
         this.cronTabUpdateStartup = cronTabUpdateStartup;
     }
@@ -48,7 +47,7 @@ public class KeelCronWatchman extends KeelWatchmanImpl {
     public static Future<String> deploy(
             String watchmanName,
             Function<String, Future<Void>> cronTabUpdateStartup,
-            KeelIssueRecordCenter issueRecordCenter
+            RecorderFactory issueRecordCenter
     ) {
         KeelCronWatchman keelCronWatchman = new KeelCronWatchman(watchmanName, cronTabUpdateStartup, issueRecordCenter);
         return Keel.getVertx()
@@ -98,29 +97,29 @@ public class KeelCronWatchman extends KeelWatchmanImpl {
         }));
         return operateCronTab(asyncMapName, () -> Keel.getVertx().sharedData().getAsyncMap(asyncMapName)
                                                       .compose(asyncMap -> asyncMap.keys()
-                                                                               .compose(oldKeys -> {
-                                                                         Set<Object> newKeys = hashMap.keySet();
+                                                                                   .compose(oldKeys -> {
+                                                                                       Set<Object> newKeys = hashMap.keySet();
 
-                                                                         HashSet<Object> toDeleteHashSet =
-                                                                                 new HashSet<>(oldKeys);
-                                                                         toDeleteHashSet.removeAll(newKeys);
+                                                                                       HashSet<Object> toDeleteHashSet =
+                                                                                               new HashSet<>(oldKeys);
+                                                                                       toDeleteHashSet.removeAll(newKeys);
 
-                                                                         HashSet<Object> toAddHashSet =
-                                                                                 new HashSet<>(newKeys);
-                                                                         toAddHashSet.removeAll(oldKeys);
+                                                                                       HashSet<Object> toAddHashSet =
+                                                                                               new HashSet<>(newKeys);
+                                                                                       toAddHashSet.removeAll(oldKeys);
 
-                                                                         return Future.all(
-                                                                                 Keel.asyncCallIteratively(
-                                                                                         toDeleteHashSet,
-                                                                                         (hash, task) -> asyncMap.remove(String.valueOf(hash))
-                                                                                                                 .compose(v -> Future.succeededFuture())),
-                                                                                 Keel.asyncCallIteratively(
-                                                                                         toAddHashSet,
-                                                                                         (hash, task) -> asyncMap.put(hash, hashMap.get(hash))
-                                                                                                                 .compose(v -> Future.succeededFuture()))
-                                                                         );
-                                                                     })
-                                                                               .compose(v -> Future.succeededFuture()))
+                                                                                       return Future.all(
+                                                                                               Keel.asyncCallIteratively(
+                                                                                                       toDeleteHashSet,
+                                                                                                       (hash, task) -> asyncMap.remove(String.valueOf(hash))
+                                                                                                                               .compose(v -> Future.succeededFuture())),
+                                                                                               Keel.asyncCallIteratively(
+                                                                                                       toAddHashSet,
+                                                                                                       (hash, task) -> asyncMap.put(hash, hashMap.get(hash))
+                                                                                                                               .compose(v -> Future.succeededFuture()))
+                                                                                       );
+                                                                                   })
+                                                                                   .compose(v -> Future.succeededFuture()))
         );
     }
 
@@ -224,8 +223,7 @@ public class KeelCronWatchman extends KeelWatchmanImpl {
         Future.succeededFuture()
               .compose(v -> cronTabUpdateStartup.apply(eventBusAddress()))
               .onFailure(throwable -> {
-                  getWatchmanLogger().exception(throwable, r -> {
-                  });
+                  getWatchmanLogger().exception(throwable);
                   undeployMe();
               });
         return Future.succeededFuture();

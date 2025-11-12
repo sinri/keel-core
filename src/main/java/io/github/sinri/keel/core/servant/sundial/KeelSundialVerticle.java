@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.servant.sundial;
 
 import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
-import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
+import io.github.sinri.keel.logger.api.issue.IssueRecorder;
 import io.github.sinri.keel.utils.ReflectionUtils;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -18,12 +18,12 @@ import java.util.Calendar;
 final class KeelSundialVerticle extends KeelVerticleImpl {
     private final KeelSundialPlan sundialPlan;
     private final Calendar now;
-    private final KeelIssueRecorder<SundialIssueRecord> sundialIssueRecorder;
+    private final IssueRecorder<SundialIssueRecord> sundialIssueRecorder;
 
     public KeelSundialVerticle(
             @Nonnull KeelSundialPlan sundialPlan,
             @Nonnull Calendar now,
-            @Nonnull KeelIssueRecorder<SundialIssueRecord> sundialIssueRecorder
+            @Nonnull IssueRecorder<SundialIssueRecord> sundialIssueRecorder
     ) {
         this.sundialPlan = sundialPlan;
         this.now = now;

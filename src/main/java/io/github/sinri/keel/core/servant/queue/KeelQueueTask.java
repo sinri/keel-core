@@ -1,8 +1,8 @@
 package io.github.sinri.keel.core.servant.queue;
 
 import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
+import io.github.sinri.keel.logger.api.factory.RecorderFactory;
+import io.github.sinri.keel.logger.api.issue.IssueRecorder;
 import io.github.sinri.keel.utils.ReflectionUtils;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -15,7 +15,7 @@ import javax.annotation.Nonnull;
  */
 public abstract class KeelQueueTask extends KeelVerticleImpl {
     private QueueWorkerPoolManager queueWorkerPoolManager;
-    private KeelIssueRecorder<QueueTaskIssueRecord> queueTaskIssueRecorder;
+    private IssueRecorder<QueueTaskIssueRecord> queueTaskIssueRecorder;
 
     final void setQueueWorkerPoolManager(QueueWorkerPoolManager queueWorkerPoolManager) {
         this.queueWorkerPoolManager = queueWorkerPoolManager;
@@ -30,21 +30,23 @@ public abstract class KeelQueueTask extends KeelVerticleImpl {
     /**
      * @since 4.0.0
      */
-    abstract protected KeelIssueRecordCenter getIssueRecordCenter();
+    abstract protected RecorderFactory getIssueRecordCenter();
 
     /**
      * @since 4.0.0
      */
     @Nonnull
-    protected final KeelIssueRecorder<QueueTaskIssueRecord> buildQueueTaskIssueRecorder() {
-        return getIssueRecordCenter().generateIssueRecorder(QueueTaskIssueRecord.TopicQueue,
-                () -> new QueueTaskIssueRecord(getTaskReference(), getTaskCategory()));
+    protected final IssueRecorder<QueueTaskIssueRecord> buildQueueTaskIssueRecorder() {
+        return getIssueRecordCenter().createIssueRecorder(
+                QueueTaskIssueRecord.TopicQueue,
+                () -> new QueueTaskIssueRecord(getTaskReference(), getTaskCategory())
+        );
     }
 
     /**
      * @since 4.0.2
      */
-    public KeelIssueRecorder<QueueTaskIssueRecord> getQueueTaskIssueRecorder() {
+    public IssueRecorder<QueueTaskIssueRecord> getQueueTaskIssueRecorder() {
         return queueTaskIssueRecorder;
     }
 
@@ -65,9 +67,7 @@ public abstract class KeelQueueTask extends KeelVerticleImpl {
               })
               .compose(v -> run())
               .recover(throwable -> {
-                  getQueueTaskIssueRecorder().exception(throwable, r -> r.message("KeelQueueTask Caught throwable " +
-                          "from Method " +
-                          "run"));
+                  getQueueTaskIssueRecorder().exception(throwable, "KeelQueueTask Caught throwable from Method run");
                   return Future.succeededFuture();
               })
               .eventually(() -> {

@@ -1,15 +1,16 @@
 package io.github.sinri.keel.core.servant.queue;
 
-import io.github.sinri.keel.logger.issue.record.AbstractIssueRecord;
+import io.github.sinri.keel.logger.api.issue.IssueRecord;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 
-public final class QueueManageIssueRecord extends AbstractIssueRecord<QueueManageIssueRecord> {
+public final class QueueManageIssueRecord extends IssueRecord<QueueManageIssueRecord> {
     public static final String TopicQueue = "Queue";
 
     public QueueManageIssueRecord() {
         super();
-        this.classification("manage");
+        this.classification(List.of("manage"));
     }
 
 

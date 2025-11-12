@@ -1,5 +1,6 @@
 package io.github.sinri.keel.utils;
 
+import io.github.sinri.keel.logger.api.event.EventRecorder;
 import io.github.sinri.keel.utils.io.FileUtils;
 
 import javax.annotation.Nonnull;
@@ -40,6 +41,9 @@ public class ReflectionUtils {
     private ReflectionUtils() {
     }
 
+    private static EventRecorder createEventRecorder() {
+        return Keel.getRecorderFactory().createEventRecorder(ReflectionUtils.class.getName());
+    }
 
     /**
      * @param <T> class of target annotation
@@ -48,7 +52,7 @@ public class ReflectionUtils {
      */
     @Nullable
     public static <T extends Annotation> T getAnnotationOfMethod(@Nonnull Method method, @Nonnull Class<T> classOfAnnotation,
-                                                          @Nullable T defaultAnnotation) {
+                                                                 @Nullable T defaultAnnotation) {
         T annotation = method.getAnnotation(classOfAnnotation);
         if (annotation == null) {
             return defaultAnnotation;
@@ -74,7 +78,7 @@ public class ReflectionUtils {
      */
     @Nullable
     public static <T extends Annotation> T getAnnotationOfClass(@Nonnull Class<?> anyClass,
-                                                         @Nonnull Class<T> classOfAnnotation) {
+                                                                @Nonnull Class<T> classOfAnnotation) {
         return anyClass.getAnnotation(classOfAnnotation);
     }
 
@@ -84,7 +88,7 @@ public class ReflectionUtils {
      */
     @Nonnull
     public static <T extends Annotation> T[] getAnnotationsOfClass(@Nonnull Class<?> anyClass,
-                                                            @Nonnull Class<T> classOfAnnotation) {
+                                                                   @Nonnull Class<T> classOfAnnotation) {
         return anyClass.getAnnotationsByType(classOfAnnotation);
     }
 
@@ -106,8 +110,9 @@ public class ReflectionUtils {
         Set<Class<? extends R>> set = new HashSet<>();
 
         List<String> classPathList = FileUtils.getClassPathList();
+        //BaseEventRecorder baseEventRecorder = new BaseEventRecorder(ReflectionUtils.class.getName());
         for (String classPath : classPathList) {
-            Keel.getLogger().debug("[1] Seeking classes in class path: " + classPath);
+            //baseEventRecorder.debug("[1] Seeking classes in class path: " + classPath);
             if (classPath.endsWith(".jar")) {
                 Set<Class<? extends R>> classes = seekClassDescendantsInPackageForProvidedJar(classPath, packageName,
                         baseClass);
@@ -132,28 +137,26 @@ public class ReflectionUtils {
         Set<Class<? extends R>> descendantClasses = new HashSet<>();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         // in file system
-
         String packagePath = packageName.replace('.', File.separatorChar);
-        Keel.getLogger().debug("[2] Seeking classes in package through file system: " + packagePath);
+        //Keel.getLogger().debug("[2] Seeking classes in package through file system: " + packagePath);
         try {
             // Assuming classes are in a directory on the file system (e.g., not in a JAR)
             Enumeration<URL> resources = classLoader.getResources(packagePath);
             if (!resources.hasMoreElements()) {
-                Keel.getLogger()
-                    .debug("classLoader.getResource found null for package through file system: " + packagePath);
+                //Keel.getLogger().debug("classLoader.getResource found null for package through file system: " + packagePath);
             }
             while (resources.hasMoreElements()) {
                 var resource = resources.nextElement();
-                Keel.getLogger().debug("[3] resource: " + resource.toString());
+                //Keel.getLogger().debug("[3] resource: " + resource.toString());
 
                 URI uri = resource.toURI();
                 Path startPath = Paths.get(uri);
-                Keel.getLogger().debug("[4] startPath: " + startPath);
+                //Keel.getLogger().debug("[4] startPath: " + startPath);
                 Files.walkFileTree(startPath, new SimpleFileVisitor<>() {
                     @Nonnull
                     @Override
                     public FileVisitResult visitFile(@Nonnull Path file, @Nonnull BasicFileAttributes attrs) {
-                        Keel.getLogger().debug("[5] Visiting file: " + file);
+                        //Keel.getLogger().debug("[5] Visiting file: " + file);
                         if (file.toString().endsWith(".class")) {
                             String className = file.toString().replace(".class", "").replace(File.separator, ".");
                             className = className.substring(className.indexOf(packageName));
@@ -172,9 +175,7 @@ public class ReflectionUtils {
                                     descendantClasses.add(castedClass);
                                 }
                             } catch (Throwable e) {
-                                Keel.getLogger()
-                                    .debug(getClass() + " seekClassDescendantsInPackageForFileSystem for "
-                                            + className + " error: " + e.getMessage());
+                                //Keel.getLogger().debug(getClass() + " seekClassDescendantsInPackageForFileSystem for " + className + " error: " + e.getMessage());
                             }
                         }
                         return FileVisitResult.CONTINUE;
@@ -183,7 +184,8 @@ public class ReflectionUtils {
 
             }
         } catch (Exception e) {
-            Keel.getLogger().exception(e);
+            //Keel.getLogger().exception(e);
+            Keel.getRecorderFactory().createEventRecorder(ReflectionUtils.class.getName()).exception(e);
         }
         return descendantClasses;
     }
@@ -191,10 +193,12 @@ public class ReflectionUtils {
     /**
      * @since 3.2.11
      */
-    protected static <R> Set<Class<? extends R>> seekClassDescendantsInPackageForRunningJar(@Nonnull String packageName,
-                                                                                     @Nonnull Class<R> baseClass) {
+    protected static <R> Set<Class<? extends R>> seekClassDescendantsInPackageForRunningJar(
+            @Nonnull String packageName,
+            @Nonnull Class<R> baseClass) {
         Set<Class<? extends R>> descendantClasses = new HashSet<>();
         Set<String> strings = FileUtils.seekPackageClassFilesInRunningJar(packageName);
+        var eventRecorder = createEventRecorder();
         for (String s : strings) {
             try {
                 Class<?> aClass = Class.forName(s);
@@ -204,7 +208,7 @@ public class ReflectionUtils {
                     descendantClasses.add(castedClass);
                 }
             } catch (Throwable e) {
-                Keel.getLogger().debug(String.format(
+                eventRecorder.debug(String.format(
                         "%s seekClassDescendantsInPackageForRunningJar for %s error: %s",
                         ReflectionUtils.class, s, e.getMessage()
                 ));
@@ -217,10 +221,11 @@ public class ReflectionUtils {
      * @since 3.2.11
      */
     protected static <R> Set<Class<? extends R>> seekClassDescendantsInPackageForProvidedJar(@Nonnull String jarInClassPath,
-                                                                                      @Nonnull String packageName, @Nonnull Class<R> baseClass) {
+                                                                                             @Nonnull String packageName, @Nonnull Class<R> baseClass) {
         Set<Class<? extends R>> descendantClasses = new HashSet<>();
         List<String> classNames = FileUtils.traversalInJarFile(new File(jarInClassPath));
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        var eventRecorder = createEventRecorder();
         classNames.forEach(className -> {
             if (className.startsWith(packageName + ".")) {
                 try {
@@ -230,10 +235,7 @@ public class ReflectionUtils {
                         descendantClasses.add(clazz);
                     }
                 } catch (Throwable e) {
-                    Keel.getLogger()
-                        .debug(ReflectionUtils.class + " seekClassDescendantsInPackageForProvidedJar for " + className
-                                + " error" +
-                                ": " + e.getMessage());
+                    eventRecorder.debug("%s seekClassDescendantsInPackageForProvidedJar for %s error: %s".formatted(ReflectionUtils.class, className, e.getMessage()));
                 }
             }
         });

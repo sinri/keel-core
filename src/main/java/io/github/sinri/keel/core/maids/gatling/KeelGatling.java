@@ -1,8 +1,7 @@
 package io.github.sinri.keel.core.maids.gatling;
 
 import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
-import io.github.sinri.keel.logger.issue.record.KeelEventLog;
-import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
+import io.github.sinri.keel.logger.api.event.EventRecorder;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -26,7 +25,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 abstract public class KeelGatling extends KeelVerticleImpl {
     private final Options options;
     private final AtomicInteger barrelUsed = new AtomicInteger(0);
-    private KeelIssueRecorder<KeelEventLog> gatlingLogger;
+    private EventRecorder gatlingLogger;
 
     private KeelGatling(Options options) {
         this.options = options;
@@ -43,12 +42,12 @@ abstract public class KeelGatling extends KeelVerticleImpl {
      * @since 4.0.2
      */
     @Nonnull
-    abstract protected KeelIssueRecorder<KeelEventLog> buildGatlingLogger();
+    abstract protected EventRecorder buildGatlingLogger();
 
     /**
      * @since 4.0.2
      */
-    public KeelIssueRecorder<KeelEventLog> getGatlingLogger() {
+    public EventRecorder getGatlingLogger() {
         return gatlingLogger;
     }
 
@@ -76,8 +75,7 @@ abstract public class KeelGatling extends KeelVerticleImpl {
 
                          fireBullet(bullet, firedAR -> {
                              if (firedAR.failed()) {
-                                 getGatlingLogger().exception(firedAR.cause(), r -> r.message("BULLET FIRED " +
-                                         "ERROR"));
+                                 getGatlingLogger().exception(firedAR.cause(), "BULLET FIRED ERROR");
                              } else {
                                  getGatlingLogger().info(r -> r.message("BULLET FIRED DONE"));
                              }
@@ -87,7 +85,7 @@ abstract public class KeelGatling extends KeelVerticleImpl {
                          return Keel.asyncSleep(10L);
                      })
                      .recover(throwable -> {
-                         getGatlingLogger().exception(throwable, r -> r.message("FAILED TO LOAD BULLET"));
+                         getGatlingLogger().exception(throwable, "FAILED TO LOAD BULLET");
                          return rest();
                      });
     }

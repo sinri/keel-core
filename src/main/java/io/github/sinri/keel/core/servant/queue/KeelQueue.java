@@ -1,11 +1,10 @@
 package io.github.sinri.keel.core.servant.queue;
 
 import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
+import io.github.sinri.keel.logger.api.factory.RecorderFactory;
+import io.github.sinri.keel.logger.api.issue.IssueRecorder;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.ThreadingModel;
 
 import javax.annotation.Nonnull;
@@ -25,26 +24,28 @@ public abstract class KeelQueue extends KeelVerticleImpl
     private QueueWorkerPoolManager queueWorkerPoolManager;
     //private KeelQueueSignalReader signalReader;
     private KeelQueueStatus queueStatus = KeelQueueStatus.INIT;
-    private KeelIssueRecorder<QueueManageIssueRecord> queueManageIssueRecorder;
+    private IssueRecorder<QueueManageIssueRecord> queueManageIssueRecorder;
 
     /**
      * @since 4.0.0
      */
-    protected abstract KeelIssueRecordCenter getIssueRecordCenter();
+    protected abstract RecorderFactory getIssueRecordCenter();
 
     /**
      * @since 4.0.2
      */
     @Nonnull
-    protected final KeelIssueRecorder<QueueManageIssueRecord> buildQueueManageIssueRecorder() {
-        return getIssueRecordCenter().generateIssueRecorder(QueueManageIssueRecord.TopicQueue,
-                QueueManageIssueRecord::new);
+    protected final IssueRecorder<QueueManageIssueRecord> buildQueueManageIssueRecorder() {
+        return getIssueRecordCenter().createIssueRecorder(
+                QueueManageIssueRecord.TopicQueue,
+                QueueManageIssueRecord::new
+        );
     }
 
     /**
      * @since 4.0.2
      */
-    public KeelIssueRecorder<QueueManageIssueRecord> getQueueManageIssueRecorder() {
+    public IssueRecorder<QueueManageIssueRecord> getQueueManageIssueRecorder() {
         return queueManageIssueRecorder;
     }
 
@@ -174,9 +175,8 @@ public abstract class KeelQueue extends KeelVerticleImpl
                                                              },
                                                              throwable -> {
                                                                  getQueueManageIssueRecorder().exception(throwable,
-                                                                         r -> r.message("CANNOT DEPLOY TASK " +
-                                                                                 "[" + task.getTaskReference() + "] " +
-                                                                                 "VERTICLE"));
+                                                                         "CANNOT DEPLOY TASK [%s] VERTICLE".formatted(task.getTaskReference())
+                                                                 );
                                                                  // 通知 FutureUntil 继续下一轮
                                                                  return Future.succeededFuture();
                                                              }
@@ -184,15 +184,15 @@ public abstract class KeelQueue extends KeelVerticleImpl
                                     });
                    })
                    .recover(throwable -> {
-                       getQueueManageIssueRecorder().exception(throwable, r -> r.message("KeelQueue 递归找活干里出现了奇怪的故障"));
+                       getQueueManageIssueRecorder().exception(throwable, "KeelQueue 递归找活干里出现了奇怪的故障");
                        return Future.succeededFuture();
                    });
     }
 
     @Override
-    public void stop(Promise<Void> stopPromise) {
+    protected Future<Void> stopVerticle() {
         this.queueStatus = KeelQueueStatus.STOPPED;
-        stopPromise.complete();
+        return Future.succeededFuture();
     }
 
     /**

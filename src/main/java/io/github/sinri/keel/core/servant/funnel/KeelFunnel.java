@@ -1,9 +1,8 @@
 package io.github.sinri.keel.core.servant.funnel;
 
 import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenterBuilder;
-import io.github.sinri.keel.logger.issue.record.KeelEventLog;
-import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
+import io.github.sinri.keel.logger.api.event.EventRecorder;
+import io.github.sinri.keel.logger.api.factory.RecorderFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 
@@ -28,7 +27,7 @@ public class KeelFunnel extends KeelVerticleImpl {
     private final AtomicReference<Promise<Void>> interruptRef;
     private final Queue<Supplier<Future<Void>>> queue;
     private final AtomicLong sleepTimeRef;
-    private final KeelIssueRecorder<KeelEventLog> funnelLogger;
+    private final EventRecorder funnelLogger;
 
     public KeelFunnel() {
         this.sleepTimeRef = new AtomicLong(1_000L);
@@ -37,18 +36,22 @@ public class KeelFunnel extends KeelVerticleImpl {
         this.funnelLogger = buildFunnelLogger();
     }
 
-    /**
-     * @since 4.0.2
-     */
-    @Nonnull
-    protected KeelIssueRecorder<KeelEventLog> buildFunnelLogger() {
-        return KeelIssueRecordCenterBuilder.outputCenter().generateIssueRecorder("Funnel", KeelEventLog::new);
+    protected RecorderFactory getRecorderFactory() {
+        return Keel.getRecorderFactory();
     }
 
     /**
      * @since 4.0.2
      */
-    protected KeelIssueRecorder<KeelEventLog> getFunnelLogger() {
+    @Nonnull
+    protected EventRecorder buildFunnelLogger() {
+        return getRecorderFactory().createEventRecorder("Funnel");
+    }
+
+    /**
+     * @since 4.0.2
+     */
+    protected EventRecorder getFunnelLogger() {
         return funnelLogger;
     }
 

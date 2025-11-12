@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.maids.watchman;
 
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
+import io.github.sinri.keel.logger.api.factory.RecorderFactory;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -17,13 +17,13 @@ public class KeelPureWatchman extends KeelWatchmanImpl {
 
     private final Options options;
 
-    protected KeelPureWatchman(String watchmanName, Options options, KeelIssueRecordCenter issueRecordCenter) {
+    protected KeelPureWatchman(String watchmanName, Options options, RecorderFactory issueRecordCenter) {
         super(watchmanName, issueRecordCenter);
         this.options = options;
     }
 
     public static Future<String> deploy(String watchmanName, Handler<Options> optionsHandler,
-                                        KeelIssueRecordCenter issueRecordCenter) {
+                                        RecorderFactory issueRecordCenter) {
         Options options = new Options();
         optionsHandler.handle(options);
         KeelPureWatchman keelPureWatchman = new KeelPureWatchman(watchmanName, options, issueRecordCenter);

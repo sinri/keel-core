@@ -2,10 +2,8 @@ package io.github.sinri.keel.core.maids.pleiades;
 
 import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
-import io.github.sinri.keel.logger.issue.record.KeelEventLog;
-import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
+import io.github.sinri.keel.logger.api.event.EventRecorder;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -22,7 +20,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
 @TechnicalPreview(since = "3.2.19")
 public abstract class Pleiades<T> extends KeelVerticleImpl {
     private MessageConsumer<T> consumer;
-    private KeelIssueRecorder<KeelEventLog> pleiadesLogger;
+    private EventRecorder pleiadesLogger;
 
     public static <T> MessageProducer<T> generateMessageProducer(String address) {
         return generateMessageProducer(address, new DeliveryOptions());
@@ -39,12 +37,12 @@ public abstract class Pleiades<T> extends KeelVerticleImpl {
     /**
      * @since 4.0.2
      */
-    abstract protected KeelIssueRecorder<KeelEventLog> buildPleiadesLogger();
+    abstract protected EventRecorder buildPleiadesLogger();
 
     /**
      * @since 4.0.2
      */
-    public KeelIssueRecorder<KeelEventLog> getPleiadesLogger() {
+    public EventRecorder getPleiadesLogger() {
         return pleiadesLogger;
     }
 
@@ -56,11 +54,10 @@ public abstract class Pleiades<T> extends KeelVerticleImpl {
     }
 
     @Override
-    public void stop(Promise<Void> stopPromise) {
+    protected Future<Void> stopVerticle() {
         if (consumer != null) {
-            consumer.unregister()
-                    .onSuccess(unused -> stopPromise.complete())
-                    .onFailure(stopPromise::fail);
+            return consumer.unregister();
         }
+        return Future.succeededFuture();
     }
 }

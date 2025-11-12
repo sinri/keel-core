@@ -1,11 +1,9 @@
 package io.github.sinri.keel.core.maids.watchman;
 
 import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
-import io.github.sinri.keel.logger.issue.center.KeelIssueRecordCenter;
-import io.github.sinri.keel.logger.issue.record.KeelEventLog;
-import io.github.sinri.keel.logger.issue.recorder.KeelIssueRecorder;
+import io.github.sinri.keel.logger.api.event.EventRecorder;
+import io.github.sinri.keel.logger.api.factory.RecorderFactory;
 import io.vertx.core.Future;
-import io.vertx.core.Promise;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.shareddata.Lock;
@@ -19,11 +17,11 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  */
 abstract class KeelWatchmanImpl extends KeelVerticleImpl implements KeelWatchman {
     private final String watchmanName;
-    private final KeelIssueRecordCenter issueRecordCenter;
+    private final RecorderFactory issueRecordCenter;
     private MessageConsumer<Long> consumer;
-    private KeelIssueRecorder<KeelEventLog> watchmanLogger;
+    private EventRecorder watchmanLogger;
 
-    public KeelWatchmanImpl(String watchmanName, KeelIssueRecordCenter issueRecordCenter) {
+    public KeelWatchmanImpl(String watchmanName, RecorderFactory issueRecordCenter) {
         this.watchmanName = watchmanName;
         this.issueRecordCenter = issueRecordCenter;
     }
@@ -44,7 +42,8 @@ abstract class KeelWatchmanImpl extends KeelVerticleImpl implements KeelWatchman
         this.consumer = Keel.getVertx().eventBus().consumer(eventBusAddress());
         this.consumer.handler(this::consumeHandleMassage);
         this.consumer.exceptionHandler(throwable -> getWatchmanLogger()
-                .exception(throwable, r -> r.message(watchmanName() + " ERROR")));
+                .exception(throwable, watchmanName() + " ERROR")
+        );
 
         try {
             // @since 2.9.3 强行拟合HH:MM:SS.000-200
@@ -85,15 +84,15 @@ abstract class KeelWatchmanImpl extends KeelVerticleImpl implements KeelWatchman
     }
 
     @Override
-    public void stop(Promise<Void> stopPromise) {
+    protected Future<Void> stopVerticle() {
         consumer.unregister();
-        stopPromise.complete();
+        return Future.succeededFuture();
     }
 
     /**
      * @since 4.0.2
      */
-    protected final KeelIssueRecordCenter getIssueRecordCenter() {
+    protected final RecorderFactory getIssueRecordCenter() {
         return issueRecordCenter;
     }
 
@@ -101,14 +100,14 @@ abstract class KeelWatchmanImpl extends KeelVerticleImpl implements KeelWatchman
      * @since 4.0.2
      */
     @Nonnull
-    protected KeelIssueRecorder<KeelEventLog> buildWatchmanLogger() {
-        return getIssueRecordCenter().generateIssueRecorder("Watchman", KeelEventLog::new);
+    protected EventRecorder buildWatchmanLogger() {
+        return getIssueRecordCenter().createEventRecorder("Watchman");
     }
 
     /**
      * @since 4.0.2
      */
-    public KeelIssueRecorder<KeelEventLog> getWatchmanLogger() {
+    public EventRecorder getWatchmanLogger() {
         return watchmanLogger;
     }
 }

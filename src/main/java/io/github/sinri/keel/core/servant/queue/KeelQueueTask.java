@@ -1,9 +1,9 @@
 package io.github.sinri.keel.core.servant.queue;
 
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
+import io.github.sinri.keel.core.utils.ReflectionUtils;
 import io.github.sinri.keel.logger.api.factory.RecorderFactory;
 import io.github.sinri.keel.logger.api.issue.IssueRecorder;
-import io.github.sinri.keel.utils.ReflectionUtils;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;

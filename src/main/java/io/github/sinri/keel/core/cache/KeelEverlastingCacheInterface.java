@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.cache;
 
-import io.github.sinri.keel.core.cache.impl.KeelCacheVet;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -18,7 +17,7 @@ import java.util.function.Function;
  */
 public interface KeelEverlastingCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
     static <K, V> KeelEverlastingCacheInterface<K, V> createDefaultInstance() {
-        return new KeelCacheVet<>();
+        return new KeelEverlastingCacheImpl<>();
     }
 
     void save(@NotNull Map<K, V> appendEntries);

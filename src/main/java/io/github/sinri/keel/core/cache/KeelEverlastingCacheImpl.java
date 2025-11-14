@@ -1,6 +1,5 @@
-package io.github.sinri.keel.core.cache.impl;
+package io.github.sinri.keel.core.cache;
 
-import io.github.sinri.keel.core.cache.KeelEverlastingCacheInterface;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,11 +10,11 @@ import java.util.function.Function;
 /**
  * @since 2.9
  */
-public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
+class KeelEverlastingCacheImpl<K, V> implements KeelEverlastingCacheInterface<K, V> {
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private final Map<K, V> map;
 
-    public KeelCacheVet() {
+    public KeelEverlastingCacheImpl() {
         map = new HashMap<>();
     }
 

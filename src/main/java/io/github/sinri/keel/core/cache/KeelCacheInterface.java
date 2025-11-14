@@ -1,7 +1,5 @@
 package io.github.sinri.keel.core.cache;
 
-import io.github.sinri.keel.core.cache.impl.KeelCacheAlef;
-import io.github.sinri.keel.core.cache.impl.KeelCacheDummy;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,7 +26,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @since 2.5 changed to use KeelCacheAlef
      */
     static <K, V> KeelCacheInterface<K, V> createDefaultInstance() {
-        return new KeelCacheAlef<>();
+        return new KeelCacheImpl<>();
     }
 
     /**

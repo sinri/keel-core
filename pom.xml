@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.github.sinri</groupId>
-    <artifactId>keel</artifactId>
-    <version>5.0.0-SNAPSHOT</version>
-    <!--    <version>4.1.5</version>-->
+    <artifactId>keel-core</artifactId>
+    <!--    <version>5.0.0-SNAPSHOT</version>-->
+    <version>5.0.0-rc.1</version>
 
-    <name>Keel</name>
+    <name>Keel-Core</name>
     <description>
-        A website framework with VERT.X for ex-PHP-ers, exactly Ark Framework Users.
+        Keel Framework Core
     </description>
 
     <url>https://github.com/sinri/Keel</url>
@@ -50,7 +50,7 @@
         <commonmarkVersion>0.21.0</commonmarkVersion>
         <jacksonVersion>2.18.2</jacksonVersion>
         <oshiCoreVersion>6.4.9</oshiCoreVersion>
-        <jolCoreVersion>0.17</jolCoreVersion>
+        <!--        <jolCoreVersion>0.17</jolCoreVersion>-->
         <slf4j.version>2.0.17</slf4j.version>
         <log4j.version>2.24.3</log4j.version>
     </properties>
@@ -232,10 +232,10 @@
             <version>${oshiCoreVersion}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.openjdk.jol/jol-core -->
-        <dependency>
-            <groupId>org.openjdk.jol</groupId>
-            <artifactId>jol-core</artifactId>
-            <version>${jolCoreVersion}</version>
-        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>org.openjdk.jol</groupId>-->
+        <!--            <artifactId>jol-core</artifactId>-->
+        <!--            <version>${jolCoreVersion}</version>-->
+        <!--        </dependency>-->
     </dependencies>
 </project>

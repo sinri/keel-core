@@ -1,7 +1,5 @@
-package io.github.sinri.keel.core.cache.impl;
+package io.github.sinri.keel.core.cache;
 
-import io.github.sinri.keel.core.cache.KeelCacheInterface;
-import io.github.sinri.keel.core.cache.NotCached;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -1,7 +1,5 @@
-package io.github.sinri.keel.core.cache.impl;
+package io.github.sinri.keel.core.cache;
 
-import io.github.sinri.keel.core.cache.KeelCacheInterface;
-import io.github.sinri.keel.core.cache.ValueWrapper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,12 +17,12 @@ import java.util.function.Function;
  *
  * @since 2.5
  */
-public class KeelCacheAlef<K, V> implements KeelCacheInterface<K, V> {
+class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
     private final ConcurrentMap<K, ValueWrapper<V>> map;
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private long defaultLifeInSeconds = 1000L;
 
-    public KeelCacheAlef() {
+    public KeelCacheImpl() {
         this.map = new ConcurrentHashMap<>();
     }
 

@@ -1,26 +1,27 @@
 package io.github.sinri.keel.core.servant.funnel;
 
-import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
+import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.github.sinri.keel.logger.api.event.EventRecorder;
 import io.github.sinri.keel.logger.api.factory.RecorderFactory;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
+import static io.github.sinri.keel.base.KeelInstance.Keel;
+
 
 /**
  * Handle customized tasks in order.
  *
  * @since 3.0.0
  */
-public class KeelFunnel extends KeelVerticleImpl {
+public class KeelFunnel extends AbstractKeelVerticle {
     /**
      * The interrupt, to stop sleeping when idle time ends (a new task comes).
      */
@@ -43,7 +44,7 @@ public class KeelFunnel extends KeelVerticleImpl {
     /**
      * @since 4.0.2
      */
-    @Nonnull
+    @NotNull
     protected EventRecorder buildFunnelLogger() {
         return getRecorderFactory().createEventRecorder("Funnel");
     }

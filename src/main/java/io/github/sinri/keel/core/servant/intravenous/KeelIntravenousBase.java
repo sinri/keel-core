@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.servant.intravenous;
 
 import io.github.sinri.keel.base.async.RepeatedlyCallTask;
-import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
+import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 
@@ -12,12 +12,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
+import static io.github.sinri.keel.base.KeelInstance.Keel;
+
 
 /**
  * @since 4.0.7
  */
-abstract class KeelIntravenousBase<D> extends KeelVerticleImpl implements KeelIntravenous<D> {
+abstract class KeelIntravenousBase<D> extends AbstractKeelVerticle implements KeelIntravenous<D> {
     private final Queue<D> queue;
     private final AtomicReference<Promise<Void>> interrupterRef = new AtomicReference<>();
     private final AtomicBoolean stoppedRef = new AtomicBoolean(false);
@@ -72,7 +73,7 @@ abstract class KeelIntravenousBase<D> extends KeelVerticleImpl implements KeelIn
         this.interrupterRef.set(null);
         Keel.asyncCallRepeatedly(this::handleRoutine)
             .onComplete(ar -> this.undeployMe()
-                              .onSuccess(v -> undeployedRef.set(true)));
+                                  .onSuccess(v -> undeployedRef.set(true)));
         return Future.succeededFuture();
     }
 

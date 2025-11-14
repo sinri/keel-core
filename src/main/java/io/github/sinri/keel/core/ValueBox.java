@@ -1,7 +1,8 @@
 package io.github.sinri.keel.core;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A generic container for a value that can be set with an optional expiration
@@ -110,7 +111,7 @@ public class ValueBox<T> {
     /**
      * @since 4.1.0
      */
-    @Nonnull
+    @NotNull
     public synchronized T getNonNullValue() {
         T t = getValue();
         if (t == null) {

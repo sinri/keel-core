@@ -2,7 +2,6 @@ package io.github.sinri.keel.core.servant.queue;
 
 import io.github.sinri.keel.logger.api.issue.IssueRecord;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 public final class QueueManageIssueRecord extends IssueRecord<QueueManageIssueRecord> {
@@ -14,9 +13,9 @@ public final class QueueManageIssueRecord extends IssueRecord<QueueManageIssueRe
     }
 
 
-    @Nonnull
-    @Override
-    public QueueManageIssueRecord getImplementation() {
-        return this;
-    }
+    //    @NotNull
+    //    @Override
+    //    public QueueManageIssueRecord getImplementation() {
+    //        return this;
+    //    }
 }

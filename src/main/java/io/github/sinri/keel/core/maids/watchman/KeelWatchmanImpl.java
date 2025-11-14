@@ -1,21 +1,21 @@
 package io.github.sinri.keel.core.maids.watchman;
 
-import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
+import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.github.sinri.keel.logger.api.event.EventRecorder;
 import io.github.sinri.keel.logger.api.factory.RecorderFactory;
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.shareddata.Lock;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
+import static io.github.sinri.keel.base.KeelInstance.Keel;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * @since 2.9.3
  */
-abstract class KeelWatchmanImpl extends KeelVerticleImpl implements KeelWatchman {
+abstract class KeelWatchmanImpl extends AbstractKeelVerticle implements KeelWatchman {
     private final String watchmanName;
     private final RecorderFactory issueRecordCenter;
     private MessageConsumer<Long> consumer;
@@ -99,7 +99,7 @@ abstract class KeelWatchmanImpl extends KeelVerticleImpl implements KeelWatchman
     /**
      * @since 4.0.2
      */
-    @Nonnull
+    @NotNull
     protected EventRecorder buildWatchmanLogger() {
         return getIssueRecordCenter().createEventRecorder("Watchman");
     }

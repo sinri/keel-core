@@ -1,10 +1,10 @@
 package io.github.sinri.keel.utils;
 
+import io.github.sinri.keel.base.utils.FileUtils;
 import io.github.sinri.keel.logger.api.event.EventRecorder;
-import io.github.sinri.keel.utils.io.FileUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -17,7 +17,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
+import static io.github.sinri.keel.base.KeelInstance.Keel;
+
 
 /**
  * @since 2.6
@@ -51,7 +52,7 @@ public class ReflectionUtils {
      * @since 1.13
      */
     @Nullable
-    public static <T extends Annotation> T getAnnotationOfMethod(@Nonnull Method method, @Nonnull Class<T> classOfAnnotation,
+    public static <T extends Annotation> T getAnnotationOfMethod(@NotNull Method method, @NotNull Class<T> classOfAnnotation,
                                                                  @Nullable T defaultAnnotation) {
         T annotation = method.getAnnotation(classOfAnnotation);
         if (annotation == null) {
@@ -64,7 +65,7 @@ public class ReflectionUtils {
      * @since 2.6
      */
     @Nullable
-    public static <T extends Annotation> T getAnnotationOfMethod(@Nonnull Method method, @Nonnull Class<T> classOfAnnotation) {
+    public static <T extends Annotation> T getAnnotationOfMethod(@NotNull Method method, @NotNull Class<T> classOfAnnotation) {
         return getAnnotationOfMethod(method, classOfAnnotation, null);
     }
 
@@ -77,8 +78,8 @@ public class ReflectionUtils {
      * @since 2.8
      */
     @Nullable
-    public static <T extends Annotation> T getAnnotationOfClass(@Nonnull Class<?> anyClass,
-                                                                @Nonnull Class<T> classOfAnnotation) {
+    public static <T extends Annotation> T getAnnotationOfClass(@NotNull Class<?> anyClass,
+                                                                @NotNull Class<T> classOfAnnotation) {
         return anyClass.getAnnotation(classOfAnnotation);
     }
 
@@ -86,9 +87,9 @@ public class ReflectionUtils {
      * @since 3.1.8
      *         For the repeatable annotations.
      */
-    @Nonnull
-    public static <T extends Annotation> T[] getAnnotationsOfClass(@Nonnull Class<?> anyClass,
-                                                                   @Nonnull Class<T> classOfAnnotation) {
+    @NotNull
+    public static <T extends Annotation> T[] getAnnotationsOfClass(@NotNull Class<?> anyClass,
+                                                                   @NotNull Class<T> classOfAnnotation) {
         return anyClass.getAnnotationsByType(classOfAnnotation);
     }
 
@@ -101,8 +102,8 @@ public class ReflectionUtils {
      * @since 3.2.12.1 rewrite
      */
     public static <R> Set<Class<? extends R>> seekClassDescendantsInPackage(
-            @Nonnull String packageName,
-            @Nonnull Class<R> baseClass
+            @NotNull String packageName,
+            @NotNull Class<R> baseClass
     ) {
         // Reflections reflections = new Reflections(packageName);
         // return reflections.getSubTypesOf(baseClass);
@@ -132,8 +133,9 @@ public class ReflectionUtils {
      * @since 3.2.11
      */
     protected static <R> Set<Class<? extends R>> seekClassDescendantsInPackageForFileSystem(
-            @Nonnull String packageName,
-            @Nonnull Class<R> baseClass) {
+            @NotNull String packageName,
+            @NotNull Class<R> baseClass
+    ) {
         Set<Class<? extends R>> descendantClasses = new HashSet<>();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         // in file system
@@ -153,9 +155,9 @@ public class ReflectionUtils {
                 Path startPath = Paths.get(uri);
                 //Keel.getLogger().debug("[4] startPath: " + startPath);
                 Files.walkFileTree(startPath, new SimpleFileVisitor<>() {
-                    @Nonnull
+                    @NotNull
                     @Override
-                    public FileVisitResult visitFile(@Nonnull Path file, @Nonnull BasicFileAttributes attrs) {
+                    public FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs) {
                         //Keel.getLogger().debug("[5] Visiting file: " + file);
                         if (file.toString().endsWith(".class")) {
                             String className = file.toString().replace(".class", "").replace(File.separator, ".");
@@ -194,8 +196,9 @@ public class ReflectionUtils {
      * @since 3.2.11
      */
     protected static <R> Set<Class<? extends R>> seekClassDescendantsInPackageForRunningJar(
-            @Nonnull String packageName,
-            @Nonnull Class<R> baseClass) {
+            @NotNull String packageName,
+            @NotNull Class<R> baseClass
+    ) {
         Set<Class<? extends R>> descendantClasses = new HashSet<>();
         Set<String> strings = FileUtils.seekPackageClassFilesInRunningJar(packageName);
         var eventRecorder = createEventRecorder();
@@ -220,8 +223,11 @@ public class ReflectionUtils {
     /**
      * @since 3.2.11
      */
-    protected static <R> Set<Class<? extends R>> seekClassDescendantsInPackageForProvidedJar(@Nonnull String jarInClassPath,
-                                                                                             @Nonnull String packageName, @Nonnull Class<R> baseClass) {
+    protected static <R> Set<Class<? extends R>> seekClassDescendantsInPackageForProvidedJar(
+            @NotNull String jarInClassPath,
+            @NotNull String packageName,
+            @NotNull Class<R> baseClass
+    ) {
         Set<Class<? extends R>> descendantClasses = new HashSet<>();
         List<String> classNames = FileUtils.traversalInJarFile(new File(jarInClassPath));
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -247,7 +253,7 @@ public class ReflectionUtils {
      *         `implementClass`.
      * @since 3.0.10
      */
-    public static boolean isClassAssignable(@Nonnull Class<?> baseClass, @Nonnull Class<?> implementClass) {
+    public static boolean isClassAssignable(@NotNull Class<?> baseClass, @NotNull Class<?> implementClass) {
         return baseClass.isAssignableFrom(implementClass);
     }
 

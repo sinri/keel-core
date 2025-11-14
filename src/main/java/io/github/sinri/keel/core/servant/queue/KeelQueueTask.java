@@ -1,19 +1,19 @@
 package io.github.sinri.keel.core.servant.queue;
 
-import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
+import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.github.sinri.keel.logger.api.factory.RecorderFactory;
 import io.github.sinri.keel.logger.api.issue.IssueRecorder;
 import io.github.sinri.keel.utils.ReflectionUtils;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 
 /**
  * @since 2.1
  */
-public abstract class KeelQueueTask extends KeelVerticleImpl {
+public abstract class KeelQueueTask extends AbstractKeelVerticle {
     private QueueWorkerPoolManager queueWorkerPoolManager;
     private IssueRecorder<QueueTaskIssueRecord> queueTaskIssueRecorder;
 
@@ -21,10 +21,10 @@ public abstract class KeelQueueTask extends KeelVerticleImpl {
         this.queueWorkerPoolManager = queueWorkerPoolManager;
     }
 
-    @Nonnull
+    @NotNull
     abstract public String getTaskReference();
 
-    @Nonnull
+    @NotNull
     abstract public String getTaskCategory();
 
     /**
@@ -35,7 +35,7 @@ public abstract class KeelQueueTask extends KeelVerticleImpl {
     /**
      * @since 4.0.0
      */
-    @Nonnull
+    @NotNull
     protected final IssueRecorder<QueueTaskIssueRecord> buildQueueTaskIssueRecorder() {
         return getIssueRecordCenter().createIssueRecorder(
                 QueueTaskIssueRecord.TopicQueue,

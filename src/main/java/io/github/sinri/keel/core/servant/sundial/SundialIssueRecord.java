@@ -1,9 +1,9 @@
 package io.github.sinri.keel.core.servant.sundial;
 
+import io.github.sinri.keel.base.utils.cron.ParsedCalenderElements;
 import io.github.sinri.keel.logger.api.issue.IssueRecord;
-import io.github.sinri.keel.utils.time.cron.ParsedCalenderElements;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Calendar;
 import java.util.List;
 
@@ -19,9 +19,9 @@ public class SundialIssueRecord extends IssueRecord<SundialIssueRecord> {
     }
 
     public SundialIssueRecord(
-            @Nonnull KeelSundialPlan sundialPlan,
-            @Nonnull Calendar now,
-            @Nonnull String deploymentId
+            @NotNull KeelSundialPlan sundialPlan,
+            @NotNull Calendar now,
+            @NotNull String deploymentId
     ) {
         super();
         this.classification(List.of("Plan"));
@@ -31,9 +31,9 @@ public class SundialIssueRecord extends IssueRecord<SundialIssueRecord> {
             .context("deploymentId", deploymentId);
     }
 
-    @Nonnull
-    @Override
-    public SundialIssueRecord getImplementation() {
-        return this;
-    }
+    //    @NotNull
+    //    @Override
+    //    public SundialIssueRecord getImplementation() {
+    //        return this;
+    //    }
 }

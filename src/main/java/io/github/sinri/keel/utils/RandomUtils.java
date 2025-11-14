@@ -2,15 +2,16 @@ package io.github.sinri.keel.utils;
 
 
 import io.vertx.ext.auth.prng.VertxContextPRNG;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
+import static io.github.sinri.keel.base.KeelInstance.Keel;
+
 
 /**
  * As of 4.1.1, fix the static method to use the instance method.
@@ -157,7 +158,7 @@ public class RandomUtils {
      * @throws IllegalStateException 如果无法创建伪随机数生成器
      * @since 3.2.11 build when first get
      */
-    @Nonnull
+    @NotNull
     public static VertxContextPRNG getPRNG() {
         return prngRef.updateAndGet(existing -> {
             if (existing != null) {

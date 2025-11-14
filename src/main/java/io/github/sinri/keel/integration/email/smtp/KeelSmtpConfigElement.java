@@ -2,18 +2,18 @@ package io.github.sinri.keel.integration.email.smtp;
 
 import io.github.sinri.keel.base.configuration.KeelConfigElement;
 import io.vertx.ext.mail.MailConfig;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 
 /**
  * @since 4.1.0
  */
 public class KeelSmtpConfigElement extends KeelConfigElement {
-    public KeelSmtpConfigElement(@Nonnull String name) {
+    public KeelSmtpConfigElement(@NotNull String name) {
         super(name);
     }
 
-    public KeelSmtpConfigElement(@Nonnull KeelConfigElement another) {
+    public KeelSmtpConfigElement(@NotNull KeelConfigElement another) {
         super(another);
     }
 

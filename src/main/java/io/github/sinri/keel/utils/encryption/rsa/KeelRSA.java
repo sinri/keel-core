@@ -1,7 +1,8 @@
 package io.github.sinri.keel.utils.encryption.rsa;
 
-import io.github.sinri.keel.utils.BinaryUtils;
-import io.github.sinri.keel.utils.StringUtils;
+
+import io.github.sinri.keel.base.utils.BinaryUtils;
+import io.github.sinri.keel.base.utils.StringUtils;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;

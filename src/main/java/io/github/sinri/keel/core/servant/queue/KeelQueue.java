@@ -1,15 +1,15 @@
 package io.github.sinri.keel.core.servant.queue;
 
-import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
+import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.github.sinri.keel.logger.api.factory.RecorderFactory;
 import io.github.sinri.keel.logger.api.issue.IssueRecorder;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
+import static io.github.sinri.keel.base.KeelInstance.Keel;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
 
 /**
  * 标准的队列服务实现。
@@ -18,7 +18,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  *
  * @since 2.1
  */
-public abstract class KeelQueue extends KeelVerticleImpl
+public abstract class KeelQueue extends AbstractKeelVerticle
         implements KeelQueueNextTaskSeeker, KeelQueueSignalReader {
     //private KeelQueueNextTaskSeeker nextTaskSeeker;
     private QueueWorkerPoolManager queueWorkerPoolManager;
@@ -34,7 +34,7 @@ public abstract class KeelQueue extends KeelVerticleImpl
     /**
      * @since 4.0.2
      */
-    @Nonnull
+    @NotNull
     protected final IssueRecorder<QueueManageIssueRecord> buildQueueManageIssueRecorder() {
         return getIssueRecordCenter().createIssueRecorder(
                 QueueManageIssueRecord.TopicQueue,
@@ -64,7 +64,7 @@ public abstract class KeelQueue extends KeelVerticleImpl
      *
      * @since 3.0.9
      */
-    protected @Nonnull QueueWorkerPoolManager getQueueWorkerPoolManager() {
+    protected @NotNull QueueWorkerPoolManager getQueueWorkerPoolManager() {
         return new QueueWorkerPoolManager(0);
     }
 

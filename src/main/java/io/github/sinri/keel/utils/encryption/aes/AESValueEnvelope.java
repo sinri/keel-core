@@ -2,8 +2,8 @@ package io.github.sinri.keel.utils.encryption.aes;
 
 import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.core.KeelValueEnvelope;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 
 /**
  * @since 3.1.0 Technical Preview

@@ -1,6 +1,7 @@
 package io.github.sinri.keel.utils.encryption.aes;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
+
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.nio.charset.Charset;
@@ -22,34 +23,18 @@ public interface KeelAes {
      */
     Charset ENCODING = StandardCharsets.UTF_8;
 
-    static @Nonnull KeelAes create(@Nonnull SupportedCipherAlgorithm cipherAlgorithm, @Nonnull String key) {
+    @NotNull
+    static KeelAes create(@NotNull SupportedCipherAlgorithm cipherAlgorithm, @NotNull String key) {
         Objects.requireNonNull(cipherAlgorithm);
         Objects.requireNonNull(key);
-        switch (cipherAlgorithm) {
-            case AesCbcPkcs7Padding:
-                return new KeelAesCbcPkcs7Padding(key);
-            case AesCbcPkcs5Padding:
-                return new KeelAesCbcPkcs5Padding(key);
-            case AesEcbPkcs5Padding:
-                return new KeelAesEcbPkcs5Padding(key);
-            case AesEcbPkcs7Padding:
-                return new KeelAesEcbPkcs7Padding(key);
-            case AesEcbNoPadding:
-                return new KeelAesEcbNoPadding(key);
-        }
-        throw new IllegalArgumentException();
+        return switch (cipherAlgorithm) {
+            case AesCbcPkcs7Padding -> new KeelAesCbcPkcs7Padding(key);
+            case AesCbcPkcs5Padding -> new KeelAesCbcPkcs5Padding(key);
+            case AesEcbPkcs5Padding -> new KeelAesEcbPkcs5Padding(key);
+            case AesEcbPkcs7Padding -> new KeelAesEcbPkcs7Padding(key);
+            case AesEcbNoPadding -> new KeelAesEcbNoPadding(key);
+        };
     }
-
-    /**
-     * 加密/解密算法 / 工作模式 / 填充方式
-     * Java 6支持PKCS5Padding填充方式
-     * Bouncy Castle支持PKCS7Padding填充方式
-     */
-    SupportedCipherAlgorithm getCipherAlgorithm();
-
-    String encrypt(String source);
-
-    String decrypt(String encryptStr);
 
     /**
      * @since 3.0.11 be static.
@@ -81,6 +66,17 @@ public interface KeelAes {
     static String generate256BitsSecretKey() throws NoSuchAlgorithmException {
         return Base64.getEncoder().encodeToString(generateSecretKeyWithKeySize(256).getEncoded());
     }
+
+    /**
+     * 加密/解密算法 / 工作模式 / 填充方式
+     * Java 6支持PKCS5Padding填充方式
+     * Bouncy Castle支持PKCS7Padding填充方式
+     */
+    SupportedCipherAlgorithm getCipherAlgorithm();
+
+    String encrypt(String source);
+
+    String decrypt(String encryptStr);
 
     enum SupportedCipherAlgorithm {
         AesCbcPkcs5Padding("AES/CBC/PKCS5Padding"),

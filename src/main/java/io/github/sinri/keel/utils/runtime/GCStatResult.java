@@ -1,15 +1,16 @@
 package io.github.sinri.keel.utils.runtime;
 
-import io.github.sinri.keel.logger.base.event.BaseEventRecorder;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.lang.management.GarbageCollectorMXBean;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 /**
  * @since 2.9.4
@@ -69,28 +70,28 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
     /**
      * @since 4.0.2
      */
-    public static void handleMajorGCNames(@Nonnull Handler<Set<String>> handler) {
+    public static void handleMajorGCNames(@NotNull Handler<Set<String>> handler) {
         handler.handle(majorGCNames);
     }
 
     /**
      * @since 4.0.2
      */
-    public static void handleMinorGCNames(@Nonnull Handler<Set<String>> handler) {
+    public static void handleMinorGCNames(@NotNull Handler<Set<String>> handler) {
         handler.handle(minorGCNames);
     }
 
     /**
      * @since 4.0.2
      */
-    public static void handleIgnoreGCNames(@Nonnull Handler<Set<String>> handler) {
+    public static void handleIgnoreGCNames(@NotNull Handler<Set<String>> handler) {
         handler.handle(ignoreGCNames);
     }
 
     /**
      * @since 4.0.2
      */
-    public static GCStatResult parseGarbageCollectorMXBeans(@Nonnull List<GarbageCollectorMXBean> gcList) {
+    public static GCStatResult parseGarbageCollectorMXBeans(@NotNull List<GarbageCollectorMXBean> gcList) {
         GCStatResult gcStatResult = new GCStatResult();
         for (GarbageCollectorMXBean gc : gcList) {
             if (gc == null) {
@@ -169,7 +170,7 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
      * @since 3.1.4
      * @since 4.0.2 refine
      */
-    private void refreshWithGC(@Nonnull GarbageCollectorMXBean gc) {
+    private void refreshWithGC(@NotNull GarbageCollectorMXBean gc) {
         if (minorGCNames.contains(gc.getName())) {
             this.minorGCCount = gc.getCollectionCount();
             if (gc.getCollectionTime() >= 0) {
@@ -183,8 +184,7 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
             }
             this.majorGCType = gc.getName();
         } else if (!ignoreGCNames.contains(gc.getName())) {
-            BaseEventRecorder baseEventRecorder = new BaseEventRecorder(getClass().getName());
-            baseEventRecorder.error(log -> log
+            Keel.getRecorderFactory().createEventRecorder(getClass().getName()).error(log -> log
                     .message("Found Unknown GarbageCollectorMXBean Name")
                     .context(ctx -> ctx
                             .put("class", gc.getClass().getName())

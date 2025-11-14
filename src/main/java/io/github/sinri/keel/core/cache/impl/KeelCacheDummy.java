@@ -2,9 +2,9 @@ package io.github.sinri.keel.core.cache.impl;
 
 import io.github.sinri.keel.core.cache.KeelCacheInterface;
 import io.github.sinri.keel.core.cache.NotCached;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -21,28 +21,28 @@ public class KeelCacheDummy<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public void save(@Nonnull K key, V value, long lifeInSeconds) {
+    public void save(@NotNull K key, V value, long lifeInSeconds) {
 
     }
 
-    @Nonnull
+    @NotNull
     @Override
-    public V read(@Nonnull K key) throws NotCached {
+    public V read(@NotNull K key) throws NotCached {
         throw new NotCached(key.toString());
     }
 
     @Override
-    public V computeIfAbsent(@Nonnull K key, @Nonnull Function<K, V> computation, long lifeInSeconds) {
+    public V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation, long lifeInSeconds) {
         return computation.apply(key);
     }
 
     @Override
-    public V read(@Nonnull K key, @Nullable V fallbackValue) {
+    public V read(@NotNull K key, @Nullable V fallbackValue) {
         return fallbackValue;
     }
 
     @Override
-    public void remove(@Nonnull K key) {
+    public void remove(@NotNull K key) {
 
     }
 
@@ -56,7 +56,7 @@ public class KeelCacheDummy<K, V> implements KeelCacheInterface<K, V> {
 
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public Set<K> getCachedKeySet() {
         return Set.of();

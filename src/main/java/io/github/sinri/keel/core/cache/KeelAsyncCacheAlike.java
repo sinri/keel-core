@@ -1,9 +1,9 @@
 package io.github.sinri.keel.core.cache;
 
 import io.vertx.core.Future;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * An interface for an asynchronous cache mechanism that supports non-blocking
@@ -25,8 +25,8 @@ public interface KeelAsyncCacheAlike<K, V> {
      * @param v the value
      * @return the future of save operation
      */
-    @Nonnull
-    Future<Void> save(@Nonnull K k, @Nullable V v);
+    @NotNull
+    Future<Void> save(@NotNull K k, @Nullable V v);
 
     /**
      * Read an available cached item with the provided key asynchronously
@@ -36,8 +36,8 @@ public interface KeelAsyncCacheAlike<K, V> {
      * @param v the fallback value, nullable
      * @return the future of read operation, holding a non-null value when succeeded
      */
-    @Nonnull
-    Future<V> read(@Nonnull K k, @Nullable V v);
+    @NotNull
+    Future<V> read(@NotNull K k, @Nullable V v);
 
     /**
      * Read an available cached item with the provided key asynchronously
@@ -47,8 +47,8 @@ public interface KeelAsyncCacheAlike<K, V> {
      *         succeeded, otherwise failed with
      *         {@link NotCached}.
      */
-    @Nonnull
-    default Future<V> read(@Nonnull K k) {
+    @NotNull
+    default Future<V> read(@NotNull K k) {
         return read(k, null)
                 .compose(v -> {
                     if (v == null) {

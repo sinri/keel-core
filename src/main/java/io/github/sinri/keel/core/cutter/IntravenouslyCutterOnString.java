@@ -9,7 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
+import static io.github.sinri.keel.base.KeelInstance.Keel;
+
 
 /**
  * @since 4.0.11

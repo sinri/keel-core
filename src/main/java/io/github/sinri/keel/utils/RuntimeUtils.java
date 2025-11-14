@@ -3,12 +3,12 @@ package io.github.sinri.keel.utils;
 import io.github.sinri.keel.utils.runtime.CPUTimeResult;
 import io.github.sinri.keel.utils.runtime.GCStatResult;
 import io.github.sinri.keel.utils.runtime.JVMMemoryResult;
+import org.jetbrains.annotations.NotNull;
 import org.openjdk.jol.info.ClassLayout;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
 
-import javax.annotation.Nonnull;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
@@ -40,7 +40,7 @@ public class RuntimeUtils {
         return Runtime.getRuntime();
     }
 
-    @Nonnull
+    @NotNull
     public static GCStatResult getGCSnapshot() {
         return GCStatResult.parseGarbageCollectorMXBeans(ManagementFactory.getGarbageCollectorMXBeans());
     }
@@ -48,7 +48,7 @@ public class RuntimeUtils {
     /**
      * @since 2.9.4
      */
-    @Nonnull
+    @NotNull
     public static CPUTimeResult getCPUTimeSnapshot() {
         CentralProcessor processor = systemInfo.getHardware().getProcessor();
         long[] systemCpuLoadTicks = processor.getSystemCpuLoadTicks();

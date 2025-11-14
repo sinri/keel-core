@@ -5,9 +5,9 @@ import io.github.sinri.keel.utils.authenticator.googleauth.async.AsyncGoogleAuth
 import io.github.sinri.keel.utils.authenticator.googleauth.sync.GoogleAuthenticator;
 import io.github.sinri.keel.utils.encryption.bcrypt.BCrypt;
 import io.vertx.core.Handler;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * @since 2.9.4
@@ -23,7 +23,8 @@ public class AuthenticationUtils {
      * @since 2.8
      * @since 2.9.4 moved from digest to authentication
      */
-    public static @Nonnull String php_password_hash(@Nonnull String password) {
+    @NotNull
+    public static String php_password_hash(@NotNull String password) {
         return BCrypt.hashpw(password);
     }
 
@@ -31,7 +32,7 @@ public class AuthenticationUtils {
      * @since 2.8
      * @since 2.9.4 moved from digest to authentication
      */
-    public static boolean php_password_verify(@Nonnull String password, @Nonnull String hash) {
+    public static boolean php_password_verify(@NotNull String password, @NotNull String hash) {
         return BCrypt.checkpw(password, hash);
     }
 

@@ -6,7 +6,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.ThreadingModel;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
+import static io.github.sinri.keel.base.KeelInstance.Keel;
+
 
 /**
  * It might be used like KeelEndless in standalone mode with Promise and clustered lock.

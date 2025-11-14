@@ -1,20 +1,21 @@
 package io.github.sinri.keel.core.maids.gatling;
 
-import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
+import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.github.sinri.keel.logger.api.event.EventRecorder;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.shareddata.Counter;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
+import static io.github.sinri.keel.base.KeelInstance.Keel;
+
 
 /**
  * Gatling Gun with multi barrels, for parallel tasks in clustered vertx runtime.
@@ -22,7 +23,7 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 2.9.1
  * @since 2.9.3 change to VERTICLE
  */
-abstract public class KeelGatling extends KeelVerticleImpl {
+abstract public class KeelGatling extends AbstractKeelVerticle {
     private final Options options;
     private final AtomicInteger barrelUsed = new AtomicInteger(0);
     private EventRecorder gatlingLogger;
@@ -41,7 +42,7 @@ abstract public class KeelGatling extends KeelVerticleImpl {
     /**
      * @since 4.0.2
      */
-    @Nonnull
+    @NotNull
     abstract protected EventRecorder buildGatlingLogger();
 
     /**

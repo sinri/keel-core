@@ -1,9 +1,9 @@
 package io.github.sinri.keel.core.cache.impl;
 
 import io.github.sinri.keel.core.cache.KeelEverlastingCacheInterface;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
@@ -19,7 +19,7 @@ public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
         map = new HashMap<>();
     }
 
-    private void saveImpl(@Nonnull K key, @Nullable V value) {
+    private void saveImpl(@NotNull K key, @Nullable V value) {
         if (value == null) {
             map.remove(key);
         } else {
@@ -28,7 +28,7 @@ public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
     }
 
     @Override
-    public void save(@Nonnull K k, @Nullable V v) {
+    public void save(@NotNull K k, @Nullable V v) {
         lock.writeLock().lock();
         try {
             saveImpl(k, v);
@@ -38,7 +38,7 @@ public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
     }
 
     @Override
-    public void save(@Nonnull Map<K, V> appendEntries) {
+    public void save(@NotNull Map<K, V> appendEntries) {
         lock.writeLock().lock();
         try {
             appendEntries.forEach(this::saveImpl);
@@ -48,13 +48,13 @@ public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
     }
 
     @Nullable
-    private V readImpl(@Nonnull K key) {
+    private V readImpl(@NotNull K key) {
         return map.get(key);
     }
 
     @Override
     @Nullable
-    public V read(@Nonnull K k, @Nullable V v) {
+    public V read(@NotNull K k, @Nullable V v) {
         lock.readLock().lock();
         try {
             var cached = readImpl(k);
@@ -69,7 +69,7 @@ public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
     }
 
     @Override
-    public V computeIfAbsent(@Nonnull K key, @Nonnull Function<K, V> computation) {
+    public V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation) {
         lock.writeLock().lock();
         try {
             var v = readImpl(key);
@@ -86,7 +86,7 @@ public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
         }
     }
 
-    private void removeImpl(@Nonnull K key) {
+    private void removeImpl(@NotNull K key) {
         map.remove(key);
     }
 
@@ -95,7 +95,7 @@ public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
     }
 
     @Override
-    public void remove(@Nonnull K key) {
+    public void remove(@NotNull K key) {
         lock.writeLock().lock();
         try {
             removeImpl(key);
@@ -105,7 +105,7 @@ public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
     }
 
     @Override
-    public void remove(@Nonnull Collection<K> keys) {
+    public void remove(@NotNull Collection<K> keys) {
         lock.writeLock().lock();
         try {
             keys.forEach(this::removeImpl);
@@ -129,7 +129,7 @@ public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
      * @since 2.9.4 no longer implemented by replace map
      */
     @Override
-    public void replaceAll(@Nonnull Map<K, V> newEntries) {
+    public void replaceAll(@NotNull Map<K, V> newEntries) {
         lock.writeLock().lock();
         try {
             removeAllImpl();
@@ -139,7 +139,7 @@ public class KeelCacheVet<K, V> implements KeelEverlastingCacheInterface<K, V> {
         }
     }
 
-    @Nonnull
+    @NotNull
     @Override
     public Set<K> getCachedKeySet() {
         lock.readLock().lock();

@@ -2,16 +2,14 @@ package io.github.sinri.keel.core.cache;
 
 import io.github.sinri.keel.core.cache.impl.KeelCacheAlef;
 import io.github.sinri.keel.core.cache.impl.KeelCacheDummy;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
+import static io.github.sinri.keel.base.KeelInstance.Keel;
+
 
 /**
  * An interface for a cache mechanism that supports synchronous operations
@@ -58,28 +56,16 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param value         value
      * @param lifeInSeconds The lifetime of the cache item, in seconds.
      */
-    void save(@Nonnull K key, V value, long lifeInSeconds);
+    void save(@NotNull K key, V value, long lifeInSeconds);
 
     /**
      * @since 2.8
      */
     @Override
-    default void save(@Nonnull K key, @Nullable V value) {
+    default void save(@NotNull K key, @Nullable V value) {
         save(key, value, getDefaultLifeInSeconds());
     }
 
-    /**
-     * Seek cached value with the key, generate one with generator if not cached.
-     * <p>
-     * You must enclose the key with in the dynamic generator. It is not so convenient so deprecated.
-     *
-     * @since 4.0.0
-     * @deprecated Use {@link KeelCacheInterface#computeIfAbsent(Object, Function, long)} instead as of 4.1.5
-     */
-    @Deprecated(since = "4.1.5", forRemoval = true)
-    default V read(@Nonnull K key, Supplier<V> generator, long lifeInSeconds) {
-        return computeIfAbsent(key, k -> generator.get(), lifeInSeconds);
-    }
 
     /**
      * Computes a value for the given key if it is not already present in the cache.
@@ -95,7 +81,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @return the existing or newly computed value associated with the key
      * @since 4.1.5
      */
-    default V computeIfAbsent(@Nonnull K key, @Nonnull Function<K, V> computation) {
+    default V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation) {
         return computeIfAbsent(key, computation, getDefaultLifeInSeconds());
     }
 
@@ -115,14 +101,14 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @return the existing or newly computed value associated with the key.
      * @since 4.1.5
      */
-    V computeIfAbsent(@Nonnull K key, @Nonnull Function<K, V> computation, long lifeInSeconds);
+    V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation, long lifeInSeconds);
 
     /**
      * Remove the cached item with the key.
      *
      * @param key key
      */
-    void remove(@Nonnull K key);
+    void remove(@NotNull K key);
 
     /**
      * Remove all the cached items.
@@ -135,29 +121,11 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
     void cleanUp();
 
     /**
-     * @return ConcurrentMap K → V alive value only
-     * @since 1.14
-     */
-    @Deprecated(since = "4.1.5", forRemoval = true)
-    @Nonnull
-    default Map<K, V> getSnapshotMap() {
-        Map<K, V> map = new HashMap<>();
-        getCachedKeySet().forEach(k -> {
-            try {
-                map.put(k, read(k));
-            } catch (NotCached e) {
-                // do nothing
-            }
-        });
-        return map;
-    }
-
-    /**
      * Retrieves the set of keys currently stored in the cache.
      *
      * @return A non-null set containing all cached keys.
      */
-    @Nonnull
+    @NotNull
     Set<K> getCachedKeySet();
 
     /**

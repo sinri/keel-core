@@ -1,8 +1,8 @@
 package io.github.sinri.keel.core.servant.queue;
 
 import io.github.sinri.keel.logger.api.issue.IssueRecord;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
 /**
@@ -11,14 +11,14 @@ import java.util.List;
 public final class QueueTaskIssueRecord extends IssueRecord<QueueTaskIssueRecord> {
     public static final String TopicQueue = "Queue";
 
-    public QueueTaskIssueRecord(@Nonnull String taskReference, @Nonnull String taskCategory) {
+    public QueueTaskIssueRecord(@NotNull String taskReference, @NotNull String taskCategory) {
         super();
         this.classification(List.of("task", "reference:" + taskReference, "category:" + taskCategory));
     }
 
-    @Nonnull
-    @Override
-    public QueueTaskIssueRecord getImplementation() {
-        return this;
-    }
+    //    @NotNull
+    //    @Override
+    //    public QueueTaskIssueRecord getImplementation() {
+    //        return this;
+    //    }
 }

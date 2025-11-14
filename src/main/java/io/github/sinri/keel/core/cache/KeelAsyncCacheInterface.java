@@ -1,14 +1,15 @@
 package io.github.sinri.keel.core.cache;
 
 import io.vertx.core.Future;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
+import static io.github.sinri.keel.base.KeelInstance.Keel;
+
 
 /**
  * An interface representing an asynchronous cache system that allows storing,
@@ -30,7 +31,7 @@ public interface KeelAsyncCacheInterface<K, V> extends KeelAsyncCacheAlike<K, V>
      * @param value         value
      * @param lifeInSeconds The lifetime of the cache item, in seconds.
      */
-    Future<Void> save(@Nonnull K key, V value, long lifeInSeconds);
+    Future<Void> save(@NotNull K key, V value, long lifeInSeconds);
 
     /**
      * Read an available cached item with key;
@@ -45,14 +46,14 @@ public interface KeelAsyncCacheInterface<K, V> extends KeelAsyncCacheAlike<K, V>
      * @return async: the valued read from cache
      * @since 2.5
      */
-    Future<V> read(@Nonnull K key, Function<K, Future<V>> generator, long lifeInSeconds);
+    Future<V> read(@NotNull K key, Function<K, Future<V>> generator, long lifeInSeconds);
 
     /**
      * Remove the cached item with key.
      *
      * @param key key
      */
-    Future<Void> remove(@Nonnull K key);
+    Future<Void> remove(@NotNull K key);
 
     /**
      * Remove all the cached items.

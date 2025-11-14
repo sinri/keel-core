@@ -1,8 +1,9 @@
 package io.github.sinri.keel.utils.encryption.rsa;
 
-import io.github.sinri.keel.utils.BinaryUtils;
-import io.github.sinri.keel.utils.StringUtils;
-import io.github.sinri.keel.utils.io.FileUtils;
+
+import io.github.sinri.keel.base.utils.BinaryUtils;
+import io.github.sinri.keel.base.utils.FileUtils;
+import io.github.sinri.keel.base.utils.StringUtils;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;

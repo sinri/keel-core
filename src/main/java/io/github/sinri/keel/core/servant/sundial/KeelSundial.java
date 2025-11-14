@@ -1,26 +1,27 @@
 package io.github.sinri.keel.core.servant.sundial;
 
-import io.github.sinri.keel.base.verticles.KeelVerticleImpl;
+import io.github.sinri.keel.base.utils.cron.KeelCronExpression;
+import io.github.sinri.keel.base.utils.cron.ParsedCalenderElements;
+import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.github.sinri.keel.logger.api.factory.RecorderFactory;
 import io.github.sinri.keel.logger.api.issue.IssueRecorder;
-import io.github.sinri.keel.utils.time.cron.KeelCronExpression;
-import io.github.sinri.keel.utils.time.cron.ParsedCalenderElements;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
+import static io.github.sinri.keel.base.KeelInstance.Keel;
+
 
 /**
  * @since 3.0.0
  * @since 3.2.4 use verticle to handle the sundial plan executing.
  * @since 4.0.0 changed to use issue recorder
  */
-public abstract class KeelSundial extends KeelVerticleImpl {
+public abstract class KeelSundial extends AbstractKeelVerticle {
     private final Map<String, KeelSundialPlan> planMap = new ConcurrentHashMap<>();
     private Long timerID;
     /**
@@ -36,7 +37,7 @@ public abstract class KeelSundial extends KeelVerticleImpl {
     /**
      * @since 4.0.0
      */
-    @Nonnull
+    @NotNull
     protected IssueRecorder<SundialIssueRecord> buildIssueRecorder() {
         return getIssueRecordCenter().createIssueRecorder(SundialIssueRecord.TopicSundial, SundialIssueRecord::new);
     }

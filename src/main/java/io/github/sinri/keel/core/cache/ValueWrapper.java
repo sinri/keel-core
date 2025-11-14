@@ -1,6 +1,7 @@
 package io.github.sinri.keel.core.cache;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+
 import java.lang.ref.SoftReference;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantReadWriteLock;

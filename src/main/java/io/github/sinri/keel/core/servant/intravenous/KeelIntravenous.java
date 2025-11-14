@@ -2,11 +2,12 @@ package io.github.sinri.keel.core.servant.intravenous;
 
 import io.github.sinri.keel.base.verticles.KeelVerticle;
 import io.vertx.core.Future;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 
-import static io.github.sinri.keel.facade.KeelInstance.Keel;
+import static io.github.sinri.keel.base.KeelInstance.Keel;
+
 
 /**
  * Handle tasks to process objects of a certain type in order.
@@ -17,11 +18,11 @@ import static io.github.sinri.keel.facade.KeelInstance.Keel;
  * @since 4.0.7
  */
 public interface KeelIntravenous<D> extends KeelVerticle {
-    static <T> KeelIntravenous<T> instant(@Nonnull SingleDropProcessor<T> itemProcessor) {
+    static <T> KeelIntravenous<T> instant(@NotNull SingleDropProcessor<T> itemProcessor) {
         return new KeelIntravenousSingleImpl<>(itemProcessor);
     }
 
-    static <T> KeelIntravenous<T> instantBatch(@Nonnull MultiDropsProcessor<T> itemsProcessor) {
+    static <T> KeelIntravenous<T> instantBatch(@NotNull MultiDropsProcessor<T> itemsProcessor) {
         return new KeelIntravenousBatchImpl<>(itemsProcessor);
     }
 

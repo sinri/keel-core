@@ -1,10 +1,9 @@
 package io.github.sinri.keel.core.cache;
 
 import io.github.sinri.keel.core.cache.impl.KeelCacheVet;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nonnull;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -22,7 +21,7 @@ public interface KeelEverlastingCacheInterface<K, V> extends KeelSyncCacheAlike<
         return new KeelCacheVet<>();
     }
 
-    void save(@Nonnull Map<K, V> appendEntries);
+    void save(@NotNull Map<K, V> appendEntries);
 
     /**
      * Computes and retrieves a value associated with the provided key. If the key is not already
@@ -33,16 +32,16 @@ public interface KeelEverlastingCacheInterface<K, V> extends KeelSyncCacheAlike<
      * @return the computed or cached value associated with the specified key
      * @since 4.1.5
      */
-    V computeIfAbsent(@Nonnull K key, @Nonnull Function<K, V> computation);
+    V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation);
 
     /**
      * Remove the cached item with key.
      *
      * @param key key
      */
-    void remove(@Nonnull K key);
+    void remove(@NotNull K key);
 
-    void remove(@Nonnull Collection<K> keys);
+    void remove(@NotNull Collection<K> keys);
 
     /**
      * Remove all the cached items.
@@ -54,25 +53,8 @@ public interface KeelEverlastingCacheInterface<K, V> extends KeelSyncCacheAlike<
      *
      * @param newEntries new map of entries
      */
-    void replaceAll(@Nonnull Map<K, V> newEntries);
+    void replaceAll(@NotNull Map<K, V> newEntries);
 
-    /**
-     * @return ConcurrentMap K → V alive value only
-     * @since 1.14
-     */
-    @Deprecated(since = "4.1.5", forRemoval = true)
-    @Nonnull
-    default Map<K, V> getSnapshotMap() {
-        Map<K, V> map = new HashMap<>();
-        getCachedKeySet().forEach(k -> {
-            try {
-                map.put(k, read(k));
-            } catch (NotCached e) {
-                // do nothing
-            }
-        });
-        return map;
-    }
 
     /**
      * Retrieves the set of all keys currently cached in the everlasting cache.
@@ -80,7 +62,7 @@ public interface KeelEverlastingCacheInterface<K, V> extends KeelSyncCacheAlike<
      * @return a non-null set of keys representing all the items currently stored in the cache
      * @since 4.1.5
      */
-    @Nonnull
+    @NotNull
     Set<K> getCachedKeySet();
 
 }

@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.servant.sundial;
 
-import io.github.sinri.keel.base.utils.cron.ParsedCalenderElements;
+import io.github.sinri.keel.core.utils.cron.ParsedCalenderElements;
 import io.github.sinri.keel.logger.api.log.SpecificLog;
 import org.jetbrains.annotations.NotNull;
 

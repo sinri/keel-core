@@ -33,8 +33,8 @@ package io.github.sinri.keel.core.utils.authenticator.googleauth.async;
 //import org.apache.commons.codec.binary.Base32;
 //import org.apache.commons.codec.binary.Base64;
 
-import io.github.sinri.keel.base.utils.BinaryUtils;
-import io.github.sinri.keel.base.utils.StringUtils;
+import io.github.sinri.keel.core.utils.BinaryUtils;
+import io.github.sinri.keel.core.utils.StringUtils;
 import io.github.sinri.keel.core.utils.authenticator.googleauth.GoogleAuthenticatorConfig;
 import io.github.sinri.keel.core.utils.authenticator.googleauth.GoogleAuthenticatorException;
 import io.github.sinri.keel.core.utils.authenticator.googleauth.GoogleAuthenticatorKey;

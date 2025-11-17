@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.utils;
 
-import io.github.sinri.keel.base.utils.FileUtils;
 import io.github.sinri.keel.logger.api.logger.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

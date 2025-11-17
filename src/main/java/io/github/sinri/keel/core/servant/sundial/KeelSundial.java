@@ -1,8 +1,8 @@
 package io.github.sinri.keel.core.servant.sundial;
 
-import io.github.sinri.keel.base.utils.cron.KeelCronExpression;
-import io.github.sinri.keel.base.utils.cron.ParsedCalenderElements;
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
+import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
+import io.github.sinri.keel.core.utils.cron.ParsedCalenderElements;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.DeploymentOptions;

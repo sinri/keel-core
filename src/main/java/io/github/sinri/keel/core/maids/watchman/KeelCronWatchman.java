@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.maids.watchman;
 
-import io.github.sinri.keel.base.utils.cron.KeelCronExpression;
+import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;

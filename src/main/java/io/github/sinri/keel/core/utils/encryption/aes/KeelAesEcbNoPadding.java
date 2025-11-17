@@ -1,8 +1,8 @@
 package io.github.sinri.keel.core.utils.encryption.aes;
 
 
-import io.github.sinri.keel.base.utils.BinaryUtils;
-import io.github.sinri.keel.base.utils.StringUtils;
+import io.github.sinri.keel.core.utils.BinaryUtils;
+import io.github.sinri.keel.core.utils.StringUtils;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;

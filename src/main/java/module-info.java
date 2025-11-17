@@ -12,7 +12,6 @@ module io.github.sinri.keel.core {
     requires org.jetbrains.annotations;
 
     // Exports for public API packages
-    exports io.github.sinri.keel.core;
     exports io.github.sinri.keel.core.cache;
     exports io.github.sinri.keel.core.cutter;
     exports io.github.sinri.keel.core.integration.email.smtp;

@@ -1,5 +1,4 @@
-package io.github.sinri.keel.core;
-
+package io.github.sinri.keel.core.utils.value;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

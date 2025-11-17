@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.servant.sundial;
 
 import io.github.sinri.keel.base.utils.cron.KeelCronExpression;
-import io.github.sinri.keel.logger.api.issue.IssueRecorder;
+import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.Future;
 
 import java.util.Calendar;
@@ -22,7 +22,7 @@ public interface KeelSundialPlan {
      *
      * @param sundialIssueRecorder as of 4.0.3
      */
-    Future<Void> execute(Calendar now, IssueRecorder<SundialIssueRecord> sundialIssueRecorder);
+    Future<Void> execute(Calendar now, SpecificLogger<SundialIssueRecord> sundialIssueRecorder);
 
     /**
      * Determines whether the execution of a task or plan requires a worker thread.

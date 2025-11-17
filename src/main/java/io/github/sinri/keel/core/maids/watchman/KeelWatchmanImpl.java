@@ -1,8 +1,8 @@
 package io.github.sinri.keel.core.maids.watchman;
 
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
-import io.github.sinri.keel.logger.api.event.EventRecorder;
-import io.github.sinri.keel.logger.api.factory.RecorderFactory;
+import io.github.sinri.keel.logger.api.factory.LoggerFactory;
+import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.Future;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -17,11 +17,11 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
  */
 abstract class KeelWatchmanImpl extends AbstractKeelVerticle implements KeelWatchman {
     private final String watchmanName;
-    private final RecorderFactory issueRecordCenter;
+    private final LoggerFactory issueRecordCenter;
     private MessageConsumer<Long> consumer;
-    private EventRecorder watchmanLogger;
+    private Logger watchmanLogger;
 
-    public KeelWatchmanImpl(String watchmanName, RecorderFactory issueRecordCenter) {
+    public KeelWatchmanImpl(String watchmanName, LoggerFactory issueRecordCenter) {
         this.watchmanName = watchmanName;
         this.issueRecordCenter = issueRecordCenter;
     }
@@ -92,7 +92,7 @@ abstract class KeelWatchmanImpl extends AbstractKeelVerticle implements KeelWatc
     /**
      * @since 4.0.2
      */
-    protected final RecorderFactory getIssueRecordCenter() {
+    protected final LoggerFactory getIssueRecordCenter() {
         return issueRecordCenter;
     }
 
@@ -100,14 +100,14 @@ abstract class KeelWatchmanImpl extends AbstractKeelVerticle implements KeelWatc
      * @since 4.0.2
      */
     @NotNull
-    protected EventRecorder buildWatchmanLogger() {
-        return getIssueRecordCenter().createEventRecorder("Watchman");
+    protected Logger buildWatchmanLogger() {
+        return getIssueRecordCenter().createLogger("Watchman");
     }
 
     /**
      * @since 4.0.2
      */
-    public EventRecorder getWatchmanLogger() {
+    public Logger getWatchmanLogger() {
         return watchmanLogger;
     }
 }

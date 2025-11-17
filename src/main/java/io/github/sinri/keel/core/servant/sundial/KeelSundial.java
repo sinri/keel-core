@@ -3,8 +3,8 @@ package io.github.sinri.keel.core.servant.sundial;
 import io.github.sinri.keel.base.utils.cron.KeelCronExpression;
 import io.github.sinri.keel.base.utils.cron.ParsedCalenderElements;
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
-import io.github.sinri.keel.logger.api.factory.RecorderFactory;
-import io.github.sinri.keel.logger.api.issue.IssueRecorder;
+import io.github.sinri.keel.logger.api.factory.LoggerFactory;
+import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
@@ -27,25 +27,25 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
     /**
      * @since 4.0.2
      */
-    private IssueRecorder<SundialIssueRecord> sundialIssueRecorder;
+    private SpecificLogger<SundialIssueRecord> sundialIssueRecorder;
 
     /**
      * @since 4.0.0
      */
-    abstract protected RecorderFactory getIssueRecordCenter();
+    abstract protected LoggerFactory getIssueRecordCenter();
 
     /**
      * @since 4.0.0
      */
     @NotNull
-    protected IssueRecorder<SundialIssueRecord> buildIssueRecorder() {
-        return getIssueRecordCenter().createIssueRecorder(SundialIssueRecord.TopicSundial, SundialIssueRecord::new);
+    protected SpecificLogger<SundialIssueRecord> buildIssueRecorder() {
+        return getIssueRecordCenter().createLogger(SundialIssueRecord.TopicSundial, SundialIssueRecord::new);
     }
 
     /**
      * @since 4.0.2
      */
-    public IssueRecorder<SundialIssueRecord> getSundialIssueRecorder() {
+    public SpecificLogger<SundialIssueRecord> getSundialIssueRecorder() {
         return sundialIssueRecorder;
     }
 

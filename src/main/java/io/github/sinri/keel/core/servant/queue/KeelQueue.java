@@ -1,8 +1,8 @@
 package io.github.sinri.keel.core.servant.queue;
 
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
-import io.github.sinri.keel.logger.api.factory.RecorderFactory;
-import io.github.sinri.keel.logger.api.issue.IssueRecorder;
+import io.github.sinri.keel.logger.api.factory.LoggerFactory;
+import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
@@ -24,19 +24,19 @@ public abstract class KeelQueue extends AbstractKeelVerticle
     private QueueWorkerPoolManager queueWorkerPoolManager;
     //private KeelQueueSignalReader signalReader;
     private KeelQueueStatus queueStatus = KeelQueueStatus.INIT;
-    private IssueRecorder<QueueManageIssueRecord> queueManageIssueRecorder;
+    private SpecificLogger<QueueManageIssueRecord> queueManageIssueRecorder;
 
     /**
      * @since 4.0.0
      */
-    protected abstract RecorderFactory getIssueRecordCenter();
+    protected abstract LoggerFactory getIssueRecordCenter();
 
     /**
      * @since 4.0.2
      */
     @NotNull
-    protected final IssueRecorder<QueueManageIssueRecord> buildQueueManageIssueRecorder() {
-        return getIssueRecordCenter().createIssueRecorder(
+    protected final SpecificLogger<QueueManageIssueRecord> buildQueueManageIssueRecorder() {
+        return getIssueRecordCenter().createLogger(
                 QueueManageIssueRecord.TopicQueue,
                 QueueManageIssueRecord::new
         );
@@ -45,7 +45,7 @@ public abstract class KeelQueue extends AbstractKeelVerticle
     /**
      * @since 4.0.2
      */
-    public IssueRecorder<QueueManageIssueRecord> getQueueManageIssueRecorder() {
+    public SpecificLogger<QueueManageIssueRecord> getQueueManageIssueRecorder() {
         return queueManageIssueRecorder;
     }
 

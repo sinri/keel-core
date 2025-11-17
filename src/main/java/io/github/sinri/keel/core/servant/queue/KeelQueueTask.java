@@ -2,8 +2,8 @@ package io.github.sinri.keel.core.servant.queue;
 
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.github.sinri.keel.core.utils.ReflectionUtils;
-import io.github.sinri.keel.logger.api.factory.RecorderFactory;
-import io.github.sinri.keel.logger.api.issue.IssueRecorder;
+import io.github.sinri.keel.logger.api.factory.LoggerFactory;
+import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class KeelQueueTask extends AbstractKeelVerticle {
     private QueueWorkerPoolManager queueWorkerPoolManager;
-    private IssueRecorder<QueueTaskIssueRecord> queueTaskIssueRecorder;
+    private SpecificLogger<QueueTaskIssueRecord> queueTaskIssueRecorder;
 
     final void setQueueWorkerPoolManager(QueueWorkerPoolManager queueWorkerPoolManager) {
         this.queueWorkerPoolManager = queueWorkerPoolManager;
@@ -30,14 +30,14 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
     /**
      * @since 4.0.0
      */
-    abstract protected RecorderFactory getIssueRecordCenter();
+    abstract protected LoggerFactory getIssueRecordCenter();
 
     /**
      * @since 4.0.0
      */
     @NotNull
-    protected final IssueRecorder<QueueTaskIssueRecord> buildQueueTaskIssueRecorder() {
-        return getIssueRecordCenter().createIssueRecorder(
+    protected final SpecificLogger<QueueTaskIssueRecord> buildQueueTaskIssueRecorder() {
+        return getIssueRecordCenter().createLogger(
                 QueueTaskIssueRecord.TopicQueue,
                 () -> new QueueTaskIssueRecord(getTaskReference(), getTaskCategory())
         );
@@ -46,7 +46,7 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
     /**
      * @since 4.0.2
      */
-    public IssueRecorder<QueueTaskIssueRecord> getQueueTaskIssueRecorder() {
+    public SpecificLogger<QueueTaskIssueRecord> getQueueTaskIssueRecorder() {
         return queueTaskIssueRecorder;
     }
 

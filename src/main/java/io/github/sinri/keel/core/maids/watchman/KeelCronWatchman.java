@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.maids.watchman;
 
 import io.github.sinri.keel.base.utils.cron.KeelCronExpression;
-import io.github.sinri.keel.logger.api.factory.RecorderFactory;
+import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
@@ -29,7 +29,7 @@ public class KeelCronWatchman extends KeelWatchmanImpl {
     protected KeelCronWatchman(
             String watchmanName,
             Function<String, Future<Void>> cronTabUpdateStartup,
-            RecorderFactory issueRecordCenter
+            LoggerFactory issueRecordCenter
     ) {
         super(watchmanName, issueRecordCenter);
         this.handler = now -> {
@@ -48,7 +48,7 @@ public class KeelCronWatchman extends KeelWatchmanImpl {
     public static Future<String> deploy(
             String watchmanName,
             Function<String, Future<Void>> cronTabUpdateStartup,
-            RecorderFactory issueRecordCenter
+            LoggerFactory issueRecordCenter
     ) {
         KeelCronWatchman keelCronWatchman = new KeelCronWatchman(watchmanName, cronTabUpdateStartup, issueRecordCenter);
         return Keel.getVertx()

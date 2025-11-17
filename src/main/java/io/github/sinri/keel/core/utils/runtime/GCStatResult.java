@@ -184,7 +184,7 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
             }
             this.majorGCType = gc.getName();
         } else if (!ignoreGCNames.contains(gc.getName())) {
-            Keel.getRecorderFactory().createEventRecorder(getClass().getName()).error(log -> log
+            Keel.getLoggerFactory().createLogger(getClass().getName()).error(log -> log
                     .message("Found Unknown GarbageCollectorMXBean Name")
                     .context(ctx -> ctx
                             .put("class", gc.getClass().getName())

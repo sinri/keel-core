@@ -1,10 +1,11 @@
 package io.github.sinri.keel.core.servant.queue;
 
-import io.github.sinri.keel.logger.api.issue.IssueRecord;
+
+import io.github.sinri.keel.logger.api.log.SpecificLog;
 
 import java.util.List;
 
-public final class QueueManageIssueRecord extends IssueRecord<QueueManageIssueRecord> {
+public final class QueueManageIssueRecord extends SpecificLog<QueueManageIssueRecord> {
     public static final String TopicQueue = "Queue";
 
     public QueueManageIssueRecord() {

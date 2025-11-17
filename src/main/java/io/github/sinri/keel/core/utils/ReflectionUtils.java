@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.utils;
 
 import io.github.sinri.keel.base.utils.FileUtils;
-import io.github.sinri.keel.logger.api.event.EventRecorder;
+import io.github.sinri.keel.logger.api.logger.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,8 +42,8 @@ public class ReflectionUtils {
     private ReflectionUtils() {
     }
 
-    private static EventRecorder createEventRecorder() {
-        return Keel.getRecorderFactory().createEventRecorder(ReflectionUtils.class.getName());
+    private static Logger createEventRecorder() {
+        return Keel.getLoggerFactory().createLogger(ReflectionUtils.class.getName());
     }
 
     /**
@@ -187,7 +187,7 @@ public class ReflectionUtils {
             }
         } catch (Exception e) {
             //Keel.getLogger().exception(e);
-            Keel.getRecorderFactory().createEventRecorder(ReflectionUtils.class.getName()).exception(e);
+            Keel.getLoggerFactory().createLogger(ReflectionUtils.class.getName()).exception(e);
         }
         return descendantClasses;
     }

@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.maids.gatling;
 
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
-import io.github.sinri.keel.logger.api.event.EventRecorder;
+import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
@@ -26,7 +26,7 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 abstract public class KeelGatling extends AbstractKeelVerticle {
     private final Options options;
     private final AtomicInteger barrelUsed = new AtomicInteger(0);
-    private EventRecorder gatlingLogger;
+    private Logger gatlingLogger;
 
     private KeelGatling(Options options) {
         this.options = options;
@@ -43,12 +43,12 @@ abstract public class KeelGatling extends AbstractKeelVerticle {
      * @since 4.0.2
      */
     @NotNull
-    abstract protected EventRecorder buildGatlingLogger();
+    abstract protected Logger buildGatlingLogger();
 
     /**
      * @since 4.0.2
      */
-    public EventRecorder getGatlingLogger() {
+    public Logger getGatlingLogger() {
         return gatlingLogger;
     }
 

@@ -11,47 +11,37 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Calendar;
 
 /**
- * @since 3.2.4
- * @since 3.2.5 Used in KeelSundial
- * @since 4.0.0 become abstract
+ * 定时任务计划的封装运行 Verticle 类。
+ *
+ * @since 5.0.0
  */
 final class KeelSundialVerticle extends AbstractKeelVerticle {
     private final KeelSundialPlan sundialPlan;
     private final Calendar now;
-    private final SpecificLogger<SundialIssueRecord> sundialIssueRecorder;
+    private final SpecificLogger<SundialSpecificLog> sundialSpecificLogger;
 
     public KeelSundialVerticle(
             @NotNull KeelSundialPlan sundialPlan,
             @NotNull Calendar now,
-            @NotNull SpecificLogger<SundialIssueRecord> sundialIssueRecorder
+            @NotNull SpecificLogger<SundialSpecificLog> sundialSpecificLogger
     ) {
         this.sundialPlan = sundialPlan;
         this.now = now;
-        this.sundialIssueRecorder = sundialIssueRecorder;
+        this.sundialSpecificLogger = sundialSpecificLogger;
     }
 
     @Override
     protected Future<Void> startVerticle() {
         Future.succeededFuture()
-              .compose(v -> sundialPlan.execute(now, sundialIssueRecorder))
+              .compose(v -> sundialPlan.execute(now, sundialSpecificLogger))
               .onComplete(ar -> undeployMe());
         return Future.succeededFuture();
     }
 
     /**
-     * Deploys the current verticle with dynamic threading behavior based on the requirements
-     * of the associated sundial plan and the availability of virtual threads.
-     * <ul>
-     * <li>If the sundial plan requires a worker thread, the verticle will be deployed
-     * using a worker threading model.</li>
-     * <li>If virtual threads are available and worker threads are not specifically required,
-     * the verticle will be deployed using a virtual threading model.</li>
-     * <li>If neither condition is met, the default threading model will be used.</li>
-     * </ul>
+     * 如果定时任务计划指定在 WORKER 线程模型下运行，则以此部署；否则，先尝试以虚拟线程模型部署，不行就用事件循环模式部署。
      *
-     * @return a future that completes with the deployment ID if the deployment is successful,
-     *         or fails with an exception if the deployment fails.
-     * @since 4.1.3
+     * @return 部署结果
      */
     public Future<String> deployMe() {
         var deploymentOptions = new DeploymentOptions();

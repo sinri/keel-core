@@ -17,13 +17,15 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * Handle customized tasks in order.
+ * 烟囱。
+ * <p>
+ * 接受各种异步任务逻辑，按照 FIFO 原则依次执行。
  *
- * @since 3.0.0
+ * @since 5.0.0
  */
 public class KeelFunnel extends AbstractKeelVerticle {
     /**
-     * The interrupt, to stop sleeping when idle time ends (a new task comes).
+     * 休眠中出现新任务时，使用此内寄存的 Promise 唤醒。
      */
     private final AtomicReference<Promise<Void>> interruptRef;
     private final Queue<Supplier<Future<Void>>> queue;
@@ -37,7 +39,7 @@ public class KeelFunnel extends AbstractKeelVerticle {
         this.funnelLogger = buildFunnelLogger();
     }
 
-    protected LoggerFactory getRecorderFactory() {
+    protected LoggerFactory getLoggerFactory() {
         return Keel.getLoggerFactory();
     }
 
@@ -46,7 +48,7 @@ public class KeelFunnel extends AbstractKeelVerticle {
      */
     @NotNull
     protected Logger buildFunnelLogger() {
-        return getRecorderFactory().createLogger("Funnel");
+        return getLoggerFactory().createLogger("Funnel");
     }
 
     /**

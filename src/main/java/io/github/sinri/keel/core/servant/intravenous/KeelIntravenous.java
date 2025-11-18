@@ -1,6 +1,7 @@
 package io.github.sinri.keel.core.servant.intravenous;
 
 import io.github.sinri.keel.base.verticles.KeelVerticle;
+import io.github.sinri.keel.base.verticles.KeelVerticleRunningStateEnum;
 import io.vertx.core.Future;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,12 +11,12 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * Handle tasks to process objects of a certain type in order.
+ * 静脉注入。
  * <p>
- * Extracted since 4.0.7.
+ * 陆续接收特定类型的对象，并按照 FIFO 的原则依次按批处理。
  *
- * @param <D> the type of the object to be processed.
- * @since 4.0.7
+ * @param <D> 处理对象的类型
+ * @since 5.0.0
  */
 public interface KeelIntravenous<D> extends KeelVerticle {
     static <T> KeelIntravenous<T> instant(@NotNull SingleDropProcessor<T> itemProcessor) {
@@ -29,30 +30,26 @@ public interface KeelIntravenous<D> extends KeelVerticle {
     void add(D drop);
 
     /**
-     * The exception occurred when handling drops, override this method to handle.
-     * By default, the exception would be omitted.
+     * 处理对象过程中发生异常时的回调。
+     * <p>
+     * 默认实现为无视异常。
      */
     default void handleAllergy(Throwable throwable) {
         // do nothing by default for the thrown exception
     }
 
-    /**
-     * @since 4.0.11
-     */
     boolean isNoDropsLeft();
 
     /**
-     * When all the drops reported, i.e. no more drops would be accepted.
-     *
-     * @since 4.0.11
+     * @return 是否已停止接收待处理对象。
      */
     boolean isStopped();
 
+    /**
+     * 通知本接口的实现立即停止接收待处理对象。
+     */
     void shutdown();
 
-    /**
-     * @since 4.1.3
-     */
     default Future<Void> shutdownAndAwait() {
         shutdown();
         return Keel.asyncCallRepeatedly(repeatedlyCallTask -> {
@@ -67,9 +64,10 @@ public interface KeelIntravenous<D> extends KeelVerticle {
 
     /**
      * @return Whether the verticle is undeployed.
-     * @since 4.0.11
      */
-    boolean isUndeployed();
+    default boolean isUndeployed() {
+        return this.getRunningState() == KeelVerticleRunningStateEnum.AFTER_RUNNING;
+    }
 
     interface SingleDropProcessor<T> {
         Future<Void> process(T drop);

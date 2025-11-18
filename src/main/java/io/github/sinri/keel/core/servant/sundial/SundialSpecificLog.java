@@ -8,17 +8,19 @@ import java.util.Calendar;
 import java.util.List;
 
 /**
- * @since 4.0.0
+ * 日晷定时任务特定日志记录
+ *
+ * @since 5.0.0
  */
-public class SundialIssueRecord extends SpecificLog<SundialIssueRecord> {
+public class SundialSpecificLog extends SpecificLog<SundialSpecificLog> {
     public static final String TopicSundial = "Sundial";
 
-    public SundialIssueRecord() {
+    public SundialSpecificLog() {
         super();
         this.classification(List.of("Scheduler"));
     }
 
-    public SundialIssueRecord(
+    public SundialSpecificLog(
             @NotNull KeelSundialPlan sundialPlan,
             @NotNull Calendar now,
             @NotNull String deploymentId
@@ -30,10 +32,4 @@ public class SundialIssueRecord extends SpecificLog<SundialIssueRecord> {
             .context("time", new ParsedCalenderElements(now).toString())
             .context("deploymentId", deploymentId);
     }
-
-    //    @NotNull
-    //    @Override
-    //    public SundialIssueRecord getImplementation() {
-    //        return this;
-    //    }
 }

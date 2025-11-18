@@ -4,13 +4,12 @@ import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.Future;
 
 /**
- * @since 4.0.0
+ * 队列状态信号读取器
+ *
+ * @since 5.0.0
  */
 public interface KeelQueueSignalReader {
-    /**
-     * @since 4.0.0
-     */
-    SpecificLogger<QueueManageIssueRecord> getQueueManageIssueRecorder();
+    SpecificLogger<QueueManageSpecificLog> getQueueManageLogger();
 
     Future<KeelQueueSignal> readSignal();
 }

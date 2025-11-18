@@ -11,11 +11,13 @@ import org.jetbrains.annotations.NotNull;
 
 
 /**
- * @since 2.1
+ * 队列任务类
+ *
+ * @since 5.0.0
  */
 public abstract class KeelQueueTask extends AbstractKeelVerticle {
     private QueueWorkerPoolManager queueWorkerPoolManager;
-    private SpecificLogger<QueueTaskIssueRecord> queueTaskIssueRecorder;
+    private SpecificLogger<QueueTaskSpecificLog> queueTaskIssueRecorder;
 
     final void setQueueWorkerPoolManager(QueueWorkerPoolManager queueWorkerPoolManager) {
         this.queueWorkerPoolManager = queueWorkerPoolManager;
@@ -27,26 +29,17 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
     @NotNull
     abstract public String getTaskCategory();
 
-    /**
-     * @since 4.0.0
-     */
     abstract protected LoggerFactory getIssueRecordCenter();
 
-    /**
-     * @since 4.0.0
-     */
     @NotNull
-    protected final SpecificLogger<QueueTaskIssueRecord> buildQueueTaskIssueRecorder() {
+    protected final SpecificLogger<QueueTaskSpecificLog> buildQueueTaskIssueRecorder() {
         return getIssueRecordCenter().createLogger(
-                QueueTaskIssueRecord.TopicQueue,
-                () -> new QueueTaskIssueRecord(getTaskReference(), getTaskCategory())
+                QueueTaskSpecificLog.TopicQueue,
+                () -> new QueueTaskSpecificLog(getTaskReference(), getTaskCategory())
         );
     }
 
-    /**
-     * @since 4.0.2
-     */
-    public SpecificLogger<QueueTaskIssueRecord> getQueueTaskIssueRecorder() {
+    public SpecificLogger<QueueTaskSpecificLog> getQueueTaskIssueRecorder() {
         return queueTaskIssueRecorder;
     }
 
@@ -90,24 +83,18 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
     }
 
     /**
-     * Determines whether the current task requires execution on a worker thread.
      *
-     * @return true if a worker thread is required for this task, false otherwise.
-     * @since 4.1.3
+     *
+     * @return 指定本任务是否需要在 WORKER 线程模型下运行
      */
     public boolean isWorkerThreadRequired() {
         return true;
     }
 
     /**
-     * Deploys the current task with proper threading model based on the configuration.
-     * If a worker thread is required, the threading model is set to WORKER.
-     * If virtual threads are available and no worker thread is required, the threading model is set to VIRTUAL_THREAD.
-     * Delegates to the superclass deployMe method with configured DeploymentOptions.
+     * 如果本任务类指定在 WORKER 线程模型下运行，则以此部署；否则，先尝试以虚拟线程模型部署，不行就用事件循环模式部署。
      *
-     * @return a future that completes with the deployment ID if the deployment is successful,
-     *         or fails with an exception if the deployment fails
-     * @since 4.1.3
+     * @return 部署结果
      */
     public Future<String> deployMe() {
         var deploymentOptions = new DeploymentOptions();

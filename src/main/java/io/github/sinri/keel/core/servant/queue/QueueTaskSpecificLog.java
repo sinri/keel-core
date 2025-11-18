@@ -6,19 +6,15 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 /**
- * @since 3.2.0
+ * 面向队列任务的特定日志。
+ *
+ * @since 5.0.0
  */
-public final class QueueTaskIssueRecord extends SpecificLog<QueueTaskIssueRecord> {
+public final class QueueTaskSpecificLog extends SpecificLog<QueueTaskSpecificLog> {
     public static final String TopicQueue = "Queue";
 
-    public QueueTaskIssueRecord(@NotNull String taskReference, @NotNull String taskCategory) {
+    public QueueTaskSpecificLog(@NotNull String taskReference, @NotNull String taskCategory) {
         super();
         this.classification(List.of("task", "reference:" + taskReference, "category:" + taskCategory));
     }
-
-    //    @NotNull
-    //    @Override
-    //    public QueueTaskIssueRecord getImplementation() {
-    //        return this;
-    //    }
 }

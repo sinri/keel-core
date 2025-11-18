@@ -12,41 +12,30 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * 标准的队列服务实现。
+ * 队列服务实现。
  * <p>
  * 仅用于单节点模式。
  *
- * @since 2.1
+ * @since 5.0.0
  */
 public abstract class KeelQueue extends AbstractKeelVerticle
         implements KeelQueueNextTaskSeeker, KeelQueueSignalReader {
-    //private KeelQueueNextTaskSeeker nextTaskSeeker;
     private QueueWorkerPoolManager queueWorkerPoolManager;
-    //private KeelQueueSignalReader signalReader;
     private KeelQueueStatus queueStatus = KeelQueueStatus.INIT;
-    private SpecificLogger<QueueManageIssueRecord> queueManageIssueRecorder;
+    private SpecificLogger<QueueManageSpecificLog> queueManageLogger;
 
-    /**
-     * @since 4.0.0
-     */
     protected abstract LoggerFactory getIssueRecordCenter();
 
-    /**
-     * @since 4.0.2
-     */
     @NotNull
-    protected final SpecificLogger<QueueManageIssueRecord> buildQueueManageIssueRecorder() {
+    protected final SpecificLogger<QueueManageSpecificLog> buildQueueManageIssueRecorder() {
         return getIssueRecordCenter().createLogger(
-                QueueManageIssueRecord.TopicQueue,
-                QueueManageIssueRecord::new
+                QueueManageSpecificLog.TopicQueue,
+                QueueManageSpecificLog::new
         );
     }
 
-    /**
-     * @since 4.0.2
-     */
-    public SpecificLogger<QueueManageIssueRecord> getQueueManageIssueRecorder() {
-        return queueManageIssueRecorder;
+    public SpecificLogger<QueueManageSpecificLog> getQueueManageLogger() {
+        return queueManageLogger;
     }
 
     public KeelQueueStatus getQueueStatus() {
@@ -59,22 +48,18 @@ public abstract class KeelQueue extends AbstractKeelVerticle
     }
 
     /**
-     * Create a new instance of QueueWorkerPoolManager when routine starts. By default, it uses an unlimited pool, this
-     * could be override if needed.
-     *
-     * @since 3.0.9
+     * 创建队列并发工作管理器。
+     * <p>
+     * 默认实现为一个不限制并发的实例，可以重写本方法修改。
      */
-    protected @NotNull QueueWorkerPoolManager getQueueWorkerPoolManager() {
+    @NotNull
+    protected QueueWorkerPoolManager buildQueueWorkerPoolManager() {
         return new QueueWorkerPoolManager(0);
     }
 
     /**
-     * Callback method invoked before the queue starts its processing routine.
-     * This method can be overridden to define any preparatory logic or initialization
-     * steps required before the queue begins processing tasks.
+     * 队列运行前的清理整备逻辑。
      *
-     * @return a Future that completes successfully when the preparatory logic is completed.
-     * @since 4.1.3
      */
     protected Future<Void> beforeQueueStart() {
         return Future.succeededFuture();
@@ -82,6 +67,8 @@ public abstract class KeelQueue extends AbstractKeelVerticle
 
     @Override
     protected Future<Void> startVerticle() {
+        queueManageLogger = this.buildQueueManageIssueRecorder();
+        this.queueWorkerPoolManager = buildQueueWorkerPoolManager();
         this.queueStatus = KeelQueueStatus.RUNNING;
         return beforeQueueStart()
                 .compose(v -> {
@@ -91,15 +78,13 @@ public abstract class KeelQueue extends AbstractKeelVerticle
     }
 
     protected final void routine() {
-        queueManageIssueRecorder = this.buildQueueManageIssueRecorder();
-
-        getQueueManageIssueRecorder().debug(r -> r.message("KeelQueue::routine start"));
-        this.queueWorkerPoolManager = getQueueWorkerPoolManager();
+        this.getQueueManageLogger().debug(r -> r.message("KeelQueue::routine start"));
 
         Future.succeededFuture()
               .compose(v -> this.readSignal())
               .recover(throwable -> {
-                  getQueueManageIssueRecorder().debug(r -> r.message("AS IS. Failed to read signal: " + throwable.getMessage()));
+                  this.getQueueManageLogger()
+                      .debug(r -> r.message("AS IS. Failed to read signal: " + throwable.getMessage()));
                   if (getQueueStatus() == KeelQueueStatus.STOPPED) {
                       return Future.succeededFuture(KeelQueueSignal.STOP);
                   } else {
@@ -117,7 +102,8 @@ public abstract class KeelQueue extends AbstractKeelVerticle
               })
               .eventually(() -> {
                   long waitingMs = this.getWaitingPeriodInMsWhenTaskFree();
-                  getQueueManageIssueRecorder().debug(r -> r.message("set timer for next routine after " + waitingMs + " ms"));
+                  this.getQueueManageLogger()
+                      .debug(r -> r.message("set timer for next routine after " + waitingMs + " ms"));
                   Keel.getVertx().setTimer(waitingMs, timerID -> routine());
                   return Future.succeededFuture();
               })
@@ -127,7 +113,7 @@ public abstract class KeelQueue extends AbstractKeelVerticle
     private Future<Void> whenSignalStopCame() {
         if (getQueueStatus() == KeelQueueStatus.RUNNING) {
             this.queueStatus = KeelQueueStatus.STOPPED;
-            getQueueManageIssueRecorder().notice(r -> r.message("Signal Stop Received"));
+            this.getQueueManageLogger().notice(r -> r.message("Signal Stop Received"));
         }
         return Future.succeededFuture();
     }
@@ -145,7 +131,7 @@ public abstract class KeelQueue extends AbstractKeelVerticle
                                     .compose(task -> {
                                         if (task == null) {
                                             // 队列里已经空了，不必再找
-                                            getQueueManageIssueRecorder().debug(r -> r
+                                            this.getQueueManageLogger().debug(r -> r
                                                     .message("No more task todo"));
                                             // 通知 FutureUntil 结束
                                             routineResult.stop();
@@ -153,9 +139,9 @@ public abstract class KeelQueue extends AbstractKeelVerticle
                                         }
 
                                         // 队列里找出来一个task, deploy it (至于能不能跑起来有没有锁就不管了)
-                                        getQueueManageIssueRecorder().info(r -> r
+                                        this.getQueueManageLogger().info(r -> r
                                                 .message("To run task: " + task.getTaskReference()));
-                                        getQueueManageIssueRecorder().info(r -> r
+                                        this.getQueueManageLogger().info(r -> r
                                                 .message("Trusted that task  is already locked by seeker: " + task.getTaskReference()));
 
                                         // since 3.0.9
@@ -167,14 +153,14 @@ public abstract class KeelQueue extends AbstractKeelVerticle
                                                      })
                                                      .compose(
                                                              deploymentID -> {
-                                                                 getQueueManageIssueRecorder().info(r -> r.message(
+                                                                 this.getQueueManageLogger().info(r -> r.message(
                                                                          "TASK [" + task.getTaskReference() + "] " +
                                                                                  "VERTICLE DEPLOYED: " + deploymentID));
                                                                  // 通知 FutureUntil 继续下一轮
                                                                  return Future.succeededFuture();
                                                              },
                                                              throwable -> {
-                                                                 getQueueManageIssueRecorder().exception(throwable,
+                                                                 this.getQueueManageLogger().exception(throwable,
                                                                          "CANNOT DEPLOY TASK [%s] VERTICLE".formatted(task.getTaskReference())
                                                                  );
                                                                  // 通知 FutureUntil 继续下一轮
@@ -184,7 +170,7 @@ public abstract class KeelQueue extends AbstractKeelVerticle
                                     });
                    })
                    .recover(throwable -> {
-                       getQueueManageIssueRecorder().exception(throwable, "KeelQueue 递归找活干里出现了奇怪的故障");
+                       this.getQueueManageLogger().exception(throwable, "KeelQueue 递归找活干里出现了奇怪的故障");
                        return Future.succeededFuture();
                    });
     }
@@ -196,11 +182,7 @@ public abstract class KeelQueue extends AbstractKeelVerticle
     }
 
     /**
-     * Deploys the current queue verticle on the worker threading model.
-     *
-     * @return a future that completes with the deployment ID if the deployment is successful,
-     *         or fails with an exception if the deployment fails
-     * @since 4.1.3
+     * 将本队列实例以 WORKER 线程模型部署。
      */
     public final Future<String> deployMe() {
         return super.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));

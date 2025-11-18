@@ -3,14 +3,16 @@ package io.github.sinri.keel.core.servant.queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * @since 3.0.9
+ * 队列并发工作管理器
+ *
+ * @since 5.0.0
  */
 public class QueueWorkerPoolManager {
     private final AtomicInteger maxWorkerCountRef;
     private final AtomicInteger runningWorkerCounter;
 
     /**
-     * @param maxWorkerCount If zero, unlimited workers would be thought.
+     * @param maxWorkerCount 并发数量限制；为 0 表示不限制。
      */
     public QueueWorkerPoolManager(int maxWorkerCount) {
         this.maxWorkerCountRef = new AtomicInteger(maxWorkerCount);

@@ -17,41 +17,32 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * @since 3.0.0
- * @since 3.2.4 use verticle to handle the sundial plan executing.
- * @since 4.0.0 changed to use issue recorder
+ * 日晷。
+ * <p>
+ * 单节点下的定时任务调度器。
+ *
+ * @since 5.0.0
  */
 public abstract class KeelSundial extends AbstractKeelVerticle {
     private final Map<String, KeelSundialPlan> planMap = new ConcurrentHashMap<>();
     private Long timerID;
-    /**
-     * @since 4.0.2
-     */
-    private SpecificLogger<SundialIssueRecord> sundialIssueRecorder;
+    private SpecificLogger<SundialSpecificLog> logger;
 
-    /**
-     * @since 4.0.0
-     */
-    abstract protected LoggerFactory getIssueRecordCenter();
+    abstract protected LoggerFactory getLoggerFactory();
 
-    /**
-     * @since 4.0.0
-     */
     @NotNull
-    protected SpecificLogger<SundialIssueRecord> buildIssueRecorder() {
-        return getIssueRecordCenter().createLogger(SundialIssueRecord.TopicSundial, SundialIssueRecord::new);
+    protected SpecificLogger<SundialSpecificLog> buildLogger() {
+        return getLoggerFactory().createLogger(SundialSpecificLog.TopicSundial, SundialSpecificLog::new);
     }
 
-    /**
-     * @since 4.0.2
-     */
-    public SpecificLogger<SundialIssueRecord> getSundialIssueRecorder() {
-        return sundialIssueRecorder;
+    @NotNull
+    public final SpecificLogger<SundialSpecificLog> getLogger() {
+        return Objects.requireNonNull(logger);
     }
 
     @Override
     protected Future<Void> startVerticle() {
-        this.sundialIssueRecorder = buildIssueRecorder();
+        this.logger = buildLogger();
         int delaySeconds = 61 - KeelCronExpression.parseCalenderToElements(Calendar.getInstance()).second;
         this.timerID = Keel.getVertx().setPeriodic(delaySeconds * 1000L, 60_000L, timerID -> {
             handleEveryMinute(Calendar.getInstance());
@@ -60,19 +51,19 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
         return Future.succeededFuture();
     }
 
-    private void handleEveryMinute(Calendar now) {
+    private void handleEveryMinute(@NotNull Calendar now) {
         ParsedCalenderElements parsedCalenderElements = new ParsedCalenderElements(now);
         planMap.forEach((key, plan) -> {
             if (plan.cronExpression().match(parsedCalenderElements)) {
-                getSundialIssueRecorder().debug(x -> x
+                getLogger().debug(x -> x
                         .message("Sundial Plan Matched")
                         .context("plan_key", plan.key())
                         .context("plan_cron", plan.cronExpression().getRawCronExpression())
                         .context("now", parsedCalenderElements.toString())
                 );
-                new KeelSundialVerticle(plan, now, getSundialIssueRecorder()).deployMe();
+                new KeelSundialVerticle(plan, now, getLogger()).deployMe();
             } else {
-                getSundialIssueRecorder().debug(x -> x
+                getLogger().debug(x -> x
                         .message("Sundial Plan Not Match")
                         .context("plan_key", plan.key())
                         .context("plan_cron", plan.cronExpression().getRawCronExpression())
@@ -82,9 +73,6 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
         });
     }
 
-    /**
-     * @since 3.2.4
-     */
     private void refreshPlans() {
         Keel.asyncCallExclusively(
                     "io.github.sinri.keel.servant.sundial.KeelSundial.refreshPlans",
@@ -105,13 +93,14 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
                                 return Future.succeededFuture();
                             })
             )
-            .onFailure(throwable -> getSundialIssueRecorder().exception(throwable, "io.github.sinri.keel.core.servant.sundial.KeelSundial" +
+            .onFailure(throwable -> getLogger().exception(throwable, "io.github.sinri.keel.core.servant.sundial.KeelSundial" +
                     ".refreshPlans exception"));
     }
 
     /**
-     * @since 3.0.1 Before plansSupplier is removed, when plansSupplier returns non-null supplier, use that and ignore
-     *         this. If future as null, means `NOT MODIFIED`.
+     * 异步获取最新定时任务计划集，根据结果进行全量覆盖或保持不动。
+     *
+     * @return 异步返回的定时任务计划集，用于覆盖更新当前的计划快照；如果异步返回了 null，则表示不更新计划快照。
      */
     abstract protected Future<Collection<KeelSundialPlan>> fetchPlans();
 
@@ -124,11 +113,9 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
     }
 
     /**
-     * Deploys the current verticle using a deployment option configured with a worker threading model.
+     * 以 WORKER 模式部署。
      *
-     * @return a future representing the result of the deployment. The future completes with the deployment ID if
-     *         the deployment is successful or fails with an exception if an error occurs during deployment.
-     * @since 4.1.3
+     * @return 部署结果
      */
     public final Future<String> deployMe() {
         return super.deployMe(new DeploymentOptions()

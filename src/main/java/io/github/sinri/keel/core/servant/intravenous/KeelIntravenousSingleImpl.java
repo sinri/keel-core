@@ -9,9 +9,9 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * A new implementation as of 4.0.7, no sleep anymore.
+ * 对单个实体进行处理的静脉注入的实现
  *
- * @since 4.0.7
+ * @since 5.0.0
  */
 class KeelIntravenousSingleImpl<D> extends KeelIntravenousBase<D> {
     private final @NotNull SingleDropProcessor<D> itemProcessor;
@@ -23,10 +23,10 @@ class KeelIntravenousSingleImpl<D> extends KeelIntravenousBase<D> {
 
     protected Future<Void> handleDrops(List<D> drops) {
         return Keel.asyncCallIteratively(drops, drop -> Future.succeededFuture()
-                                                          .compose(v -> this.itemProcessor.process(drop))
-                                                          .recover(throwable -> {
-                         this.handleAllergy(throwable);
-                         return Future.succeededFuture();
-                     }));
+                                                              .compose(v -> this.itemProcessor.process(drop))
+                                                              .recover(throwable -> {
+                                                                  this.handleAllergy(throwable);
+                                                                  return Future.succeededFuture();
+                                                              }));
     }
 }

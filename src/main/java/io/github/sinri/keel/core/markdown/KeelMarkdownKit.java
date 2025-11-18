@@ -10,11 +10,12 @@ import java.util.List;
 
 
 /**
- * A utility class for parsing and rendering Markdown content. It allows customization through a list of extensions,
- * providing flexibility in how the Markdown is parsed and rendered.
+ * Markdown处理工具。
+ * <p>
+ * 本类功能基于 commonmark-java 实现。
  *
  * @see <a href="https://github.com/commonmark/commonmark-java">commonmark java readme</a>
- * @since 1.12 based on `org.commonmark`
+ * @since 5.0.0 based on `org.commonmark`
  */
 public class KeelMarkdownKit {
     private List<Extension> extensions;

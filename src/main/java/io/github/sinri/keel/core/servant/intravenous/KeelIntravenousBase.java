@@ -16,7 +16,8 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * @since 4.0.7
+ * 静脉注入的基本实现。
+ * @since 5.0.0
  */
 abstract class KeelIntravenousBase<D> extends AbstractKeelVerticle implements KeelIntravenous<D> {
     private final Queue<D> queue;

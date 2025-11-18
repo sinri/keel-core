@@ -6,7 +6,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 /**
- * @since 4.0.7
+ * 对指定实体进行批量处理的静脉注入的实现。
+ *
+ * @since 5.0.0
  */
 class KeelIntravenousBatchImpl<D> extends KeelIntravenousBase<D> {
 

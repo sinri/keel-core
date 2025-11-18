@@ -5,34 +5,51 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.ThreadingModel;
+import org.jetbrains.annotations.NotNull;
 
 import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * It might be used like KeelEndless in standalone mode with Promise and clustered lock.
+ * 基于配置的更夫实现。
+ * <p>
+ * 本类实现类似单节点内无限循环调用的机制，基于异步 Promise 和集群锁。
  *
- * @since 2.9.3
+ * @since 5.0.0
  */
 public class KeelPureWatchman extends KeelWatchmanImpl {
 
+    @NotNull
     private final Options options;
+    @NotNull
+    private final LoggerFactory loggerFactory;
 
-    protected KeelPureWatchman(String watchmanName, Options options, LoggerFactory issueRecordCenter) {
-        super(watchmanName, issueRecordCenter);
+    protected KeelPureWatchman(@NotNull String watchmanName, @NotNull Options options, @NotNull LoggerFactory loggerFactory) {
+        super(watchmanName);
         this.options = options;
+        this.loggerFactory = loggerFactory;
     }
 
-    public static Future<String> deploy(String watchmanName, Handler<Options> optionsHandler,
-                                        LoggerFactory issueRecordCenter) {
+    public static Future<String> deploy(
+            @NotNull String watchmanName,
+            @NotNull Handler<Options> optionsHandler,
+            @NotNull LoggerFactory loggerFactory
+    ) {
         Options options = new Options();
         optionsHandler.handle(options);
-        KeelPureWatchman keelPureWatchman = new KeelPureWatchman(watchmanName, options, issueRecordCenter);
+        KeelPureWatchman keelPureWatchman = new KeelPureWatchman(watchmanName, options, loggerFactory);
         return Keel.getVertx().deployVerticle(keelPureWatchman, new DeploymentOptions()
                 .setThreadingModel(ThreadingModel.WORKER)
         );
     }
 
+    @Override
+    @NotNull
+    protected final LoggerFactory getLoggerFactory() {
+        return loggerFactory;
+    }
+
+    @NotNull
     public KeelWatchmanEventHandler regularHandler() {
         return options.getHandler();
     }

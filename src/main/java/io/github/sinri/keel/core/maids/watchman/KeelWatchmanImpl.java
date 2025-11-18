@@ -9,30 +9,34 @@ import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.shareddata.Lock;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * @since 2.9.3
+ * 更夫的基础实现，基于Verticle。
+ *
+ * @since 5.0.0
  */
 abstract class KeelWatchmanImpl extends AbstractKeelVerticle implements KeelWatchman {
+    @NotNull
     private final String watchmanName;
-    private final LoggerFactory issueRecordCenter;
     private MessageConsumer<Long> consumer;
     private Logger watchmanLogger;
 
-    public KeelWatchmanImpl(String watchmanName, LoggerFactory issueRecordCenter) {
+    public KeelWatchmanImpl(@NotNull String watchmanName) {
         this.watchmanName = watchmanName;
-        this.issueRecordCenter = issueRecordCenter;
     }
 
     @Override
+    @NotNull
     public String watchmanName() {
         return this.watchmanName;
     }
 
     protected String eventBusAddress() {
-        return this.getClass().getName() + ":" + watchmanName();
+        return "%s:%s".formatted(this.getClass().getName(), watchmanName());
     }
 
     @Override
@@ -46,7 +50,7 @@ abstract class KeelWatchmanImpl extends AbstractKeelVerticle implements KeelWatc
         );
 
         try {
-            // @since 2.9.3 强行拟合HH:MM:SS.000-200
+            // 强行拟合HH:MM:SS.000-200
             long x = 1000 - System.currentTimeMillis() % 1_000;
             if (x < 800) {
                 Thread.sleep(x);
@@ -54,10 +58,8 @@ abstract class KeelWatchmanImpl extends AbstractKeelVerticle implements KeelWatc
         } catch (Exception ignore) {
             // 拟合不了拉倒
         }
-        Keel.getVertx().setPeriodic(
-                interval(),
-                timerID -> Keel.getVertx().eventBus()
-                               .send(eventBusAddress(), System.currentTimeMillis()));
+        Keel.getVertx().setPeriodic(interval(), timerID -> Keel.getVertx().eventBus()
+                                                               .send(eventBusAddress(), System.currentTimeMillis()));
 
         return Future.succeededFuture();
     }
@@ -89,25 +91,16 @@ abstract class KeelWatchmanImpl extends AbstractKeelVerticle implements KeelWatc
         return Future.succeededFuture();
     }
 
-    /**
-     * @since 4.0.2
-     */
-    protected final LoggerFactory getIssueRecordCenter() {
-        return issueRecordCenter;
-    }
+    @NotNull
+    protected abstract LoggerFactory getLoggerFactory();
 
-    /**
-     * @since 4.0.2
-     */
     @NotNull
     protected Logger buildWatchmanLogger() {
-        return getIssueRecordCenter().createLogger("Watchman");
+        return getLoggerFactory().createLogger("Watchman");
     }
 
-    /**
-     * @since 4.0.2
-     */
+    @NotNull
     public Logger getWatchmanLogger() {
-        return watchmanLogger;
+        return Objects.requireNonNull(watchmanLogger);
     }
 }

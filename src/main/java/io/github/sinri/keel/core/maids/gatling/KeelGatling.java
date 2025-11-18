@@ -9,47 +9,43 @@ import io.vertx.core.Promise;
 import io.vertx.core.shareddata.Counter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 
 import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * Gatling Gun with multi barrels, for parallel tasks in clustered vertx runtime.
+ * 多管加特林。
+ * <p>
+ * 一个在 Vertx 集群中并行处理任务的服务。
  *
- * @since 2.9.1
- * @since 2.9.3 change to VERTICLE
+ * @since 5.0.0
  */
 abstract public class KeelGatling extends AbstractKeelVerticle {
-    private final Options options;
+    @NotNull
+    private final GatlingOptions options;
     private final AtomicInteger barrelUsed = new AtomicInteger(0);
     private Logger gatlingLogger;
 
-    private KeelGatling(Options options) {
+    private KeelGatling(@NotNull GatlingOptions options) {
         this.options = options;
     }
 
     protected Future<Void> rest() {
-        int actualRestInterval = new Random().nextInt(
-                Math.toIntExact(options.getAverageRestInterval() / 2)
-        ) + options.getAverageRestInterval();
+        long actualRestInterval = new Random().nextLong(Math.toIntExact(options.getAverageRestInterval() / 2));
+        actualRestInterval += options.getAverageRestInterval();
         return Keel.asyncSleep(actualRestInterval);
     }
 
-    /**
-     * @since 4.0.2
-     */
     @NotNull
     abstract protected Logger buildGatlingLogger();
 
-    /**
-     * @since 4.0.2
-     */
+    @NotNull
     public Logger getGatlingLogger() {
-        return gatlingLogger;
+        return Objects.requireNonNull(gatlingLogger);
     }
 
     @Override
@@ -92,14 +88,15 @@ abstract public class KeelGatling extends AbstractKeelVerticle {
     }
 
     /**
-     * Seek one bullet from anywhere with a certain rule.
+     * 基于 Vertx 集群共享锁机制为当前运行实例寻找可执行的任务。
      *
-     * @return Future of a runnable bullet, or null.
+     * @return 异步找到的可执行任务；为 null 时表示当前没有可执行的任务
      */
     private Future<Bullet> loadOneBullet() {
         return Keel.getVertx().sharedData()
-                   .getLock("KeelGatling-" + this.options.getGatlingName() + "-Load")
-                   .compose(lock -> this.options.getBulletLoader().get().andThen(ar -> lock.release()));
+                   .getLock("KeelGatling-%s-Load".formatted(this.options.getGatlingName()))
+                   .compose(lock -> this.options.getBulletLoader().get().
+                                                andThen(ar -> lock.release()));
     }
 
     protected Future<Void> requireExclusiveLocksOfBullet(Bullet bullet) {
@@ -118,7 +115,8 @@ abstract public class KeelGatling extends AbstractKeelVerticle {
                                                   }
                                                   return Future.succeededFuture();
                                               });
-                               })
+                               }
+                       )
                        .compose(v -> {
                            if (blocked.get()) {
                                return releaseExclusiveLocksOfBullet(bullet)
@@ -165,71 +163,4 @@ abstract public class KeelGatling extends AbstractKeelVerticle {
         promise.future().andThen(handler);
     }
 
-    public static class Options {
-        private final String gatlingName;
-        private int barrels;
-        private int averageRestInterval;
-        private Supplier<Future<Bullet>> bulletLoader;
-        //        private KeelEventLogger logger;
-
-        public Options(String gatlingName) {
-            this.gatlingName = gatlingName;
-            this.barrels = 1;
-            this.averageRestInterval = 1000;
-            this.bulletLoader = () -> Future.succeededFuture(null);
-            //            this.logger = KeelEventLogger.silentLogger();
-        }
-
-        /**
-         * @return 加特林机枪名称（集群中各节点之间的识别同一组加特林机枪类的实例用）
-         */
-        public String getGatlingName() {
-            return gatlingName;
-        }
-
-        /**
-         * @return 枪管数量（并发任务数）
-         */
-        public int getBarrels() {
-            return barrels;
-        }
-
-        /**
-         * @param barrels 枪管数量（并发任务数）
-         */
-        public Options setBarrels(int barrels) {
-            this.barrels = barrels;
-            return this;
-        }
-
-        /**
-         * @return 弹带更换平均等待时长（没有新任务时的休眠期，单位0.001秒）
-         */
-        public int getAverageRestInterval() {
-            return averageRestInterval;
-        }
-
-        /**
-         * @param averageRestInterval 弹带更换平均等待时长（没有新任务时的休眠期，单位0.001秒）
-         */
-        public Options setAverageRestInterval(int averageRestInterval) {
-            this.averageRestInterval = averageRestInterval;
-            return this;
-        }
-
-        /**
-         * @return 供弹器（新任务生成器）
-         */
-        public Supplier<Future<Bullet>> getBulletLoader() {
-            return bulletLoader;
-        }
-
-        /**
-         * @param bulletLoader 供弹器（新任务生成器）
-         */
-        public Options setBulletLoader(Supplier<Future<Bullet>> bulletLoader) {
-            this.bulletLoader = bulletLoader;
-            return this;
-        }
-    }
 }

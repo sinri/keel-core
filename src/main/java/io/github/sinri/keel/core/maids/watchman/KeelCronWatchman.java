@@ -8,6 +8,7 @@ import io.vertx.core.ThreadingModel;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.AsyncMap;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Function;
@@ -17,21 +18,27 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * It is designed as KeelSundial, to perform crontab in cluster.
+ * 基于Cron的更夫实现。
+ * <p>
+ * 本类实现类似单节点下的{@link io.github.sinri.keel.core.servant.sundial.KeelSundial}，在集群内实现 crontab 任务调度。
  *
- * @since 2.9.3
+ * @since 5.0.0
  */
 public class KeelCronWatchman extends KeelWatchmanImpl {
+    @NotNull
     private final KeelWatchmanEventHandler handler;
+    @NotNull
     private final Function<String, Future<Void>> cronTabUpdateStartup;
-
+    @NotNull
+    private final LoggerFactory loggerFactory;
 
     protected KeelCronWatchman(
-            String watchmanName,
-            Function<String, Future<Void>> cronTabUpdateStartup,
-            LoggerFactory issueRecordCenter
+            @NotNull String watchmanName,
+            @NotNull Function<String, Future<Void>> cronTabUpdateStartup,
+            @NotNull LoggerFactory loggerFactory
     ) {
-        super(watchmanName, issueRecordCenter);
+        super(watchmanName);
+        this.loggerFactory = loggerFactory;
         this.handler = now -> {
             Calendar calendar = new Calendar
                     .Builder()
@@ -46,11 +53,11 @@ public class KeelCronWatchman extends KeelWatchmanImpl {
     }
 
     public static Future<String> deploy(
-            String watchmanName,
-            Function<String, Future<Void>> cronTabUpdateStartup,
-            LoggerFactory issueRecordCenter
+            @NotNull String watchmanName,
+            @NotNull Function<String, Future<Void>> cronTabUpdateStartup,
+            @NotNull LoggerFactory loggerFactory
     ) {
-        KeelCronWatchman keelCronWatchman = new KeelCronWatchman(watchmanName, cronTabUpdateStartup, issueRecordCenter);
+        KeelCronWatchman keelCronWatchman = new KeelCronWatchman(watchmanName, cronTabUpdateStartup, loggerFactory);
         return Keel.getVertx()
                    .deployVerticle(keelCronWatchman, new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));
     }
@@ -215,7 +222,7 @@ public class KeelCronWatchman extends KeelWatchmanImpl {
     }
 
     @Override
-    public final KeelWatchmanEventHandler regularHandler() {
+    public final @NotNull KeelWatchmanEventHandler regularHandler() {
         return handler;
     }
 
@@ -228,5 +235,11 @@ public class KeelCronWatchman extends KeelWatchmanImpl {
                   undeployMe();
               });
         return Future.succeededFuture();
+    }
+
+    @Override
+    @NotNull
+    protected LoggerFactory getLoggerFactory() {
+        return loggerFactory;
     }
 }

@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.maids.pleiades;
 
-import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.Future;
@@ -13,12 +12,12 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * A queue impl based on EventBus and Messages. Pleiades (戦闘メイド) is the combat maid squad of the Great Tomb of Nazarick
- * [REF: Overlord].
+ * 基于 Vert.x 的 EventBus 和消息机制运作的集群队列实现。
  *
- * @since 3.2.19
+ * @see <a href="https://overlordmaruyama.fandom.com/wiki/Pleiades">Pleiades, of the Great Tomb of Nazarick, in
+ *         Overload</a>
+ * @since 5.0.0
  */
-@TechnicalPreview(since = "3.2.19")
 public abstract class Pleiades<T> extends AbstractKeelVerticle {
     private MessageConsumer<T> consumer;
     private Logger pleiadesLogger;
@@ -35,14 +34,8 @@ public abstract class Pleiades<T> extends AbstractKeelVerticle {
 
     abstract protected void handleMessage(Message<T> message);
 
-    /**
-     * @since 4.0.2
-     */
     abstract protected Logger buildPleiadesLogger();
 
-    /**
-     * @since 4.0.2
-     */
     public Logger getPleiadesLogger() {
         return pleiadesLogger;
     }

@@ -15,16 +15,15 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * @since 1.10
- * @since 3.0.6 changed a lot
+ * SMTP协议工具。
+ *
+ * @since 5.0.0
  */
 public class KeelSmtpKit {
     private final MailConfig mailConfig;
     private final MailClient mailClient;
 
-    /**
-     * @since 3.0.6
-     */
+
     public KeelSmtpKit(@NotNull MailConfig mailConfig, @Nullable String poolName) {
         this.mailConfig = mailConfig;
         if (poolName != null) {
@@ -43,24 +42,18 @@ public class KeelSmtpKit {
     }
 
     public KeelSmtpKit() {
-        this(
-                Objects.requireNonNull(
-                        Keel.config("email.smtp.default_smtp_name"),
-                        "email.smtp.default_smtp_name is not configured"
-                )
-        );
+        this(Objects.requireNonNull(
+                Keel.config("email.smtp.default_smtp_name"),
+                "email.smtp.default_smtp_name is not configured"
+        ));
     }
 
-    /**
-     * As of 3.0.6, only five property keys supported.
-     * As of 4.1.0, use {@link KeelSmtpConfigElement}.
-     */
     private static MailConfig buildMailConfig(@NotNull String smtpName) {
         var smtpConfiguration = Keel.getConfiguration().extract("email", "smtp", smtpName);
         Objects.requireNonNull(smtpConfiguration);
 
-        KeelSmtpConfigElement keelSmtpConfigElement = new KeelSmtpConfigElement(smtpConfiguration);
-        return keelSmtpConfigElement.toMailConfig();
+        SmtpConfigElement smtpConfigElement = new SmtpConfigElement(smtpConfiguration);
+        return smtpConfigElement.toMailConfig();
     }
 
     public MailClient getMailClient() {

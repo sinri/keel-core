@@ -8,14 +8,16 @@ import java.util.List;
 
 
 /**
- * @since 4.1.0
+ * 面向SMTP协议工具所需的配置的配置节点，可转化为{@link MailConfig}实例。
+ *
+ * @since 5.0.0
  */
-public class KeelSmtpConfigElement extends ConfigElement {
-    public KeelSmtpConfigElement(@NotNull String name) {
+public class SmtpConfigElement extends ConfigElement {
+    public SmtpConfigElement(@NotNull String name) {
         super(name);
     }
 
-    public KeelSmtpConfigElement(@NotNull ConfigElement another) {
+    public SmtpConfigElement(@NotNull ConfigElement another) {
         super(another);
     }
 

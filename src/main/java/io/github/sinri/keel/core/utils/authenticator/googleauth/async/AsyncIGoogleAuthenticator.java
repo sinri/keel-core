@@ -37,7 +37,7 @@ import io.vertx.core.Future;
 /**
  * Google Authenticator library interface.
  * @author Sinri Edogawa
- * @since 3.2.9
+ * @since 5.0.0
  */
 public interface AsyncIGoogleAuthenticator {
     /**

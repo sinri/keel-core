@@ -47,7 +47,7 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
  * }</pre>
  *
  * @see <a href="https://github.com/cloudonix/vertx-java.io">original project by guss77 (MIT): OutputToReadStream</a>
- * @since 4.1.5
+ * @since 5.0.0
  */
 class AsyncOutputReadStreamImpl extends OutputStream implements ReadStream<Buffer>, AsyncOutputReadStream {
 

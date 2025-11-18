@@ -7,7 +7,7 @@ import io.vertx.core.json.JsonObject;
  * for various system metrics such as memory, CPU, or garbage collection statistics.
  *
  * @param <T> the type of the implementing class, used for comparison and data transformation.
- * @since 2.9.4
+ * @since 5.0.0
  */
 public interface RuntimeStatResult<T> {
     long getStatTime();

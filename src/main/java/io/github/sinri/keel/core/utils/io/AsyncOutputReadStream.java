@@ -9,7 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import java.io.InputStream;
 
 /**
- * @since 4.1.5
+ * 一个Vertx体系下 {@link ReadStream} 的实现，其将 {@link InputStream} 封装来实现异步流式读取。
+ *
+ * @since 5.0.0
  */
 public interface AsyncOutputReadStream extends ReadStream<Buffer> {
     static AsyncOutputReadStream create() {

@@ -36,7 +36,7 @@ import java.util.List;
 
 /**
  * @author Sinri Edogawa
- * @since 3.2.9
+ * @since 5.0.0
  */
 public interface AsyncICredentialRepository {
     /**

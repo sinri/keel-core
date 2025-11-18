@@ -5,10 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Calendar;
 
 /**
- * Represents parsed calendar elements, including minute, hour, day, month, weekday, and second.
- * This class is used to encapsulate the components of a date and time for use in matching against cron expressions.
+ * 日历类实例的解析结果，包括分钟、小时、天、月、星期、秒（可选）。
  *
- * @since 4.0.0
+ * @since 5.0.0
  */
 public class ParsedCalenderElements {
     public final int minute;
@@ -17,19 +16,22 @@ public class ParsedCalenderElements {
     public final int month;
     public final int weekday;
 
-    // debug use
+    /**
+     * 秒（可选）。
+     * 默认为 0。
+     */
     public final int second;
 
     /**
-     * Constructs a new instance of ParsedCalenderElements with the specified minute, hour, day, month, weekday, and
-     * second.
+     * 使用指定的分钟、小时、天、月、星期和秒构造 ParsedCalenderElements 实例。
+     * <p>此构造函数用于创建一个包含所有时间元素的解析结果对象。
      *
-     * @param minute  the minute component (0-59)
-     * @param hour    the hour component (0-23)
-     * @param day     the day of the month (1-31)
-     * @param month   the month (1-12)
-     * @param weekday the day of the week (0-6, where 0 is Sunday)
-     * @param second  the second component (0-59), used for debugging
+     * @param minute  分钟组件，取值范围 0-59
+     * @param hour    小时组件，取值范围 0-23
+     * @param day     月份中的天数，取值范围 1-31
+     * @param month   月份，取值范围 1-12（1 表示一月）
+     * @param weekday 星期几，取值范围 0-6（0 表示星期日）
+     * @param second  秒组件，取值范围 0-59，通常用于调试
      */
     public ParsedCalenderElements(int minute, int hour, int day, int month, int weekday, int second) {
         this.minute = minute;
@@ -41,26 +43,27 @@ public class ParsedCalenderElements {
     }
 
     /**
-     * Constructs a new instance of ParsedCalenderElements with the specified minute, hour, day, month, and weekday.
-     * The second component is set to 0 by default.
+     * 使用指定的分钟、小时、天、月和星期构造 ParsedCalenderElements 实例。
+     * <p>秒组件默认设置为 0。
+     * <p>此构造函数是便捷方法，适用于不需要指定秒的场景。
      *
-     * @param minute  the minute component (0-59)
-     * @param hour    the hour component (0-23)
-     * @param day     the day of the month (1-31)
-     * @param month   the month (1-12)
-     * @param weekday the day of the week (0-6, where 0 is Sunday)
+     * @param minute  分钟组件，取值范围 0-59
+     * @param hour    小时组件，取值范围 0-23
+     * @param day     月份中的天数，取值范围 1-31
+     * @param month   月份，取值范围 1-12（1 表示一月）
+     * @param weekday 星期几，取值范围 0-6（0 表示星期日）
      */
     public ParsedCalenderElements(int minute, int hour, int day, int month, int weekday) {
         this(minute, hour, day, month, weekday, 0);
     }
 
     /**
-     * Constructs a new instance of ParsedCalenderElements from the provided Calendar object.
-     * This constructor extracts and sets the minute, hour, day, month, weekday, and second components
-     * from the given Calendar object. The month is adjusted to be 1-based (January = 1), and the weekday
-     * is adjusted to be 0-based (Sunday = 0).
+     * 从提供的 Calendar 对象构造 ParsedCalenderElements 实例。
+     * <p>此构造函数从给定的 Calendar 对象中提取并设置分钟、小时、天、月、星期和秒组件。
+     * <p>月份会被调整为基于 1 的格式（一月 = 1），星期会被调整为基于 0 的格式（星期日 = 0）。
+     * <p>这是从 Calendar 对象创建解析结果的最便捷方式。
      *
-     * @param currentCalendar the Calendar object from which to extract the date and time components
+     * @param currentCalendar 用于提取日期和时间组件的 Calendar 对象，不能为 null
      */
     public ParsedCalenderElements(@NotNull Calendar currentCalendar) {
         minute = currentCalendar.get(Calendar.MINUTE);
@@ -72,10 +75,11 @@ public class ParsedCalenderElements {
     }
 
     /**
-     * Returns a string representation of the parsed calendar elements.
-     * The format is "(second) minute hour day month weekday".
+     * 返回解析后的日历元素的字符串表示。
+     * <p>格式为 "(秒) 分钟 小时 天 月 星期"。
+     * <p>例如："(30) 15 14 25 12 3" 表示 12 月 25 日 14:15:30，星期三。
      *
-     * @return a string in the format "(second) minute hour day month weekday"
+     * @return 格式为 "(秒) 分钟 小时 天 月 星期" 的字符串
      */
     @Override
     public String toString() {

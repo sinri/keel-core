@@ -10,8 +10,7 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * @since 3.0.0
- * @since 3.1.4 add JVM and Heap Memory Monitoring
+ * @since 5.0.0
  */
 public class KeelRuntimeMonitor {
     private final AtomicReference<GCStatResult> _lastGCRef = new AtomicReference<>();

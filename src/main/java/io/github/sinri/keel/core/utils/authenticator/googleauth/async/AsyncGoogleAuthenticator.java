@@ -30,8 +30,6 @@
 
 package io.github.sinri.keel.core.utils.authenticator.googleauth.async;
 
-//import org.apache.commons.codec.binary.Base32;
-//import org.apache.commons.codec.binary.Base64;
 
 import io.github.sinri.keel.core.utils.BinaryUtils;
 import io.github.sinri.keel.core.utils.StringUtils;
@@ -80,8 +78,7 @@ import java.util.logging.Logger;
  * @see <a href="http://thegreyblog.blogspot.com/2011/12/google-authenticator-using-it-in-your.html"></a>
  * @see <a href="http://code.google.com/p/google-authenticator"></a>
  * @see <a href="http://tools.ietf.org/id/draft-mraihi-totp-timebased-06.txt"></a>
- * @since 0.3.0
- * @since 3.2.9 Support Async!
+ * @since 5.0.0
  */
 public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator {
 
@@ -171,7 +168,8 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
     }
 
     /**
-     * The constructor that allows a user to specify the config and uses the default randomNumberAlgorithm and randomNumberAlgorithmProvider.
+     * The constructor that allows a user to specify the config and uses the default randomNumberAlgorithm and
+     * randomNumberAlgorithmProvider.
      *
      * @param config The configuration used by the current instance.
      */
@@ -189,10 +187,13 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
     }
 
     /**
-     * The constructor that allows a user the randomNumberAlgorithm, the randomNumberAlgorithmProvider, and uses the default config.
+     * The constructor that allows a user the randomNumberAlgorithm, the randomNumberAlgorithmProvider, and uses the
+     * default config.
      *
-     * @param randomNumberAlgorithm         The random number algorithm to define the secure random number generator. If this is null the randomNumberAlgorithmProvider must be null.
-     * @param randomNumberAlgorithmProvider The random number algorithm provider to define the secure random number generator. This value may be null.
+     * @param randomNumberAlgorithm         The random number algorithm to define the secure random number generator. If
+     *                                      this is null the randomNumberAlgorithmProvider must be null.
+     * @param randomNumberAlgorithmProvider The random number algorithm provider to define the secure random number
+     *                                      generator. This value may be null.
      */
     public AsyncGoogleAuthenticator(final String randomNumberAlgorithm, final String randomNumberAlgorithmProvider) {
         this(new GoogleAuthenticatorConfig(), randomNumberAlgorithm, randomNumberAlgorithmProvider);
@@ -200,11 +201,14 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
     }
 
     /**
-     * The constructor that allows a user to specify the config, the randomNumberAlgorithm, and the randomNumberAlgorithmProvider.
+     * The constructor that allows a user to specify the config, the randomNumberAlgorithm, and the
+     * randomNumberAlgorithmProvider.
      *
      * @param config                        The configuration used by the current instance.
-     * @param randomNumberAlgorithm         The random number algorithm to define the secure random number generator. If this is null the randomNumberAlgorithmProvider must be null.
-     * @param randomNumberAlgorithmProvider The random number algorithm provider to define the secure random number generator. This value may be null.
+     * @param randomNumberAlgorithm         The random number algorithm to define the secure random number generator. If
+     *                                      this is null the randomNumberAlgorithmProvider must be null.
+     * @param randomNumberAlgorithmProvider The random number algorithm provider to define the secure random number
+     *                                      generator. This value may be null.
      */
     public AsyncGoogleAuthenticator(GoogleAuthenticatorConfig config, final String randomNumberAlgorithm, final String randomNumberAlgorithmProvider) {
         if (config == null) {
@@ -249,7 +253,7 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
      * @param key the secret key in binary format.
      * @param tm  the instant of time.
      * @return the validation code for the provided key at the specified instant
-     * of time.
+     *         of time.
      */
     int calculateCode(byte[] key, long tm) {
         // Allocating an array of bytes to represent the specified instant
@@ -322,7 +326,7 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
      * @param timestamp the instant of time to use during the validation process.
      * @param window    the window size to use during the validation process.
      * @return <code>true</code> if the validation code is valid,
-     * <code>false</code> otherwise.
+     *         <code>false</code> otherwise.
      */
     private Future<Boolean> checkCode(
             String secret,
@@ -359,15 +363,15 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
             case BASE32:
                 return StringUtils.decodeWithBase32ToBytes(secret.toUpperCase());
 
-//                Base32 codec32 = new Base32();
+            //                Base32 codec32 = new Base32();
             // See: https://issues.apache.org/jira/browse/CODEC-234
             // Commons Codec Base32::decode does not support lowercase letters.
-//                return codec32.decode(secret.toUpperCase());
+            //                return codec32.decode(secret.toUpperCase());
             case BASE64:
                 return StringUtils.decodeWithBase32ToBytes(secret);
 
-//                Base64 codec64 = new Base64();
-//                return codec64.decode(secret);
+            //                Base64 codec64 = new Base64();
+            //                return codec64.decode(secret);
             default:
                 throw new IllegalArgumentException("Unknown key representation type.");
         }
@@ -404,25 +408,25 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
     @Override
     public Future<GoogleAuthenticatorKey> createCredentials(String userName) {
         return Future.succeededFuture()
-                .compose(v -> {
-                    // Further validation will be performed by the configured provider.
-                    if (userName == null) {
-                        throw new IllegalArgumentException("User name cannot be null.");
-                    }
+                     .compose(v -> {
+                         // Further validation will be performed by the configured provider.
+                         if (userName == null) {
+                             throw new IllegalArgumentException("User name cannot be null.");
+                         }
 
-                    GoogleAuthenticatorKey key = createCredentials();
-                    return Future.succeededFuture(key);
-                })
-                .compose(key -> {
-                    AsyncICredentialRepository repository = getValidCredentialRepository();
-                    return repository.saveUserCredentials(
-                                    userName,
-                                    key.getKey(),
-                                    key.getVerificationCode(),
-                                    key.getScratchCodes()
-                            )
-                            .compose(v -> Future.succeededFuture(key));
-                });
+                         GoogleAuthenticatorKey key = createCredentials();
+                         return Future.succeededFuture(key);
+                     })
+                     .compose(key -> {
+                         AsyncICredentialRepository repository = getValidCredentialRepository();
+                         return repository.saveUserCredentials(
+                                                  userName,
+                                                  key.getKey(),
+                                                  key.getVerificationCode(),
+                                                  key.getScratchCodes()
+                                          )
+                                          .compose(v -> Future.succeededFuture(key));
+                     });
     }
 
     private List<Integer> calculateScratchCodes() {
@@ -519,11 +523,11 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
     public Future<Integer> getTotpPasswordOfUser(String userName, long time) {
         AsyncICredentialRepository repository = getValidCredentialRepository();
         return repository.getSecretKey(userName)
-                .compose(secretKey -> {
-                    byte[] x = decodeSecret(secretKey);
-                    int totpPassword = calculateCode(x, getTimeWindowFromTime(time));
-                    return Future.succeededFuture(totpPassword);
-                });
+                         .compose(secretKey -> {
+                             byte[] x = decodeSecret(secretKey);
+                             int totpPassword = calculateCode(x, getTimeWindowFromTime(time));
+                             return Future.succeededFuture(totpPassword);
+                         });
     }
 
     /**
@@ -536,10 +540,10 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
         switch (config.getKeyRepresentation()) {
             case BASE32:
                 return BinaryUtils.encodeWithBase32ToString(secretKey);
-//                return new Base32().encodeToString(secretKey);
+            //                return new Base32().encodeToString(secretKey);
             case BASE64:
                 return BinaryUtils.encodeWithBase64ToString(secretKey);
-//                return new Base64().encodeToString(secretKey);
+            //                return new Base64().encodeToString(secretKey);
             default:
                 throw new IllegalArgumentException("Unknown key representation type.");
         }
@@ -579,7 +583,7 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
     public Future<Boolean> authorizeUser(String userName, int verificationCode, long time) {
         AsyncICredentialRepository repository = getValidCredentialRepository();
         return repository.getSecretKey(userName)
-                .compose(secretKey -> authorize(secretKey, verificationCode, time));
+                         .compose(secretKey -> authorize(secretKey, verificationCode, time));
     }
 
     /**
@@ -610,7 +614,7 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
      * registered using the Java service loader API.
      *
      * @return the first registered ICredentialRepository or <code>null</code>
-     * if none is found.
+     *         if none is found.
      */
     public AsyncICredentialRepository getCredentialRepository() {
         if (this.credentialRepositorySearched) return this.credentialRepository;

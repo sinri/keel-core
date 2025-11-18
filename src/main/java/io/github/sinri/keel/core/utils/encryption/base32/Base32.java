@@ -1,5 +1,8 @@
 package io.github.sinri.keel.core.utils.encryption.base32;
 
+/**
+ * @since 5.0.0
+ */
 public class Base32 {
     /* lookup table used to encode() groups of 5 bits of data */
     private static final String base32Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";

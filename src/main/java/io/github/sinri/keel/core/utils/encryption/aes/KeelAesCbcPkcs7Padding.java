@@ -10,7 +10,7 @@ import java.security.NoSuchProviderException;
 import java.util.Base64;
 
 /**
- * @since 2.8
+ * @since 5.0.0
  */
 public class KeelAesCbcPkcs7Padding extends KeelAesUsingPkcs7Padding {
 

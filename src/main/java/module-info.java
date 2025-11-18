@@ -19,7 +19,6 @@ module io.github.sinri.keel.core {
     exports io.github.sinri.keel.core.markdown;
 
     // Integration packages
-    exports io.github.sinri.keel.core.integration.email;
     exports io.github.sinri.keel.core.integration.email.smtp;
 
     // Maids (background services)
@@ -46,10 +45,10 @@ module io.github.sinri.keel.core {
     exports io.github.sinri.keel.core.utils.authenticator.googleauth.sync;
 
     // Encryption utilities
-    exports io.github.sinri.keel.core.utils.encryption.aes;
-    exports io.github.sinri.keel.core.utils.encryption.base32;
-    exports io.github.sinri.keel.core.utils.encryption.bcrypt;
-    exports io.github.sinri.keel.core.utils.encryption.rsa;
+    //    exports io.github.sinri.keel.core.utils.encryption.aes;
+    //    exports io.github.sinri.keel.core.utils.encryption.base32;
+    //    exports io.github.sinri.keel.core.utils.encryption.bcrypt;
+    //    exports io.github.sinri.keel.core.utils.encryption.rsa;
 
     // Opens for reflection-based operations
     opens io.github.sinri.keel.core.utils to java.base;

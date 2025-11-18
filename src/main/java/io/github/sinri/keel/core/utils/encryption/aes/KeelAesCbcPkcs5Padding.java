@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
 /**
- * @since 2.8
+ * @since 5.0.0
  */
 public class KeelAesCbcPkcs5Padding extends KeelAesUsingPkcs5Padding {
     /**

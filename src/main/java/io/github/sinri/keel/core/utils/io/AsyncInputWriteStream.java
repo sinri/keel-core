@@ -9,7 +9,9 @@ import org.jetbrains.annotations.NotNull;
 import java.io.OutputStream;
 
 /**
- * @since 4.1.5
+ * 一个Vertx体系下 {@link WriteStream} 的实现，其将{@link OutputStream}封装来实现流式异步写入。
+ *
+ * @since 5.0.0
  */
 public interface AsyncInputWriteStream extends WriteStream<Buffer> {
     static AsyncInputWriteStream create() {

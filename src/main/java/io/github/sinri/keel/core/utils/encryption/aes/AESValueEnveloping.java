@@ -1,15 +1,13 @@
 package io.github.sinri.keel.core.utils.encryption.aes;
 
-import io.github.sinri.keel.base.annotations.TechnicalPreview;
-import io.github.sinri.keel.core.utils.value.ValueEnvelope;
+import io.github.sinri.keel.core.utils.value.ValueEnveloping;
 import org.jetbrains.annotations.Nullable;
 
-
 /**
- * @since 3.1.0 Technical Preview
+ * 运用 AES 加密算法，对字符串进行密封和解封。
+ * @since 5.0.0
  */
-@TechnicalPreview(since = "3.1.0")
-public interface AESValueEnvelope extends ValueEnvelope {
+public interface AESValueEnveloping extends ValueEnveloping<String, String> {
     /**
      * Encrypt the raw string and store the encrypted value with this instance.
      *

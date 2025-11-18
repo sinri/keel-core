@@ -36,7 +36,7 @@ import java.text.DecimalFormat;
  * System ticks also include time executing other virtual hosts (steal).
  * </p>
  *
- * @since 2.9.4
+ * @since 5.0.0
  */
 public class CPUTimeResult implements RuntimeStatResult<CPUTimeResult> {
     private final long statTime;
@@ -165,7 +165,7 @@ public class CPUTimeResult implements RuntimeStatResult<CPUTimeResult> {
     }
 
     /**
-     * @since 3.1.5 if the usage is not finite, null would be returned.
+     * @return 使用率。如果使用率不是一个有效的数值，返回null。
      */
     @Nullable
     public String getCpuUsagePercent() {
@@ -186,7 +186,6 @@ public class CPUTimeResult implements RuntimeStatResult<CPUTimeResult> {
                 .put("IRQ", this.spentInIRQState)
                 .put("SoftIRQ", this.spentInSoftIRQState)
                 .put("Steal", this.spentInStealState)
-                //.put("usage_raw", this.getCpuUsage())
                 .put("usage", this.getCpuUsagePercent());
     }
 }

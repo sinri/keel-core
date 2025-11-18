@@ -61,7 +61,7 @@ import java.security.SecureRandom;
  *
  * @author Damien Miller
  * @version 0.4
- * @since 2.8 imported to Keel
+ * @since 5.0.0
  */
 public class BCrypt {
     // BCrypt parameters

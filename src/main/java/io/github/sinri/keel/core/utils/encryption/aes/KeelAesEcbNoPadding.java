@@ -13,7 +13,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * @since 3.0.11
+ * @since 5.0.0
  */
 public class KeelAesEcbNoPadding extends KeelAesBase {
     /**

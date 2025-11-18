@@ -25,7 +25,7 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
  * The default queue size is 1000 writes, but it can be changed using {@link #setWriteQueueMaxSize(int)}
  *
  * @see <a href="https://github.com/cloudonix/vertx-java.io">original project by guss77 (MIT): WriteToInputStream</a>
- * @since 4.1.5
+ * @since 5.0.0
  */
 class AsyncInputWriteStreamImpl extends InputStream implements WriteStream<Buffer>, AsyncInputWriteStream {
 

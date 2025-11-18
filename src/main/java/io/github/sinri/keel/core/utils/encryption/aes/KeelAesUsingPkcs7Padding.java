@@ -22,7 +22,7 @@ import java.security.Security;
  * <p>
  * This should be done once during application startup.
  *
- * @since 2.8
+ * @since 5.0.0
  */
 abstract public class KeelAesUsingPkcs7Padding extends KeelAesBase {
 //    static {

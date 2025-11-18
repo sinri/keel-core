@@ -5,7 +5,7 @@ import io.vertx.core.json.JsonObject;
 import java.text.DecimalFormat;
 
 /**
- * @since 2.9.4
+ * @since 5.0.0
  */
 public class MemoryResult implements RuntimeStatResult<MemoryResult> {
     private final long statTime;

@@ -40,7 +40,10 @@ import java.nio.charset.StandardCharsets;
  * provided credential.  The generated QR code can be fed to the Google
  * Authenticator application so that it can configure itself with the data
  * contained therein.
+ *
+ * @deprecated 生成二维码的工作可以由业务系统自行选择如何进行，无需框架提供
  */
+@Deprecated(since = "5.0.0")
 public final class GoogleAuthenticatorQRGenerator {
     /**
      * The format string to generate the Google Chart HTTP API call.
@@ -76,7 +79,8 @@ public final class GoogleAuthenticatorQRGenerator {
      * <p>
      * label = accountname / issuer (“:” / “%3A”) *”%20” accountname
      *
-     * @see <a href="https://code.google.com/p/google-authenticator/wiki/KeyUriFormat">Google Authenticator - KeyUriFormat</a>
+     * @see <a href="https://code.google.com/p/google-authenticator/wiki/KeyUriFormat">Google Authenticator -
+     *         KeyUriFormat</a>
      */
     private static String formatLabel(String issuer, String accountName) {
         if (accountName == null || accountName.trim().isEmpty()) {
@@ -117,8 +121,9 @@ public final class GoogleAuthenticatorQRGenerator {
      * @param accountName The account name. This parameter shall not be null.
      * @param credentials The generated credentials.  This parameter shall not be null.
      * @return the Google Chart API call URL to generate a QR code containing
-     * the provided information.
-     * @see <a href="https://code.google.com/p/google-authenticator/wiki/KeyUriFormat">Google Authenticator - KeyUriFormat</a>
+     *         the provided information.
+     * @see <a href="https://code.google.com/p/google-authenticator/wiki/KeyUriFormat">Google Authenticator -
+     *         KeyUriFormat</a>
      */
     public static String getOtpAuthURL(String issuer,
                                        String accountName,
@@ -145,16 +150,17 @@ public final class GoogleAuthenticatorQRGenerator {
      * @param accountName The account name. This parameter shall not be null.
      * @param credentials The generated credentials.  This parameter shall not be null.
      * @return an otpauth scheme URI for loading into a client application.
-     * @see <a href="https://github.com/google/google-authenticator/wiki/Key-Uri-Format">Google Authenticator - KeyUriFormat</a>
+     * @see <a href="https://github.com/google/google-authenticator/wiki/Key-Uri-Format">Google Authenticator -
+     *         KeyUriFormat</a>
      */
     public static String getOtpAuthTotpURL(String issuer,
                                            String accountName,
                                            GoogleAuthenticatorKey credentials) {
         StringBuilder url = new StringBuilder();
         url.append("otpauth://totp/")
-                .append(URLEncoder.encode(formatLabel(issuer, accountName), StandardCharsets.UTF_8))
-                .append("?secret=")
-                .append(URLEncoder.encode(credentials.getKey(), StandardCharsets.UTF_8));
+           .append(URLEncoder.encode(formatLabel(issuer, accountName), StandardCharsets.UTF_8))
+           .append("?secret=")
+           .append(URLEncoder.encode(credentials.getKey(), StandardCharsets.UTF_8));
 
         if (issuer != null) {
             if (issuer.contains(":")) {
@@ -165,32 +171,35 @@ public final class GoogleAuthenticatorQRGenerator {
 
         final GoogleAuthenticatorConfig config = credentials.getConfig();
         url
-                .append("&algorithm=").append(URLEncoder.encode(getAlgorithmName(config.getHmacHashFunction()), StandardCharsets.UTF_8))
-                .append("&digits=").append(URLEncoder.encode(String.valueOf(config.getCodeDigits()), StandardCharsets.UTF_8))
-                .append("&period=").append(URLEncoder.encode(String.valueOf((int) (config.getTimeStepSizeInMillis() / 1000)), StandardCharsets.UTF_8));
+                .append("&algorithm=")
+                .append(URLEncoder.encode(getAlgorithmName(config.getHmacHashFunction()), StandardCharsets.UTF_8))
+                .append("&digits=")
+                .append(URLEncoder.encode(String.valueOf(config.getCodeDigits()), StandardCharsets.UTF_8))
+                .append("&period=")
+                .append(URLEncoder.encode(String.valueOf((int) (config.getTimeStepSizeInMillis() / 1000)), StandardCharsets.UTF_8));
 
         return url.toString();
 
-//        URIBuilder uri = new URIBuilder()
-//                .setScheme("otpauth")
-//                .setHost("totp")
-//                .setPath("/" + formatLabel(issuer, accountName))
-//                .setParameter("secret", credentials.getKey());
-//
-//        if (issuer != null) {
-//            if (issuer.contains(":")) {
-//                throw new IllegalArgumentException("Issuer cannot contain the \':\' character.");
-//            }
-//
-//            uri.setParameter("issuer", issuer);
-//        }
-//
-//        final GoogleAuthenticatorConfig config = credentials.getConfig();
-//        uri.setParameter("algorithm", getAlgorithmName(config.getHmacHashFunction()));
-//        uri.setParameter("digits", String.valueOf(config.getCodeDigits()));
-//        uri.setParameter("period", String.valueOf((int) (config.getTimeStepSizeInMillis() / 1000)));
-//
-//        return uri.toString();
+        //        URIBuilder uri = new URIBuilder()
+        //                .setScheme("otpauth")
+        //                .setHost("totp")
+        //                .setPath("/" + formatLabel(issuer, accountName))
+        //                .setParameter("secret", credentials.getKey());
+        //
+        //        if (issuer != null) {
+        //            if (issuer.contains(":")) {
+        //                throw new IllegalArgumentException("Issuer cannot contain the \':\' character.");
+        //            }
+        //
+        //            uri.setParameter("issuer", issuer);
+        //        }
+        //
+        //        final GoogleAuthenticatorConfig config = credentials.getConfig();
+        //        uri.setParameter("algorithm", getAlgorithmName(config.getHmacHashFunction()));
+        //        uri.setParameter("digits", String.valueOf(config.getCodeDigits()));
+        //        uri.setParameter("period", String.valueOf((int) (config.getTimeStepSizeInMillis() / 1000)));
+        //
+        //        return uri.toString();
     }
 
     private static String getAlgorithmName(HmacHashFunction hashFunction) {

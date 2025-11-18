@@ -15,7 +15,7 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Objects;
 
 /**
- * @since 3.0.1
+ * @since 5.0.0
  */
 public class KeelRSA extends KeelRSAKeyPair {
     public static final String SIGN_ALGORITHMS = "SHA1WithRSA";

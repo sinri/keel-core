@@ -11,7 +11,7 @@ import java.util.Base64;
 import java.util.Objects;
 
 /**
- * @since 2.8
+ * @since 5.0.0
  */
 public interface KeelAes {
     /**

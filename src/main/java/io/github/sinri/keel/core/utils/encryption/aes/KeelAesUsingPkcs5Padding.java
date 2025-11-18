@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.utils.encryption.aes;
 
 /**
- * @since 2.8
+ * @since 5.0.0
  */
 abstract public class KeelAesUsingPkcs5Padding extends KeelAesBase {
     /**

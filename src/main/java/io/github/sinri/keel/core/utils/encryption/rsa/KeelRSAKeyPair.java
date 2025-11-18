@@ -16,7 +16,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
 /**
- * @since 3.0.1
+ * @since 5.0.0
  */
 public class KeelRSAKeyPair {
     private RSAPublicKey publicKey;

@@ -3,7 +3,7 @@ package io.github.sinri.keel.core.utils.runtime;
 import io.vertx.core.json.JsonObject;
 
 /**
- * @since 3.1.9
+ * @since 5.0.0
  */
 public class JVMMemoryResult implements RuntimeStatResult<JVMMemoryResult> {
     private final long statTime;

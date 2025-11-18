@@ -13,7 +13,7 @@ import java.util.Set;
 import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 /**
- * @since 2.9.4
+ * @since 5.0.0
  */
 public class GCStatResult implements RuntimeStatResult<GCStatResult> {
     private static final Set<String> minorGCNames;
@@ -67,30 +67,18 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
         this.statTime = statTime;
     }
 
-    /**
-     * @since 4.0.2
-     */
     public static void handleMajorGCNames(@NotNull Handler<Set<String>> handler) {
         handler.handle(majorGCNames);
     }
 
-    /**
-     * @since 4.0.2
-     */
     public static void handleMinorGCNames(@NotNull Handler<Set<String>> handler) {
         handler.handle(minorGCNames);
     }
 
-    /**
-     * @since 4.0.2
-     */
     public static void handleIgnoreGCNames(@NotNull Handler<Set<String>> handler) {
         handler.handle(ignoreGCNames);
     }
 
-    /**
-     * @since 4.0.2
-     */
     public static GCStatResult parseGarbageCollectorMXBeans(@NotNull List<GarbageCollectorMXBean> gcList) {
         GCStatResult gcStatResult = new GCStatResult();
         for (GarbageCollectorMXBean gc : gcList) {
@@ -118,17 +106,11 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
         return majorGCTime;
     }
 
-    /**
-     * @since 4.0.2
-     */
     @Nullable
     public String getMajorGCType() {
         return majorGCType;
     }
 
-    /**
-     * @since 4.0.2
-     */
     @Nullable
     public String getMinorGCType() {
         return minorGCType;
@@ -166,10 +148,6 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
                 );
     }
 
-    /**
-     * @since 3.1.4
-     * @since 4.0.2 refine
-     */
     private void refreshWithGC(@NotNull GarbageCollectorMXBean gc) {
         if (minorGCNames.contains(gc.getName())) {
             this.minorGCCount = gc.getCollectionCount();

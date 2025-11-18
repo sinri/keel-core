@@ -14,8 +14,11 @@ import java.lang.management.MemoryUsage;
 import java.lang.management.OperatingSystemMXBean;
 
 /**
- * @since 2.9.3
- * @since 3.1.3 Add more GarbageCollectorMXBean.
+ * 运行时工具。
+ * <p>
+ * 目前主要用于监控。
+ *
+ * @since 5.0.0
  */
 public class RuntimeUtils {
 
@@ -42,9 +45,6 @@ public class RuntimeUtils {
         return GCStatResult.parseGarbageCollectorMXBeans(ManagementFactory.getGarbageCollectorMXBeans());
     }
 
-    /**
-     * @since 2.9.4
-     */
     @NotNull
     public static CPUTimeResult getCPUTimeSnapshot() {
         CentralProcessor processor = systemInfo.getHardware().getProcessor();
@@ -91,89 +91,23 @@ public class RuntimeUtils {
      * may be unavailable on some platform where it is expensive to implement this method.
      *
      * @return the system load average; or a negative value if not available.
-     * @since 3.1.4
      */
     public static double getSystemLoadAverage() {
         return osMX().getSystemLoadAverage();
     }
 
-    /**
-     * @since 3.1.4
-     */
+
     public static MemoryUsage getHeapMemoryUsage() {
         return memoryMX().getHeapMemoryUsage();
     }
 
-    /**
-     * @since 3.1.4
-     */
+
     public static MemoryUsage getNonHeapMemoryUsage() {
         return memoryMX().getNonHeapMemoryUsage();
     }
 
-    /**
-     * @since 3.1.4
-     */
+
     public static int getObjectPendingFinalizationCount() {
         return memoryMX().getObjectPendingFinalizationCount();
     }
-
-    //    /**
-    //     * @param object the object to calculate its size
-    //     * @return the size of the object, in bytes.
-    //     * @since 4.0.0
-    //     */
-    //    public static long measureObjectSizeWithJOL(Object object) {
-    //        ClassLayout classLayout = ClassLayout.parseInstance(object);
-    //        return classLayout.instanceSize();
-    //    }
-
-    //    /**
-    //     * To calculate the size of an object and its referenced objects.
-    //     * It is not accurate.
-    //     *
-    //     * @param obj the object to calculate its deep size
-    //     * @return the deep size of the provided object, in bytes.
-    //     * @since 4.0.0
-    //     */
-    //    public static long calculateObjectDeepSizeWithJOL(Object obj) {
-    //        IdentityHashMap<Object, Object> visited = new IdentityHashMap<>();
-    //        return calculateObjectDeepSizeWithJOL(obj, visited);
-    //    }
-
-    //    /**
-    //     * @since 4.0.0
-    //     */
-    //    private static long calculateObjectDeepSizeWithJOL(Object obj, IdentityHashMap<Object, Object> visited) {
-    //        if (obj == null || visited.containsKey(obj)) {
-    //            return 0;
-    //        }
-    //        visited.put(obj, null);
-    //
-    //        long size = ClassLayout.parseInstance(obj).instanceSize();
-    //        Class<?> clazz = obj.getClass();
-    //
-    //        while (clazz != null) {
-    //            for (Field field : clazz.getDeclaredFields()) {
-    //                // 跳过 JDK 内部类的字段
-    //                if (field.getDeclaringClass().getName().startsWith("java.") ||
-    //                        field.getDeclaringClass().getName().startsWith("javax.")) {
-    //                    continue;
-    //                }
-    //                if (!field.getType().isPrimitive()) {
-    //                    field.setAccessible(true);
-    //                    try {
-    //                        Object fieldValue = field.get(obj);
-    //                        if (fieldValue != null) {
-    //                            size += calculateObjectDeepSizeWithJOL(fieldValue, visited);
-    //                        }
-    //                    } catch (IllegalAccessException e) {
-    //                        //e.printStackTrace();
-    //                    }
-    //                }
-    //            }
-    //            clazz = clazz.getSuperclass();
-    //        }
-    //        return size;
-    //    }
 }

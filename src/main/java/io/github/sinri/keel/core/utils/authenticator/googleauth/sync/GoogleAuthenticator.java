@@ -39,14 +39,17 @@ import io.github.sinri.keel.core.utils.authenticator.googleauth.GoogleAuthentica
 import io.github.sinri.keel.core.utils.authenticator.googleauth.GoogleAuthenticatorException;
 import io.github.sinri.keel.core.utils.authenticator.googleauth.GoogleAuthenticatorKey;
 import io.github.sinri.keel.core.utils.authenticator.googleauth.ReseedingSecureRandom;
+import io.github.sinri.keel.logger.api.logger.Logger;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import static io.github.sinri.keel.base.KeelInstance.Keel;
+//import java.util.logging.Level;
+//import java.util.logging.Logger;
 
 /**
  * This class implements the functionality described in RFC 6238 (TOTP: Time
@@ -99,7 +102,8 @@ public final class GoogleAuthenticator implements IGoogleAuthenticator {
     /**
      * The logger for this class.
      */
-    private static final Logger LOGGER = Logger.getLogger(GoogleAuthenticator.class.getName());
+    //private static final Logger LOGGER = Logger.getLogger(GoogleAuthenticator.class.getName());
+    private static final Logger LOGGER = Keel.getLoggerFactory().createLogger(GoogleAuthenticator.class.getName());
 
     /**
      * Number of digits of a scratch code represented as a decimal integer.
@@ -298,7 +302,8 @@ public final class GoogleAuthenticator implements IGoogleAuthenticator {
             return (int) truncatedHash;
         } catch (NoSuchAlgorithmException | InvalidKeyException ex) {
             // Logging the exception.
-            LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            // LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
+            LOGGER.exception(ex);
 
             // We're not disclosing internal error details to our clients.
             throw new GoogleAuthenticatorException("The operation cannot be performed now.");

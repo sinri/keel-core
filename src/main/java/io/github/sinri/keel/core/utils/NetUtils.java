@@ -9,7 +9,8 @@ import java.net.UnknownHostException;
 import java.util.Objects;
 
 /**
- * @since 2.8
+ * 网络工具类
+ * @since 5.0.0
  */
 public class NetUtils {
 
@@ -47,8 +48,7 @@ public class NetUtils {
         }
     }
 
-    @NotNull
-    public static byte[] convertIPv4ToAddressBytes(long ipv4AsLong) {
+    public static byte @NotNull [] convertIPv4ToAddressBytes(long ipv4AsLong) {
         return new byte[]{
                 (byte) (ipv4AsLong >> 24),
                 (byte) ((ipv4AsLong >> 16) & 0xFF),
@@ -57,15 +57,13 @@ public class NetUtils {
         };
     }
 
-    @NotNull
-    public static byte[] convertIPv4ToAddressBytes(@Nullable String ipv4) {
+    public static byte @NotNull [] convertIPv4ToAddressBytes(@Nullable String ipv4) {
         long x = Objects.requireNonNull(convertIPv4ToNumber(ipv4));
         return convertIPv4ToAddressBytes(x);
     }
 
     /**
      * @return like "127.0.0.1"; If the local host name could not be resolved into an address, null.
-     * @since 2.9.1
      */
     @Nullable
     public static String getLocalHostAddress() {
@@ -79,7 +77,6 @@ public class NetUtils {
 
     /**
      * @return like "SinriMacInLeqee.local"; If the local host name could not be resolved into an address, null.
-     * @since 2.9.1
      */
     @Nullable
     public static String getLocalHostName() {
@@ -93,7 +90,6 @@ public class NetUtils {
 
     /**
      * @return like "localhost"; If the local host name could not be resolved into an address, null.
-     * @since 2.9.1
      */
     @Nullable
     public static String getLocalHostCanonicalName() {

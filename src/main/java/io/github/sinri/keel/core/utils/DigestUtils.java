@@ -10,64 +10,45 @@ import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
- * 校验用加密（摘要）。
- * 特征是不可解密。
+ * 摘要工具类。
+ * <p>
+ * 校验用摘要，特征是不可解密。
  *
- * @since 2.8
+ * @since 5.0.0
  */
 public class DigestUtils {
     public static final String DIGEST_ALGO_SHA_512 = "SHA-512";
     public static final String DIGEST_ALGO_MD5 = "MD5";
     public static final String DIGEST_ALGO_SHA_1 = "SHA";
-    private static MessageDigest MD5MessageDigest;
-
-    static {
-        try {
-            MD5MessageDigest = MessageDigest.getInstance(DIGEST_ALGO_MD5);
-        } catch (NoSuchAlgorithmException e) {
-            System.err.println("MD5 not supported!");
-            MD5MessageDigest = null;
-        }
-    }
+    private static final Map<String, MessageDigest> messageDigestCache = new ConcurrentHashMap<>();
 
     private DigestUtils() {
 
     }
 
-
-    /**
-     * As of 4.1.0, it is open to the world.
-     *
-     * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal
-     *         #22</a>
-     */
-    public static MessageDigest getMD5MessageDigest() {
-        //return MD5.HOLDER.get();
-        // as of 5.0.0 fallback
-        if (MD5MessageDigest != null) {
-            return MD5MessageDigest;
-        }
-
-        try {
-            MD5MessageDigest = MessageDigest.getInstance(DIGEST_ALGO_MD5);
-            return MD5MessageDigest;
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
+    public static MessageDigest getMessageDigest(@NotNull String algorithm) {
+        return Objects.requireNonNull(messageDigestCache.computeIfAbsent(algorithm, key -> {
+            synchronized (messageDigestCache) {
+                try {
+                    return MessageDigest.getInstance(key);
+                } catch (NoSuchAlgorithmException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }));
     }
 
     /**
-     * 获取raw对应的以数字和小写字母描述的MD5摘要值。
-     * As of 4.1.0, be realized by {@link DigestUtils#md5(byte[])}
+     * 计算字符串的 MD5 摘要值（小写十六进制）。
      *
-     * @param raw raw string
-     * @return md5 with lower digits
-     * @since 1.1
-     * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal
-     *         #22</a>
+     * @param raw 原始字符串
+     * @return MD5 摘要值，使用小写字母和数字的十六进制表示
      */
     @NotNull
     public static String md5(@NotNull String raw) {
@@ -75,25 +56,22 @@ public class DigestUtils {
     }
 
     /**
-     * 获取raw对应的以数字和小写字母描述的MD5摘要值。
+     * 计算字节数组的 MD5 摘要值（小写十六进制）。
      *
-     * @since 4.1.0
+     * @param raw 原始字节数组
+     * @return MD5 摘要值，使用小写字母和数字的十六进制表示
      */
-    public static String md5(@NotNull byte[] raw) {
-        MessageDigest digest = DigestUtils.getMD5MessageDigest();
+    public static String md5(byte @NotNull [] raw) {
+        MessageDigest digest = getMessageDigest(DIGEST_ALGO_MD5);
         byte[] digested = digest.digest(raw);
         return BinaryUtils.encodeHexWithLowerDigits(digested);
     }
 
     /**
-     * 获取raw对应的以数字和大写字母描述的MD5摘要值。
-     * As of 4.1.0, realized by {@link DigestUtils#MD5(byte[])}.
+     * 计算字符串的 MD5 摘要值（大写十六进制）。
      *
-     * @param raw raw string
-     * @return MD5 with upper digits
-     * @since 1.1
-     * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal
-     *         #22</a>
+     * @param raw 原始字符串
+     * @return MD5 摘要值，使用大写字母和数字的十六进制表示
      */
     @NotNull
     public static String MD5(@NotNull String raw) {
@@ -101,54 +79,75 @@ public class DigestUtils {
     }
 
     /**
-     * 获取raw对应的以数字和大写字母描述的MD5摘要值。
+     * 计算字节数组的 MD5 摘要值（大写十六进制）。
      *
-     * @since 4.1.0
+     * @param raw 原始字节数组
+     * @return MD5 摘要值，使用大写字母和数字的十六进制表示
      */
-    public static String MD5(@NotNull byte[] raw) {
-        MessageDigest digest = DigestUtils.getMD5MessageDigest();
+    public static String MD5(byte @NotNull [] raw) {
+        MessageDigest digest = getMessageDigest(DIGEST_ALGO_MD5);
         byte[] digested = digest.digest(raw);
         return BinaryUtils.encodeHexWithUpperDigits(digested);
     }
 
     /**
-     * @since 4.1.0
+     * 使用指定算法计算字节数组的摘要值（小写十六进制）。
+     *
+     * @param algorithm 摘要算法名称（如 "SHA-256", "SHA-512" 等）
+     * @param raw       原始字节数组
+     * @return 摘要值，使用小写字母和数字的十六进制表示
+     * @throws NoSuchAlgorithmException 如果指定的算法不可用
      */
-    public static String digestToLower(@NotNull String algorithm, @NotNull byte[] raw) throws NoSuchAlgorithmException {
+    public static String digestToLower(@NotNull String algorithm, byte @NotNull [] raw) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance(algorithm);
         md.update(raw);
         return BinaryUtils.encodeHexWithLowerDigits(md.digest());
     }
 
     /**
-     * As of 4.1.0, realized by {@link DigestUtils#digestToLower(String, byte[])}.
+     * 使用指定算法计算字符串的摘要值（小写十六进制）。
      *
-     * @since 3.0.11
+     * @param algorithm 摘要算法名称（如 "SHA-256", "SHA-512" 等）
+     * @param raw       原始字符串
+     * @return 摘要值，使用小写字母和数字的十六进制表示
+     * @throws NoSuchAlgorithmException 如果指定的算法不可用
      */
     public static String digestToLower(@NotNull String algorithm, @NotNull String raw) throws NoSuchAlgorithmException {
         return digestToLower(algorithm, raw.getBytes());
     }
 
     /**
-     * @since 4.1.0
+     * 使用指定算法计算字节数组的摘要值（大写十六进制）。
+     *
+     * @param algorithm 摘要算法名称（如 "SHA-256", "SHA-512" 等）
+     * @param raw       原始字节数组
+     * @return 摘要值，使用大写字母和数字的十六进制表示
+     * @throws NoSuchAlgorithmException 如果指定的算法不可用
      */
-    public static String digestToUpper(@NotNull String algorithm, @NotNull byte[] raw) throws NoSuchAlgorithmException {
+    public static String digestToUpper(@NotNull String algorithm, byte @NotNull [] raw) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance(algorithm);
         md.update(raw);
         return BinaryUtils.encodeHexWithUpperDigits(md.digest());
     }
 
     /**
-     * As of 4.1.0, realized by {@link DigestUtils#digestToUpper(String, byte[])}.
+     * 使用指定算法计算字符串的摘要值（大写十六进制）。
      *
-     * @since 3.0.11
+     * @param algorithm 摘要算法名称（如 "SHA-256", "SHA-512" 等）
+     * @param raw       原始字符串
+     * @return 摘要值，使用大写字母和数字的十六进制表示
+     * @throws NoSuchAlgorithmException 如果指定的算法不可用
      */
     public static String digestToUpper(@NotNull String algorithm, @NotNull String raw) throws NoSuchAlgorithmException {
         return digestToUpper(algorithm, raw.getBytes());
     }
 
     /**
-     * @since 3.0.11
+     * 计算字符串的 SHA-512 摘要值（大写十六进制）。
+     *
+     * @param raw 原始字符串
+     * @return SHA-512 摘要值，使用大写字母和数字的十六进制表示
+     * @throws RuntimeException 如果 SHA-512 算法不可用
      */
     @NotNull
     public static String SHA512(@NotNull String raw) {
@@ -160,7 +159,11 @@ public class DigestUtils {
     }
 
     /**
-     * @since 3.0.11
+     * 计算字符串的 SHA-512 摘要值（小写十六进制）。
+     *
+     * @param raw 原始字符串
+     * @return SHA-512 摘要值，使用小写字母和数字的十六进制表示
+     * @throws RuntimeException 如果 SHA-512 算法不可用
      */
     @NotNull
     public static String sha512(@NotNull String raw) {
@@ -172,7 +175,11 @@ public class DigestUtils {
     }
 
     /**
-     * @since 2.8
+     * 计算字符串的 SHA-1 摘要值（大写十六进制）。
+     *
+     * @param raw 原始字符串
+     * @return SHA-1 摘要值，使用大写字母和数字的十六进制表示
+     * @throws RuntimeException 如果 SHA-1 算法不可用
      */
     @NotNull
     public static String SHA1(@NotNull String raw) {
@@ -184,7 +191,11 @@ public class DigestUtils {
     }
 
     /**
-     * @since 2.8
+     * 计算字符串的 SHA-1 摘要值（小写十六进制）。
+     *
+     * @param raw 原始字符串
+     * @return SHA-1 摘要值，使用小写字母和数字的十六进制表示
+     * @throws RuntimeException 如果 SHA-1 算法不可用
      */
     @NotNull
     public static String sha1(@NotNull String raw) {
@@ -196,10 +207,18 @@ public class DigestUtils {
     }
 
     /**
-     * @since 2.8
+     * 计算字符串的 HMAC-SHA1 摘要值（原始字节数组）。
+     * <p>
+     * 使用 UTF-8 编码处理输入字符串和密钥。
+     *
+     * @param raw 原始字符串
+     * @param key 密钥字符串
+     * @return HMAC-SHA1 摘要的原始字节数组
+     * @throws UnsupportedEncodingException 如果 UTF-8 编码不可用
+     * @throws NoSuchAlgorithmException     如果 HMAC-SHA1 算法不可用
+     * @throws InvalidKeyException          如果密钥无效
      */
-    @NotNull
-    private static byte[] compute_hmac_sha1(@NotNull String raw, @NotNull String key) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException {
+    private static byte @NotNull [] compute_hmac_sha1(@NotNull String raw, @NotNull String key) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException {
         String MAC_NAME = "HmacSHA1";
         String ENCODING = "UTF-8";
 
@@ -217,7 +236,12 @@ public class DigestUtils {
     }
 
     /**
-     * @since 2.8
+     * 计算字符串的 HMAC-SHA1 摘要值（Base64 编码）。
+     *
+     * @param raw 原始字符串
+     * @param key 密钥字符串
+     * @return HMAC-SHA1 摘要值，使用 Base64 编码
+     * @throws RuntimeException 如果计算过程中发生异常
      */
     @NotNull
     public static String hmac_sha1_base64(@NotNull String raw, @NotNull String key) {
@@ -231,7 +255,12 @@ public class DigestUtils {
     }
 
     /**
-     * @since 2.8
+     * 计算字符串的 HMAC-SHA1 摘要值（小写十六进制）。
+     *
+     * @param raw 原始字符串
+     * @param key 密钥字符串
+     * @return HMAC-SHA1 摘要值，使用小写字母和数字的十六进制表示
+     * @throws RuntimeException 如果计算过程中发生异常
      */
     @NotNull
     public static String hmac_sha1_hex(@NotNull String raw, @NotNull String key) {
@@ -245,7 +274,12 @@ public class DigestUtils {
     }
 
     /**
-     * @since 2.8
+     * 计算字符串的 HMAC-SHA1 摘要值（大写十六进制）。
+     *
+     * @param raw 原始字符串
+     * @param key 密钥字符串
+     * @return HMAC-SHA1 摘要值，使用大写字母和数字的十六进制表示
+     * @throws RuntimeException 如果计算过程中发生异常
      */
     public static @NotNull String HMAC_SHA1_HEX(@NotNull String raw, @NotNull String key) {
         byte[] bytes;
@@ -256,18 +290,4 @@ public class DigestUtils {
         }
         return BinaryUtils.encodeHexWithUpperDigits(bytes);
     }
-
-    //    /**
-    //     * @since 4.0.0 <a href="https://github.com/sinri/Keel/pull/22">Enhance MD5 Performance with FastThreadLocal
-    //     *         #22</a>
-    //     */
-    //    private static class MD5 {
-    //
-    //        private static final FastThreadLocal<MessageDigest> HOLDER = new FastThreadLocal<>() {
-    //            @Override
-    //            protected MessageDigest initialValue() throws Exception {
-    //                return MessageDigest.getInstance(DIGEST_ALGO_MD5);
-    //            }
-    //        };
-    //    }
 }

@@ -6,6 +6,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Base64;
 
+/**
+ * 二进制工具类。
+ *
+ * @since 5.0.0
+ */
 public class BinaryUtils {
     final static char[] HEX_DIGITS_LOWER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
     final static char[] HEX_DIGITS_UPPER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
@@ -25,112 +30,151 @@ public class BinaryUtils {
     }
 
     /**
-     * @param data an array of byte
-     * @return expression with hex using lower digits as string
-     * @since 1.11
+     * 将字节数组编码为十六进制字符串（使用小写字母）。
+     * <p>将每个字节转换为两位十六进制字符，使用小写字母（0-9, a-f）。
+     *
+     * @param data 待编码的字节数组
+     * @return 十六进制字符串（小写）
      */
-    public static String encodeHexWithLowerDigits(@NotNull final byte[] data) {
+    public static String encodeHexWithLowerDigits(final byte @NotNull [] data) {
         return encodeHexWithLowerDigits(Buffer.buffer(data));
     }
 
     /**
-     * @param buffer an instance of Buffer defined in Vertx
-     * @return expression with hex using lower digits as string
-     * @since 1.11
+     * 将 Vert.x Buffer 编码为十六进制字符串（使用小写字母）。
+     * <p>将 Buffer 中的所有字节转换为十六进制字符串，使用小写字母（0-9, a-f）。
+     *
+     * @param buffer Vert.x 的 Buffer 实例
+     * @return 十六进制字符串（小写）
      */
     public static @NotNull String encodeHexWithLowerDigits(@NotNull Buffer buffer) {
         return encodeHexWithLowerDigits(buffer, 0, buffer.length());
     }
 
     /**
-     * @param buffer an instance of Buffer defined in Vertx
-     * @param since  the start index
-     * @param length the length
-     * @return expression of the substring with hex using lower digits as string
-     * @since 1.11
+     * 将 Vert.x Buffer 的指定部分编码为十六进制字符串（使用小写字母）。
+     * <p>从指定起始位置开始，将指定长度的字节转换为十六进制字符串，使用小写字母（0-9, a-f）。
+     *
+     * @param buffer Vert.x 的 Buffer 实例
+     * @param since  起始索引位置
+     * @param length 要编码的字节长度
+     * @return 十六进制字符串（小写）
      */
     public static @NotNull String encodeHexWithLowerDigits(@NotNull Buffer buffer, int since, int length) {
         return encodeHexWithDigits(HEX_DIGITS_LOWER, buffer, since, length);
     }
 
     /**
-     * @param data an array of bytes
-     * @return expression with hex using upper digits as string
-     * @since 1.11
+     * 将字节数组编码为十六进制字符串（使用大写字母）。
+     * <p>将每个字节转换为两位十六进制字符，使用大写字母（0-9, A-F）。
+     *
+     * @param data 待编码的字节数组
+     * @return 十六进制字符串（大写）
      */
-    public static @NotNull String encodeHexWithUpperDigits(@NotNull final byte[] data) {
+    public static @NotNull String encodeHexWithUpperDigits(final byte @NotNull [] data) {
         return encodeHexWithUpperDigits(Buffer.buffer(data));
     }
 
     /**
-     * @param buffer an instance of Buffer defined in Vertx
-     * @return expression of the substring with hex using upper digits as string
-     * @since 1.11
+     * 将 Vert.x Buffer 编码为十六进制字符串（使用大写字母）。
+     * <p>将 Buffer 中的所有字节转换为十六进制字符串，使用大写字母（0-9, A-F）。
+     *
+     * @param buffer Vert.x 的 Buffer 实例
+     * @return 十六进制字符串（大写）
      */
     public static @NotNull String encodeHexWithUpperDigits(@NotNull Buffer buffer) {
         return encodeHexWithUpperDigits(buffer, 0, buffer.length());
     }
 
     /**
-     * @param buffer an instance of Buffer defined in Vertx
-     * @param since  the start index
-     * @param length the length
-     * @return expression of the substring with hex using upper digits as string
-     * @since 1.11
+     * 将 Vert.x Buffer 的指定部分编码为十六进制字符串（使用大写字母）。
+     * <p>从指定起始位置开始，将指定长度的字节转换为十六进制字符串，使用大写字母（0-9, A-F）。
+     *
+     * @param buffer Vert.x 的 Buffer 实例
+     * @param since  起始索引位置
+     * @param length 要编码的字节长度
+     * @return 十六进制字符串（大写）
      */
     public static @NotNull String encodeHexWithUpperDigits(@NotNull Buffer buffer, int since, int length) {
         return encodeHexWithDigits(HEX_DIGITS_UPPER, buffer, since, length);
     }
 
     /**
-     * @since 2.9.4
+     * 使用 Base64 解码字节数组。
+     * <p>将 Base64 编码的字节数组解码为原始字节数组。
+     *
+     * @param bytes Base64 编码的字节数组
+     * @return 解码后的字节数组
      */
-    public static @NotNull byte[] decodeWithBase64(@NotNull byte[] bytes) {
+    public static byte @NotNull [] decodeWithBase64(byte @NotNull [] bytes) {
         return Base64.getDecoder().decode(bytes);
     }
 
     /**
-     * @since 2.9.4
+     * 使用 Base64 编码字节数组。
+     * <p>将字节数组编码为 Base64 格式的字节数组。
+     *
+     * @param bytes 待编码的字节数组
+     * @return Base64 编码后的字节数组
      */
-    @NotNull
-    public static byte[] encodeWithBase64(@NotNull byte[] bytes) {
+    public static byte @NotNull [] encodeWithBase64(byte @NotNull [] bytes) {
         return Base64.getEncoder().encode(bytes);
     }
 
     /**
-     * @since 2.9.4
+     * 使用 Base64 编码字节数组并转换为字符串。
+     * <p>将字节数组编码为 Base64 格式的字符串。
+     *
+     * @param bytes 待编码的字节数组
+     * @return Base64 编码后的字符串
      */
     @NotNull
-    public static String encodeWithBase64ToString(@NotNull byte[] bytes) {
+    public static String encodeWithBase64ToString(byte @NotNull [] bytes) {
         return new String(encodeWithBase64(bytes));
     }
 
     /**
-     * @since 2.9.4
+     * 使用 Base32 编码字节数组。
+     * <p>将字节数组编码为 Base32 格式的字节数组。
+     *
+     * @param bytes 待编码的字节数组
+     * @return Base32 编码后的字节数组
      */
-    public static @NotNull byte[] encodeWithBase32(@NotNull byte[] bytes) {
+    public static byte @NotNull [] encodeWithBase32(byte @NotNull [] bytes) {
         return encodeWithBase32ToString(bytes).getBytes();
     }
 
     /**
-     * @since 2.9.4
+     * 使用 Base32 编码字节数组并转换为字符串。
+     * <p>将字节数组编码为 Base32 格式的字符串。
+     *
+     * @param bytes 待编码的字节数组
+     * @return Base32 编码后的字符串
      */
     @NotNull
-    public static String encodeWithBase32ToString(@NotNull byte[] bytes) {
+    public static String encodeWithBase32ToString(byte @NotNull [] bytes) {
         return Base32.encode(bytes);
     }
 
     /**
-     * @since 2.9.4
+     * 使用 Base32 解码字节数组。
+     * <p>将 Base32 编码的字节数组解码为原始字节数组。
+     *
+     * @param bytes Base32 编码的字节数组
+     * @return 解码后的字节数组
      */
-    public static @NotNull byte[] decodeWithBase32(@NotNull byte[] bytes) {
+    public static byte @NotNull [] decodeWithBase32(byte @NotNull [] bytes) {
         return Base32.decode(new String(bytes));
     }
 
     /**
-     * @since 2.9.4
+     * 使用 Base32 解码字节数组并转换为字符串。
+     * <p>将 Base32 编码的字节数组解码为原始字节数组，然后转换为字符串。
+     *
+     * @param bytes Base32 编码的字节数组
+     * @return 解码后的字符串
      */
-    public static @NotNull String decodeWithBase32ToString(@NotNull byte[] bytes) {
+    public static @NotNull String decodeWithBase32ToString(byte @NotNull [] bytes) {
         return new String(decodeWithBase32(bytes));
     }
 }

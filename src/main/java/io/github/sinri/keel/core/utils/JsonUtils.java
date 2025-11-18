@@ -9,17 +9,15 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+/**
+ * JSON工具类
+ *
+ * @since 5.0.0
+ */
 public class JsonUtils {
-    /**
-     * Private constructor to prevent instantiation.
-     */
     private JsonUtils() {
-        // Utility class, no instance needed
     }
 
-    /**
-     * @since 2.4
-     */
     @NotNull
     private static JsonArray getSortedJsonArray(@NotNull JsonArray array) {
         List<Object> list = new ArrayList<>();
@@ -28,17 +26,13 @@ public class JsonUtils {
         return new JsonArray(list);
     }
 
-    /**
-     * @since 2.4
-     */
+
     @NotNull
     public static String getJsonForArrayWhoseItemsSorted(@NotNull JsonArray array) {
         return getSortedJsonArray(array).toString();
     }
 
-    /**
-     * @since 2.4
-     */
+
     @NotNull
     private static JsonObject getSortedJsonObject(@NotNull JsonObject object) {
         JsonObject result = new JsonObject();
@@ -57,9 +51,7 @@ public class JsonUtils {
         return result;
     }
 
-    /**
-     * @since 2.4
-     */
+
     @NotNull
     public static String getJsonForObjectWhoseItemKeysSorted(@NotNull JsonObject object) {
         return getSortedJsonObject(object).toString();
@@ -113,9 +105,7 @@ public class JsonUtils {
         }
     }
 
-    /**
-     * @since 3.0.0
-     */
+
     @NotNull
     public static String renderJsonToStringBlock(@Nullable String name, @Nullable Object object) {
         if (object == null) {

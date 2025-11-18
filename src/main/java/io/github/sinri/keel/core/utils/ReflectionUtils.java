@@ -20,7 +20,8 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * @since 2.6
+ * 反射工具类
+ * @since 5.0.0
  */
 public class ReflectionUtils {
 
@@ -48,7 +49,6 @@ public class ReflectionUtils {
     /**
      * @param <T> class of target annotation
      * @return target annotation
-     * @since 1.13
      */
     @Nullable
     public static <T extends Annotation> T getAnnotationOfMethod(@NotNull Method method, @NotNull Class<T> classOfAnnotation,
@@ -60,9 +60,6 @@ public class ReflectionUtils {
         return annotation;
     }
 
-    /**
-     * @since 2.6
-     */
     @Nullable
     public static <T extends Annotation> T getAnnotationOfMethod(@NotNull Method method, @NotNull Class<T> classOfAnnotation) {
         return getAnnotationOfMethod(method, classOfAnnotation, null);
@@ -74,7 +71,6 @@ public class ReflectionUtils {
      * @throws NullPointerException – if the given annotation class is null
      *                              Note that any annotation returned by this method
      *                              is a declaration annotation.
-     * @since 2.8
      */
     @Nullable
     public static <T extends Annotation> T getAnnotationOfClass(@NotNull Class<?> anyClass,
@@ -82,10 +78,7 @@ public class ReflectionUtils {
         return anyClass.getAnnotation(classOfAnnotation);
     }
 
-    /**
-     * @since 3.1.8
-     *         For the repeatable annotations.
-     */
+
     @NotNull
     public static <T extends Annotation> T[] getAnnotationsOfClass(@NotNull Class<?> anyClass,
                                                                    @NotNull Class<T> classOfAnnotation) {
@@ -97,8 +90,6 @@ public class ReflectionUtils {
      * @param baseClass   seek any class implementations of this class
      * @param <R>         the target base class to seek its implementations
      * @return the sought classes in a set
-     * @since 3.0.6
-     * @since 3.2.12.1 rewrite
      */
     public static <R> Set<Class<? extends R>> seekClassDescendantsInPackage(
             @NotNull String packageName,
@@ -126,11 +117,6 @@ public class ReflectionUtils {
         return set;
     }
 
-    /**
-     * As of 4.1.5, use {@link ClassLoader#getResources(String)} to fix the bug that test scope is not supported.
-     *
-     * @since 3.2.11
-     */
     protected static <R> Set<Class<? extends R>> seekClassDescendantsInPackageForFileSystem(
             @NotNull String packageName,
             @NotNull Class<R> baseClass
@@ -191,9 +177,7 @@ public class ReflectionUtils {
         return descendantClasses;
     }
 
-    /**
-     * @since 3.2.11
-     */
+
     protected static <R> Set<Class<? extends R>> seekClassDescendantsInPackageForRunningJar(
             @NotNull String packageName,
             @NotNull Class<R> baseClass
@@ -219,9 +203,7 @@ public class ReflectionUtils {
         return descendantClasses;
     }
 
-    /**
-     * @since 3.2.11
-     */
+
     protected static <R> Set<Class<? extends R>> seekClassDescendantsInPackageForProvidedJar(
             @NotNull String jarInClassPath,
             @NotNull String packageName,
@@ -250,15 +232,12 @@ public class ReflectionUtils {
     /**
      * @return Whether the given `baseClass` is the base of the given
      *         `implementClass`.
-     * @since 3.0.10
      */
     public static boolean isClassAssignable(@NotNull Class<?> baseClass, @NotNull Class<?> implementClass) {
         return baseClass.isAssignableFrom(implementClass);
     }
 
-    /**
-     * @since 4.1.0
-     */
+
     public static boolean isVirtualThreadsAvailable() {
         return virtualThreadsAvailable;
     }

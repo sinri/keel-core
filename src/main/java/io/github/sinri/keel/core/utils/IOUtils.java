@@ -12,11 +12,16 @@ import org.jetbrains.annotations.NotNull;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * IO工具类
+ *
+ * @since 5.0.0
+ */
 public class IOUtils {
     private IOUtils() {
     }
 
-    @TechnicalPreview(since = "4.1.5")
+    @TechnicalPreview(since = "5.0.0")
     public static AsyncOutputReadStream toReadStream(@NotNull InputStream inputStream, @NotNull Handler<ReadStream<Buffer>> handler) {
         var readStream = AsyncOutputReadStream.create();
         readStream.pause();
@@ -26,7 +31,7 @@ public class IOUtils {
         return readStream;
     }
 
-    @TechnicalPreview(since = "4.1.5")
+    @TechnicalPreview(since = "5.0.0")
     public static AsyncInputWriteStream toWriteStream(@NotNull OutputStream outputStream, @NotNull Handler<WriteStream<Buffer>> handler) {
         var writeStream = AsyncInputWriteStream.create();
         handler.handle(writeStream);

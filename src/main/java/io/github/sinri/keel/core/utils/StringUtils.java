@@ -14,6 +14,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 字符串工具。
+ *
+ * @since 5.0.0
+ */
 public class StringUtils {
     private static final Map<String, String> HttpEntityEscapeDictionary = Map.of(
             "&", "&amp;",
@@ -35,8 +40,6 @@ public class StringUtils {
      * @param separator separator
      * @param <T>       the class of item in array
      * @return the joined string
-     * @since 1.11
-     * @since 3.0.8 toString → String.valueOf
      */
     @NotNull
     @Deprecated
@@ -57,9 +60,6 @@ public class StringUtils {
      * @param x         a list
      * @param separator separator
      * @return the joined string
-     * @since 2.0 List → Collection
-     * @since 3.0.7 Collection → Iterable
-     * @since 3.0.8 toString → String.valueOf
      */
     @NotNull
     @Deprecated
@@ -84,7 +84,6 @@ public class StringUtils {
      * @param buffer  an instance of Buffer defined in Vertx
      * @param rowSize how many bytes in one row
      * @return the matrix of hex as string
-     * @since 1.11
      */
     @NotNull
     public static String bufferToHexMatrix(@NotNull Buffer buffer, int rowSize) {
@@ -102,7 +101,6 @@ public class StringUtils {
     /**
      * Make `apple_pie` to `ApplePie` or `applePie`.
      *
-     * @since 3.0.12
      */
     @Nullable
     public static String fromUnderScoreCaseToCamelCase(@Nullable String underScoreCase, boolean firstCharLower) {
@@ -133,15 +131,11 @@ public class StringUtils {
     /**
      * Make `apple_pie` to `ApplePie`.
      *
-     * @since 2.7
      */
     public static String fromUnderScoreCaseToCamelCase(@Nullable String underScoreCase) {
         return fromUnderScoreCaseToCamelCase(underScoreCase, false);
     }
 
-    /**
-     * @since 2.7
-     */
     @Nullable
     public static String fromCamelCaseToUserScoreCase(@Nullable String camelCase) {
         if (camelCase == null) {
@@ -158,7 +152,7 @@ public class StringUtils {
         for (int i = 0; i < camelCase.length(); i++) {
             String current = camelCase.substring(i, i + 1);
             if (current.matches("[\\s_]")) continue;
-            if (part.length() == 0) {
+            if (part.isEmpty()) {
                 part.append(current.toLowerCase());
             } else {
                 if (current.matches("[A-Z]")) {
@@ -168,15 +162,13 @@ public class StringUtils {
                 part.append(current.toLowerCase());
             }
         }
-        if (part.length() > 0) {
+        if (!part.isEmpty()) {
             parts.add(part.toString());
         }
         return String.join("_", parts);
     }
 
-    /**
-     * @since 2.9
-     */
+
     @NotNull
     public static String buildStackChainText(@Nullable StackTraceElement[] stackTrace,
                                              @NotNull Set<String> ignorableStackPackageSet) {
@@ -185,6 +177,7 @@ public class StringUtils {
             String ignoringClassPackage = null;
             int ignoringCount = 0;
             for (StackTraceElement stackTranceItem : stackTrace) {
+                if (stackTranceItem == null) continue;
                 String className = stackTranceItem.getClassName();
                 String matchedClassPackage = null;
                 for (var cp : ignorableStackPackageSet) {
@@ -243,17 +236,11 @@ public class StringUtils {
         return sb.toString();
     }
 
-    /**
-     * @since 2.9
-     */
     @NotNull
     public static String buildStackChainText(@Nullable StackTraceElement[] stackTrace) {
         return buildStackChainText(stackTrace, Set.of());
     }
 
-    /**
-     * @since 2.9
-     */
     @NotNull
     public static String renderThrowableChain(@Nullable Throwable throwable, @NotNull Set<String> ignorableStackPackageSet) {
         if (throwable == null) return "";
@@ -283,57 +270,34 @@ public class StringUtils {
         return sb.toString();
     }
 
-    /**
-     * @since 2.9
-     */
     @NotNull
     public static String renderThrowableChain(@Nullable Throwable throwable) {
         return renderThrowableChain(throwable, LoggingStackSpecification.IgnorableCallStackPackage);
     }
 
-    /**
-     * @since 2.9.4
-     */
-    @NotNull
-    public static byte[] encodeWithBase64ToBytes(@NotNull String s) {
+    public static byte @NotNull [] encodeWithBase64ToBytes(@NotNull String s) {
         return BinaryUtils.encodeWithBase64(s.getBytes());
     }
 
-    /**
-     * @since 2.9.4
-     */
     @NotNull
     public static String encodeWithBase64(@NotNull String s) {
         return new String(encodeWithBase64ToBytes(s));
     }
 
-    /**
-     * @since 2.9.4
-     */
     @NotNull
     public static byte[] decodeWithBase64ToBytes(@NotNull String s) {
         return Base64.getDecoder().decode(s);
     }
 
-    /**
-     * @since 2.9.4
-     */
     @NotNull
     public static String encodeWithBase32(@NotNull String s) {
         return Base32.encode(s.getBytes());
     }
 
-    /**
-     * @since 2.9.4
-     */
-    @NotNull
-    public static byte[] decodeWithBase32ToBytes(@NotNull String s) {
+    public static byte @NotNull [] decodeWithBase32ToBytes(@NotNull String s) {
         return Base32.decode(s);
     }
 
-    /**
-     * @since 2.9.4
-     */
     @NotNull
     public static String decodeWithBase32(@NotNull String s) {
         return new String(decodeWithBase32ToBytes(s));
@@ -342,7 +306,6 @@ public class StringUtils {
     /**
      * @param flags compile flags, such as `Pattern.DOTALL`.
      * @param group such as 0 for the entire, n for the Nth component.
-     * @since 3.0.8
      */
     @NotNull
     public static List<String> regexFindAll(@NotNull String regex, int flags, @NotNull String text, int group) {
@@ -357,7 +320,6 @@ public class StringUtils {
 
     /**
      * @see <a href="https://www.freeformatter.com/html-entities.html">HTTP Entities</a>
-     * @since 3.0.11
      */
     public static String escapeForHttpEntity(String raw) {
         AtomicReference<String> x = new AtomicReference<>(raw);
@@ -366,8 +328,7 @@ public class StringUtils {
     }
 
     /**
-     * @since 3.2.14
-     * @since 3.2.15 PR from yhzdys
+     * @see <a href="https://github.com/sinri/Keel/pull/21">PR from yhzdys</a>
      */
     public static String encodeToNyaCode(@NotNull String raw) {
         String encoded = URLEncoder.encode(raw, StandardCharsets.UTF_8);
@@ -381,8 +342,7 @@ public class StringUtils {
     }
 
     /**
-     * @since 3.2.14
-     * @since 3.2.15 PR from yhzdys
+     * @see <a href="https://github.com/sinri/Keel/pull/21">PR from yhzdys</a>
      */
     public static String decodeFromNyaCode(@NotNull String code) {
         int idx = 0;
@@ -399,7 +359,6 @@ public class StringUtils {
      * @param str       the string to truncate
      * @param maxLength the maximum length of the string
      * @return the truncated string
-     * @since 4.0.12
      */
     @NotNull
     public static String truncateWithEllipsis(@Nullable String str, int maxLength) {
@@ -413,7 +372,6 @@ public class StringUtils {
      *
      * @param str the string to check
      * @return true if the string is null, empty, or contains only whitespace
-     * @since 4.0.12
      */
     public static boolean isNullOrBlank(@Nullable String str) {
         return str == null || str.trim().isEmpty();
@@ -424,7 +382,6 @@ public class StringUtils {
      *
      * @param str the string to reverse
      * @return the reversed string
-     * @since 4.0.12
      */
     @NotNull
     public static String reverse(@Nullable String str) {
@@ -438,7 +395,6 @@ public class StringUtils {
      * @param str    the string to search in
      * @param subStr the substring to search for
      * @return the number of occurrences
-     * @since 4.0.12
      */
     public static int countOccurrences(@Nullable String str, @Nullable String subStr) {
         if (str == null || subStr == null || subStr.isEmpty()) return 0;
@@ -450,7 +406,6 @@ public class StringUtils {
      *
      * @param str the string to remove whitespace from
      * @return the string with all whitespace removed
-     * @since 4.0.12
      */
     @NotNull
     public static String removeWhitespace(@Nullable String str) {
@@ -463,7 +418,6 @@ public class StringUtils {
      *
      * @param str the string to check
      * @return true if the string contains only digits
-     * @since 4.0.12
      */
     public static boolean isNumericAsIntegralNumber(@Nullable String str) {
         if (str == null || str.isEmpty()) return false;
@@ -482,7 +436,6 @@ public class StringUtils {
      *
      * @param str the string to check
      * @return true if the string represents a valid number
-     * @since 4.0.12
      */
     public static boolean isNumericAsRealNumber(@Nullable String str) {
         if (str == null || str.isEmpty()) return false;
@@ -494,7 +447,6 @@ public class StringUtils {
      *
      * @param str the string to capitalize
      * @return the capitalized string
-     * @since 4.0.12
      */
     @NotNull
     public static String capitalizeWords(@Nullable String str) {
@@ -519,7 +471,6 @@ public class StringUtils {
      *
      * @param str the string to clean
      * @return the cleaned string
-     * @since 4.0.12
      */
     @NotNull
     public static String removeNonAlphanumeric(@Nullable String str) {
@@ -532,7 +483,6 @@ public class StringUtils {
      *
      * @param email the email address to validate
      * @return true if the email address is valid
-     * @since 4.0.12
      */
     public static boolean isValidEmail(@Nullable String email) {
         if (email == null) return false;
@@ -546,7 +496,6 @@ public class StringUtils {
      *
      * @param length the length of the random string
      * @return the random string
-     * @since 4.0.12
      */
     @NotNull
     public static String generateRandomString(int length) {
@@ -559,7 +508,6 @@ public class StringUtils {
      * @param length  the length of the random string
      * @param charSet the character set to use for generating the random string
      * @return the random string
-     * @since 4.0.12
      */
     @NotNull
     public static String generateRandomString(int length, @NotNull String charSet) {

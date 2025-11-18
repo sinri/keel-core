@@ -14,8 +14,8 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * As of 4.1.1, fix the static method to use the instance method.
- * @since 3.0.1
+ * 随机工具类。
+ * @since 5.0.0
  */
 public class RandomUtils {
     private static final AtomicReference<VertxContextPRNG> prngRef = new AtomicReference<>();
@@ -156,7 +156,6 @@ public class RandomUtils {
      *
      * @return 伪随机数生成器实例，永不为 null
      * @throws IllegalStateException 如果无法创建伪随机数生成器
-     * @since 3.2.11 build when first get
      */
     @NotNull
     public static VertxContextPRNG getPRNG() {

@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.utils;
 
-import io.github.sinri.keel.base.KeelInstance;
 import io.github.sinri.keel.core.utils.encryption.base32.Base32;
+import io.github.sinri.keel.logger.api.LoggingStackSpecification;
 import io.vertx.core.buffer.Buffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -288,7 +288,7 @@ public class StringUtils {
      */
     @NotNull
     public static String renderThrowableChain(@Nullable Throwable throwable) {
-        return renderThrowableChain(throwable, KeelInstance.IgnorableCallStackPackage);
+        return renderThrowableChain(throwable, LoggingStackSpecification.IgnorableCallStackPackage);
     }
 
     /**

@@ -3,8 +3,6 @@ package io.github.sinri.keel.core.cache;
 import io.vertx.core.Future;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -12,95 +10,65 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * An interface representing an asynchronous cache system that allows storing,
- * retrieving, and managing key-value pairs with support for expiration, fallback logic,
- * and cleanup mechanisms. This interface is designed to be implemented by classes
- * utilizing various underlying storage mechanisms.
+ * 基于 {@link KeelAsyncCacheAlike} 提供异步方法的缓存接口.
  *
- * @param <K> The type of keys maintained by this cache.
- * @param <V> The type of mapped values.
- * @since 1.14
+ * @param <K> 键的类型
+ * @param <V> 值的类型
+ * @since 5.0.0
  */
 public interface KeelAsyncCacheInterface<K, V> extends KeelAsyncCacheAlike<K, V> {
 
     /**
-     * Save an item (as key and value pair) into cache, keep it available for a
-     * certain time.
+     * 根据给定的键值对存入一条指定时长内有效的缓存记录。
      *
-     * @param key           key
-     * @param value         value
-     * @param lifeInSeconds The lifetime of the cache item, in seconds.
+     * @param key           键
+     * @param value         值
+     * @param lifeInSeconds 存活周期，以秒计
      */
     Future<Void> save(@NotNull K key, V value, long lifeInSeconds);
 
     /**
-     * Read an available cached item with key;
-     * if not found, try to generate one with key using `fallbackValueGenerator` to
-     * save into cache, then return it in the future;
-     * if failed to generate, failed future instead.
+     * 根据给定的键，尝试获取值；如果无法找到有效的值，则利用给定的逻辑生成一个新值，以给定存活周期存入；返回找到的值或存入的值。
      *
-     * @param key           key
-     * @param generator     function to generate a value for given key, to be saved
-     *                      into cache and return when no cached item found
-     * @param lifeInSeconds cache available in this period, in seconds
-     * @return async: the valued read from cache
-     * @since 2.5
+     * @param key           键
+     * @param generator     新建值的逻辑
+     * @param lifeInSeconds 存活周期，以秒计
+     * @return 异步返回的值
      */
     Future<V> read(@NotNull K key, Function<K, Future<V>> generator, long lifeInSeconds);
 
     /**
-     * Remove the cached item with key.
+     * 从缓存中移除指定键值对。
      *
-     * @param key key
+     * @param key 键
      */
     Future<Void> remove(@NotNull K key);
 
     /**
-     * Remove all the cached items.
+     * 从缓存中移除所有键值对。
      */
     Future<Void> removeAll();
 
     /**
-     * clean up the entries that is not alive (expired, etc.)
+     * 清理缓存中的无效键值对。
      */
     Future<Void> cleanUp();
 
     /**
-     * @return ConcurrentMap K → V alive value only
-     * @since 1.14
-     */
-    @Deprecated(since = "4.1.5", forRemoval = true)
-    default Future<Map<K, V>> getSnapshotMap() {
-        Map<K, V> map = new HashMap<>();
-        return getCachedKeySet()
-                .compose(ks -> {
-                    return Keel.parallelForAllComplete(ks, k -> {
-                        return read(k)
-                                .compose(v -> {
-                                    map.put(k, v);
-                                    return Future.succeededFuture();
-                                }, throwable -> {
-                                    return Future.succeededFuture();
-                                });
-                    });
-                })
-                .compose(v -> {
-                    return Future.succeededFuture(map);
-                });
-    }
-
-    /**
-     * Retrieves a set of all currently cached keys.
+     * 获取所有缓存中的有效的键的集合。
      *
-     * @return A future representing the set of all keys currently stored in the cache.
+     * @return 有效的键的集合
      */
     Future<Set<K>> getCachedKeySet();
 
     /**
-     * Start an endless routine for cleaning up.
-     * Use it manually if needed.
+     * 启动一个不会停止清理循环，实现定期清理缓存中的无效内容。
+     * <p>
+     * 本方法不应自动启动，需要手动调用本方法来开启。
+     * <p>
+     * 如果这个缓存实例的生命周期是有限的（即会先于进程或所在 verticle 结束）那么，那么不能使用此方法，需要自行实现。
      *
-     * @since 3.0.4
+     * @param sleepTime 清理周期，以毫秒计
      */
     default void startEndlessCleanUp(long sleepTime) {
         Keel.asyncCallEndlessly(() -> cleanUp().compose(cleaned -> Keel.asyncSleep(sleepTime)));

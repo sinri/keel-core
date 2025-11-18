@@ -6,46 +6,43 @@ import org.jetbrains.annotations.Nullable;
 
 
 /**
- * An interface for an asynchronous cache mechanism that supports non-blocking
- * operations
- * and provides functionalities to handle basic read and write operations for
- * cached key-value pairs.
+ * 提供异步步读写方法的缓存接口。
+ * <p>
+ * 缓存的键不可为空。
+ * 一个有效缓存记录的值不可为空。
  *
- * @param <K> the type of key
- * @param <V> the type of value
- * @since 4.1.5
+ * @param <K> 缓存的键的类型
+ * @param <V> 缓存的值的类型
+ * @since 5.0.0
  */
 public interface KeelAsyncCacheAlike<K, V> {
     /**
-     * Save the item to cache asynchronously.
+     * 根据给定的键值对异步存入一条缓存记录。
      * <p>
-     * If the value is null, the key will be removed from the cache.
+     * 如果值为null，将移除键对应的缓存记录，因为null不是有效的缓存值。
      *
-     * @param k the key
-     * @param v the value
-     * @return the future of save operation
+     * @param k 键
+     * @param v 值
+     * @return 异步执行结果
      */
     @NotNull
     Future<Void> save(@NotNull K k, @Nullable V v);
 
     /**
-     * Read an available cached item with the provided key asynchronously
-     * and provide a fallback value when not cache.
+     * 根据给定的键，尝试异步获取缓存的值；如果无法找到有效的缓存值，则返回给定的默认值。
      *
-     * @param k the key
-     * @param v the fallback value, nullable
-     * @return the future of read operation, holding a non-null value when succeeded
+     * @param k 键
+     * @param v 默认值，用于无法找到有效缓存时
+     * @return 异步返回的给定键对应的有效缓存或给定的默认值
      */
     @NotNull
     Future<V> read(@NotNull K k, @Nullable V v);
 
     /**
-     * Read an available cached item with the provided key asynchronously
+     * 根据给定的键，尝试异步获取缓存的值，如果无法找到有效的缓存值，则抛出 {@link NotCached} 异常。
      *
-     * @param k the key
-     * @return the future of read operation, holding a non-null value when
-     *         succeeded, otherwise failed with
-     *         {@link NotCached}.
+     * @param k 键
+     * @return 异步返回的给定键对应的有效缓存，或失败时给出{@link NotCached}异常。
      */
     @NotNull
     default Future<V> read(@NotNull K k) {

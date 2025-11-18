@@ -4,6 +4,7 @@ import io.github.sinri.keel.core.servant.intravenous.KeelIntravenous;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -13,38 +14,35 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * @since 4.0.11
+ * 数据流切分处理器的字符串切片实现。
+ * <p>
+ * 本类主要面向 Server Sent Events 协议下的数据流切分，数据流为字符流，可通过两个换行符({@code \n\n})切分为字符串片段分别处理。
+ *
+ * @since 5.0.0
  */
 public class IntravenouslyCutterOnString implements IntravenouslyCutter<String> {
     private final AtomicReference<Buffer> buffer = new AtomicReference<>(Buffer.buffer());
     private final KeelIntravenous<String> intravenous;
     private final AtomicBoolean readStopRef = new AtomicBoolean(false);
     private final KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor;
-    /**
-     * A reference to preserve the cause to stop, if exists.
-     *
-     * @since 4.0.12
-     */
     private final AtomicReference<Throwable> stopCause = new AtomicReference<>();
     private Long timeoutTimer;
 
     /**
-     * Constructor to initialize the IntravenouslyCutterOnString instance.
-     * As of 4.0.12 add timeout function.
+     * 数据流切分处理器的字符串切片实现构造函数，带超时机制。
      *
-     * @param stringSingleDropProcessor The processor for handling individual strings.
-     * @param timeout                   the timeout in millisecond, enabled when its value is greater than zero.
+     * @param stringSingleDropProcessor 切分出的字符串文本片段处理器，由内置的{@link KeelIntravenous}实例调用
+     * @param deploymentOptions         部署配置，用于部署内置的{@link KeelIntravenous}实例
+     * @param timeout                   以毫秒计的数据流接收处理总时间限制
      */
     public IntravenouslyCutterOnString(
-            KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor,
-            long timeout,
-            DeploymentOptions deploymentOptions
+            @NotNull KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor,
+            @NotNull DeploymentOptions deploymentOptions,
+            long timeout
     ) {
         this.stringSingleDropProcessor = stringSingleDropProcessor;
         intravenous = KeelIntravenous.instant(getSingleDropProcessor());
         intravenous.deployMe(deploymentOptions);
-
-        // as of 4.0.12 add timeout support
         if (timeout > 0) {
             timeoutTimer = Keel.getVertx().setTimer(timeout, timer -> {
                 this.timeoutTimer = timer;
@@ -54,35 +52,29 @@ public class IntravenouslyCutterOnString implements IntravenouslyCutter<String> 
     }
 
     /**
-     * Constructor to initialize the IntravenouslyCutterOnString instance without a timeout.
-     * This constructor internally calls the main constructor with a timeout value of 0,
-     * effectively disabling the timeout functionality.
+     * 数据流切分处理器的字符串切片实现构造函数，不带超时机制。
      *
-     * @param stringSingleDropProcessor The processor for handling individual strings.
+     * @param stringSingleDropProcessor 切分出的字符串文本片段处理器，由内置的{@link KeelIntravenous}实例调用
+     * @param deploymentOptions         部署配置，用于部署内置的{@link KeelIntravenous}实例
      */
-    public IntravenouslyCutterOnString(KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor, DeploymentOptions deploymentOptions) {
-        this(stringSingleDropProcessor, 0, deploymentOptions);
+    public IntravenouslyCutterOnString(
+            KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor,
+            DeploymentOptions deploymentOptions
+    ) {
+        this(stringSingleDropProcessor, deploymentOptions, 0);
     }
 
-    /**
-     * Retrieves the single drop processor for strings.
-     *
-     * @return The single drop processor for strings.
-     */
+
     @Override
     public KeelIntravenous.SingleDropProcessor<String> getSingleDropProcessor() {
         return stringSingleDropProcessor;
     }
 
-    /**
-     * Accepts data from the stream and processes it.
-     *
-     * @param s The Buffer data read from the stream.
-     */
+
     @Override
-    public void acceptFromStream(Buffer s) {
-        synchronized (buffer) {
-            buffer.get().appendBuffer(s);
+    public void acceptFromStream(@NotNull Buffer buffer) {
+        synchronized (this.buffer) {
+            this.buffer.get().appendBuffer(buffer);
 
             // try to cut!
             while (true) {
@@ -109,9 +101,7 @@ public class IntravenouslyCutterOnString implements IntravenouslyCutter<String> 
         return s1;
     }
 
-    /**
-     * Stops reading from the stream and processes any remaining data in the buffer.
-     */
+
     @Override
     public void stopHere(Throwable throwable) {
         if (!readStopRef.get()) {
@@ -137,12 +127,7 @@ public class IntravenouslyCutterOnString implements IntravenouslyCutter<String> 
         }
     }
 
-    /**
-     * Waits for all data processing to complete.
-     *
-     * @return A Future indicating that all data processing is complete; if stop cause declared, it would be put into
-     *         the failure future to return.
-     */
+
     @Override
     public Future<Void> waitForAllHandled() {
         return Keel.asyncCallRepeatedly(repeatedlyCallTask -> {

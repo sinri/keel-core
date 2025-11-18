@@ -6,6 +6,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Set;
 import java.util.function.Function;
 
+/**
+ * 伪同步缓存实现。
+ * <p>
+ * 本类实现不会缓存任何记录，每次读取时都不会命中缓存记录。
+ *
+ * @param <K> 键的类型
+ * @param <V> 值的类型
+ * @since 5.0.0
+ */
 public class KeelCacheDummy<K, V> implements KeelCacheInterface<K, V> {
 
     @Override

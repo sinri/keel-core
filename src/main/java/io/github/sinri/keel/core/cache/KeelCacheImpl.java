@@ -13,9 +13,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
 
 /**
- * An implementation of KeelCacheInterface, using ConcurrentHashMap.
+ * 默认的同步缓存实现
  *
- * @since 2.5
+ * @since 5.0.0
  */
 class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
     private final ConcurrentMap<K, ValueWrapper<V>> map;
@@ -140,9 +140,6 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
         }
     }
 
-    /**
-     * @since 4.1.5
-     */
     @NotNull
     @Override
     public Set<K> getCachedKeySet() {

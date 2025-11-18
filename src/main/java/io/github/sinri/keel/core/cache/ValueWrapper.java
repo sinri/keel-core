@@ -10,11 +10,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * A wrapper class that holds a value with a limited lifetime.
  * The value is stored using a SoftReference to allow garbage collection when memory is low.
  *
- * @param <P> The type of value to be wrapped
- * @since 2.5 moved from inner class to here
- * @since 3.2.15 value use SoftReference
+ * @since 5.0.0
  */
-public class ValueWrapper<P> {
+class ValueWrapper<P> {
     private final SoftReference<P> value;
     private final long death;
     private final long birth;
@@ -72,7 +70,6 @@ public class ValueWrapper<P> {
 
     /**
      * @return the value read
-     * @since 4.0.12
      */
     private P readWithReadLock() {
         lock.readLock().lock();
@@ -88,7 +85,6 @@ public class ValueWrapper<P> {
      * checked as not true.
      * This method acquires a write lock and should not be called while holding a read lock.
      *
-     * @since 4.0.12
      */
     private void clearWithWriteLock() {
         lock.writeLock().lock();
@@ -131,7 +127,6 @@ public class ValueWrapper<P> {
      * A value is not available if it is outside its lifetime period or has been garbage collected.
      *
      * @return true if the value is not available, false otherwise
-     * @since 4.0.2
      */
     public boolean isNotAvailable() {
         return !isAvailable();

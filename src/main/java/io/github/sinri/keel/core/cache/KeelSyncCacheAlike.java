@@ -5,43 +5,42 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * An interface for a synchronous cache mechanism that supports synchronous operations
- * and provides functionalities to handle basic read and write operations for cached key-value pairs.
+ * 提供同步读写方法的缓存接口。
+ * <p>
+ * 缓存的键不可为空。
+ * 一个有效缓存记录的值不可为空。
  *
- * @param <K> the type of key
- * @param <V> the type of value
- * @since 4.1.5
+ * @param <K> 缓存的键的类型
+ * @param <V> 缓存的值的类型
+ * @since 5.0.0
  */
 public interface KeelSyncCacheAlike<K, V> {
     /**
-     * Save the item to the cache bound to the provided key.
+     * 根据给定的键值对存入一条缓存记录。
      * <p>
-     * If the value is null, the key will be removed from the cache,
-     * as null is not a valid cached value.
+     * 如果值为null，将移除键对应的缓存记录，因为null不是有效的缓存值。
      *
-     * @param key   the key
-     * @param value the value
+     * @param key   键
+     * @param value 值
      */
     void save(@NotNull K key, @Nullable V value);
 
     /**
-     * Read an available cached item with the provided key from the cache
-     * or return the provided `fallbackValue` when not found.
+     * 根据给定的键，尝试获取缓存的值；如果无法找到有效的缓存值，则返回给定的默认值。
      *
-     * @param key           the provided key
-     * @param fallbackValue the default value when the key is not mapped with a non-null cached value.
-     * @return the value of the found available cached item,
-     *         or the provided `fallbackValue` when not found, which might be null.
+     * @param key           键
+     * @param fallbackValue 默认值，用于无法找到有效缓存时
+     * @return 给定键对应的有效缓存，或给定的默认值
      */
     @Nullable
     V read(@NotNull K key, @Nullable V fallbackValue);
 
     /**
-     * Read an available cached item with the provided key from the cache, or throw {@link NotCached} exception.
+     * 根据给定的键，尝试获取缓存的值，如果无法找到有效的缓存值，则抛出 {@link NotCached} 异常。
      *
-     * @param key the key
-     * @return the value of found available cached item
-     * @throws NotCached when the key is not mapped with a non-null cached value.
+     * @param key 键
+     * @return 给定键对应的有效缓存
+     * @throws NotCached 无法找到有效缓存时
      */
     @NotNull
     default V read(@NotNull K key) throws NotCached {

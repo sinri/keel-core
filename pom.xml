@@ -192,13 +192,13 @@
         <dependency>
             <groupId>io.github.sinri</groupId>
             <artifactId>keel-test</artifactId>
-            <version>5.0.0-rc.2</version>
+            <version>5.0.0-rc.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.github.sinri</groupId>
             <artifactId>keel-base</artifactId>
-            <version>5.0.0-SNAPSHOT</version>
+            <version>5.0.0-rc.8</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
@@ -221,21 +221,9 @@
             <version>${commonmarkVersion}</version>
         </dependency>
         <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-codegen</artifactId>
-            <version>${vertxVersion}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core</artifactId>
             <version>${oshiCoreVersion}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.openjdk.jol/jol-core -->
-        <!--        <dependency>-->
-        <!--            <groupId>org.openjdk.jol</groupId>-->
-        <!--            <artifactId>jol-core</artifactId>-->
-        <!--            <version>${jolCoreVersion}</version>-->
-        <!--        </dependency>-->
     </dependencies>
 </project>

@@ -10,54 +10,62 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
- * An interface for a cache mechanism that supports synchronous operations
- * and provides functionalities to manage cached key-value pairs.
+ * 基于 {@link KeelSyncCacheAlike} 提供同步方法的缓存接口.
  *
- * @param <K> class for key
- * @param <V> class for value
- * @since 1.9
+ * @param <K> 键的类型
+ * @param <V> 值的类型
+ * @since 5.0.0
  */
 public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
     /**
-     * @param <K> class for key
-     * @param <V> class for value
-     * @return A new instance of KeelCacheInterface created.
-     * @since 1.9 Use CaffeineCacheKit as implementation by default.
-     * @since 2.5 changed to use KeelCacheAlef
+     * 获取一个默认实现实例
+     *
+     * @param <K> 键的类型
+     * @param <V> 值的类型
+     * @return 本接口的默认实现实例
      */
     static <K, V> KeelCacheInterface<K, V> createDefaultInstance() {
         return new KeelCacheImpl<>();
     }
 
     /**
-     * @since 2.6
+     * 获取一个伪同步缓存实现实例，该实例不会缓存任何记录。
+     *
+     * @param <K> 键的类型
+     * @param <V> 值的类型
+     * @return 本接口的伪实现实例
      */
     static <K, V> KeelCacheInterface<K, V> getDummyInstance() {
         return new KeelCacheDummy<>();
     }
 
     /**
-     * @since 2.8
+     * @return 默认的缓存记录存活周期，以秒计。
      */
     long getDefaultLifeInSeconds();
 
     /**
-     * @since 2.8
+     * 设置默认的缓存记录存活周期，以秒计。
+     *
+     * @param lifeInSeconds 默认的缓存记录存活周期，以秒计
+     * @return 本接口实例
      */
     KeelCacheInterface<K, V> setDefaultLifeInSeconds(long lifeInSeconds);
 
     /**
-     * Save an item (as key and value pair) into cache, keep it available for a
-     * certain time.
+     * 根据给定的键值对存入一条指定时长内有效的缓存记录。
      *
-     * @param key           key
-     * @param value         value
-     * @param lifeInSeconds The lifetime of the cache item, in seconds.
+     * @param key           键
+     * @param value         值
+     * @param lifeInSeconds 本条缓存记录的存活周期，以秒计
      */
     void save(@NotNull K key, V value, long lifeInSeconds);
 
     /**
-     * @since 2.8
+     * 根据给定的键值对存入一条默认时长内有效的缓存记录。
+     *
+     * @param key   键
+     * @param value 值
      */
     @Override
     default void save(@NotNull K key, @Nullable V value) {
@@ -66,71 +74,59 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
 
 
     /**
-     * Computes a value for the given key if it is not already present in the cache.
-     * If the key is already associated with a value, the existing value is
-     * returned.
-     * Otherwise, the provided computation function is used to compute the value,
-     * associate it with the key, and return the computed value.
+     * 根据给定的键，尝试获取值；如果无法找到有效的值，则利用给定的逻辑生成一个新值，以默认存活周期存入；返回找到的值或存入的值。
      *
-     * @param key         the key whose associated value is to be returned or
-     *                    computed
-     * @param computation a function to compute a value for the key if it is not
-     *                    already present
-     * @return the existing or newly computed value associated with the key
-     * @since 4.1.5
+     * @param key         键
+     * @param computation 新值生成逻辑
+     * @return 找到的值或新建而存入的值
      */
     default V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation) {
         return computeIfAbsent(key, computation, getDefaultLifeInSeconds());
     }
 
     /**
-     * Computes a value for the given key if it is not already present in the cache.
-     * If the key is already associated with a value, the existing value is returned.
-     * Otherwise, the provided computation function is used to compute a value,
-     * associate it with the key, and return the computed value. The computed value
-     * will be stored with the specified lifetime in seconds.
+     * 根据给定的键，尝试获取值；如果无法找到有效的值，则利用给定的逻辑生成一个新值，以给定存活周期存入；返回找到的值或存入的值。
      *
-     * @param key           the key whose associated value is to be returned or computed.
-     *                      This key must not be null.
-     * @param computation   a function to compute a value for the key if it is not
-     *                      already present. This function must not be null.
-     * @param lifeInSeconds the lifetime in seconds for the computed value to remain
-     *                      in the cache, after which it will expire.
-     * @return the existing or newly computed value associated with the key.
-     * @since 4.1.5
+     * @param key           键
+     * @param computation   新值生成逻辑
+     * @param lifeInSeconds 存活周期，以秒计
+     * @return 找到的值或新建而存入的值
      */
     V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation, long lifeInSeconds);
 
     /**
-     * Remove the cached item with the key.
+     * 从缓存中移除一个记录。
      *
-     * @param key key
+     * @param key 键
      */
     void remove(@NotNull K key);
 
     /**
-     * Remove all the cached items.
+     * 从缓存中移除所有记录。
      */
     void removeAll();
 
     /**
-     * clean up the entries that is not alive (expired, etc.)
+     * 从缓存中清理掉所有无效记录（值为空、过期等情况）。
      */
     void cleanUp();
 
     /**
-     * Retrieves the set of keys currently stored in the cache.
+     * 获取所有缓存中的有效的键的集合。
      *
-     * @return A non-null set containing all cached keys.
+     * @return 有效的键的集合
      */
     @NotNull
     Set<K> getCachedKeySet();
 
     /**
-     * Start an endless process for cleaning up.
-     * Use it manually if needed.
+     * 启动一个不会停止清理循环，实现定期清理缓存中的无效内容。
+     * <p>
+     * 本方法不应自动启动，需要手动调用本方法来开启。
+     * <p>
+     * 如果这个缓存实例的生命周期是有限的（即会先于进程或所在 verticle 结束）那么，那么不能使用此方法，需要自行实现。
      *
-     * @since 3.0.4
+     * @param sleepTime 清理周期，以毫秒计
      */
     default void startEndlessCleanUp(long sleepTime) {
         Keel.asyncCallEndlessly(() -> {

@@ -1,26 +1,25 @@
 package io.github.sinri.keel.core.integration.email.smtp;
 
-import io.github.sinri.keel.base.configuration.KeelConfigElement;
+import io.github.sinri.keel.base.configuration.ConfigElement;
 import io.vertx.ext.mail.MailConfig;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 
 /**
  * @since 4.1.0
  */
-public class KeelSmtpConfigElement extends KeelConfigElement {
+public class KeelSmtpConfigElement extends ConfigElement {
     public KeelSmtpConfigElement(@NotNull String name) {
         super(name);
     }
 
-    public KeelSmtpConfigElement(@NotNull KeelConfigElement another) {
+    public KeelSmtpConfigElement(@NotNull ConfigElement another) {
         super(another);
     }
 
     public MailConfig toMailConfig() {
-        // var smtpConfiguration = Keel.getConfiguration().extract("email", "smtp", smtpName);
-        // Objects.requireNonNull(smtpConfiguration);
-
         var mailConfig = new MailConfig();
         mailConfig.setHostname(getHostname());
         mailConfig.setPort(getPort());
@@ -32,22 +31,22 @@ public class KeelSmtpConfigElement extends KeelConfigElement {
     }
 
     public String getHostname() {
-        return readString("hostname", null);
+        return readString(List.of("hostname"), null);
     }
 
     public Integer getPort() {
-        return readInteger("port", 25);
+        return readInteger(List.of("port"), 25);
     }
 
     public String getUsername() {
-        return readString("username", null);
+        return readString(List.of("username"), null);
     }
 
     public String getPassword() {
-        return readString("password", null);
+        return readString(List.of("password"), null);
     }
 
     public boolean isSSL() {
-        return readBoolean("ssl", false);
+        return readBoolean(List.of("ssl"), false);
     }
 }

@@ -1,66 +1,120 @@
 package io.github.sinri.keel.core.cutter;
 
 import io.github.sinri.keel.core.servant.intravenous.KeelIntravenous;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.ThreadingModel;
 import io.vertx.core.buffer.Buffer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 /**
  * 数据流切分处理器。
  * <p>
  * 基本使用：<br>
- * 调用{@link IntravenouslyCutter#acceptFromStream(Buffer)}方法从流接收数据。<br>
- * 当流结束时，调用{@link IntravenouslyCutter#stopHere()}方法通知切分器停止接收数据，
- * 并调用{@link IntravenouslyCutter#waitForAllHandled()}等待流切片处理结束。
+ * 1. 调用{@link IntravenouslyCutter#acceptFromStream(Buffer)}方法从流接收数据。<br>
+ * 2. 当流结束时，调用{@link IntravenouslyCutter#stopHere()}方法或{@link IntravenouslyCutter#stopHere(Throwable)}通知切分器停止接收数据；<br>
+ * 3. 调用{@link IntravenouslyCutter#waitForAllHandled()}等待流切片处理结束。
  *
  * @param <T> 组成可处理的流的实体类型
  * @since 5.0.0
  */
-public interface IntravenouslyCutter<T> {
-    /**
-     * 针对从流中切分出的一部分数据转化为对应实体的一个实例的处理器。
-     *
-     * @return 单个目标实体处理器
-     */
-    KeelIntravenous.SingleDropProcessor<T> getSingleDropProcessor();
+public abstract class IntravenouslyCutter<T> {
+    private final AtomicReference<Buffer> bufferRef = new AtomicReference<>(Buffer.buffer());
+    private final KeelIntravenous<T> intravenous;
+    private final AtomicBoolean readStopRef = new AtomicBoolean(false);
+    private final AtomicReference<Throwable> stopCause = new AtomicReference<>();
+    private Long timeoutTimer;
 
-    /**
-     * 从流接收一部分数据。
-     *
-     * @param buffer 从流中获取到的缓冲存储下来的数据块
-     */
-    void acceptFromStream(@NotNull Buffer buffer);
-
-    /**
-     * 当数据流到终点时，调用本方法通知切分处理器停止接收流数据并处理完毕已收到的数据块。
-     * <p>
-     * 调用本方法也意味着读取流本身没有出现任何异常。
-     */
-    default void stopHere() {
-        stopHere(null);
-    }
-
-    /**
-     * 当数据流到终点或遇到异常时，调用本方法通知切分处理器停止接收流数据并处理完毕已收到的数据块。
-     *
-     * @param throwable 使数据流切分处理器停止工作的异常
-     */
-    void stopHere(@Nullable Throwable throwable);
-
-    /**
-     * 等待所有接收到的数据流内容被处理完毕。
-     *
-     * @return 异步返回处理结果
-     */
-    Future<Void> waitForAllHandled();
-
-    /**
-     * 切分处理器总处理时间超时异常。
-     */
-    final class Timeout extends Exception {
-        public Timeout() {
-            super("This IntravenouslyCutter instance met timeout");
+    public IntravenouslyCutter(@NotNull KeelIntravenous.SingleDropProcessor<T> singleDropProcessor, long timeout) {
+        this.intravenous = KeelIntravenous.instant(singleDropProcessor);
+        this.intravenous.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));
+        if (timeout > 0) {
+            timeoutTimer = Keel.getVertx().setTimer(timeout, timer -> {
+                this.timeoutTimer = timer;
+                this.stopHere(new CutterTimeout());
+            });
         }
     }
+
+    public final void acceptFromStream(@NotNull Buffer incomingBuffer) {
+        synchronized (this.bufferRef) {
+            this.bufferRef.get().appendBuffer(incomingBuffer);
+
+            List<T> list;
+            synchronized (bufferRef) {
+                list = cut();
+            }
+            for (var t : list) {
+                intravenous.add(t);
+            }
+        }
+    }
+
+    public final void stopHere() {
+        this.stopHere(null);
+    }
+
+    public final void stopHere(@Nullable Throwable throwable) {
+        if (!readStopRef.get()) {
+            List<T> list;
+            synchronized (bufferRef) {
+                list = cut();
+            }
+            for (var t : list) {
+                intravenous.add(t);
+            }
+
+            if (timeoutTimer != null) {
+                Keel.getVertx().cancelTimer(timeoutTimer);
+                timeoutTimer = null;
+            }
+            stopCause.set(throwable);
+            readStopRef.set(true);
+        }
+    }
+
+    public final Future<Void> waitForAllHandled() {
+        return Keel.asyncCallRepeatedly(repeatedlyCallTask -> {
+                       if (!this.readStopRef.get()) {
+                           return Keel.asyncSleep(200L);
+                       }
+                       if (!intravenous.isNoDropsLeft()) {
+                           return Keel.asyncSleep(100L);
+                       }
+                       intravenous.shutdown();
+                       if (!intravenous.isUndeployed()) {
+                           return Keel.asyncSleep(100L);
+                       }
+                       repeatedlyCallTask.stop();
+                       return Future.succeededFuture();
+                   })
+                   .compose(v -> {
+                       Throwable throwable = stopCause.get();
+                       if (throwable != null) {
+                           return Future.failedFuture(throwable);
+                       }
+                       return Future.succeededFuture();
+                   });
+    }
+
+    protected final AtomicReference<Buffer> getBufferRef() {
+        return bufferRef;
+    }
+
+    /**
+     * 自{@link IntravenouslyCutter#getBufferRef()}读取到 buffer 后，从头开始解析出尽可能多的目标切片实体，然后更新 buffer 为余下部分。
+     * <p>
+     * 本方法已被限定在同步块内调用以保证线程安全。
+     *
+     * @return 目标切片实体列表
+     */
+    @NotNull
+    abstract protected List<T> cut();
 }

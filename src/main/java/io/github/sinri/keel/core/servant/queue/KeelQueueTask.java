@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public abstract class KeelQueueTask extends AbstractKeelVerticle {
     private QueueWorkerPoolManager queueWorkerPoolManager;
-    private SpecificLogger<QueueTaskSpecificLog> queueTaskIssueRecorder;
+    private SpecificLogger<QueueTaskSpecificLog> queueTaskLogger;
 
     final void setQueueWorkerPoolManager(QueueWorkerPoolManager queueWorkerPoolManager) {
         this.queueWorkerPoolManager = queueWorkerPoolManager;
@@ -29,18 +29,18 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
     @NotNull
     abstract public String getTaskCategory();
 
-    abstract protected LoggerFactory getIssueRecordCenter();
+    abstract protected LoggerFactory getLoggerFactory();
 
     @NotNull
-    protected final SpecificLogger<QueueTaskSpecificLog> buildQueueTaskIssueRecorder() {
-        return getIssueRecordCenter().createLogger(
+    protected final SpecificLogger<QueueTaskSpecificLog> buildQueueTaskLogger() {
+        return getLoggerFactory().createLogger(
                 QueueTaskSpecificLog.TopicQueue,
                 () -> new QueueTaskSpecificLog(getTaskReference(), getTaskCategory())
         );
     }
 
-    public SpecificLogger<QueueTaskSpecificLog> getQueueTaskIssueRecorder() {
-        return queueTaskIssueRecorder;
+    public SpecificLogger<QueueTaskSpecificLog> getQueueTaskLogger() {
+        return queueTaskLogger;
     }
 
     /**
@@ -49,7 +49,7 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
      */
     @Override
     protected Future<Void> startVerticle() {
-        this.queueTaskIssueRecorder = buildQueueTaskIssueRecorder();
+        this.queueTaskLogger = buildQueueTaskLogger();
 
         this.queueWorkerPoolManager.whenOneWorkerStarts();
 
@@ -60,11 +60,11 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
               })
               .compose(v -> run())
               .recover(throwable -> {
-                  getQueueTaskIssueRecorder().exception(throwable, "KeelQueueTask Caught throwable from Method run");
+                  getQueueTaskLogger().exception(throwable, "KeelQueueTask Caught throwable from Method run");
                   return Future.succeededFuture();
               })
               .eventually(() -> {
-                  getQueueTaskIssueRecorder().info(r -> r.message("KeelQueueTask to undeploy"));
+                  getQueueTaskLogger().info(r -> r.message("KeelQueueTask to undeploy"));
                   notifyBeforeUndeploy();
                   return undeployMe().onSuccess(done -> this.queueWorkerPoolManager.whenOneWorkerEnds());
               });
@@ -75,11 +75,11 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
     abstract protected Future<Void> run();
 
     protected void notifyAfterDeployed() {
-        getQueueTaskIssueRecorder().debug("KeelQueueTask.notifyAfterDeployed");
+        getQueueTaskLogger().debug("KeelQueueTask.notifyAfterDeployed");
     }
 
     protected void notifyBeforeUndeploy() {
-        getQueueTaskIssueRecorder().debug("KeelQueueTask.notifyBeforeUndeploy");
+        getQueueTaskLogger().debug("KeelQueueTask.notifyBeforeUndeploy");
     }
 
     /**

@@ -24,11 +24,11 @@ public abstract class KeelQueue extends AbstractKeelVerticle
     private KeelQueueStatus queueStatus = KeelQueueStatus.INIT;
     private SpecificLogger<QueueManageSpecificLog> queueManageLogger;
 
-    protected abstract LoggerFactory getIssueRecordCenter();
+    protected abstract LoggerFactory getLoggerFactory();
 
     @NotNull
-    protected final SpecificLogger<QueueManageSpecificLog> buildQueueManageIssueRecorder() {
-        return getIssueRecordCenter().createLogger(
+    protected final SpecificLogger<QueueManageSpecificLog> buildQueueManageLogger() {
+        return getLoggerFactory().createLogger(
                 QueueManageSpecificLog.TopicQueue,
                 QueueManageSpecificLog::new
         );
@@ -67,7 +67,7 @@ public abstract class KeelQueue extends AbstractKeelVerticle
 
     @Override
     protected Future<Void> startVerticle() {
-        queueManageLogger = this.buildQueueManageIssueRecorder();
+        queueManageLogger = this.buildQueueManageLogger();
         this.queueWorkerPoolManager = buildQueueWorkerPoolManager();
         this.queueStatus = KeelQueueStatus.RUNNING;
         return beforeQueueStart()

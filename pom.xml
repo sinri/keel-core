@@ -7,7 +7,7 @@
     <groupId>io.github.sinri</groupId>
     <artifactId>keel-core</artifactId>
     <!--            <version>5.0.0-SNAPSHOT</version>-->
-    <version>5.0.0-rc.10</version>
+    <version>5.0.0-rc.11</version>
 
     <name>Keel-Core</name>
     <description>
@@ -192,7 +192,7 @@
         <dependency>
             <groupId>io.github.sinri</groupId>
             <artifactId>keel-test</artifactId>
-            <version>5.0.0-rc.9</version>
+            <version>5.0.0-rc.10</version>
             <scope>test</scope>
         </dependency>
         <dependency>

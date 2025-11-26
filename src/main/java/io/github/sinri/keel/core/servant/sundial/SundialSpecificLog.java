@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @since 5.0.0
  */
-public class SundialSpecificLog extends SpecificLog<SundialSpecificLog> {
+public final class SundialSpecificLog extends SpecificLog<SundialSpecificLog> {
     public static final String TopicSundial = "Sundial";
 
     public SundialSpecificLog() {

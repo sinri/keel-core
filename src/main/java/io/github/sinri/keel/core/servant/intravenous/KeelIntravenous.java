@@ -19,10 +19,12 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
  * @since 5.0.0
  */
 public interface KeelIntravenous<D> extends KeelVerticle {
+    @NotNull
     static <T> KeelIntravenous<T> instant(@NotNull SingleDropProcessor<T> itemProcessor) {
         return new KeelIntravenousSingleImpl<>(itemProcessor);
     }
 
+    @NotNull
     static <T> KeelIntravenous<T> instantBatch(@NotNull MultiDropsProcessor<T> itemsProcessor) {
         return new KeelIntravenousBatchImpl<>(itemsProcessor);
     }
@@ -70,10 +72,12 @@ public interface KeelIntravenous<D> extends KeelVerticle {
     }
 
     interface SingleDropProcessor<T> {
+        @NotNull
         Future<Void> process(T drop);
     }
 
     interface MultiDropsProcessor<T> {
+        @NotNull
         Future<Void> process(List<T> drops);
     }
 }

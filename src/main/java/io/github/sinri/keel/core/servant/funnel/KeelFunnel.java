@@ -27,9 +27,13 @@ public class KeelFunnel extends AbstractKeelVerticle {
     /**
      * 休眠中出现新任务时，使用此内寄存的 Promise 唤醒。
      */
+    @NotNull
     private final AtomicReference<Promise<Void>> interruptRef;
+    @NotNull
     private final Queue<Supplier<Future<Void>>> queue;
+    @NotNull
     private final AtomicLong sleepTimeRef;
+    @NotNull
     private final Logger funnelLogger;
 
     public KeelFunnel() {
@@ -39,22 +43,19 @@ public class KeelFunnel extends AbstractKeelVerticle {
         this.funnelLogger = buildFunnelLogger();
     }
 
+    @NotNull
     protected LoggerFactory getLoggerFactory() {
         return Keel.getLoggerFactory();
     }
 
-    /**
-     * @since 4.0.2
-     */
+
     @NotNull
     protected Logger buildFunnelLogger() {
         return getLoggerFactory().createLogger("Funnel");
     }
 
-    /**
-     * @since 4.0.2
-     */
-    protected Logger getFunnelLogger() {
+    @NotNull
+    protected final Logger getFunnelLogger() {
         return funnelLogger;
     }
 
@@ -65,7 +66,7 @@ public class KeelFunnel extends AbstractKeelVerticle {
         this.sleepTimeRef.set(sleepTime);
     }
 
-    public void add(Supplier<Future<Void>> supplier) {
+    public void add(@NotNull Supplier<Future<Void>> supplier) {
         queue.add(supplier);
         Promise<Void> currentInterrupt = getCurrentInterrupt();
         if (currentInterrupt != null) {
@@ -104,7 +105,7 @@ public class KeelFunnel extends AbstractKeelVerticle {
                                     .compose(Supplier::get);
                    })
                    .recover(throwable -> {
-                       funnelLogger.exception(throwable);
+                       funnelLogger.error(log -> log.exception(throwable));
                        return Future.succeededFuture();
                    })
                    .eventually(() -> {

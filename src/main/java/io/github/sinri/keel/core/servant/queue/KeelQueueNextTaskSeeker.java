@@ -2,6 +2,7 @@ package io.github.sinri.keel.core.servant.queue;
 
 import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.Future;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * 队列任务寻求者
@@ -9,6 +10,7 @@ import io.vertx.core.Future;
  * @since 5.0.0
  */
 public interface KeelQueueNextTaskSeeker {
+    @NotNull
     SpecificLogger<QueueManageSpecificLog> getQueueManageLogger();
 
     /**
@@ -16,6 +18,7 @@ public interface KeelQueueNextTaskSeeker {
      *
      * @return Future为成功时，如内容为空，则说明已经找不到任务；如非空，则为准备好的任务。Future为失败时表示获取任务过程失败。
      */
+    @NotNull
     Future<KeelQueueTask> seekNextTask();
 
     /**

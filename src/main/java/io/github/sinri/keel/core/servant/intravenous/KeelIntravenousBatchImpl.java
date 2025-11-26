@@ -19,7 +19,7 @@ class KeelIntravenousBatchImpl<D> extends KeelIntravenousBase<D> {
         this.itemsProcessor = itemsProcessor;
     }
 
-    protected Future<Void> handleDrops(List<D> drops) {
+    protected @NotNull Future<Void> handleDrops(@NotNull List<D> drops) {
         return Future.succeededFuture()
                      .compose(v -> this.itemsProcessor.process(drops))
                      .recover(throwable -> {

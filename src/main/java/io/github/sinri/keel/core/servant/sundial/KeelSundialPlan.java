@@ -33,6 +33,7 @@ public interface KeelSundialPlan {
      * @param now                  本次定时任务运行对应的触发时间
      * @param sundialSpecificLogger 日晷定时任务特定日志记录器
      */
+    @NotNull
     Future<Void> execute(Calendar now, SpecificLogger<SundialSpecificLog> sundialSpecificLogger);
 
     /**

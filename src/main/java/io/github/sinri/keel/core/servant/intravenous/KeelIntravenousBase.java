@@ -4,6 +4,7 @@ import io.github.sinri.keel.base.async.RepeatedlyCallTask;
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -119,5 +120,6 @@ abstract class KeelIntravenousBase<D> extends AbstractKeelVerticle implements Ke
                      });
     }
 
-    abstract protected Future<Void> handleDrops(List<D> drops);
+    @NotNull
+    abstract protected Future<Void> handleDrops(@NotNull List<D> drops);
 }

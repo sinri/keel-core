@@ -16,8 +16,11 @@ import java.util.Calendar;
  * @since 5.0.0
  */
 final class KeelSundialVerticle extends AbstractKeelVerticle {
+    @NotNull
     private final KeelSundialPlan sundialPlan;
+    @NotNull
     private final Calendar now;
+    @NotNull
     private final SpecificLogger<SundialSpecificLog> sundialSpecificLogger;
 
     public KeelSundialVerticle(

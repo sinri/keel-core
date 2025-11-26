@@ -8,6 +8,9 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 
 /**
@@ -16,10 +19,17 @@ import org.jetbrains.annotations.NotNull;
  * @since 5.0.0
  */
 public abstract class KeelQueueTask extends AbstractKeelVerticle {
+    @Nullable
     private QueueWorkerPoolManager queueWorkerPoolManager;
+    @Nullable
     private SpecificLogger<QueueTaskSpecificLog> queueTaskLogger;
 
-    final void setQueueWorkerPoolManager(QueueWorkerPoolManager queueWorkerPoolManager) {
+    @NotNull
+    protected final QueueWorkerPoolManager getQueueWorkerPoolManager() {
+        return Objects.requireNonNull(queueWorkerPoolManager);
+    }
+
+    final void setQueueWorkerPoolManager(@NotNull QueueWorkerPoolManager queueWorkerPoolManager) {
         this.queueWorkerPoolManager = queueWorkerPoolManager;
     }
 
@@ -29,6 +39,7 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
     @NotNull
     abstract public String getTaskCategory();
 
+    @NotNull
     abstract protected LoggerFactory getLoggerFactory();
 
     @NotNull
@@ -39,8 +50,9 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
         );
     }
 
-    public SpecificLogger<QueueTaskSpecificLog> getQueueTaskLogger() {
-        return queueTaskLogger;
+    @NotNull
+    protected final SpecificLogger<QueueTaskSpecificLog> getQueueTaskLogger() {
+        return Objects.requireNonNull(queueTaskLogger);
     }
 
     /**
@@ -51,7 +63,7 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
     protected Future<Void> startVerticle() {
         this.queueTaskLogger = buildQueueTaskLogger();
 
-        this.queueWorkerPoolManager.whenOneWorkerStarts();
+        this.getQueueWorkerPoolManager().whenOneWorkerStarts();
 
         Future.succeededFuture()
               .compose(v -> {
@@ -60,13 +72,16 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
               })
               .compose(v -> run())
               .recover(throwable -> {
-                  getQueueTaskLogger().exception(throwable, "KeelQueueTask Caught throwable from Method run");
+                  getQueueTaskLogger().error(log -> log
+                          .exception(throwable)
+                          .message("KeelQueueTask Caught throwable from Method run")
+                  );
                   return Future.succeededFuture();
               })
               .eventually(() -> {
                   getQueueTaskLogger().info(r -> r.message("KeelQueueTask to undeploy"));
                   notifyBeforeUndeploy();
-                  return undeployMe().onSuccess(done -> this.queueWorkerPoolManager.whenOneWorkerEnds());
+                  return undeployMe().onSuccess(done -> this.getQueueWorkerPoolManager().whenOneWorkerEnds());
               });
 
         return Future.succeededFuture();

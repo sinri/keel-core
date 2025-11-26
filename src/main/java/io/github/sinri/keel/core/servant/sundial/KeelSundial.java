@@ -9,6 +9,7 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,10 +25,14 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
  * @since 5.0.0
  */
 public abstract class KeelSundial extends AbstractKeelVerticle {
+    @NotNull
     private final Map<String, KeelSundialPlan> planMap = new ConcurrentHashMap<>();
+    @Nullable
     private Long timerID;
+    @Nullable
     private SpecificLogger<SundialSpecificLog> logger;
 
+    @NotNull
     abstract protected LoggerFactory getLoggerFactory();
 
     @NotNull
@@ -93,8 +98,10 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
                                 return Future.succeededFuture();
                             })
             )
-            .onFailure(throwable -> getLogger().exception(throwable, "io.github.sinri.keel.core.servant.sundial.KeelSundial" +
-                    ".refreshPlans exception"));
+            .onFailure(throwable -> getLogger().error(log -> log
+                    .exception(throwable)
+                    .message("io.github.sinri.keel.core.servant.sundial.KeelSundial.refreshPlans exception"))
+            );
     }
 
     /**
@@ -102,6 +109,7 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
      *
      * @return 异步返回的定时任务计划集，用于覆盖更新当前的计划快照；如果异步返回了 null，则表示不更新计划快照。
      */
+    @NotNull
     abstract protected Future<Collection<KeelSundialPlan>> fetchPlans();
 
     @Override

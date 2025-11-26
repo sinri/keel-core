@@ -24,21 +24,22 @@ public abstract class KeelQueue extends AbstractKeelVerticle
     private KeelQueueStatus queueStatus = KeelQueueStatus.INIT;
     private SpecificLogger<QueueManageSpecificLog> queueManageLogger;
 
+    @NotNull
     protected abstract LoggerFactory getLoggerFactory();
 
     @NotNull
-    protected final SpecificLogger<QueueManageSpecificLog> buildQueueManageLogger() {
+    private SpecificLogger<QueueManageSpecificLog> buildQueueManageLogger() {
         return getLoggerFactory().createLogger(
                 QueueManageSpecificLog.TopicQueue,
                 QueueManageSpecificLog::new
         );
     }
 
-    public SpecificLogger<QueueManageSpecificLog> getQueueManageLogger() {
+    public final @NotNull SpecificLogger<QueueManageSpecificLog> getQueueManageLogger() {
         return queueManageLogger;
     }
 
-    public KeelQueueStatus getQueueStatus() {
+    public final KeelQueueStatus getQueueStatus() {
         return queueStatus;
     }
 
@@ -77,7 +78,7 @@ public abstract class KeelQueue extends AbstractKeelVerticle
                 });
     }
 
-    protected final void routine() {
+    private void routine() {
         this.getQueueManageLogger().debug(r -> r.message("KeelQueue::routine start"));
 
         Future.succeededFuture()
@@ -160,8 +161,9 @@ public abstract class KeelQueue extends AbstractKeelVerticle
                                                                  return Future.succeededFuture();
                                                              },
                                                              throwable -> {
-                                                                 this.getQueueManageLogger().exception(throwable,
-                                                                         "CANNOT DEPLOY TASK [%s] VERTICLE".formatted(task.getTaskReference())
+                                                                 this.getQueueManageLogger().error(log -> log
+                                                                         .exception(throwable)
+                                                                         .message("CANNOT DEPLOY TASK [%s] VERTICLE".formatted(task.getTaskReference()))
                                                                  );
                                                                  // 通知 FutureUntil 继续下一轮
                                                                  return Future.succeededFuture();
@@ -170,7 +172,10 @@ public abstract class KeelQueue extends AbstractKeelVerticle
                                     });
                    })
                    .recover(throwable -> {
-                       this.getQueueManageLogger().exception(throwable, "KeelQueue 递归找活干里出现了奇怪的故障");
+                       this.getQueueManageLogger().error(log -> log
+                               .exception(throwable)
+                               .message("KeelQueue 递归找活干里出现了奇怪的故障")
+                       );
                        return Future.succeededFuture();
                    });
     }

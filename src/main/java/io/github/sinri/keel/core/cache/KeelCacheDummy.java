@@ -23,7 +23,7 @@ public class KeelCacheDummy<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public KeelCacheInterface<K, V> setDefaultLifeInSeconds(long lifeInSeconds) {
+    public @NotNull KeelCacheInterface<K, V> setDefaultLifeInSeconds(long lifeInSeconds) {
         return this;
     }
 
@@ -39,7 +39,7 @@ public class KeelCacheDummy<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation, long lifeInSeconds) {
+    public @NotNull V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation, long lifeInSeconds) {
         return computation.apply(key);
     }
 

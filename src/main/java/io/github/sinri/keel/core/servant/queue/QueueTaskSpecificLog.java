@@ -11,6 +11,7 @@ import java.util.List;
  * @since 5.0.0
  */
 public final class QueueTaskSpecificLog extends SpecificLog<QueueTaskSpecificLog> {
+    @NotNull
     public static final String TopicQueue = "Queue";
 
     public QueueTaskSpecificLog(@NotNull String taskReference, @NotNull String taskCategory) {

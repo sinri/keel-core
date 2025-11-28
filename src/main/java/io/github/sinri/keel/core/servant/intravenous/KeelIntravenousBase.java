@@ -5,6 +5,7 @@ import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,17 +14,19 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
-
 
 /**
  * 静脉注入的基本实现。
  * @since 5.0.0
  */
 abstract class KeelIntravenousBase<D> extends AbstractKeelVerticle implements KeelIntravenous<D> {
+    @NotNull
     private final Queue<D> queue;
+    @NotNull
     private final AtomicReference<Promise<Void>> interrupterRef = new AtomicReference<>();
+    @NotNull
     private final AtomicBoolean stoppedRef = new AtomicBoolean(false);
+    @NotNull
     private final AtomicBoolean undeployedRef = new AtomicBoolean(false);
 
     public KeelIntravenousBase() {
@@ -31,7 +34,7 @@ abstract class KeelIntravenousBase<D> extends AbstractKeelVerticle implements Ke
     }
 
     @Override
-    public void add(D drop) {
+    public void add(@Nullable D drop) {
         if (stoppedRef.get()) {
             throw new IllegalStateException("Can't add drop to a stopped intravenous");
         }
@@ -71,7 +74,7 @@ abstract class KeelIntravenousBase<D> extends AbstractKeelVerticle implements Ke
     }
 
     @Override
-    protected Future<Void> startVerticle() {
+    protected @NotNull Future<Void> startVerticle() {
         this.interrupterRef.set(null);
         Keel.asyncCallRepeatedly(this::handleRoutine)
             .onComplete(ar -> this.undeployMe()
@@ -79,7 +82,8 @@ abstract class KeelIntravenousBase<D> extends AbstractKeelVerticle implements Ke
         return Future.succeededFuture();
     }
 
-    private Future<Void> handleRoutine(RepeatedlyCallTask repeatedlyCallTask) {
+    @NotNull
+    private Future<Void> handleRoutine(@NotNull RepeatedlyCallTask repeatedlyCallTask) {
         this.interrupterRef.set(Promise.promise());
 
         boolean toStop = this.stoppedRef.get();

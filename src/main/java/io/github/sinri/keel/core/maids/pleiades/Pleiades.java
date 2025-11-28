@@ -7,8 +7,7 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.MessageProducer;
-
-import static io.github.sinri.keel.base.KeelInstance.Keel;
+import org.jetbrains.annotations.NotNull;
 
 
 /**
@@ -22,33 +21,38 @@ public abstract class Pleiades<T> extends AbstractKeelVerticle {
     private MessageConsumer<T> consumer;
     private Logger pleiadesLogger;
 
-    public static <T> MessageProducer<T> generateMessageProducer(String address) {
+    @NotNull
+    public static <T> MessageProducer<T> generateMessageProducer(@NotNull String address) {
         return generateMessageProducer(address, new DeliveryOptions());
     }
 
-    public static <T> MessageProducer<T> generateMessageProducer(String address, DeliveryOptions deliveryOptions) {
+    @NotNull
+    public static <T> MessageProducer<T> generateMessageProducer(@NotNull String address, @NotNull DeliveryOptions deliveryOptions) {
         return Keel.getVertx().eventBus().sender(address, deliveryOptions);
     }
 
+    @NotNull
     abstract public String getAddress();
 
-    abstract protected void handleMessage(Message<T> message);
+    abstract protected void handleMessage(@NotNull Message<T> message);
 
+    @NotNull
     abstract protected Logger buildPleiadesLogger();
 
-    public Logger getPleiadesLogger() {
+    @NotNull
+    public final Logger getPleiadesLogger() {
         return pleiadesLogger;
     }
 
     @Override
-    protected Future<Void> startVerticle() {
+    protected @NotNull Future<Void> startVerticle() {
         this.pleiadesLogger = buildPleiadesLogger();
         consumer = Keel.getVertx().eventBus().consumer(getAddress(), this::handleMessage);
         return Future.succeededFuture();
     }
 
     @Override
-    protected Future<Void> stopVerticle() {
+    protected @NotNull Future<Void> stopVerticle() {
         if (consumer != null) {
             return consumer.unregister();
         }

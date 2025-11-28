@@ -7,8 +7,9 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
+import java.util.Objects;
 
 
 /**
@@ -20,8 +21,11 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
  */
 public abstract class KeelQueue extends AbstractKeelVerticle
         implements KeelQueueNextTaskSeeker, KeelQueueSignalReader {
+    @Nullable
     private QueueWorkerPoolManager queueWorkerPoolManager;
+    @NotNull
     private KeelQueueStatus queueStatus = KeelQueueStatus.INIT;
+    @Nullable
     private SpecificLogger<QueueManageSpecificLog> queueManageLogger;
 
     @NotNull
@@ -36,14 +40,15 @@ public abstract class KeelQueue extends AbstractKeelVerticle
     }
 
     public final @NotNull SpecificLogger<QueueManageSpecificLog> getQueueManageLogger() {
-        return queueManageLogger;
+        return Objects.requireNonNull(queueManageLogger);
     }
 
-    public final KeelQueueStatus getQueueStatus() {
+    public final @NotNull KeelQueueStatus getQueueStatus() {
         return queueStatus;
     }
 
-    protected KeelQueue setQueueStatus(KeelQueueStatus queueStatus) {
+    @NotNull
+    protected KeelQueue setQueueStatus(@NotNull KeelQueueStatus queueStatus) {
         this.queueStatus = queueStatus;
         return this;
     }
@@ -58,16 +63,21 @@ public abstract class KeelQueue extends AbstractKeelVerticle
         return new QueueWorkerPoolManager(0);
     }
 
+    public @NotNull QueueWorkerPoolManager getQueueWorkerPoolManager() {
+        return Objects.requireNonNull(queueWorkerPoolManager);
+    }
+
     /**
      * 队列运行前的清理整备逻辑。
      *
      */
+    @NotNull
     protected Future<Void> beforeQueueStart() {
         return Future.succeededFuture();
     }
 
     @Override
-    protected Future<Void> startVerticle() {
+    protected @NotNull Future<Void> startVerticle() {
         queueManageLogger = this.buildQueueManageLogger();
         this.queueWorkerPoolManager = buildQueueWorkerPoolManager();
         this.queueStatus = KeelQueueStatus.RUNNING;
@@ -111,6 +121,7 @@ public abstract class KeelQueue extends AbstractKeelVerticle
         ;
     }
 
+    @NotNull
     private Future<Void> whenSignalStopCame() {
         if (getQueueStatus() == KeelQueueStatus.RUNNING) {
             this.queueStatus = KeelQueueStatus.STOPPED;
@@ -119,11 +130,12 @@ public abstract class KeelQueue extends AbstractKeelVerticle
         return Future.succeededFuture();
     }
 
+    @NotNull
     private Future<Void> whenSignalRunCame() {
         this.queueStatus = KeelQueueStatus.RUNNING;
 
         return Keel.asyncCallRepeatedly(routineResult -> {
-                       if (this.queueWorkerPoolManager.isBusy()) {
+                       if (this.getQueueWorkerPoolManager().isBusy()) {
                            return Keel.asyncSleep(1_000L);
                        }
 
@@ -145,8 +157,7 @@ public abstract class KeelQueue extends AbstractKeelVerticle
                                         this.getQueueManageLogger().info(r -> r
                                                 .message("Trusted that task  is already locked by seeker: " + task.getTaskReference()));
 
-                                        // since 3.0.9
-                                        task.setQueueWorkerPoolManager(this.queueWorkerPoolManager);
+                                        task.setQueueWorkerPoolManager(this.getQueueWorkerPoolManager());
 
                                         return Future.succeededFuture()
                                                      .compose(v -> {
@@ -181,7 +192,7 @@ public abstract class KeelQueue extends AbstractKeelVerticle
     }
 
     @Override
-    protected Future<Void> stopVerticle() {
+    protected @NotNull Future<Void> stopVerticle() {
         this.queueStatus = KeelQueueStatus.STOPPED;
         return Future.succeededFuture();
     }
@@ -189,6 +200,7 @@ public abstract class KeelQueue extends AbstractKeelVerticle
     /**
      * 将本队列实例以 WORKER 线程模型部署。
      */
+    @NotNull
     public final Future<String> deployMe() {
         return super.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));
     }

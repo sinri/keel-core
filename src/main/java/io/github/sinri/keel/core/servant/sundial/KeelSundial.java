@@ -14,8 +14,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
-
 
 /**
  * 日晷。
@@ -46,7 +44,7 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
     }
 
     @Override
-    protected Future<Void> startVerticle() {
+    protected @NotNull Future<Void> startVerticle() {
         this.logger = buildLogger();
         int delaySeconds = 61 - KeelCronExpression.parseCalenderToElements(Calendar.getInstance()).second;
         this.timerID = Keel.getVertx().setPeriodic(delaySeconds * 1000L, 60_000L, timerID -> {
@@ -66,7 +64,20 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
                         .context("plan_cron", plan.cronExpression().getRawCronExpression())
                         .context("now", parsedCalenderElements.toString())
                 );
-                new KeelSundialVerticle(plan, now, getLogger()).deployMe();
+                new KeelSundialVerticle(plan, now, getLogger())
+                        .deployMe()
+                        .onComplete(ar -> {
+                            if (ar.failed()) {
+                                getLogger().error(log -> log
+                                        .exception(ar.cause())
+                                        .message("Failed to deploy KeelSundialVerticle for " + plan.key())
+                                );
+                            } else {
+                                getLogger().info(log -> log
+                                        .message("Deployed KeelSundialVerticle for " + plan.key())
+                                );
+                            }
+                        });
             } else {
                 getLogger().debug(x -> x
                         .message("Sundial Plan Not Match")
@@ -113,7 +124,7 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
     abstract protected Future<Collection<KeelSundialPlan>> fetchPlans();
 
     @Override
-    protected Future<Void> stopVerticle() {
+    protected @NotNull Future<Void> stopVerticle() {
         if (this.timerID != null) {
             Keel.getVertx().cancelTimer(this.timerID);
         }
@@ -125,6 +136,7 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
      *
      * @return 部署结果
      */
+    @NotNull
     public final Future<String> deployMe() {
         return super.deployMe(new DeploymentOptions()
                 .setThreadingModel(ThreadingModel.WORKER));

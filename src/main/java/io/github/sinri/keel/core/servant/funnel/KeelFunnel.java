@@ -6,14 +6,13 @@ import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
-
-import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
@@ -74,17 +73,19 @@ public class KeelFunnel extends AbstractKeelVerticle {
         }
     }
 
+    @Nullable
     private Promise<Void> getCurrentInterrupt() {
         return this.interruptRef.get();
     }
 
 
     @Override
-    protected Future<Void> startVerticle() {
+    protected @NotNull Future<Void> startVerticle() {
         Keel.asyncCallEndlessly(this::executeCircle);
         return Future.succeededFuture();
     }
 
+    @NotNull
     private Future<Void> executeCircle() {
         this.interruptRef.set(null);
         funnelLogger.debug("funnel one circle start");

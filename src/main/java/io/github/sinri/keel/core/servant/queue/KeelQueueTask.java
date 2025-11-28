@@ -60,7 +60,7 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
      * otherwise, the threading model is set to VIRTUAL_THREAD if possible.
      */
     @Override
-    protected Future<Void> startVerticle() {
+    protected @NotNull Future<Void> startVerticle() {
         this.queueTaskLogger = buildQueueTaskLogger();
 
         this.getQueueWorkerPoolManager().whenOneWorkerStarts();
@@ -87,6 +87,7 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
         return Future.succeededFuture();
     }
 
+    @NotNull
     abstract protected Future<Void> run();
 
     protected void notifyAfterDeployed() {
@@ -111,6 +112,7 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
      *
      * @return 部署结果
      */
+    @NotNull
     public Future<String> deployMe() {
         var deploymentOptions = new DeploymentOptions();
         if (this.isWorkerThreadRequired()) {

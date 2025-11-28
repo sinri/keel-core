@@ -3,10 +3,7 @@ package io.github.sinri.keel.core.cache;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -18,7 +15,9 @@ import java.util.function.Function;
  * @since 5.0.0
  */
 class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
+    @NotNull
     private final ConcurrentMap<K, ValueWrapper<V>> map;
+    @NotNull
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private long defaultLifeInSeconds = 1000L;
 
@@ -32,6 +31,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
+    @NotNull
     public KeelCacheInterface<K, V> setDefaultLifeInSeconds(long lifeInSeconds) {
         defaultLifeInSeconds = lifeInSeconds;
         return this;
@@ -66,6 +66,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
+    @Nullable
     public V read(@NotNull K key, @Nullable V fallbackValue) {
         lock.readLock().lock();
         try {
@@ -80,12 +81,13 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation, long lifeInSeconds) {
+    public @NotNull V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation, long lifeInSeconds) {
         this.lock.writeLock().lock();
         try {
             V v = readImpl(key);
             if (v != null) return v;
             V r = computation.apply(key);
+            Objects.requireNonNull(r);
             saveImpl(key, r, lifeInSeconds);
             return r;
         } finally {

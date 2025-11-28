@@ -7,8 +7,6 @@ import io.vertx.core.Handler;
 import io.vertx.core.ThreadingModel;
 import org.jetbrains.annotations.NotNull;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
-
 
 /**
  * 基于配置的更夫实现。
@@ -17,19 +15,20 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
  *
  * @since 5.0.0
  */
-public class KeelPureWatchman extends KeelWatchmanImpl {
+public class PureWatchman extends WatchmanImpl {
 
     @NotNull
     private final Options options;
     @NotNull
     private final LoggerFactory loggerFactory;
 
-    protected KeelPureWatchman(@NotNull String watchmanName, @NotNull Options options, @NotNull LoggerFactory loggerFactory) {
+    protected PureWatchman(@NotNull String watchmanName, @NotNull Options options, @NotNull LoggerFactory loggerFactory) {
         super(watchmanName);
         this.options = options;
         this.loggerFactory = loggerFactory;
     }
 
+    @NotNull
     public static Future<String> deploy(
             @NotNull String watchmanName,
             @NotNull Handler<Options> optionsHandler,
@@ -37,7 +36,7 @@ public class KeelPureWatchman extends KeelWatchmanImpl {
     ) {
         Options options = new Options();
         optionsHandler.handle(options);
-        KeelPureWatchman keelPureWatchman = new KeelPureWatchman(watchmanName, options, loggerFactory);
+        PureWatchman keelPureWatchman = new PureWatchman(watchmanName, options, loggerFactory);
         return Keel.getVertx().deployVerticle(keelPureWatchman, new DeploymentOptions()
                 .setThreadingModel(ThreadingModel.WORKER)
         );
@@ -60,6 +59,7 @@ public class KeelPureWatchman extends KeelWatchmanImpl {
     }
 
     public static class Options {
+        @NotNull
         private KeelWatchmanEventHandler handler;
         private long interval = 60_000L;
 
@@ -68,11 +68,13 @@ public class KeelPureWatchman extends KeelWatchmanImpl {
             };
         }
 
+        @NotNull
         public KeelWatchmanEventHandler getHandler() {
             return handler;
         }
 
-        public Options setHandler(KeelWatchmanEventHandler handler) {
+        @NotNull
+        public Options setHandler(@NotNull KeelWatchmanEventHandler handler) {
             this.handler = handler;
             return this;
         }
@@ -81,6 +83,7 @@ public class KeelPureWatchman extends KeelWatchmanImpl {
             return interval;
         }
 
+        @NotNull
         public Options setInterval(long interval) {
             this.interval = interval;
             return this;

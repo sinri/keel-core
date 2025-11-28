@@ -33,7 +33,7 @@ public class IntravenouslyCutterOnString extends IntravenouslyCutter<String> {
      *
      * @param stringSingleDropProcessor 切分出的字符串文本片段处理器，由内置的{@link KeelIntravenous}实例调用
      */
-    public IntravenouslyCutterOnString(KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor) {
+    public IntravenouslyCutterOnString(@NotNull KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor) {
         this(stringSingleDropProcessor, 0);
     }
 

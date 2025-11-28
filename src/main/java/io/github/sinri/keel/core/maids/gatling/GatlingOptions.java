@@ -16,6 +16,7 @@ public class GatlingOptions {
     private final String gatlingName;
     private int barrels;
     private long averageRestInterval;
+    @NotNull
     private Supplier<Future<Bullet>> bulletLoader;
 
     public GatlingOptions(@NotNull String gatlingName) {
@@ -43,6 +44,7 @@ public class GatlingOptions {
     /**
      * @param barrels 枪管数量（并发任务数）
      */
+    @NotNull
     public GatlingOptions setBarrels(int barrels) {
         this.barrels = barrels;
         return this;
@@ -58,6 +60,7 @@ public class GatlingOptions {
     /**
      * @param averageRestInterval 弹带更换平均等待时长（没有新任务时的休眠期，单位毫秒）
      */
+    @NotNull
     public GatlingOptions setAverageRestInterval(long averageRestInterval) {
         this.averageRestInterval = averageRestInterval;
         return this;
@@ -74,7 +77,8 @@ public class GatlingOptions {
     /**
      * @param bulletLoader 供弹器（新任务生成器）
      */
-    public GatlingOptions setBulletLoader(Supplier<Future<Bullet>> bulletLoader) {
+    @NotNull
+    public GatlingOptions setBulletLoader(@NotNull Supplier<Future<Bullet>> bulletLoader) {
         this.bulletLoader = bulletLoader;
         return this;
     }

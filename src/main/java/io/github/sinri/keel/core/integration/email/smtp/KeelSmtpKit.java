@@ -20,7 +20,9 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
  * @since 5.0.0
  */
 public class KeelSmtpKit {
+    @NotNull
     private final MailConfig mailConfig;
+    @NotNull
     private final MailClient mailClient;
 
 
@@ -41,13 +43,7 @@ public class KeelSmtpKit {
         this(smtpName, true);
     }
 
-    public KeelSmtpKit() {
-        this(Objects.requireNonNull(
-                Keel.config("email.smtp.default_smtp_name"),
-                "email.smtp.default_smtp_name is not configured"
-        ));
-    }
-
+    @NotNull
     private static MailConfig buildMailConfig(@NotNull String smtpName) {
         var smtpConfiguration = Keel.getConfiguration().extract("email", "smtp", smtpName);
         Objects.requireNonNull(smtpConfiguration);
@@ -56,21 +52,21 @@ public class KeelSmtpKit {
         return smtpConfigElement.toMailConfig();
     }
 
+    @NotNull
     public MailClient getMailClient() {
         return mailClient;
     }
 
+    @NotNull
     public Future<Void> close() {
-        if (null != mailClient) {
-            return mailClient.close();
-        }
-        return Future.succeededFuture();
+        return mailClient.close();
     }
 
+    @NotNull
     public Future<MailResult> quickSendTextMail(
-            List<String> receivers,
-            String subject,
-            String textContent
+            @NotNull List<String> receivers,
+            @NotNull String subject,
+            @NotNull String textContent
     ) {
         MailMessage message = new MailMessage();
         message.setFrom(this.mailConfig.getUsername());
@@ -81,10 +77,11 @@ public class KeelSmtpKit {
         return this.mailClient.sendMail(message);
     }
 
+    @NotNull
     public Future<MailResult> quickSendHtmlMail(
-            List<String> receivers,
-            String subject,
-            String htmlContent
+            @NotNull List<String> receivers,
+            @NotNull String subject,
+            @NotNull String htmlContent
     ) {
         MailMessage message = new MailMessage();
         message.setFrom(this.mailConfig.getUsername());
@@ -95,9 +92,7 @@ public class KeelSmtpKit {
         return this.mailClient.sendMail(message);
     }
 
-    /**
-     * @since 3.0.6
-     */
+    @NotNull
     public MailConfig getMailConfig() {
         return mailConfig;
     }

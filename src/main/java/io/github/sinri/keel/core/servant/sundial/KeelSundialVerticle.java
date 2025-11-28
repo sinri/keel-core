@@ -34,7 +34,7 @@ final class KeelSundialVerticle extends AbstractKeelVerticle {
     }
 
     @Override
-    protected Future<Void> startVerticle() {
+    protected @NotNull Future<Void> startVerticle() {
         Future.succeededFuture()
               .compose(v -> sundialPlan.execute(now, sundialSpecificLogger))
               .onComplete(ar -> undeployMe());
@@ -46,6 +46,7 @@ final class KeelSundialVerticle extends AbstractKeelVerticle {
      *
      * @return 部署结果
      */
+    @NotNull
     public Future<String> deployMe() {
         var deploymentOptions = new DeploymentOptions();
         if (sundialPlan.isWorkerThreadRequired()) {

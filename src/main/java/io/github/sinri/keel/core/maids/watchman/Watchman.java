@@ -12,9 +12,9 @@ import org.jetbrains.annotations.NotNull;
  * <p>
  * 在集群中运行时，实例实现应当一致。
  *
- * @since 2.9.3
+ * @since 5.0.0
  */
-public interface KeelWatchman extends KeelVerticle {
+public interface Watchman extends KeelVerticle {
 
     /**
      * @return 更夫的名称

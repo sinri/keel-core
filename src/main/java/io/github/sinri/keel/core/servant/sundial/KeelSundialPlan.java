@@ -34,7 +34,7 @@ public interface KeelSundialPlan {
      * @param sundialSpecificLogger 日晷定时任务特定日志记录器
      */
     @NotNull
-    Future<Void> execute(Calendar now, SpecificLogger<SundialSpecificLog> sundialSpecificLogger);
+    Future<Void> execute(@NotNull Calendar now, @NotNull SpecificLogger<SundialSpecificLog> sundialSpecificLogger);
 
     /**
      * @return 指定本任务是否需要在 WORKER 线程模型下运行

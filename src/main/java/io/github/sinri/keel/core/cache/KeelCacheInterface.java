@@ -24,6 +24,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param <V> 值的类型
      * @return 本接口的默认实现实例
      */
+    @NotNull
     static <K, V> KeelCacheInterface<K, V> createDefaultInstance() {
         return new KeelCacheImpl<>();
     }
@@ -35,6 +36,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param <V> 值的类型
      * @return 本接口的伪实现实例
      */
+    @NotNull
     static <K, V> KeelCacheInterface<K, V> getDummyInstance() {
         return new KeelCacheDummy<>();
     }
@@ -50,6 +52,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param lifeInSeconds 默认的缓存记录存活周期，以秒计
      * @return 本接口实例
      */
+    @NotNull
     KeelCacheInterface<K, V> setDefaultLifeInSeconds(long lifeInSeconds);
 
     /**
@@ -77,9 +80,10 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * 根据给定的键，尝试获取值；如果无法找到有效的值，则利用给定的逻辑生成一个新值，以默认存活周期存入；返回找到的值或存入的值。
      *
      * @param key         键
-     * @param computation 新值生成逻辑
+     * @param computation 新值生成逻辑，生成的结果不应为 null
      * @return 找到的值或新建而存入的值
      */
+    @NotNull
     default V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation) {
         return computeIfAbsent(key, computation, getDefaultLifeInSeconds());
     }
@@ -88,10 +92,11 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * 根据给定的键，尝试获取值；如果无法找到有效的值，则利用给定的逻辑生成一个新值，以给定存活周期存入；返回找到的值或存入的值。
      *
      * @param key           键
-     * @param computation   新值生成逻辑
+     * @param computation   新值生成逻辑，生成的结果不应为 null
      * @param lifeInSeconds 存活周期，以秒计
      * @return 找到的值或新建而存入的值
      */
+    @NotNull
     V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation, long lifeInSeconds);
 
     /**

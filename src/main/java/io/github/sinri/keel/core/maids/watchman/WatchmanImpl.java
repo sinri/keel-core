@@ -8,10 +8,9 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.shareddata.Lock;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
-
-import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
@@ -19,13 +18,15 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
  *
  * @since 5.0.0
  */
-abstract class KeelWatchmanImpl extends AbstractKeelVerticle implements KeelWatchman {
+abstract class WatchmanImpl extends AbstractKeelVerticle implements Watchman {
     @NotNull
     private final String watchmanName;
+    @Nullable
     private MessageConsumer<Long> consumer;
+    @Nullable
     private Logger watchmanLogger;
 
-    public KeelWatchmanImpl(@NotNull String watchmanName) {
+    public WatchmanImpl(@NotNull String watchmanName) {
         this.watchmanName = watchmanName;
     }
 
@@ -35,18 +36,19 @@ abstract class KeelWatchmanImpl extends AbstractKeelVerticle implements KeelWatc
         return this.watchmanName;
     }
 
+    @NotNull
     protected String eventBusAddress() {
         return "%s:%s".formatted(this.getClass().getName(), watchmanName());
     }
 
     @Override
-    protected Future<Void> startVerticle() {
+    protected @NotNull Future<Void> startVerticle() {
         this.watchmanLogger = this.buildWatchmanLogger();
 
         this.consumer = Keel.getVertx().eventBus().consumer(eventBusAddress());
         this.consumer.handler(this::consumeHandleMassage);
         this.consumer.exceptionHandler(throwable -> getWatchmanLogger()
-                .exception(throwable, watchmanName() + " ERROR")
+                .error(log -> log.message(watchmanName() + " ERROR").exception(throwable))
         );
 
         try {
@@ -58,13 +60,17 @@ abstract class KeelWatchmanImpl extends AbstractKeelVerticle implements KeelWatc
         } catch (Exception ignore) {
             // 拟合不了拉倒
         }
-        Keel.getVertx().setPeriodic(interval(), timerID -> Keel.getVertx().eventBus()
-                                                               .send(eventBusAddress(), System.currentTimeMillis()));
+        vertx().setPeriodic(
+                interval(),
+                timerID -> vertx()
+                        .eventBus()
+                        .send(eventBusAddress(), System.currentTimeMillis())
+        );
 
         return Future.succeededFuture();
     }
 
-    protected void consumeHandleMassage(Message<Long> message) {
+    protected void consumeHandleMassage(@NotNull Message<Long> message) {
         Long timestamp = message.body();
         getWatchmanLogger().debug(r -> r.message(watchmanName() + " TRIGGERED FOR " + timestamp));
 
@@ -86,8 +92,10 @@ abstract class KeelWatchmanImpl extends AbstractKeelVerticle implements KeelWatc
     }
 
     @Override
-    protected Future<Void> stopVerticle() {
-        consumer.unregister();
+    protected @NotNull Future<Void> stopVerticle() {
+        if (consumer != null) {
+            consumer.unregister();
+        }
         return Future.succeededFuture();
     }
 
@@ -100,7 +108,7 @@ abstract class KeelWatchmanImpl extends AbstractKeelVerticle implements KeelWatc
     }
 
     @NotNull
-    public Logger getWatchmanLogger() {
+    public final Logger getWatchmanLogger() {
         return Objects.requireNonNull(watchmanLogger);
     }
 }

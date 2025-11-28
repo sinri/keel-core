@@ -5,6 +5,7 @@ import org.commonmark.ext.gfm.tables.TablesExtension;
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -18,65 +19,64 @@ import java.util.List;
  * @since 5.0.0 based on `org.commonmark`
  */
 public class KeelMarkdownKit {
+    @NotNull
     private List<Extension> extensions;
+    @NotNull
     private Parser markdownParser;
+    @NotNull
     private HtmlRenderer htmlRenderer;
 
     public KeelMarkdownKit() {
-        extensions = List.of(TablesExtension.create());
-        markdownParser = Parser.builder()
-                               .extensions(extensions)
-                               .build();
-        htmlRenderer = HtmlRenderer.builder()
-                                   .extensions(extensions)
-                                   .build();
+        this(List.of(TablesExtension.create()));
     }
 
-    public KeelMarkdownKit(List<Extension> extensions) {
+    public KeelMarkdownKit(@NotNull List<Extension> extensions) {
         this.extensions = extensions;
-        markdownParser = Parser.builder()
-                               .extensions(extensions)
-                               .build();
-        htmlRenderer = HtmlRenderer.builder()
-                                   .extensions(extensions)
-                                   .build();
+        this.markdownParser = Parser.builder()
+                                    .extensions(extensions)
+                                    .build();
+        this.htmlRenderer = HtmlRenderer.builder()
+                                        .extensions(extensions)
+                                        .build();
     }
 
-    public KeelMarkdownKit resetExtensions(List<Extension> extensions) {
+    public KeelMarkdownKit resetExtensions(@NotNull List<Extension> extensions) {
         this.extensions = extensions;
-        markdownParser = Parser.builder()
-                               .extensions(extensions)
-                               .build();
-        htmlRenderer = HtmlRenderer.builder()
-                                   .extensions(extensions)
-                                   .build();
+        this.markdownParser = Parser.builder()
+                                    .extensions(extensions)
+                                    .build();
+        this.htmlRenderer = HtmlRenderer.builder()
+                                        .extensions(extensions)
+                                        .build();
         return this;
     }
 
-    public KeelMarkdownKit appendExtensions(Extension extension) {
+    public KeelMarkdownKit appendExtensions(@NotNull Extension extension) {
         this.extensions.add(extension);
-        markdownParser = Parser.builder()
-                               .extensions(extensions)
-                               .build();
-        htmlRenderer = HtmlRenderer.builder()
-                                   .extensions(extensions)
-                                   .build();
+        this.markdownParser = Parser.builder()
+                                    .extensions(extensions)
+                                    .build();
+        this.htmlRenderer = HtmlRenderer.builder()
+                                        .extensions(extensions)
+                                        .build();
         return this;
     }
 
+    @NotNull
     public List<Extension> getExtensions() {
         return extensions;
     }
 
-    public Parser getMarkdownParser() {
+    public @NotNull Parser getMarkdownParser() {
         return markdownParser;
     }
 
-    public HtmlRenderer getHtmlRenderer() {
+    public @NotNull HtmlRenderer getHtmlRenderer() {
         return htmlRenderer;
     }
 
-    public String convertMarkdownToHtml(String md) {
+    @NotNull
+    public String convertMarkdownToHtml(@NotNull String md) {
         Node document = markdownParser.parse(md);
         return htmlRenderer.render(document);
     }

@@ -26,13 +26,19 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
  * @since 5.0.0
  */
 public abstract class IntravenouslyCutter<T> {
-    private final AtomicReference<Buffer> bufferRef = new AtomicReference<>(Buffer.buffer());
+    @NotNull
+    private final AtomicReference<Buffer> bufferRef;
+    @NotNull
     private final KeelIntravenous<T> intravenous;
+    @NotNull
     private final AtomicBoolean readStopRef = new AtomicBoolean(false);
+    @NotNull
     private final AtomicReference<Throwable> stopCause = new AtomicReference<>();
+    @Nullable
     private Long timeoutTimer;
 
     public IntravenouslyCutter(@NotNull KeelIntravenous.SingleDropProcessor<T> singleDropProcessor, long timeout) {
+        this.bufferRef = new AtomicReference<>(Buffer.buffer());
         this.intravenous = KeelIntravenous.instant(singleDropProcessor);
         this.intravenous.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));
         if (timeout > 0) {
@@ -80,6 +86,7 @@ public abstract class IntravenouslyCutter<T> {
         }
     }
 
+    @NotNull
     public final Future<Void> waitForAllHandled() {
         return Keel.asyncCallRepeatedly(repeatedlyCallTask -> {
                        if (!this.readStopRef.get()) {
@@ -104,6 +111,7 @@ public abstract class IntravenouslyCutter<T> {
                    });
     }
 
+    @NotNull
     protected final AtomicReference<Buffer> getBufferRef() {
         return bufferRef;
     }

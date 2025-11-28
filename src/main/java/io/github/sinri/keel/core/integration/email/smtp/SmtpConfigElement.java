@@ -1,8 +1,10 @@
 package io.github.sinri.keel.core.integration.email.smtp;
 
 import io.github.sinri.keel.base.configuration.ConfigElement;
+import io.github.sinri.keel.base.configuration.ConfigTree;
 import io.vertx.ext.mail.MailConfig;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -12,15 +14,13 @@ import java.util.List;
  *
  * @since 5.0.0
  */
-public class SmtpConfigElement extends ConfigElement {
-    public SmtpConfigElement(@NotNull String name) {
-        super(name);
-    }
+public class SmtpConfigElement extends ConfigTree {
 
     public SmtpConfigElement(@NotNull ConfigElement another) {
         super(another);
     }
 
+    @NotNull
     public MailConfig toMailConfig() {
         var mailConfig = new MailConfig();
         mailConfig.setHostname(getHostname());
@@ -32,23 +32,46 @@ public class SmtpConfigElement extends ConfigElement {
         return mailConfig;
     }
 
+    @Nullable
     public String getHostname() {
-        return readString(List.of("hostname"), null);
+        try {
+            return readString(List.of("hostname"));
+        } catch (NotConfiguredException e) {
+            return null;
+        }
     }
 
-    public Integer getPort() {
-        return readInteger(List.of("port"), 25);
+    public int getPort() {
+        try {
+            return readInteger(List.of("port"));
+        } catch (NotConfiguredException e) {
+            return 25;
+        }
     }
 
+    @Nullable
     public String getUsername() {
-        return readString(List.of("username"), null);
+        try {
+            return readString(List.of("username"));
+        } catch (NotConfiguredException e) {
+            return null;
+        }
     }
 
+    @Nullable
     public String getPassword() {
-        return readString(List.of("password"), null);
+        try {
+            return readString(List.of("password"));
+        } catch (NotConfiguredException e) {
+            return null;
+        }
     }
 
     public boolean isSSL() {
-        return readBoolean(List.of("ssl"), false);
+        try {
+            return readBoolean(List.of("ssl"));
+        } catch (NotConfiguredException e) {
+            return false;
+        }
     }
 }

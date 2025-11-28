@@ -4,6 +4,7 @@ import io.github.sinri.keel.base.verticles.KeelVerticle;
 import io.github.sinri.keel.base.verticles.KeelVerticleRunningStateEnum;
 import io.vertx.core.Future;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -29,14 +30,14 @@ public interface KeelIntravenous<D> extends KeelVerticle {
         return new KeelIntravenousBatchImpl<>(itemsProcessor);
     }
 
-    void add(D drop);
+    void add(@Nullable D drop);
 
     /**
      * 处理对象过程中发生异常时的回调。
      * <p>
      * 默认实现为无视异常。
      */
-    default void handleAllergy(Throwable throwable) {
+    default void handleAllergy(@NotNull Throwable throwable) {
         // do nothing by default for the thrown exception
     }
 
@@ -52,6 +53,7 @@ public interface KeelIntravenous<D> extends KeelVerticle {
      */
     void shutdown();
 
+    @NotNull
     default Future<Void> shutdownAndAwait() {
         shutdown();
         return Keel.asyncCallRepeatedly(repeatedlyCallTask -> {
@@ -73,11 +75,11 @@ public interface KeelIntravenous<D> extends KeelVerticle {
 
     interface SingleDropProcessor<T> {
         @NotNull
-        Future<Void> process(T drop);
+        Future<Void> process(@Nullable T drop);
     }
 
     interface MultiDropsProcessor<T> {
         @NotNull
-        Future<Void> process(List<T> drops);
+        Future<Void> process(@NotNull List<T> drops);
     }
 }

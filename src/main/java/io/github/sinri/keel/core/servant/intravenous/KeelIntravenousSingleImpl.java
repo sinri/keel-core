@@ -5,8 +5,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
-
 
 /**
  * 对单个实体进行处理的静脉注入的实现

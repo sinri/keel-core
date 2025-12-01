@@ -6,8 +6,8 @@
 
     <groupId>io.github.sinri</groupId>
     <artifactId>keel-core</artifactId>
-    <!--    <version>5.0.0-SNAPSHOT</version>-->
-    <version>5.0.0-rc.12</version>
+    <version>5.0.0-SNAPSHOT</version>
+    <!--    <version>5.0.0-rc.12</version>-->
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -26,8 +26,8 @@
         <!--        <jolCoreVersion>0.17</jolCoreVersion>-->
         <slf4j.version>2.0.17</slf4j.version>
         <log4j.version>2.24.3</log4j.version>
-        <keelBaseVersion>5.0.0-rc.15</keelBaseVersion>
-        <keelTestVersion>5.0.0-rc.11</keelTestVersion>
+        <keelBaseVersion>5.0.0-rc.16</keelBaseVersion>
+        <keelTestVersion>5.0.0-rc.12</keelTestVersion>
     </properties>
 
     <name>Keel-Core</name>
@@ -56,7 +56,6 @@
             <organizationUrl>https://sinri.github.io</organizationUrl>
         </developer>
     </developers>
-
 
 
     <build>

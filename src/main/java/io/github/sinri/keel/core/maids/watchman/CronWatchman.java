@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.maids.watchman;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.vertx.core.DeploymentOptions;
@@ -31,11 +32,12 @@ public class CronWatchman extends WatchmanImpl {
     private final LoggerFactory loggerFactory;
 
     protected CronWatchman(
+            @NotNull Keel keel,
             @NotNull String watchmanName,
             @NotNull Function<String, Future<Void>> cronTabUpdateStartup,
             @NotNull LoggerFactory loggerFactory
     ) {
-        super(watchmanName);
+        super(keel, watchmanName);
         this.loggerFactory = loggerFactory;
         this.handler = now -> {
             Calendar calendar = new Calendar
@@ -43,50 +45,55 @@ public class CronWatchman extends WatchmanImpl {
                     .setInstant(now)
                     .build();
 
-            readAsyncMapForEventHandlers(calendar)
+            readAsyncMapForEventHandlers(keel, calendar)
                     .onSuccess(list -> list.forEach(x -> x.handle(now)))
-                    .onFailure(throwable -> getWatchmanLogger().exception(throwable));
+                    .onFailure(throwable -> getWatchmanLogger().error(x -> x.exception(throwable)));
         };
         this.cronTabUpdateStartup = cronTabUpdateStartup;
     }
 
     @NotNull
     public static Future<String> deploy(
+            @NotNull Keel keel,
             @NotNull String watchmanName,
             @NotNull Function<String, Future<Void>> cronTabUpdateStartup,
             @NotNull LoggerFactory loggerFactory
     ) {
-        CronWatchman keelCronWatchman = new CronWatchman(watchmanName, cronTabUpdateStartup, loggerFactory);
-        return Keel.getVertx()
+        CronWatchman keelCronWatchman = new CronWatchman(keel, watchmanName, cronTabUpdateStartup, loggerFactory);
+        return keel.getVertx()
                    .deployVerticle(keelCronWatchman, new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));
     }
 
     @NotNull
-    private static Future<Void> operateCronTab(@NotNull String asyncMapName, @NotNull Supplier<Future<Void>> supplier) {
-        return Keel.getVertx().sharedData().getLock(asyncMapName)
+    private static Future<Void> operateCronTab(@NotNull Keel keel, @NotNull String asyncMapName, @NotNull Supplier<Future<Void>> supplier) {
+        return keel.getVertx().sharedData().getLock(asyncMapName)
                    .compose(lock -> supplier.get()
                                             .andThen(ar -> lock.release()));
     }
 
     @NotNull
     public static Future<Void> addCronJobToAsyncMap(
+            @NotNull Keel keel,
             @NotNull String asyncMapName,
             @NotNull KeelCronExpression keelCronExpression,
             @NotNull Class<? extends KeelWatchmanEventHandler> eventHandlerClass
     ) {
-        return addCronJobToAsyncMap(asyncMapName, keelCronExpression.getRawCronExpression(),
+        return addCronJobToAsyncMap(keel,
+                asyncMapName, keelCronExpression.getRawCronExpression(),
                 eventHandlerClass.getName());
     }
 
     @NotNull
     public static Future<Void> addCronJobToAsyncMap(
+            @NotNull Keel keel,
             @NotNull String asyncMapName,
             @NotNull String keelCronExpression,
             @NotNull String eventHandlerClassName
     ) {
         return operateCronTab(
+                keel,
                 asyncMapName,
-                () -> Keel.getVertx().sharedData().getAsyncMap(asyncMapName)
+                () -> keel.getVertx().sharedData().getAsyncMap(asyncMapName)
                           .compose(asyncMap -> asyncMap.put(
                                   keelCronExpression + "@" + eventHandlerClassName,
                                   new JsonObject()
@@ -97,7 +104,7 @@ public class CronWatchman extends WatchmanImpl {
     }
 
     @NotNull
-    public static Future<Void> replaceAllCronJobToAsyncMap(@NotNull String asyncMapName, @NotNull Map<String, List<String>> newMap) {
+    public static Future<Void> replaceAllCronJobToAsyncMap(@NotNull Keel keel, @NotNull String asyncMapName, @NotNull Map<String, List<String>> newMap) {
         Map<Object, JsonObject> hashMap = new HashMap<>();
         newMap.forEach((cronExpression, classes) -> classes.forEach(classItem -> {
             String hash = cronExpression + "@" + classItem;
@@ -107,8 +114,9 @@ public class CronWatchman extends WatchmanImpl {
                     .put("handler", classItem));
         }));
         return operateCronTab(
+                keel,
                 asyncMapName,
-                () -> Keel.getVertx().sharedData().getAsyncMap(asyncMapName)
+                () -> keel.getVertx().sharedData().getAsyncMap(asyncMapName)
                           .compose(asyncMap -> asyncMap.keys()
                                                        .compose(oldKeys -> {
                                                            Set<Object> newKeys = hashMap.keySet();
@@ -122,11 +130,11 @@ public class CronWatchman extends WatchmanImpl {
                                                            toAddHashSet.removeAll(oldKeys);
 
                                                            return Future.all(
-                                                                   Keel.asyncCallIteratively(
+                                                                   keel.asyncCallIteratively(
                                                                            toDeleteHashSet,
                                                                            (hash, task) -> asyncMap.remove(String.valueOf(hash))
                                                                                                    .compose(v -> Future.succeededFuture())),
-                                                                   Keel.asyncCallIteratively(
+                                                                   keel.asyncCallIteratively(
                                                                            toAddHashSet,
                                                                            (hash, task) -> asyncMap.put(hash, hashMap.get(hash))
                                                                                                    .compose(v -> Future.succeededFuture()))
@@ -138,44 +146,48 @@ public class CronWatchman extends WatchmanImpl {
 
     @NotNull
     public static Future<Void> removeCronJobFromAsyncMap(
+            @NotNull Keel keel,
             @NotNull String asyncMapName,
             @NotNull KeelCronExpression keelCronExpression,
             @NotNull Class<? extends KeelWatchmanEventHandler> eventHandlerClass
     ) {
-        return removeCronJobFromAsyncMap(asyncMapName, keelCronExpression.getRawCronExpression(),
+        return removeCronJobFromAsyncMap(keel, asyncMapName, keelCronExpression.getRawCronExpression(),
                 eventHandlerClass.getName());
     }
 
     @NotNull
     public static Future<Void> removeCronJobFromAsyncMap(
+            @NotNull Keel keel,
             @NotNull String asyncMapName,
             @NotNull String keelCronExpression,
             @NotNull String eventHandlerClassName
     ) {
-        return removeCronJobFromAsyncMap(asyncMapName, keelCronExpression + "@" + eventHandlerClassName);
+        return removeCronJobFromAsyncMap(keel, asyncMapName, keelCronExpression + "@" + eventHandlerClassName);
     }
 
     @NotNull
-    public static Future<Void> removeCronJobFromAsyncMap(@NotNull String asyncMapName, @NotNull String hash) {
+    public static Future<Void> removeCronJobFromAsyncMap(@NotNull Keel keel, @NotNull String asyncMapName, @NotNull String hash) {
         return operateCronTab(
+                keel,
                 asyncMapName,
-                () -> Keel.getVertx().sharedData().getAsyncMap(asyncMapName)
+                () -> keel.getVertx().sharedData().getAsyncMap(asyncMapName)
                           .compose(asyncMap -> asyncMap.remove(hash)
                                                        .compose(v -> Future.succeededFuture()))
         );
     }
 
     @NotNull
-    public static Future<Void> removeAllCronJobsFromAsyncMap(@NotNull String asyncMapName) {
+    public static Future<Void> removeAllCronJobsFromAsyncMap(@NotNull Keel keel, @NotNull String asyncMapName) {
         return operateCronTab(
+                keel,
                 asyncMapName,
-                () -> Keel.getVertx().sharedData().getAsyncMap(asyncMapName)
+                () -> keel.getVertx().sharedData().getAsyncMap(asyncMapName)
                           .compose(AsyncMap::clear));
     }
 
     @NotNull
-    public static Future<Map<String, List<String>>> getAllCronJobsFromAsyncMap(@NotNull String asyncMapName) {
-        return Keel.getVertx().sharedData().getAsyncMap(asyncMapName)
+    public static Future<Map<String, List<String>>> getAllCronJobsFromAsyncMap(@NotNull Keel keel, @NotNull String asyncMapName) {
+        return keel.getVertx().sharedData().getAsyncMap(asyncMapName)
                    .compose(AsyncMap::entries)
                    .compose(entries -> {
                        Map<String, List<String>> map = new HashMap<>();
@@ -192,11 +204,12 @@ public class CronWatchman extends WatchmanImpl {
 
     @NotNull
     public static Future<List<KeelWatchmanEventHandler>> readAsyncMapForEventHandlers(
+            @NotNull Keel keel,
             @NotNull String asyncMapName,
             @NotNull Calendar calendar
     ) {
         List<KeelWatchmanEventHandler> list = new ArrayList<>();
-        return Keel.getVertx().sharedData().getAsyncMap(asyncMapName)
+        return keel.getVertx().sharedData().getAsyncMap(asyncMapName)
                    .compose(AsyncMap::entries)
                    .compose(entries -> {
                        entries.forEach((k, v) -> {
@@ -224,8 +237,8 @@ public class CronWatchman extends WatchmanImpl {
     }
 
     @NotNull
-    private Future<List<KeelWatchmanEventHandler>> readAsyncMapForEventHandlers(@NotNull Calendar calendar) {
-        return readAsyncMapForEventHandlers(eventBusAddress(), calendar);
+    private Future<List<KeelWatchmanEventHandler>> readAsyncMapForEventHandlers(@NotNull Keel keel, @NotNull Calendar calendar) {
+        return readAsyncMapForEventHandlers(keel, eventBusAddress(), calendar);
     }
 
     @Override

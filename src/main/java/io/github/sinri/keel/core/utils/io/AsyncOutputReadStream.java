@@ -2,6 +2,7 @@ package io.github.sinri.keel.core.utils.io;
 
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.ReadStream;
 import org.jetbrains.annotations.NotNull;
@@ -14,8 +15,8 @@ import java.io.InputStream;
  * @since 5.0.0
  */
 public interface AsyncOutputReadStream extends ReadStream<Buffer> {
-    static AsyncOutputReadStream create() {
-        return new AsyncOutputReadStreamImpl();
+    static AsyncOutputReadStream create(Vertx vertx) {
+        return new AsyncOutputReadStreamImpl(vertx);
     }
 
     void wrap(@NotNull InputStream inputStream);

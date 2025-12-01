@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.maids.watchman;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.github.sinri.keel.logger.api.logger.Logger;
@@ -26,7 +27,8 @@ abstract class WatchmanImpl extends AbstractKeelVerticle implements Watchman {
     @Nullable
     private Logger watchmanLogger;
 
-    public WatchmanImpl(@NotNull String watchmanName) {
+    public WatchmanImpl(@NotNull Keel keel, @NotNull String watchmanName) {
+        super(keel);
         this.watchmanName = watchmanName;
     }
 
@@ -45,7 +47,7 @@ abstract class WatchmanImpl extends AbstractKeelVerticle implements Watchman {
     protected @NotNull Future<Void> startVerticle() {
         this.watchmanLogger = this.buildWatchmanLogger();
 
-        this.consumer = Keel.getVertx().eventBus().consumer(eventBusAddress());
+        this.consumer = getVertx().eventBus().consumer(eventBusAddress());
         this.consumer.handler(this::consumeHandleMassage);
         this.consumer.exceptionHandler(throwable -> getWatchmanLogger()
                 .error(log -> log.message(watchmanName() + " ERROR").exception(throwable))
@@ -60,11 +62,10 @@ abstract class WatchmanImpl extends AbstractKeelVerticle implements Watchman {
         } catch (Exception ignore) {
             // 拟合不了拉倒
         }
-        vertx().setPeriodic(
+        getVertx().setPeriodic(
                 interval(),
-                timerID -> vertx()
-                        .eventBus()
-                        .send(eventBusAddress(), System.currentTimeMillis())
+                timerID -> getVertx().eventBus()
+                                     .send(eventBusAddress(), System.currentTimeMillis())
         );
 
         return Future.succeededFuture();
@@ -75,7 +76,7 @@ abstract class WatchmanImpl extends AbstractKeelVerticle implements Watchman {
         getWatchmanLogger().debug(r -> r.message(watchmanName() + " TRIGGERED FOR " + timestamp));
 
         long x = timestamp / interval();
-        Keel.getVertx().sharedData().getLockWithTimeout(eventBusAddress() + "@" + x, Math.min(3_000L, interval() - 1))
+        getVertx().sharedData().getLockWithTimeout(eventBusAddress() + "@" + x, Math.min(3_000L, interval() - 1))
             .onComplete(lockAR -> {
                 if (lockAR.failed()) {
                     getWatchmanLogger().warning(r -> r.message("LOCK ACQUIRE FAILED FOR " + timestamp + " i.e. " + x));
@@ -83,7 +84,7 @@ abstract class WatchmanImpl extends AbstractKeelVerticle implements Watchman {
                     Lock lock = lockAR.result();
                     getWatchmanLogger().info(r -> r.message("LOCK ACQUIRED FOR " + timestamp + " i.e. " + x));
                     regularHandler().handle(timestamp);
-                    Keel.getVertx().setTimer(interval(), timerID -> {
+                    getVertx().setTimer(interval(), timerID -> {
                         lock.release();
                         getWatchmanLogger().info(r -> r.message("LOCK RELEASED FOR " + timestamp + " i.e. " + x));
                     });

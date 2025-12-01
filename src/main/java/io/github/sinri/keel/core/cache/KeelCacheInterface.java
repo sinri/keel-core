@@ -6,8 +6,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Set;
 import java.util.function.Function;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
-
 
 /**
  * 基于 {@link KeelSyncCacheAlike} 提供同步方法的缓存接口.
@@ -113,6 +111,8 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
 
     /**
      * 从缓存中清理掉所有无效记录（值为空、过期等情况）。
+     * <p>
+     * 本方法需要适时调用以避免内存泄露。
      */
     void cleanUp();
 
@@ -123,20 +123,4 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      */
     @NotNull
     Set<K> getCachedKeySet();
-
-    /**
-     * 启动一个不会停止清理循环，实现定期清理缓存中的无效内容。
-     * <p>
-     * 本方法不应自动启动，需要手动调用本方法来开启。
-     * <p>
-     * 如果这个缓存实例的生命周期是有限的（即会先于进程或所在 verticle 结束）那么，那么不能使用此方法，需要自行实现。
-     *
-     * @param sleepTime 清理周期，以毫秒计
-     */
-    default void startEndlessCleanUp(long sleepTime) {
-        Keel.asyncCallEndlessly(() -> {
-            cleanUp();
-            return Keel.asyncSleep(sleepTime);
-        });
-    }
 }

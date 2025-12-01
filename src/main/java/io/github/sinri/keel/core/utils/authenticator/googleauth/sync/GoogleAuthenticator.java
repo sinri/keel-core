@@ -33,6 +33,7 @@ package io.github.sinri.keel.core.utils.authenticator.googleauth.sync;
 //import org.apache.commons.codec.binary.Base32;
 //import org.apache.commons.codec.binary.Base64;
 
+import io.github.sinri.keel.base.logger.factory.StdoutLoggerFactory;
 import io.github.sinri.keel.core.utils.BinaryUtils;
 import io.github.sinri.keel.core.utils.StringUtils;
 import io.github.sinri.keel.core.utils.authenticator.googleauth.GoogleAuthenticatorConfig;
@@ -47,9 +48,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
 
 /**
  * This class implements the functionality described in RFC 6238 (TOTP: Time
@@ -98,34 +96,23 @@ public final class GoogleAuthenticator implements IGoogleAuthenticator {
      * @since 0.5.0
      */
     public static final String RNG_ALGORITHM_PROVIDER = "com.warrenstrange.googleauth.rng.algorithmProvider";
-
-    /**
-     * The logger for this class.
-     */
-    //private static final Logger LOGGER = Logger.getLogger(GoogleAuthenticator.class.getName());
-    private static final Logger LOGGER = Keel.getLoggerFactory().createLogger(GoogleAuthenticator.class.getName());
-
     /**
      * Number of digits of a scratch code represented as a decimal integer.
      */
     private static final int SCRATCH_CODE_LENGTH = 8;
-
     /**
      * Modulus used to truncate the scratch code.
      */
     public static final int SCRATCH_CODE_MODULUS = (int) Math.pow(10, SCRATCH_CODE_LENGTH);
-
     /**
      * Magic number representing an invalid scratch code.
      */
     private static final int SCRATCH_CODE_INVALID = -1;
-
     /**
      * Length in bytes of each scratch code. We're using Google's default of
      * using 4 bytes per scratch code.
      */
     private static final int BYTES_PER_SCRATCH_CODE = 4;
-
     /**
      * The default SecureRandom algorithm to use if none is specified.
      *
@@ -133,7 +120,6 @@ public final class GoogleAuthenticator implements IGoogleAuthenticator {
      * @since 0.5.0
      */
     private static final String DEFAULT_RANDOM_NUMBER_ALGORITHM = "SHA1PRNG";
-
     /**
      * The default random number algorithm provider to use if none is specified.
      *
@@ -141,7 +127,12 @@ public final class GoogleAuthenticator implements IGoogleAuthenticator {
      * @since 0.5.0
      */
     private static final String DEFAULT_RANDOM_NUMBER_ALGORITHM_PROVIDER = "SUN";
-
+    /**
+     * The logger for this class.
+     */
+    //private static final Logger LOGGER = Logger.getLogger(GoogleAuthenticator.class.getName());
+    private final static Logger LOGGER = StdoutLoggerFactory.getInstance()
+                                                            .createLogger(GoogleAuthenticator.class.getName());
     /**
      * The configuration used by the current instance.
      */
@@ -172,7 +163,8 @@ public final class GoogleAuthenticator implements IGoogleAuthenticator {
     }
 
     /**
-     * The constructor that allows a user to specify the config and uses the default randomNumberAlgorithm and randomNumberAlgorithmProvider.
+     * The constructor that allows a user to specify the config and uses the default randomNumberAlgorithm and
+     * randomNumberAlgorithmProvider.
      *
      * @param config The configuration used by the current instance.
      */
@@ -190,10 +182,13 @@ public final class GoogleAuthenticator implements IGoogleAuthenticator {
     }
 
     /**
-     * The constructor that allows a user the randomNumberAlgorithm, the randomNumberAlgorithmProvider, and uses the default config.
+     * The constructor that allows a user the randomNumberAlgorithm, the randomNumberAlgorithmProvider, and uses the
+     * default config.
      *
-     * @param randomNumberAlgorithm         The random number algorithm to define the secure random number generator. If this is null the randomNumberAlgorithmProvider must be null.
-     * @param randomNumberAlgorithmProvider The random number algorithm provider to define the secure random number generator. This value may be null.
+     * @param randomNumberAlgorithm         The random number algorithm to define the secure random number generator. If
+     *                                      this is null the randomNumberAlgorithmProvider must be null.
+     * @param randomNumberAlgorithmProvider The random number algorithm provider to define the secure random number
+     *                                      generator. This value may be null.
      */
     public GoogleAuthenticator(final String randomNumberAlgorithm, final String randomNumberAlgorithmProvider) {
         this(new GoogleAuthenticatorConfig(), randomNumberAlgorithm, randomNumberAlgorithmProvider);
@@ -201,11 +196,14 @@ public final class GoogleAuthenticator implements IGoogleAuthenticator {
     }
 
     /**
-     * The constructor that allows a user to specify the config, the randomNumberAlgorithm, and the randomNumberAlgorithmProvider.
+     * The constructor that allows a user to specify the config, the randomNumberAlgorithm, and the
+     * randomNumberAlgorithmProvider.
      *
      * @param config                        The configuration used by the current instance.
-     * @param randomNumberAlgorithm         The random number algorithm to define the secure random number generator. If this is null the randomNumberAlgorithmProvider must be null.
-     * @param randomNumberAlgorithmProvider The random number algorithm provider to define the secure random number generator. This value may be null.
+     * @param randomNumberAlgorithm         The random number algorithm to define the secure random number generator. If
+     *                                      this is null the randomNumberAlgorithmProvider must be null.
+     * @param randomNumberAlgorithmProvider The random number algorithm provider to define the secure random number
+     *                                      generator. This value may be null.
      */
     public GoogleAuthenticator(GoogleAuthenticatorConfig config, final String randomNumberAlgorithm, final String randomNumberAlgorithmProvider) {
         if (config == null) {
@@ -250,7 +248,7 @@ public final class GoogleAuthenticator implements IGoogleAuthenticator {
      * @param key the secret key in binary format.
      * @param tm  the instant of time.
      * @return the validation code for the provided key at the specified instant
-     * of time.
+     *         of time.
      */
     int calculateCode(byte[] key, long tm) {
         // Allocating an array of bytes to represent the specified instant
@@ -324,7 +322,7 @@ public final class GoogleAuthenticator implements IGoogleAuthenticator {
      * @param timestamp the instant of time to use during the validation process.
      * @param window    the window size to use during the validation process.
      * @return <code>true</code> if the validation code is valid,
-     * <code>false</code> otherwise.
+     *         <code>false</code> otherwise.
      */
     private boolean checkCode(
             String secret,
@@ -361,15 +359,15 @@ public final class GoogleAuthenticator implements IGoogleAuthenticator {
             case BASE32:
                 return StringUtils.decodeWithBase32ToBytes(secret.toUpperCase());
 
-//                Base32 codec32 = new Base32();
+            //                Base32 codec32 = new Base32();
             // See: https://issues.apache.org/jira/browse/CODEC-234
             // Commons Codec Base32::decode does not support lowercase letters.
-//                return codec32.decode(secret.toUpperCase());
+            //                return codec32.decode(secret.toUpperCase());
             case BASE64:
                 return StringUtils.decodeWithBase32ToBytes(secret);
 
-//                Base64 codec64 = new Base64();
-//                return codec64.decode(secret);
+            //                Base64 codec64 = new Base64();
+            //                return codec64.decode(secret);
             default:
                 throw new IllegalArgumentException("Unknown key representation type.");
         }
@@ -531,10 +529,10 @@ public final class GoogleAuthenticator implements IGoogleAuthenticator {
         switch (config.getKeyRepresentation()) {
             case BASE32:
                 return BinaryUtils.encodeWithBase32ToString(secretKey);
-//                return new Base32().encodeToString(secretKey);
+            //                return new Base32().encodeToString(secretKey);
             case BASE64:
                 return BinaryUtils.encodeWithBase64ToString(secretKey);
-//                return new Base64().encodeToString(secretKey);
+            //                return new Base64().encodeToString(secretKey);
             default:
                 throw new IllegalArgumentException("Unknown key representation type.");
         }
@@ -605,7 +603,7 @@ public final class GoogleAuthenticator implements IGoogleAuthenticator {
      * registered using the Java service loader API.
      *
      * @return the first registered ICredentialRepository or <code>null</code>
-     * if none is found.
+     *         if none is found.
      */
     public ICredentialRepository getCredentialRepository() {
         if (this.credentialRepositorySearched) return this.credentialRepository;

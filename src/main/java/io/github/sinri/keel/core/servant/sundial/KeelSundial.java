@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.servant.sundial;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
 import io.github.sinri.keel.core.utils.cron.ParsedCalenderElements;
@@ -30,6 +31,10 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
     @Nullable
     private SpecificLogger<SundialSpecificLog> logger;
 
+    public KeelSundial(@NotNull Keel keel) {
+        super(keel);
+    }
+
     @NotNull
     abstract protected LoggerFactory getLoggerFactory();
 
@@ -47,7 +52,7 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
     protected @NotNull Future<Void> startVerticle() {
         this.logger = buildLogger();
         int delaySeconds = 61 - KeelCronExpression.parseCalenderToElements(Calendar.getInstance()).second;
-        this.timerID = Keel.getVertx().setPeriodic(delaySeconds * 1000L, 60_000L, timerID -> {
+        this.timerID = getVertx().setPeriodic(delaySeconds * 1000L, 60_000L, timerID -> {
             handleEveryMinute(Calendar.getInstance());
             refreshPlans();
         });
@@ -64,7 +69,7 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
                         .context("plan_cron", plan.cronExpression().getRawCronExpression())
                         .context("now", parsedCalenderElements.toString())
                 );
-                new KeelSundialVerticle(plan, now, getLogger())
+                new KeelSundialVerticle(keel(), plan, now, getLogger())
                         .deployMe()
                         .onComplete(ar -> {
                             if (ar.failed()) {
@@ -90,7 +95,7 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
     }
 
     private void refreshPlans() {
-        Keel.asyncCallExclusively(
+        keel().asyncCallExclusively(
                     "io.github.sinri.keel.servant.sundial.KeelSundial.refreshPlans",
                     1000L,
                     () -> fetchPlans()
@@ -126,7 +131,7 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
     @Override
     protected @NotNull Future<Void> stopVerticle() {
         if (this.timerID != null) {
-            Keel.getVertx().cancelTimer(this.timerID);
+            keel().getVertx().cancelTimer(this.timerID);
         }
         return Future.succeededFuture();
     }

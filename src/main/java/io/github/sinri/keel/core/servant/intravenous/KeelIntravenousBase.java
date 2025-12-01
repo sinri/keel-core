@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.servant.intravenous;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.async.RepeatedlyCallTask;
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.vertx.core.Future;
@@ -17,6 +18,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 静脉注入的基本实现。
+ *
  * @since 5.0.0
  */
 abstract class KeelIntravenousBase<D> extends AbstractKeelVerticle implements KeelIntravenous<D> {
@@ -29,7 +31,8 @@ abstract class KeelIntravenousBase<D> extends AbstractKeelVerticle implements Ke
     @NotNull
     private final AtomicBoolean undeployedRef = new AtomicBoolean(false);
 
-    public KeelIntravenousBase() {
+    public KeelIntravenousBase(@NotNull Keel keel) {
+        super(keel);
         this.queue = new ConcurrentLinkedQueue<>();
     }
 
@@ -76,9 +79,9 @@ abstract class KeelIntravenousBase<D> extends AbstractKeelVerticle implements Ke
     @Override
     protected @NotNull Future<Void> startVerticle() {
         this.interrupterRef.set(null);
-        Keel.asyncCallRepeatedly(this::handleRoutine)
-            .onComplete(ar -> this.undeployMe()
-                                  .onSuccess(v -> undeployedRef.set(true)));
+        keel().asyncCallRepeatedly(this::handleRoutine)
+              .onComplete(ar -> this.undeployMe()
+                                    .onSuccess(v -> undeployedRef.set(true)));
         return Future.succeededFuture();
     }
 
@@ -116,7 +119,7 @@ abstract class KeelIntravenousBase<D> extends AbstractKeelVerticle implements Ke
                          } else {
                              // wait for next `add` call, or just sleep 1 second
                              return Future.any(
-                                                  Keel.asyncSleep(1000L),
+                                                  keel().asyncSleep(1000L),
                                                   this.interrupterRef.get().future()
                                           )
                                           .compose(compositeFuture -> Future.succeededFuture());

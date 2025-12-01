@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.utils.runtime;
 
+import io.github.sinri.keel.base.logger.factory.StdoutLoggerFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
 import org.jetbrains.annotations.NotNull;
@@ -10,7 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 /**
  * @since 5.0.0
@@ -162,7 +162,7 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
             }
             this.majorGCType = gc.getName();
         } else if (!ignoreGCNames.contains(gc.getName())) {
-            Keel.getLoggerFactory().createLogger(getClass().getName()).error(log -> log
+            StdoutLoggerFactory.getInstance().createLogger(getClass().getName()).error(log -> log
                     .message("Found Unknown GarbageCollectorMXBean Name")
                     .context(ctx -> ctx
                             .put("class", gc.getClass().getName())

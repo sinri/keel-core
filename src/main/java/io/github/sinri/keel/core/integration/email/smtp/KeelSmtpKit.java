@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.integration.email.smtp;
 
+import io.github.sinri.keel.base.Keel;
 import io.vertx.core.Future;
 import io.vertx.ext.mail.MailClient;
 import io.vertx.ext.mail.MailConfig;
@@ -10,8 +11,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
-
-import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
@@ -26,26 +25,26 @@ public class KeelSmtpKit {
     private final MailClient mailClient;
 
 
-    public KeelSmtpKit(@NotNull MailConfig mailConfig, @Nullable String poolName) {
+    public KeelSmtpKit(@NotNull Keel keel, @NotNull MailConfig mailConfig, @Nullable String poolName) {
         this.mailConfig = mailConfig;
         if (poolName != null) {
-            this.mailClient = MailClient.createShared(Keel.getVertx(), this.mailConfig, poolName);
+            this.mailClient = MailClient.createShared(keel.getVertx(), this.mailConfig, poolName);
         } else {
-            this.mailClient = MailClient.create(Keel.getVertx(), this.mailConfig);
+            this.mailClient = MailClient.create(keel.getVertx(), this.mailConfig);
         }
     }
 
-    public KeelSmtpKit(@NotNull String smtpName, boolean shared) {
-        this(buildMailConfig(smtpName), shared ? Objects.requireNonNull(smtpName) : null);
+    public KeelSmtpKit(@NotNull Keel keel, @NotNull String smtpName, boolean shared) {
+        this(keel, buildMailConfig(keel, smtpName), shared ? Objects.requireNonNull(smtpName) : null);
     }
 
-    public KeelSmtpKit(@NotNull String smtpName) {
-        this(smtpName, true);
+    public KeelSmtpKit(@NotNull Keel keel, @NotNull String smtpName) {
+        this(keel, smtpName, true);
     }
 
     @NotNull
-    private static MailConfig buildMailConfig(@NotNull String smtpName) {
-        var smtpConfiguration = Keel.getConfiguration().extract("email", "smtp", smtpName);
+    private static MailConfig buildMailConfig(@NotNull Keel keel, @NotNull String smtpName) {
+        var smtpConfiguration = keel.getConfiguration().extract("email", "smtp", smtpName);
         Objects.requireNonNull(smtpConfiguration);
 
         SmtpConfigElement smtpConfigElement = new SmtpConfigElement(smtpConfiguration);

@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.cutter;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.core.servant.intravenous.KeelIntravenous;
 import io.vertx.core.buffer.Buffer;
 import org.jetbrains.annotations.NotNull;
@@ -24,8 +25,8 @@ public class IntravenouslyCutterOnString extends IntravenouslyCutter<String> {
      * @param stringSingleDropProcessor 切分出的字符串文本片段处理器，由内置的{@link KeelIntravenous}实例调用
      * @param timeout                   以毫秒计的数据流接收处理总时间限制
      */
-    public IntravenouslyCutterOnString(@NotNull KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor, long timeout) {
-        super(stringSingleDropProcessor, timeout);
+    public IntravenouslyCutterOnString(@NotNull Keel keel, @NotNull KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor, long timeout) {
+        super(keel, stringSingleDropProcessor, timeout);
     }
 
     /**
@@ -33,8 +34,8 @@ public class IntravenouslyCutterOnString extends IntravenouslyCutter<String> {
      *
      * @param stringSingleDropProcessor 切分出的字符串文本片段处理器，由内置的{@link KeelIntravenous}实例调用
      */
-    public IntravenouslyCutterOnString(@NotNull KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor) {
-        this(stringSingleDropProcessor, 0);
+    public IntravenouslyCutterOnString(@NotNull Keel keel, @NotNull KeelIntravenous.SingleDropProcessor<String> stringSingleDropProcessor) {
+        this(keel, stringSingleDropProcessor, 0);
     }
 
     @Override

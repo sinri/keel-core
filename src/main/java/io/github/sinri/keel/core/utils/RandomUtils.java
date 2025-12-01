@@ -1,6 +1,7 @@
 package io.github.sinri.keel.core.utils;
 
 
+import io.vertx.core.Vertx;
 import io.vertx.ext.auth.prng.VertxContextPRNG;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,11 +11,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
-
 
 /**
  * 随机工具类。
+ *
  * @since 5.0.0
  */
 public class RandomUtils {
@@ -29,14 +29,14 @@ public class RandomUtils {
      * @param length 字符串长度
      * @return 随机字符串
      */
-    public static String generateRandomString(int length) {
+    public static String generateRandomString(Vertx vertx, int length) {
         if (length <= 0) {
             throw new IllegalArgumentException("Length must be positive");
         }
 
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
         StringBuilder sb = new StringBuilder();
-        VertxContextPRNG prng = getPRNG();
+        VertxContextPRNG prng = getPRNG(vertx);
 
         for (int i = 0; i < length; i++) {
             int index = prng.nextInt(chars.length());
@@ -52,14 +52,14 @@ public class RandomUtils {
      * @param length 字符串长度
      * @return 随机字母数字字符串
      */
-    public static String generateRandomAlphanumericString(int length) {
+    public static String generateRandomAlphanumericString(Vertx vertx, int length) {
         if (length <= 0) {
             throw new IllegalArgumentException("Length must be positive");
         }
 
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder sb = new StringBuilder();
-        VertxContextPRNG prng = getPRNG();
+        VertxContextPRNG prng = getPRNG(vertx);
 
         for (int i = 0; i < length; i++) {
             int index = prng.nextInt(chars.length());
@@ -76,12 +76,12 @@ public class RandomUtils {
      * @param <T>  元素类型
      * @return 随机选择的元素
      */
-    public static <T> T getRandomElement(List<T> list) {
+    public static <T> T getRandomElement(Vertx vertx, List<T> list) {
         if (list == null || list.isEmpty()) {
             throw new IllegalArgumentException("List cannot be null or empty");
         }
 
-        VertxContextPRNG prng = getPRNG();
+        VertxContextPRNG prng = getPRNG(vertx);
         int index = prng.nextInt(list.size());
         return list.get(index);
     }
@@ -93,13 +93,13 @@ public class RandomUtils {
      * @param <T>  元素类型
      * @return 打乱后的新列表
      */
-    public static <T> List<T> shuffleList(List<T> list) {
+    public static <T> List<T> shuffleList(Vertx vertx, List<T> list) {
         if (list == null) {
             throw new IllegalArgumentException("List cannot be null");
         }
 
         List<T> shuffled = new ArrayList<>(list);
-        VertxContextPRNG prng = getPRNG();
+        VertxContextPRNG prng = getPRNG(vertx);
 
         for (int i = shuffled.size() - 1; i > 0; i--) {
             int index = prng.nextInt(i + 1);
@@ -118,12 +118,12 @@ public class RandomUtils {
      * @param max 最大值（包含）
      * @return 随机整数
      */
-    public static int generateRandomInt(int min, int max) {
+    public static int generateRandomInt(Vertx vertx, int min, int max) {
         if (min > max) {
             throw new IllegalArgumentException("Min cannot be greater than max");
         }
 
-        VertxContextPRNG prng = getPRNG();
+        VertxContextPRNG prng = getPRNG(vertx);
         return min + prng.nextInt(max - min + 1);
     }
 
@@ -134,7 +134,7 @@ public class RandomUtils {
      * @param length 每个字符串的长度
      * @return 唯一随机字符串列表
      */
-    public static List<String> generateUniqueRandomStrings(int count, int length) {
+    public static List<String> generateUniqueRandomStrings(Vertx vertx, int count, int length) {
         if (count <= 0 || length <= 0) {
             throw new IllegalArgumentException("Count and length must be positive");
         }
@@ -142,7 +142,7 @@ public class RandomUtils {
         Set<String> uniqueStrings = new HashSet<>();
 
         while (uniqueStrings.size() < count) {
-            uniqueStrings.add(generateRandomString(length));
+            uniqueStrings.add(generateRandomString(vertx, length));
         }
 
         return new ArrayList<>(uniqueStrings);
@@ -158,18 +158,14 @@ public class RandomUtils {
      * @throws IllegalStateException 如果无法创建伪随机数生成器
      */
     @NotNull
-    public static VertxContextPRNG getPRNG() {
+    public static VertxContextPRNG getPRNG(@NotNull Vertx vertx) {
         return prngRef.updateAndGet(existing -> {
             if (existing != null) {
                 return existing;
             }
-            
+
             try {
-                if (Keel.isVertxInitialized()) {
-                    return VertxContextPRNG.current(Keel.getVertx());
-                } else {
-                    return VertxContextPRNG.current();
-                }
+                return VertxContextPRNG.current(vertx);
             } catch (Exception e) {
                 throw new IllegalStateException("Failed to create VertxContextPRNG instance", e);
             }

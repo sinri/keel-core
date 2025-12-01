@@ -31,6 +31,7 @@
 package io.github.sinri.keel.core.utils.authenticator.googleauth.async;
 
 
+import io.github.sinri.keel.base.logger.factory.StdoutLoggerFactory;
 import io.github.sinri.keel.core.utils.BinaryUtils;
 import io.github.sinri.keel.core.utils.StringUtils;
 import io.github.sinri.keel.core.utils.authenticator.googleauth.GoogleAuthenticatorConfig;
@@ -46,9 +47,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
-//import java.util.logging.Level;
-//import java.util.logging.Logger;
 
 /**
  * This class implements the functionality described in RFC 6238 (TOTP: Time
@@ -98,35 +96,23 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
      * @since 0.5.0
      */
     public static final String RNG_ALGORITHM_PROVIDER = "com.warrenstrange.googleauth.rng.algorithmProvider";
-
-    /**
-     * The logger for this class.
-     */
-    //    private static final Logger LOGGER = Logger.getLogger(AsyncGoogleAuthenticator.class.getName());
-    private static final Logger LOGGER = Keel.getLoggerFactory().createLogger(AsyncGoogleAuthenticator.class.getName());
-
-
     /**
      * Number of digits of a scratch code represented as a decimal integer.
      */
     private static final int SCRATCH_CODE_LENGTH = 8;
-
     /**
      * Modulus used to truncate the scratch code.
      */
     public static final int SCRATCH_CODE_MODULUS = (int) Math.pow(10, SCRATCH_CODE_LENGTH);
-
     /**
      * Magic number representing an invalid scratch code.
      */
     private static final int SCRATCH_CODE_INVALID = -1;
-
     /**
      * Length in bytes of each scratch code. We're using Google's default of
      * using 4 bytes per scratch code.
      */
     private static final int BYTES_PER_SCRATCH_CODE = 4;
-
     /**
      * The default SecureRandom algorithm to use if none is specified.
      *
@@ -134,7 +120,6 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
      * @since 0.5.0
      */
     private static final String DEFAULT_RANDOM_NUMBER_ALGORITHM = "SHA1PRNG";
-
     /**
      * The default random number algorithm provider to use if none is specified.
      *
@@ -142,7 +127,12 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
      * @since 0.5.0
      */
     private static final String DEFAULT_RANDOM_NUMBER_ALGORITHM_PROVIDER = "SUN";
-
+    /**
+     * The logger for this class.
+     */
+    //    private static final Logger LOGGER = Logger.getLogger(AsyncGoogleAuthenticator.class.getName());
+    private final static Logger LOGGER = StdoutLoggerFactory.getInstance()
+                                                            .createLogger(AsyncGoogleAuthenticator.class.getName());
     /**
      * The configuration used by the current instance.
      */

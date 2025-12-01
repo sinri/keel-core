@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.cutter;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.core.servant.intravenous.KeelIntravenous;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -12,7 +13,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 /**
  * 数据流切分处理器。
@@ -34,19 +34,27 @@ public abstract class IntravenouslyCutter<T> {
     private final AtomicBoolean readStopRef = new AtomicBoolean(false);
     @NotNull
     private final AtomicReference<Throwable> stopCause = new AtomicReference<>();
+    @NotNull
+    private final Keel keel;
     @Nullable
     private Long timeoutTimer;
 
-    public IntravenouslyCutter(@NotNull KeelIntravenous.SingleDropProcessor<T> singleDropProcessor, long timeout) {
+    public IntravenouslyCutter(@NotNull Keel keel, @NotNull KeelIntravenous.SingleDropProcessor<T> singleDropProcessor, long timeout) {
+        this.keel = keel;
         this.bufferRef = new AtomicReference<>(Buffer.buffer());
-        this.intravenous = KeelIntravenous.instant(singleDropProcessor);
+        this.intravenous = KeelIntravenous.instant(keel, singleDropProcessor);
         this.intravenous.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));
         if (timeout > 0) {
-            timeoutTimer = Keel.getVertx().setTimer(timeout, timer -> {
+            timeoutTimer = keel.getVertx().setTimer(timeout, timer -> {
                 this.timeoutTimer = timer;
                 this.stopHere(new CutterTimeout());
             });
         }
+    }
+
+    protected @NotNull
+    final Keel getKeel() {
+        return keel;
     }
 
     public final void acceptFromStream(@NotNull Buffer incomingBuffer) {
@@ -78,7 +86,7 @@ public abstract class IntravenouslyCutter<T> {
             }
 
             if (timeoutTimer != null) {
-                Keel.getVertx().cancelTimer(timeoutTimer);
+                keel.getVertx().cancelTimer(timeoutTimer);
                 timeoutTimer = null;
             }
             stopCause.set(throwable);
@@ -88,16 +96,16 @@ public abstract class IntravenouslyCutter<T> {
 
     @NotNull
     public final Future<Void> waitForAllHandled() {
-        return Keel.asyncCallRepeatedly(repeatedlyCallTask -> {
+        return keel.asyncCallRepeatedly(repeatedlyCallTask -> {
                        if (!this.readStopRef.get()) {
-                           return Keel.asyncSleep(200L);
+                           return keel.asyncSleep(200L);
                        }
                        if (!intravenous.isNoDropsLeft()) {
-                           return Keel.asyncSleep(100L);
+                           return keel.asyncSleep(100L);
                        }
                        intravenous.shutdown();
                        if (!intravenous.isUndeployed()) {
-                           return Keel.asyncSleep(100L);
+                           return keel.asyncSleep(100L);
                        }
                        repeatedlyCallTask.stop();
                        return Future.succeededFuture();

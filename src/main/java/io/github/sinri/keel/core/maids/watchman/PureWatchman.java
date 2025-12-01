@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.maids.watchman;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -22,22 +23,23 @@ public class PureWatchman extends WatchmanImpl {
     @NotNull
     private final LoggerFactory loggerFactory;
 
-    protected PureWatchman(@NotNull String watchmanName, @NotNull Options options, @NotNull LoggerFactory loggerFactory) {
-        super(watchmanName);
+    protected PureWatchman(@NotNull Keel keel, @NotNull String watchmanName, @NotNull Options options, @NotNull LoggerFactory loggerFactory) {
+        super(keel, watchmanName);
         this.options = options;
         this.loggerFactory = loggerFactory;
     }
 
     @NotNull
     public static Future<String> deploy(
+            @NotNull Keel keel,
             @NotNull String watchmanName,
             @NotNull Handler<Options> optionsHandler,
             @NotNull LoggerFactory loggerFactory
     ) {
         Options options = new Options();
         optionsHandler.handle(options);
-        PureWatchman keelPureWatchman = new PureWatchman(watchmanName, options, loggerFactory);
-        return Keel.getVertx().deployVerticle(keelPureWatchman, new DeploymentOptions()
+        PureWatchman keelPureWatchman = new PureWatchman(keel, watchmanName, options, loggerFactory);
+        return keel.getVertx().deployVerticle(keelPureWatchman, new DeploymentOptions()
                 .setThreadingModel(ThreadingModel.WORKER)
         );
     }

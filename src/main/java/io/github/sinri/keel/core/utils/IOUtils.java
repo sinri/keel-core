@@ -4,6 +4,7 @@ import io.github.sinri.keel.base.annotations.TechnicalPreview;
 import io.github.sinri.keel.core.utils.io.AsyncInputWriteStream;
 import io.github.sinri.keel.core.utils.io.AsyncOutputReadStream;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.ReadStream;
 import io.vertx.core.streams.WriteStream;
@@ -22,8 +23,8 @@ public class IOUtils {
     }
 
     @TechnicalPreview(since = "5.0.0")
-    public static AsyncOutputReadStream toReadStream(@NotNull InputStream inputStream, @NotNull Handler<ReadStream<Buffer>> handler) {
-        var readStream = AsyncOutputReadStream.create();
+    public static AsyncOutputReadStream toReadStream(@NotNull Vertx vertx, @NotNull InputStream inputStream, @NotNull Handler<ReadStream<Buffer>> handler) {
+        var readStream = AsyncOutputReadStream.create(vertx);
         readStream.pause();
         handler.handle(readStream);
         readStream.resume();
@@ -32,8 +33,8 @@ public class IOUtils {
     }
 
     @TechnicalPreview(since = "5.0.0")
-    public static AsyncInputWriteStream toWriteStream(@NotNull OutputStream outputStream, @NotNull Handler<WriteStream<Buffer>> handler) {
-        var writeStream = AsyncInputWriteStream.create();
+    public static AsyncInputWriteStream toWriteStream(@NotNull Vertx vertx, @NotNull OutputStream outputStream, @NotNull Handler<WriteStream<Buffer>> handler) {
+        var writeStream = AsyncInputWriteStream.create(vertx);
         handler.handle(writeStream);
         writeStream.wrap(outputStream);
         return writeStream;

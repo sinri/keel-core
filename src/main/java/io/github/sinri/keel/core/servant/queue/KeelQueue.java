@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.servant.queue;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.github.sinri.keel.logger.api.logger.SpecificLogger;
@@ -27,6 +28,10 @@ public abstract class KeelQueue extends AbstractKeelVerticle
     private KeelQueueStatus queueStatus = KeelQueueStatus.INIT;
     @Nullable
     private SpecificLogger<QueueManageSpecificLog> queueManageLogger;
+
+    public KeelQueue(@NotNull Keel keel) {
+        super(keel);
+    }
 
     @NotNull
     protected abstract LoggerFactory getLoggerFactory();
@@ -115,7 +120,7 @@ public abstract class KeelQueue extends AbstractKeelVerticle
                   long waitingMs = this.getWaitingPeriodInMsWhenTaskFree();
                   this.getQueueManageLogger()
                       .debug(r -> r.message("set timer for next routine after " + waitingMs + " ms"));
-                  Keel.getVertx().setTimer(waitingMs, timerID -> routine());
+                  getVertx().setTimer(waitingMs, timerID -> routine());
                   return Future.succeededFuture();
               })
         ;
@@ -134,9 +139,9 @@ public abstract class KeelQueue extends AbstractKeelVerticle
     private Future<Void> whenSignalRunCame() {
         this.queueStatus = KeelQueueStatus.RUNNING;
 
-        return Keel.asyncCallRepeatedly(routineResult -> {
+        return keel().asyncCallRepeatedly(routineResult -> {
                        if (this.getQueueWorkerPoolManager().isBusy()) {
-                           return Keel.asyncSleep(1_000L);
+                           return keel().asyncSleep(1_000L);
                        }
 
                        return Future.succeededFuture()

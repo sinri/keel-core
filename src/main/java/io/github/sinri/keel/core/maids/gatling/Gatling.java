@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.maids.gatling;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.AsyncResult;
@@ -31,7 +32,8 @@ abstract public class Gatling extends AbstractKeelVerticle {
     @Nullable
     private Logger gatlingLogger;
 
-    private Gatling(@NotNull GatlingOptions options) {
+    private Gatling(@NotNull Keel keel, @NotNull GatlingOptions options) {
+        super(keel);
         this.options = options;
     }
 
@@ -39,7 +41,7 @@ abstract public class Gatling extends AbstractKeelVerticle {
     protected Future<Void> rest() {
         long actualRestInterval = new Random().nextLong(Math.toIntExact(options.getAverageRestInterval() / 2));
         actualRestInterval += options.getAverageRestInterval();
-        return Keel.asyncSleep(actualRestInterval);
+        return keel().asyncSleep(actualRestInterval);
     }
 
     @NotNull
@@ -54,7 +56,7 @@ abstract public class Gatling extends AbstractKeelVerticle {
     protected @NotNull Future<Void> startVerticle() {
         this.gatlingLogger = buildGatlingLogger();
         barrelUsed.set(0);
-        Keel.asyncCallRepeatedly(routineResult -> fireOnce());
+        keel().asyncCallRepeatedly(routineResult -> fireOnce());
         return Future.succeededFuture();
     }
 
@@ -83,7 +85,7 @@ abstract public class Gatling extends AbstractKeelVerticle {
                              barrelUsed.decrementAndGet();
                          });
 
-                         return Keel.asyncSleep(10L);
+                         return keel().asyncSleep(10L);
                      })
                      .recover(throwable -> {
                          getGatlingLogger().error(log -> log.exception(throwable).message("FAILED TO LOAD BULLET"));
@@ -98,7 +100,7 @@ abstract public class Gatling extends AbstractKeelVerticle {
      */
     @NotNull
     private Future<Bullet> loadOneBullet() {
-        return Keel.getVertx().sharedData()
+        return getVertx().sharedData()
                    .getLock("KeelGatling-%s-Load".formatted(this.options.getGatlingName()))
                    .compose(lock -> this.options.getBulletLoader().get().
                                                 andThen(ar -> lock.release()));
@@ -108,11 +110,11 @@ abstract public class Gatling extends AbstractKeelVerticle {
     protected Future<Void> requireExclusiveLocksOfBullet(@NotNull Bullet bullet) {
         if (!bullet.exclusiveLockSet().isEmpty()) {
             AtomicBoolean blocked = new AtomicBoolean(false);
-            return Keel.asyncCallIteratively(
+            return keel().asyncCallIteratively(
                                bullet.exclusiveLockSet(),
                                (exclusiveLock, task) -> {
                                    String exclusiveLockName = "KeelGatling-Bullet-Exclusive-Lock-" + exclusiveLock;
-                                   return Keel.getVertx().sharedData()
+                                   return getVertx().sharedData()
                                               .getCounter(exclusiveLockName)
                                               .compose(Counter::incrementAndGet)
                                               .compose(increased -> {
@@ -140,9 +142,9 @@ abstract public class Gatling extends AbstractKeelVerticle {
     protected Future<Void> releaseExclusiveLocksOfBullet(@NotNull Bullet bullet) {
         bullet.exclusiveLockSet();
         if (!bullet.exclusiveLockSet().isEmpty()) {
-            return Keel.asyncCallIteratively(bullet.exclusiveLockSet(), (exclusiveLock, task) -> {
+            return keel().asyncCallIteratively(bullet.exclusiveLockSet(), (exclusiveLock, task) -> {
                 String exclusiveLockName = "KeelGatling-Bullet-Exclusive-Lock-" + exclusiveLock;
-                return Keel.getVertx().sharedData().getCounter(exclusiveLockName)
+                return getVertx().sharedData().getCounter(exclusiveLockName)
                            .compose(counter -> counter.decrementAndGet()
                                                       .compose(x -> Future.succeededFuture()));
             });

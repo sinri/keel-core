@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.servant.intravenous;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.verticles.KeelVerticle;
 import io.github.sinri.keel.base.verticles.KeelVerticleRunningStateEnum;
 import io.vertx.core.Future;
@@ -7,8 +8,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-
-import static io.github.sinri.keel.base.KeelInstance.Keel;
 
 
 /**
@@ -21,13 +20,13 @@ import static io.github.sinri.keel.base.KeelInstance.Keel;
  */
 public interface KeelIntravenous<D> extends KeelVerticle {
     @NotNull
-    static <T> KeelIntravenous<T> instant(@NotNull SingleDropProcessor<T> itemProcessor) {
-        return new KeelIntravenousSingleImpl<>(itemProcessor);
+    static <T> KeelIntravenous<T> instant(@NotNull Keel keel, @NotNull SingleDropProcessor<T> itemProcessor) {
+        return new KeelIntravenousSingleImpl<>(keel, itemProcessor);
     }
 
     @NotNull
-    static <T> KeelIntravenous<T> instantBatch(@NotNull MultiDropsProcessor<T> itemsProcessor) {
-        return new KeelIntravenousBatchImpl<>(itemsProcessor);
+    static <T> KeelIntravenous<T> instantBatch(@NotNull Keel keel, @NotNull MultiDropsProcessor<T> itemsProcessor) {
+        return new KeelIntravenousBatchImpl<>(keel, itemsProcessor);
     }
 
     void add(@Nullable D drop);
@@ -56,12 +55,12 @@ public interface KeelIntravenous<D> extends KeelVerticle {
     @NotNull
     default Future<Void> shutdownAndAwait() {
         shutdown();
-        return Keel.asyncCallRepeatedly(repeatedlyCallTask -> {
+        return keel().asyncCallRepeatedly(repeatedlyCallTask -> {
             if (isUndeployed()) {
                 repeatedlyCallTask.stop();
                 return Future.succeededFuture();
             } else {
-                return Keel.asyncSleep(1000L);
+                return keel().asyncSleep(1000L);
             }
         });
     }

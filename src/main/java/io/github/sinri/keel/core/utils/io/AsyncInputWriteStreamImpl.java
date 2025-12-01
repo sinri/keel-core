@@ -13,8 +13,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
-
 
 /**
  * A conversion utility to help move data from a Vert.x asynchronous stream to Java classic blocking IO.
@@ -44,10 +42,6 @@ class AsyncInputWriteStreamImpl extends InputStream implements WriteStream<Buffe
 
     public AsyncInputWriteStreamImpl(Vertx vertx) {
         context = vertx.getOrCreateContext();
-    }
-
-    public AsyncInputWriteStreamImpl() {
-        this(Keel.getVertx());
     }
 
     @NotNull

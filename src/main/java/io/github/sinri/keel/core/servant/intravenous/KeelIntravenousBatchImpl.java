@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.servant.intravenous;
 
+import io.github.sinri.keel.base.Keel;
 import io.vertx.core.Future;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,8 +15,8 @@ class KeelIntravenousBatchImpl<D> extends KeelIntravenousBase<D> {
 
     private final @NotNull MultiDropsProcessor<D> itemsProcessor;
 
-    public KeelIntravenousBatchImpl(@NotNull MultiDropsProcessor<D> itemsProcessor) {
-        super();
+    public KeelIntravenousBatchImpl(@NotNull Keel keel, @NotNull MultiDropsProcessor<D> itemsProcessor) {
+        super(keel);
         this.itemsProcessor = itemsProcessor;
     }
 

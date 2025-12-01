@@ -1,8 +1,10 @@
 package io.github.sinri.keel.core.maids.pleiades;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
@@ -21,14 +23,18 @@ public abstract class Pleiades<T> extends AbstractKeelVerticle {
     private MessageConsumer<T> consumer;
     private Logger pleiadesLogger;
 
-    @NotNull
-    public static <T> MessageProducer<T> generateMessageProducer(@NotNull String address) {
-        return generateMessageProducer(address, new DeliveryOptions());
+    public Pleiades(@NotNull Keel keel) {
+        super(keel);
     }
 
     @NotNull
-    public static <T> MessageProducer<T> generateMessageProducer(@NotNull String address, @NotNull DeliveryOptions deliveryOptions) {
-        return Keel.getVertx().eventBus().sender(address, deliveryOptions);
+    public static <T> MessageProducer<T> generateMessageProducer(@NotNull Vertx vertx, @NotNull String address) {
+        return generateMessageProducer(vertx, address, new DeliveryOptions());
+    }
+
+    @NotNull
+    public static <T> MessageProducer<T> generateMessageProducer(@NotNull Vertx vertx, @NotNull String address, @NotNull DeliveryOptions deliveryOptions) {
+        return vertx.eventBus().sender(address, deliveryOptions);
     }
 
     @NotNull
@@ -47,7 +53,7 @@ public abstract class Pleiades<T> extends AbstractKeelVerticle {
     @Override
     protected @NotNull Future<Void> startVerticle() {
         this.pleiadesLogger = buildPleiadesLogger();
-        consumer = Keel.getVertx().eventBus().consumer(getAddress(), this::handleMessage);
+        consumer = getVertx().eventBus().consumer(getAddress(), this::handleMessage);
         return Future.succeededFuture();
     }
 

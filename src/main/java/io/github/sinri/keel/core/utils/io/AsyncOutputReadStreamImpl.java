@@ -16,8 +16,6 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
-
 
 /**
  * A conversion utility to help move data from a Java classic blocking IO to a Vert.x asynchronous Stream.
@@ -68,18 +66,14 @@ class AsyncOutputReadStreamImpl extends OutputStream implements ReadStream<Buffe
         context = vertx.getOrCreateContext();
     }
 
-    public AsyncOutputReadStreamImpl() {
-        this(Keel.getVertx());
-    }
-
 
     public void wrap(@NotNull InputStream inputStream) {
         if (started || this.readOverPromise != null) {
             throw new IllegalStateException("Stream has already been wrapped");
         }
         this.readOverPromise = Promise.promise();
-        Keel.getVertx().executeBlocking(() -> inputStream.transferTo(this))
-            .onComplete(readOverPromise);
+        this.context.executeBlocking(() -> inputStream.transferTo(this))
+                    .onComplete(readOverPromise);
     }
 
     @NotNull

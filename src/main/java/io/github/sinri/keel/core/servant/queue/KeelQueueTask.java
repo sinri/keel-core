@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.servant.queue;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.github.sinri.keel.core.utils.ReflectionUtils;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
@@ -23,6 +24,10 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
     private QueueWorkerPoolManager queueWorkerPoolManager;
     @Nullable
     private SpecificLogger<QueueTaskSpecificLog> queueTaskLogger;
+
+    public KeelQueueTask(@NotNull Keel keel) {
+        super(keel);
+    }
 
     @NotNull
     protected final QueueWorkerPoolManager getQueueWorkerPoolManager() {

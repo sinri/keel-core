@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.servant.funnel;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
-import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -35,7 +35,8 @@ public class KeelFunnel extends AbstractKeelVerticle {
     @NotNull
     private final Logger funnelLogger;
 
-    public KeelFunnel() {
+    public KeelFunnel(@NotNull Keel keel) {
+        super(keel);
         this.sleepTimeRef = new AtomicLong(1_000L);
         this.queue = new ConcurrentLinkedQueue<>();
         this.interruptRef = new AtomicReference<>();
@@ -43,14 +44,8 @@ public class KeelFunnel extends AbstractKeelVerticle {
     }
 
     @NotNull
-    protected LoggerFactory getLoggerFactory() {
-        return Keel.getLoggerFactory();
-    }
-
-
-    @NotNull
-    protected Logger buildFunnelLogger() {
-        return getLoggerFactory().createLogger("Funnel");
+    private Logger buildFunnelLogger() {
+        return keel().getLoggerFactory().createLogger("Funnel");
     }
 
     @NotNull
@@ -81,7 +76,7 @@ public class KeelFunnel extends AbstractKeelVerticle {
 
     @Override
     protected @NotNull Future<Void> startVerticle() {
-        Keel.asyncCallEndlessly(this::executeCircle);
+        keel().asyncCallEndlessly(this::executeCircle);
         return Future.succeededFuture();
     }
 
@@ -89,29 +84,29 @@ public class KeelFunnel extends AbstractKeelVerticle {
     private Future<Void> executeCircle() {
         this.interruptRef.set(null);
         funnelLogger.debug("funnel one circle start");
-        return Keel.asyncCallRepeatedly(routineResult -> {
-                       // got one job to do, no matter if done
-                       return Future.succeededFuture()
-                                    .compose(ready -> {
-                                        Supplier<Future<Void>> supplier = queue.poll();
-                                        if (supplier == null) {
-                                            // no job to do
-                                            routineResult.stop();
-                                            Supplier<Future<Void>> supplierTemp = Future::succeededFuture;
-                                            return Future.succeededFuture(supplierTemp);
-                                        } else {
-                                            return Future.succeededFuture(supplier);
-                                        }
-                                    })
-                                    .compose(Supplier::get);
-                   })
-                   .recover(throwable -> {
-                       funnelLogger.error(log -> log.exception(throwable));
-                       return Future.succeededFuture();
-                   })
-                   .eventually(() -> {
-                       this.interruptRef.set(Promise.promise());
-                       return Keel.asyncSleep(this.sleepTimeRef.get(), getCurrentInterrupt());
-                   });
+        return keel().asyncCallRepeatedly(routineResult -> {
+                         // got one job to do, no matter if done
+                         return Future.succeededFuture()
+                                      .compose(ready -> {
+                                          Supplier<Future<Void>> supplier = queue.poll();
+                                          if (supplier == null) {
+                                              // no job to do
+                                              routineResult.stop();
+                                              Supplier<Future<Void>> supplierTemp = Future::succeededFuture;
+                                              return Future.succeededFuture(supplierTemp);
+                                          } else {
+                                              return Future.succeededFuture(supplier);
+                                          }
+                                      })
+                                      .compose(Supplier::get);
+                     })
+                     .recover(throwable -> {
+                         funnelLogger.error(log -> log.exception(throwable));
+                         return Future.succeededFuture();
+                     })
+                     .eventually(() -> {
+                         this.interruptRef.set(Promise.promise());
+                         return keel().asyncSleep(this.sleepTimeRef.get(), getCurrentInterrupt());
+                     });
     }
 }

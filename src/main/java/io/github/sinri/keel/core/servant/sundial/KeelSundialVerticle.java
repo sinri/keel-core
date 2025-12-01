@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.servant.sundial;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.github.sinri.keel.core.utils.ReflectionUtils;
 import io.github.sinri.keel.logger.api.logger.SpecificLogger;
@@ -24,10 +25,12 @@ final class KeelSundialVerticle extends AbstractKeelVerticle {
     private final SpecificLogger<SundialSpecificLog> sundialSpecificLogger;
 
     public KeelSundialVerticle(
+            @NotNull Keel keel,
             @NotNull KeelSundialPlan sundialPlan,
             @NotNull Calendar now,
             @NotNull SpecificLogger<SundialSpecificLog> sundialSpecificLogger
     ) {
+        super(keel);
         this.sundialPlan = sundialPlan;
         this.now = now;
         this.sundialSpecificLogger = sundialSpecificLogger;

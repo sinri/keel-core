@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.utils;
 
+import io.github.sinri.keel.base.logger.factory.StdoutLoggerFactory;
 import io.github.sinri.keel.logger.api.logger.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,11 +17,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static io.github.sinri.keel.base.KeelInstance.Keel;
-
 
 /**
  * 反射工具类
+ *
  * @since 5.0.0
  */
 public class ReflectionUtils {
@@ -40,10 +40,6 @@ public class ReflectionUtils {
     }
 
     private ReflectionUtils() {
-    }
-
-    private static Logger createEventRecorder() {
-        return Keel.getLoggerFactory().createLogger(ReflectionUtils.class.getName());
     }
 
     /**
@@ -172,7 +168,7 @@ public class ReflectionUtils {
             }
         } catch (Exception e) {
             //Keel.getLogger().exception(e);
-            Keel.getLoggerFactory().createLogger(ReflectionUtils.class.getName()).exception(e);
+            StdoutLoggerFactory.getInstance().createLogger(ReflectionUtils.class.getName()).error(x -> x.exception(e));
         }
         return descendantClasses;
     }
@@ -184,7 +180,9 @@ public class ReflectionUtils {
     ) {
         Set<Class<? extends R>> descendantClasses = new HashSet<>();
         Set<String> strings = FileUtils.seekPackageClassFilesInRunningJar(packageName);
-        var eventRecorder = createEventRecorder();
+
+        Logger logger = StdoutLoggerFactory.getInstance().createLogger(ReflectionUtils.class.getName());
+
         for (String s : strings) {
             try {
                 Class<?> aClass = Class.forName(s);
@@ -194,7 +192,7 @@ public class ReflectionUtils {
                     descendantClasses.add(castedClass);
                 }
             } catch (Throwable e) {
-                eventRecorder.debug(String.format(
+                logger.debug(String.format(
                         "%s seekClassDescendantsInPackageForRunningJar for %s error: %s",
                         ReflectionUtils.class, s, e.getMessage()
                 ));
@@ -212,7 +210,7 @@ public class ReflectionUtils {
         Set<Class<? extends R>> descendantClasses = new HashSet<>();
         List<String> classNames = FileUtils.traversalInJarFile(new File(jarInClassPath));
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        var eventRecorder = createEventRecorder();
+        Logger logger = StdoutLoggerFactory.getInstance().createLogger(ReflectionUtils.class.getName());
         classNames.forEach(className -> {
             if (className.startsWith(packageName + ".")) {
                 try {
@@ -222,7 +220,7 @@ public class ReflectionUtils {
                         descendantClasses.add(clazz);
                     }
                 } catch (Throwable e) {
-                    eventRecorder.debug("%s seekClassDescendantsInPackageForProvidedJar for %s error: %s".formatted(ReflectionUtils.class, className, e.getMessage()));
+                    logger.debug("%s seekClassDescendantsInPackageForProvidedJar for %s error: %s".formatted(ReflectionUtils.class, className, e.getMessage()));
                 }
             }
         });

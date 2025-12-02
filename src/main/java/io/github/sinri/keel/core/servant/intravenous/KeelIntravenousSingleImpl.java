@@ -21,7 +21,7 @@ class KeelIntravenousSingleImpl<D> extends KeelIntravenousBase<D> {
     }
 
     protected @NotNull Future<Void> handleDrops(@NotNull List<D> drops) {
-        return keel().asyncCallIteratively(drops, drop -> Future.succeededFuture()
+        return getKeel().asyncCallIteratively(drops, drop -> Future.succeededFuture()
                                                                 .compose(v -> this.itemProcessor.process(drop))
                                                                 .recover(throwable -> {
                                                                     this.handleAllergy(throwable);

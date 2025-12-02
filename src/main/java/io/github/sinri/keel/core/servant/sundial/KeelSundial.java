@@ -69,7 +69,7 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
                         .context("plan_cron", plan.cronExpression().getRawCronExpression())
                         .context("now", parsedCalenderElements.toString())
                 );
-                new KeelSundialVerticle(keel(), plan, now, getLogger())
+                new KeelSundialVerticle(getKeel(), plan, now, getLogger())
                         .deployMe()
                         .onComplete(ar -> {
                             if (ar.failed()) {
@@ -95,29 +95,29 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
     }
 
     private void refreshPlans() {
-        keel().asyncCallExclusively(
-                    "io.github.sinri.keel.servant.sundial.KeelSundial.refreshPlans",
-                    1000L,
-                    () -> fetchPlans()
-                            .compose(plans -> {
-                                // treat null as NOT MODIFIED
-                                if (plans != null) {
-                                    Set<String> toDelete = new HashSet<>(planMap.keySet());
-                                    plans.forEach(plan -> {
-                                        toDelete.remove(plan.key());
-                                        planMap.put(plan.key(), plan);
-                                    });
-                                    if (!toDelete.isEmpty()) {
-                                        toDelete.forEach(planMap::remove);
-                                    }
-                                }
-                                return Future.succeededFuture();
-                            })
-            )
-            .onFailure(throwable -> getLogger().error(log -> log
-                    .exception(throwable)
-                    .message("io.github.sinri.keel.core.servant.sundial.KeelSundial.refreshPlans exception"))
-            );
+        getKeel().asyncCallExclusively(
+                         "io.github.sinri.keel.servant.sundial.KeelSundial.refreshPlans",
+                         1000L,
+                         () -> fetchPlans()
+                                 .compose(plans -> {
+                                     // treat null as NOT MODIFIED
+                                     if (plans != null) {
+                                         Set<String> toDelete = new HashSet<>(planMap.keySet());
+                                         plans.forEach(plan -> {
+                                             toDelete.remove(plan.key());
+                                             planMap.put(plan.key(), plan);
+                                         });
+                                         if (!toDelete.isEmpty()) {
+                                             toDelete.forEach(planMap::remove);
+                                         }
+                                     }
+                                     return Future.succeededFuture();
+                                 })
+                 )
+                 .onFailure(throwable -> getLogger().error(log -> log
+                         .exception(throwable)
+                         .message("io.github.sinri.keel.core.servant.sundial.KeelSundial.refreshPlans exception"))
+                 );
     }
 
     /**
@@ -131,7 +131,7 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
     @Override
     protected @NotNull Future<Void> stopVerticle() {
         if (this.timerID != null) {
-            keel().getVertx().cancelTimer(this.timerID);
+            getVertx().cancelTimer(this.timerID);
         }
         return Future.succeededFuture();
     }

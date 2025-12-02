@@ -41,7 +41,7 @@ abstract public class Gatling extends AbstractKeelVerticle {
     protected Future<Void> rest() {
         long actualRestInterval = new Random().nextLong(Math.toIntExact(options.getAverageRestInterval() / 2));
         actualRestInterval += options.getAverageRestInterval();
-        return keel().asyncSleep(actualRestInterval);
+        return getKeel().asyncSleep(actualRestInterval);
     }
 
     @NotNull
@@ -56,7 +56,7 @@ abstract public class Gatling extends AbstractKeelVerticle {
     protected @NotNull Future<Void> startVerticle() {
         this.gatlingLogger = buildGatlingLogger();
         barrelUsed.set(0);
-        keel().asyncCallRepeatedly(routineResult -> fireOnce());
+        getKeel().asyncCallRepeatedly(routineResult -> fireOnce());
         return Future.succeededFuture();
     }
 
@@ -85,7 +85,7 @@ abstract public class Gatling extends AbstractKeelVerticle {
                              barrelUsed.decrementAndGet();
                          });
 
-                         return keel().asyncSleep(10L);
+                         return getKeel().asyncSleep(10L);
                      })
                      .recover(throwable -> {
                          getGatlingLogger().error(log -> log.exception(throwable).message("FAILED TO LOAD BULLET"));
@@ -110,7 +110,7 @@ abstract public class Gatling extends AbstractKeelVerticle {
     protected Future<Void> requireExclusiveLocksOfBullet(@NotNull Bullet bullet) {
         if (!bullet.exclusiveLockSet().isEmpty()) {
             AtomicBoolean blocked = new AtomicBoolean(false);
-            return keel().asyncCallIteratively(
+            return getKeel().asyncCallIteratively(
                                bullet.exclusiveLockSet(),
                                (exclusiveLock, task) -> {
                                    String exclusiveLockName = "KeelGatling-Bullet-Exclusive-Lock-" + exclusiveLock;
@@ -142,7 +142,7 @@ abstract public class Gatling extends AbstractKeelVerticle {
     protected Future<Void> releaseExclusiveLocksOfBullet(@NotNull Bullet bullet) {
         bullet.exclusiveLockSet();
         if (!bullet.exclusiveLockSet().isEmpty()) {
-            return keel().asyncCallIteratively(bullet.exclusiveLockSet(), (exclusiveLock, task) -> {
+            return getKeel().asyncCallIteratively(bullet.exclusiveLockSet(), (exclusiveLock, task) -> {
                 String exclusiveLockName = "KeelGatling-Bullet-Exclusive-Lock-" + exclusiveLock;
                 return getVertx().sharedData().getCounter(exclusiveLockName)
                            .compose(counter -> counter.decrementAndGet()

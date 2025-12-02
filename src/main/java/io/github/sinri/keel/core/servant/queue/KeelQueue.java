@@ -139,9 +139,9 @@ public abstract class KeelQueue extends AbstractKeelVerticle
     private Future<Void> whenSignalRunCame() {
         this.queueStatus = KeelQueueStatus.RUNNING;
 
-        return keel().asyncCallRepeatedly(routineResult -> {
+        return getKeel().asyncCallRepeatedly(routineResult -> {
                        if (this.getQueueWorkerPoolManager().isBusy()) {
-                           return keel().asyncSleep(1_000L);
+                           return getKeel().asyncSleep(1_000L);
                        }
 
                        return Future.succeededFuture()

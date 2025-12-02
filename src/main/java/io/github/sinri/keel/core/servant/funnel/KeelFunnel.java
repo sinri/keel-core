@@ -45,7 +45,7 @@ public class KeelFunnel extends AbstractKeelVerticle {
 
     @NotNull
     private Logger buildFunnelLogger() {
-        return keel().getLoggerFactory().createLogger("Funnel");
+        return getKeel().getLoggerFactory().createLogger("Funnel");
     }
 
     @NotNull
@@ -76,7 +76,7 @@ public class KeelFunnel extends AbstractKeelVerticle {
 
     @Override
     protected @NotNull Future<Void> startVerticle() {
-        keel().asyncCallEndlessly(this::executeCircle);
+        getKeel().asyncCallEndlessly(this::executeCircle);
         return Future.succeededFuture();
     }
 
@@ -84,7 +84,7 @@ public class KeelFunnel extends AbstractKeelVerticle {
     private Future<Void> executeCircle() {
         this.interruptRef.set(null);
         funnelLogger.debug("funnel one circle start");
-        return keel().asyncCallRepeatedly(routineResult -> {
+        return getKeel().asyncCallRepeatedly(routineResult -> {
                          // got one job to do, no matter if done
                          return Future.succeededFuture()
                                       .compose(ready -> {
@@ -106,7 +106,7 @@ public class KeelFunnel extends AbstractKeelVerticle {
                      })
                      .eventually(() -> {
                          this.interruptRef.set(Promise.promise());
-                         return keel().asyncSleep(this.sleepTimeRef.get(), getCurrentInterrupt());
+                         return getKeel().asyncSleep(this.sleepTimeRef.get(), getCurrentInterrupt());
                      });
     }
 }

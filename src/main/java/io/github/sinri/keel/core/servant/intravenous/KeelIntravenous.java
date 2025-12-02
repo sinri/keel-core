@@ -55,12 +55,12 @@ public interface KeelIntravenous<D> extends KeelVerticle {
     @NotNull
     default Future<Void> shutdownAndAwait() {
         shutdown();
-        return keel().asyncCallRepeatedly(repeatedlyCallTask -> {
+        return getKeel().asyncCallRepeatedly(repeatedlyCallTask -> {
             if (isUndeployed()) {
                 repeatedlyCallTask.stop();
                 return Future.succeededFuture();
             } else {
-                return keel().asyncSleep(1000L);
+                return getKeel().asyncSleep(1000L);
             }
         });
     }

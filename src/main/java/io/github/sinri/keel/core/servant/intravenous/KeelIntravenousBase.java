@@ -79,9 +79,9 @@ abstract class KeelIntravenousBase<D> extends AbstractKeelVerticle implements Ke
     @Override
     protected @NotNull Future<Void> startVerticle() {
         this.interrupterRef.set(null);
-        keel().asyncCallRepeatedly(this::handleRoutine)
-              .onComplete(ar -> this.undeployMe()
-                                    .onSuccess(v -> undeployedRef.set(true)));
+        getKeel().asyncCallRepeatedly(this::handleRoutine)
+                 .onComplete(ar -> this.undeployMe()
+                                       .onSuccess(v -> undeployedRef.set(true)));
         return Future.succeededFuture();
     }
 
@@ -119,7 +119,7 @@ abstract class KeelIntravenousBase<D> extends AbstractKeelVerticle implements Ke
                          } else {
                              // wait for next `add` call, or just sleep 1 second
                              return Future.any(
-                                                  keel().asyncSleep(1000L),
+                                                  getKeel().asyncSleep(1000L),
                                                   this.interrupterRef.get().future()
                                           )
                                           .compose(compositeFuture -> Future.succeededFuture());

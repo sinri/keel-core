@@ -11,11 +11,11 @@ import java.util.List;
  *
  * @since 5.0.0
  */
-class KeelIntravenousBatchImpl<D> extends KeelIntravenousBase<D> {
+class IntravenousBatchImpl<D> extends IntravenousBase<D> {
 
     private final @NotNull MultiDropsProcessor<D> itemsProcessor;
 
-    public KeelIntravenousBatchImpl(@NotNull Keel keel, @NotNull MultiDropsProcessor<D> itemsProcessor) {
+    public IntravenousBatchImpl(@NotNull Keel keel, @NotNull MultiDropsProcessor<D> itemsProcessor) {
         super(keel);
         this.itemsProcessor = itemsProcessor;
     }

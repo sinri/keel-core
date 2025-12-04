@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @since 5.0.0
  */
-abstract class KeelIntravenousBase<D> extends AbstractKeelVerticle implements KeelIntravenous<D> {
+abstract class IntravenousBase<D> extends AbstractKeelVerticle implements Intravenous<D> {
     @NotNull
     private final Queue<D> queue;
     @NotNull
@@ -31,7 +31,7 @@ abstract class KeelIntravenousBase<D> extends AbstractKeelVerticle implements Ke
     @NotNull
     private final AtomicBoolean undeployedRef = new AtomicBoolean(false);
 
-    public KeelIntravenousBase(@NotNull Keel keel) {
+    public IntravenousBase(@NotNull Keel keel) {
         super(keel);
         this.queue = new ConcurrentLinkedQueue<>();
     }

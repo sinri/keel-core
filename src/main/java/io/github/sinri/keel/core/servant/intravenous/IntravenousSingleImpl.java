@@ -12,10 +12,10 @@ import java.util.List;
  *
  * @since 5.0.0
  */
-class KeelIntravenousSingleImpl<D> extends KeelIntravenousBase<D> {
+class IntravenousSingleImpl<D> extends IntravenousBase<D> {
     private final @NotNull SingleDropProcessor<D> itemProcessor;
 
-    public KeelIntravenousSingleImpl(@NotNull Keel keel, @NotNull SingleDropProcessor<D> itemProcessor) {
+    public IntravenousSingleImpl(@NotNull Keel keel, @NotNull SingleDropProcessor<D> itemProcessor) {
         super(keel);
         this.itemProcessor = itemProcessor;
     }

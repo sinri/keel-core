@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.cutter;
 
 import io.github.sinri.keel.base.Keel;
-import io.github.sinri.keel.core.servant.intravenous.KeelIntravenous;
+import io.github.sinri.keel.core.servant.intravenous.Intravenous;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
@@ -29,7 +29,7 @@ public abstract class IntravenouslyCutter<T> {
     @NotNull
     private final AtomicReference<Buffer> bufferRef;
     @NotNull
-    private final KeelIntravenous<T> intravenous;
+    private final Intravenous<T> intravenous;
     @NotNull
     private final AtomicBoolean readStopRef = new AtomicBoolean(false);
     @NotNull
@@ -39,10 +39,10 @@ public abstract class IntravenouslyCutter<T> {
     @Nullable
     private Long timeoutTimer;
 
-    public IntravenouslyCutter(@NotNull Keel keel, @NotNull KeelIntravenous.SingleDropProcessor<T> singleDropProcessor, long timeout) {
+    public IntravenouslyCutter(@NotNull Keel keel, @NotNull Intravenous.SingleDropProcessor<T> singleDropProcessor, long timeout) {
         this.keel = keel;
         this.bufferRef = new AtomicReference<>(Buffer.buffer());
-        this.intravenous = KeelIntravenous.instant(keel, singleDropProcessor);
+        this.intravenous = Intravenous.instant(keel, singleDropProcessor);
         this.intravenous.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));
         if (timeout > 0) {
             timeoutTimer = keel.getVertx().setTimer(timeout, timer -> {

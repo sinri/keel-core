@@ -9,10 +9,10 @@ import org.jetbrains.annotations.NotNull;
  *
  * @since 5.0.0
  */
-public interface KeelQueueSignalReader {
+public interface QueueSignalReader {
     @NotNull
     SpecificLogger<QueueManageSpecificLog> getQueueManageLogger();
 
     @NotNull
-    Future<KeelQueueSignal> readSignal();
+    Future<QueueSignal> readSignal();
 }

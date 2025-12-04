@@ -5,7 +5,7 @@ package io.github.sinri.keel.core.servant.queue;
  *
  * @since 5.0.0
  */
-public enum KeelQueueSignal {
+public enum QueueSignal {
     RUN,
     STOP
 }

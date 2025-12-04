@@ -22,7 +22,7 @@ public final class SundialSpecificLog extends SpecificLog<SundialSpecificLog> {
     }
 
     public SundialSpecificLog(
-            @NotNull KeelSundialPlan sundialPlan,
+            @NotNull SundialPlan sundialPlan,
             @NotNull Calendar now,
             @NotNull String deploymentId
     ) {

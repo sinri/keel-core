@@ -22,7 +22,7 @@ import java.util.function.Supplier;
  *
  * @since 5.0.0
  */
-public class KeelFunnel extends AbstractKeelVerticle {
+public class Funnel extends AbstractKeelVerticle {
     /**
      * 休眠中出现新任务时，使用此内寄存的 Promise 唤醒。
      */
@@ -35,7 +35,7 @@ public class KeelFunnel extends AbstractKeelVerticle {
     @NotNull
     private final Logger funnelLogger;
 
-    public KeelFunnel(@NotNull Keel keel) {
+    public Funnel(@NotNull Keel keel) {
         super(keel);
         this.sleepTimeRef = new AtomicLong(1_000L);
         this.queue = new ConcurrentLinkedQueue<>();

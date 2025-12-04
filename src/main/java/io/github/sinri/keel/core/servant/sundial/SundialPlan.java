@@ -1,8 +1,10 @@
 package io.github.sinri.keel.core.servant.sundial;
 
+import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
 import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.Future;
+import io.vertx.core.ThreadingModel;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Calendar;
@@ -12,7 +14,7 @@ import java.util.Calendar;
  *
  * @since 5.0.0
  */
-public interface KeelSundialPlan {
+public interface SundialPlan {
     /**
      *
      * @return 定时任务计划名称
@@ -30,16 +32,14 @@ public interface KeelSundialPlan {
     /**
      * 任务计划执行逻辑。
      *
-     * @param now                  本次定时任务运行对应的触发时间
+     * @param now                   本次定时任务运行对应的触发时间
      * @param sundialSpecificLogger 日晷定时任务特定日志记录器
      */
     @NotNull
-    Future<Void> execute(@NotNull Calendar now, @NotNull SpecificLogger<SundialSpecificLog> sundialSpecificLogger);
+    Future<Void> execute(@NotNull Keel keel, @NotNull Calendar now, @NotNull SpecificLogger<SundialSpecificLog> sundialSpecificLogger);
 
-    /**
-     * @return 指定本任务是否需要在 WORKER 线程模型下运行
-     */
-    default boolean isWorkerThreadRequired() {
-        return true;
+    @NotNull
+    default ThreadingModel threadingModel() {
+        return ThreadingModel.WORKER;
     }
 }

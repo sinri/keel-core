@@ -1,6 +1,7 @@
 package io.github.sinri.keel.core.maids.watchman;
 
 import io.github.sinri.keel.base.Keel;
+import io.github.sinri.keel.core.servant.sundial.Sundial;
 import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.vertx.core.DeploymentOptions;
@@ -19,13 +20,13 @@ import java.util.function.Supplier;
 /**
  * 基于Cron的更夫实现。
  * <p>
- * 本类实现类似单节点下的{@link io.github.sinri.keel.core.servant.sundial.KeelSundial}，在集群内实现 crontab 任务调度。
+ * 本类实现类似单节点下的{@link Sundial}，在集群内实现 crontab 任务调度。
  *
  * @since 5.0.0
  */
 public class CronWatchman extends WatchmanImpl {
     @NotNull
-    private final KeelWatchmanEventHandler handler;
+    private final WatchmanEventHandler handler;
     @NotNull
     private final Function<String, Future<Void>> cronTabUpdateStartup;
     @NotNull
@@ -76,7 +77,7 @@ public class CronWatchman extends WatchmanImpl {
             @NotNull Keel keel,
             @NotNull String asyncMapName,
             @NotNull KeelCronExpression keelCronExpression,
-            @NotNull Class<? extends KeelWatchmanEventHandler> eventHandlerClass
+            @NotNull Class<? extends WatchmanEventHandler> eventHandlerClass
     ) {
         return addCronJobToAsyncMap(keel,
                 asyncMapName, keelCronExpression.getRawCronExpression(),
@@ -149,7 +150,7 @@ public class CronWatchman extends WatchmanImpl {
             @NotNull Keel keel,
             @NotNull String asyncMapName,
             @NotNull KeelCronExpression keelCronExpression,
-            @NotNull Class<? extends KeelWatchmanEventHandler> eventHandlerClass
+            @NotNull Class<? extends WatchmanEventHandler> eventHandlerClass
     ) {
         return removeCronJobFromAsyncMap(keel, asyncMapName, keelCronExpression.getRawCronExpression(),
                 eventHandlerClass.getName());
@@ -203,12 +204,12 @@ public class CronWatchman extends WatchmanImpl {
     }
 
     @NotNull
-    public static Future<List<KeelWatchmanEventHandler>> readAsyncMapForEventHandlers(
+    public static Future<List<WatchmanEventHandler>> readAsyncMapForEventHandlers(
             @NotNull Keel keel,
             @NotNull String asyncMapName,
             @NotNull Calendar calendar
     ) {
-        List<KeelWatchmanEventHandler> list = new ArrayList<>();
+        List<WatchmanEventHandler> list = new ArrayList<>();
         return keel.getVertx().sharedData().getAsyncMap(asyncMapName)
                    .compose(AsyncMap::entries)
                    .compose(entries -> {
@@ -219,10 +220,10 @@ public class CronWatchman extends WatchmanImpl {
                                eventHandlerClassNameArray.forEach(eventHandlerClassName -> {
                                    try {
                                        Class<?> aClass = Class.forName(String.valueOf(eventHandlerClassName));
-                                       if (KeelWatchmanEventHandler.class.isAssignableFrom(aClass)) {
-                                           KeelWatchmanEventHandler eventHandler =
-                                                   (KeelWatchmanEventHandler) aClass.getConstructor()
-                                                                                    .newInstance();
+                                       if (WatchmanEventHandler.class.isAssignableFrom(aClass)) {
+                                           WatchmanEventHandler eventHandler =
+                                                   (WatchmanEventHandler) aClass.getConstructor()
+                                                                                .newInstance();
                                            list.add(eventHandler);
                                        }
                                    } catch (Throwable e) {
@@ -237,7 +238,7 @@ public class CronWatchman extends WatchmanImpl {
     }
 
     @NotNull
-    private Future<List<KeelWatchmanEventHandler>> readAsyncMapForEventHandlers(@NotNull Keel keel, @NotNull Calendar calendar) {
+    private Future<List<WatchmanEventHandler>> readAsyncMapForEventHandlers(@NotNull Keel keel, @NotNull Calendar calendar) {
         return readAsyncMapForEventHandlers(keel, eventBusAddress(), calendar);
     }
 
@@ -247,7 +248,7 @@ public class CronWatchman extends WatchmanImpl {
     }
 
     @Override
-    public final @NotNull KeelWatchmanEventHandler regularHandler() {
+    public final @NotNull WatchmanEventHandler regularHandler() {
         return handler;
     }
 

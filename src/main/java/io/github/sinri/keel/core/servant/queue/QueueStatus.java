@@ -5,7 +5,7 @@ package io.github.sinri.keel.core.servant.queue;
  *
  * @since 5.0.0
  */
-public enum KeelQueueStatus {
+public enum QueueStatus {
     INIT,
     RUNNING,
     STOPPED

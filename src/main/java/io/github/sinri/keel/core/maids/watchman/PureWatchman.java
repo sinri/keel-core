@@ -51,7 +51,7 @@ public class PureWatchman extends WatchmanImpl {
     }
 
     @NotNull
-    public KeelWatchmanEventHandler regularHandler() {
+    public WatchmanEventHandler regularHandler() {
         return options.getHandler();
     }
 
@@ -62,7 +62,7 @@ public class PureWatchman extends WatchmanImpl {
 
     public static class Options {
         @NotNull
-        private KeelWatchmanEventHandler handler;
+        private WatchmanEventHandler handler;
         private long interval = 60_000L;
 
         public Options() {
@@ -71,12 +71,12 @@ public class PureWatchman extends WatchmanImpl {
         }
 
         @NotNull
-        public KeelWatchmanEventHandler getHandler() {
+        public WatchmanEventHandler getHandler() {
             return handler;
         }
 
         @NotNull
-        public Options setHandler(@NotNull KeelWatchmanEventHandler handler) {
+        public Options setHandler(@NotNull WatchmanEventHandler handler) {
             this.handler = handler;
             return this;
         }

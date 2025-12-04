@@ -23,15 +23,15 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @since 5.0.0
  */
-public abstract class KeelSundial extends AbstractKeelVerticle {
+public abstract class Sundial extends AbstractKeelVerticle {
     @NotNull
-    private final Map<String, KeelSundialPlan> planMap = new ConcurrentHashMap<>();
+    private final Map<String, SundialPlan> planMap = new ConcurrentHashMap<>();
     @Nullable
     private Long timerID;
     @Nullable
     private SpecificLogger<SundialSpecificLog> logger;
 
-    public KeelSundial(@NotNull Keel keel) {
+    public Sundial(@NotNull Keel keel) {
         super(keel);
     }
 
@@ -69,7 +69,7 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
                         .context("plan_cron", plan.cronExpression().getRawCronExpression())
                         .context("now", parsedCalenderElements.toString())
                 );
-                new KeelSundialVerticle(getKeel(), plan, now, getLogger())
+                new SundialVerticle(getKeel(), plan, now, getLogger())
                         .deployMe()
                         .onComplete(ar -> {
                             if (ar.failed()) {
@@ -126,7 +126,7 @@ public abstract class KeelSundial extends AbstractKeelVerticle {
      * @return 异步返回的定时任务计划集，用于覆盖更新当前的计划快照；如果异步返回了 null，则表示不更新计划快照。
      */
     @NotNull
-    abstract protected Future<Collection<KeelSundialPlan>> fetchPlans();
+    abstract protected Future<Collection<SundialPlan>> fetchPlans();
 
     @Override
     protected @NotNull Future<Void> stopVerticle() {

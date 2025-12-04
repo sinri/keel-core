@@ -20,16 +20,16 @@ import java.util.Objects;
  *
  * @since 5.0.0
  */
-public abstract class KeelQueue extends AbstractKeelVerticle
-        implements KeelQueueNextTaskSeeker, KeelQueueSignalReader {
+public abstract class QueueDispatcher extends AbstractKeelVerticle
+        implements NextQueueTaskSeeker, QueueSignalReader {
     @Nullable
     private QueueWorkerPoolManager queueWorkerPoolManager;
     @NotNull
-    private KeelQueueStatus queueStatus = KeelQueueStatus.INIT;
+    private QueueStatus queueStatus = QueueStatus.INIT;
     @Nullable
     private SpecificLogger<QueueManageSpecificLog> queueManageLogger;
 
-    public KeelQueue(@NotNull Keel keel) {
+    public QueueDispatcher(@NotNull Keel keel) {
         super(keel);
     }
 
@@ -48,12 +48,12 @@ public abstract class KeelQueue extends AbstractKeelVerticle
         return Objects.requireNonNull(queueManageLogger);
     }
 
-    public final @NotNull KeelQueueStatus getQueueStatus() {
+    public final @NotNull QueueStatus getQueueStatus() {
         return queueStatus;
     }
 
     @NotNull
-    protected KeelQueue setQueueStatus(@NotNull KeelQueueStatus queueStatus) {
+    protected QueueDispatcher setQueueStatus(@NotNull QueueStatus queueStatus) {
         this.queueStatus = queueStatus;
         return this;
     }
@@ -85,7 +85,7 @@ public abstract class KeelQueue extends AbstractKeelVerticle
     protected @NotNull Future<Void> startVerticle() {
         queueManageLogger = this.buildQueueManageLogger();
         this.queueWorkerPoolManager = buildQueueWorkerPoolManager();
-        this.queueStatus = KeelQueueStatus.RUNNING;
+        this.queueStatus = QueueStatus.RUNNING;
         return beforeQueueStart()
                 .compose(v -> {
                     routine();
@@ -101,16 +101,16 @@ public abstract class KeelQueue extends AbstractKeelVerticle
               .recover(throwable -> {
                   this.getQueueManageLogger()
                       .debug(r -> r.message("AS IS. Failed to read signal: " + throwable.getMessage()));
-                  if (getQueueStatus() == KeelQueueStatus.STOPPED) {
-                      return Future.succeededFuture(KeelQueueSignal.STOP);
+                  if (getQueueStatus() == QueueStatus.STOPPED) {
+                      return Future.succeededFuture(QueueSignal.STOP);
                   } else {
-                      return Future.succeededFuture(KeelQueueSignal.RUN);
+                      return Future.succeededFuture(QueueSignal.RUN);
                   }
               })
               .compose(signal -> {
-                  if (signal == KeelQueueSignal.STOP) {
+                  if (signal == QueueSignal.STOP) {
                       return this.whenSignalStopCame();
-                  } else if (signal == KeelQueueSignal.RUN) {
+                  } else if (signal == QueueSignal.RUN) {
                       return this.whenSignalRunCame();
                   } else {
                       return Future.failedFuture("Unknown Signal");
@@ -128,8 +128,8 @@ public abstract class KeelQueue extends AbstractKeelVerticle
 
     @NotNull
     private Future<Void> whenSignalStopCame() {
-        if (getQueueStatus() == KeelQueueStatus.RUNNING) {
-            this.queueStatus = KeelQueueStatus.STOPPED;
+        if (getQueueStatus() == QueueStatus.RUNNING) {
+            this.queueStatus = QueueStatus.STOPPED;
             this.getQueueManageLogger().notice(r -> r.message("Signal Stop Received"));
         }
         return Future.succeededFuture();
@@ -137,7 +137,7 @@ public abstract class KeelQueue extends AbstractKeelVerticle
 
     @NotNull
     private Future<Void> whenSignalRunCame() {
-        this.queueStatus = KeelQueueStatus.RUNNING;
+        this.queueStatus = QueueStatus.RUNNING;
 
         return getKeel().asyncCallRepeatedly(routineResult -> {
                        if (this.getQueueWorkerPoolManager().isBusy()) {
@@ -198,7 +198,7 @@ public abstract class KeelQueue extends AbstractKeelVerticle
 
     @Override
     protected @NotNull Future<Void> stopVerticle() {
-        this.queueStatus = KeelQueueStatus.STOPPED;
+        this.queueStatus = QueueStatus.STOPPED;
         return Future.succeededFuture();
     }
 

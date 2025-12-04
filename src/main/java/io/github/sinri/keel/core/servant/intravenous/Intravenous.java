@@ -18,15 +18,15 @@ import java.util.List;
  * @param <D> 处理对象的类型
  * @since 5.0.0
  */
-public interface KeelIntravenous<D> extends KeelVerticle {
+public interface Intravenous<D> extends KeelVerticle {
     @NotNull
-    static <T> KeelIntravenous<T> instant(@NotNull Keel keel, @NotNull SingleDropProcessor<T> itemProcessor) {
-        return new KeelIntravenousSingleImpl<>(keel, itemProcessor);
+    static <T> Intravenous<T> instant(@NotNull Keel keel, @NotNull SingleDropProcessor<T> itemProcessor) {
+        return new IntravenousSingleImpl<>(keel, itemProcessor);
     }
 
     @NotNull
-    static <T> KeelIntravenous<T> instantBatch(@NotNull Keel keel, @NotNull MultiDropsProcessor<T> itemsProcessor) {
-        return new KeelIntravenousBatchImpl<>(keel, itemsProcessor);
+    static <T> Intravenous<T> instantBatch(@NotNull Keel keel, @NotNull MultiDropsProcessor<T> itemsProcessor) {
+        return new IntravenousBatchImpl<>(keel, itemsProcessor);
     }
 
     void add(@Nullable D drop);

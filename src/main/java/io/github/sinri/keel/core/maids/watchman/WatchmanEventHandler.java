@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * @since 5.0.0
  */
-public interface KeelWatchmanEventHandler extends Handler<Long> {
+public interface WatchmanEventHandler extends Handler<Long> {
     @NotNull
     default JsonObject config() {
         return new JsonObject();

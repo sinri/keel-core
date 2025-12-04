@@ -2,7 +2,6 @@ package io.github.sinri.keel.core.servant.queue;
 
 import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
-import io.github.sinri.keel.core.utils.ReflectionUtils;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.DeploymentOptions;
@@ -19,13 +18,13 @@ import java.util.Objects;
  *
  * @since 5.0.0
  */
-public abstract class KeelQueueTask extends AbstractKeelVerticle {
+public abstract class QueueTask extends AbstractKeelVerticle {
     @Nullable
     private QueueWorkerPoolManager queueWorkerPoolManager;
     @Nullable
     private SpecificLogger<QueueTaskSpecificLog> queueTaskLogger;
 
-    public KeelQueueTask(@NotNull Keel keel) {
+    public QueueTask(@NotNull Keel keel) {
         super(keel);
     }
 
@@ -104,27 +103,18 @@ public abstract class KeelQueueTask extends AbstractKeelVerticle {
     }
 
     /**
-     *
-     *
-     * @return 指定本任务是否需要在 WORKER 线程模型下运行
-     */
-    public boolean isWorkerThreadRequired() {
-        return true;
-    }
-
-    /**
-     * 如果本任务类指定在 WORKER 线程模型下运行，则以此部署；否则，先尝试以虚拟线程模型部署，不行就用事件循环模式部署。
-     *
      * @return 部署结果
      */
     @NotNull
     public Future<String> deployMe() {
         var deploymentOptions = new DeploymentOptions();
-        if (this.isWorkerThreadRequired()) {
-            deploymentOptions.setThreadingModel(ThreadingModel.WORKER);
-        } else if (ReflectionUtils.isVirtualThreadsAvailable()) {
-            deploymentOptions.setThreadingModel(ThreadingModel.VIRTUAL_THREAD);
-        }
+        deploymentOptions.setThreadingModel(threadingModel());
         return super.deployMe(deploymentOptions);
     }
+
+    @NotNull
+    protected ThreadingModel threadingModel() {
+        return ThreadingModel.WORKER;
+    }
+
 }

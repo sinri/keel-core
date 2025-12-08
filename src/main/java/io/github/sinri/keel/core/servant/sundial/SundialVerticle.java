@@ -14,6 +14,7 @@ import java.util.Calendar;
  *
  * @since 5.0.0
  */
+@Deprecated(since = "5.0.0",forRemoval = true)
 final class SundialVerticle extends AbstractKeelVerticle {
     @NotNull
     private final SundialPlan sundialPlan;

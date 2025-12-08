@@ -2,6 +2,7 @@ package io.github.sinri.keel.core.servant.sundial;
 
 import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
+import io.github.sinri.keel.base.verticles.KeelVerticle;
 import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
 import io.github.sinri.keel.core.utils.cron.ParsedCalenderElements;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
@@ -69,20 +70,30 @@ public abstract class Sundial extends AbstractKeelVerticle {
                         .context("plan_cron", plan.cronExpression().getRawCronExpression())
                         .context("now", parsedCalenderElements.toString())
                 );
-                new SundialVerticle(getKeel(), plan, now, getLogger())
-                        .deployMe()
-                        .onComplete(ar -> {
-                            if (ar.failed()) {
-                                getLogger().error(log -> log
-                                        .exception(ar.cause())
-                                        .message("Failed to deploy KeelSundialVerticle for " + plan.key())
-                                );
-                            } else {
-                                getLogger().info(log -> log
-                                        .message("Deployed KeelSundialVerticle for " + plan.key())
-                                );
-                            }
-                        });
+
+                KeelVerticle.instant(
+                                    getKeel(),
+                                    keelVerticle -> plan.execute(
+                                            keelVerticle.getKeel(),
+                                            now,
+                                            getLogger()
+                                    )
+                            )
+                            .deployMe(new DeploymentOptions()
+                                    .setThreadingModel(plan.threadingModel())
+                            )
+                            .onComplete(ar -> {
+                                if (ar.failed()) {
+                                    getLogger().error(log -> log
+                                            .exception(ar.cause())
+                                            .message("Failed to deploy verticle for " + plan.key())
+                                    );
+                                } else {
+                                    getLogger().info(log -> log
+                                            .message("Deployed verticle for " + plan.key() + " as " + ar.result())
+                                    );
+                                }
+                            });
             } else {
                 getLogger().debug(x -> x
                         .message("Sundial Plan Not Match")

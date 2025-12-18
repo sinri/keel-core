@@ -16,14 +16,22 @@ import java.io.InputStream;
  */
 public interface AsyncOutputReadStream extends ReadStream<Buffer> {
     static AsyncOutputReadStream create(Vertx vertx) {
-        return new AsyncOutputReadStreamImpl(vertx);
+        return new AsyncOutputReadStreamImpl2(vertx);
     }
 
     void wrap(@NotNull InputStream inputStream);
 
+    /**
+     *
+     * @return a promise of the number of bytes transferred
+     */
     @NotNull
     Promise<Long> getReadOverPromise();
 
+    /**
+     *
+     * @return a future of the number of bytes transferred
+     */
     @NotNull
     default Future<Long> readOver() {
         return getReadOverPromise().future();

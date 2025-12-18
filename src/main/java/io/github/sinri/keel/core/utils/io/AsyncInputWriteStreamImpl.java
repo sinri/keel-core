@@ -24,7 +24,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @see <a href="https://github.com/cloudonix/vertx-java.io">original project by guss77 (MIT): WriteToInputStream</a>
  * @since 5.0.0
+ * @deprecated block in vertx
  */
+@Deprecated(since = "5.0.0")
 class AsyncInputWriteStreamImpl extends InputStream implements WriteStream<Buffer>, AsyncInputWriteStream {
 
     private final ConcurrentLinkedQueue<PendingWrite> buffer = new ConcurrentLinkedQueue<>();

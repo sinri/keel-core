@@ -16,7 +16,7 @@ import java.io.OutputStream;
  */
 public interface AsyncInputWriteStream extends WriteStream<Buffer> {
     static AsyncInputWriteStream create(Vertx vertx) {
-        return new AsyncInputWriteStreamImpl(vertx);
+        return new AsyncInputWriteStreamImpl2(vertx);
     }
 
     void wrap(@NotNull OutputStream os);

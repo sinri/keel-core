@@ -44,7 +44,9 @@ public abstract class QueueTask extends AbstractKeelVerticle {
     abstract public String getTaskCategory();
 
     @NotNull
-    abstract protected LoggerFactory getLoggerFactory();
+    protected LoggerFactory getLoggerFactory(){
+        return getKeel().getLoggerFactory();
+    }
 
     @NotNull
     protected final SpecificLogger<QueueTaskSpecificLog> buildQueueTaskLogger() {

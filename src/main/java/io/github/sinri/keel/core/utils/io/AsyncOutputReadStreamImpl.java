@@ -46,8 +46,10 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @see <a href="https://github.com/cloudonix/vertx-java.io">original project by guss77 (MIT): OutputToReadStream</a>
  * @since 5.0.0
+ * @deprecated block in vertx
  */
-class AsyncOutputReadStreamImpl extends OutputStream implements ReadStream<Buffer>, AsyncOutputReadStream {
+@Deprecated(since = "5.0.0")
+class AsyncOutputReadStreamImpl extends OutputStream implements AsyncOutputReadStream {
 
     private final AtomicReference<CountDownLatch> paused = new AtomicReference<>(new CountDownLatch(0));
     private final AtomicLong demand = new AtomicLong(0);
@@ -76,6 +78,10 @@ class AsyncOutputReadStreamImpl extends OutputStream implements ReadStream<Buffe
                     .onComplete(readOverPromise);
     }
 
+    /**
+     *
+     * @return a promise of the number of bytes transferred
+     */
     @NotNull
     public Promise<Long> getReadOverPromise() {
         return Objects.requireNonNull(readOverPromise, "this stream has not been wrapped yet");

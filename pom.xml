@@ -7,7 +7,7 @@
     <groupId>io.github.sinri</groupId>
     <artifactId>keel-core</artifactId>
 <!--        <version>5.0.0-SNAPSHOT</version>-->
-    <version>5.0.0-rc.21</version>
+    <version>5.0.0-rc.22</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -19,14 +19,14 @@
         <mavenSurefirePluginVersion>3.5.4</mavenSurefirePluginVersion>
         <mavenGpgPluginVersion>3.2.8</mavenGpgPluginVersion>
         <nexusStagingMavenPluginVersion>1.7.0</nexusStagingMavenPluginVersion>
-        <vertxVersion>5.0.5</vertxVersion>
+        <vertxVersion>5.0.6</vertxVersion>
         <commonmarkVersion>0.27.0</commonmarkVersion>
         <jacksonVersion>2.18.2</jacksonVersion>
         <oshiCoreVersion>6.4.9</oshiCoreVersion>
         <slf4j.version>2.0.17</slf4j.version>
         <log4j.version>2.24.3</log4j.version>
-        <keelBaseVersion>5.0.0-rc.24</keelBaseVersion>
-        <keelTestVersion>5.0.0-rc.19</keelTestVersion>
+        <keelBaseVersion>5.0.0-rc.25</keelBaseVersion>
+        <keelTestVersion>5.0.0-rc.20</keelTestVersion>
     </properties>
 
     <name>Keel-Core</name>

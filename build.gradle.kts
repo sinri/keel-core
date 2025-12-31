@@ -51,16 +51,16 @@ dependencies {
 
     // Vert.x dependencies (matching pom.xml and module-info.java)
     api("io.vertx:vertx-core:$vertxVersion")
-    implementation("io.vertx:vertx-web-client:$vertxVersion")
-    implementation("io.vertx:vertx-mail-client:$vertxVersion")
-    implementation("io.vertx:vertx-json-schema:$vertxVersion")
+    api("io.vertx:vertx-web-client:$vertxVersion")
+    api("io.vertx:vertx-mail-client:$vertxVersion")
+    api("io.vertx:vertx-json-schema:$vertxVersion")
 
     // CommonMark dependencies (matching pom.xml)
     api("org.commonmark:commonmark:$commonmarkVersion")
-    implementation("org.commonmark:commonmark-ext-gfm-tables:$commonmarkVersion")
+    api("org.commonmark:commonmark-ext-gfm-tables:$commonmarkVersion")
 
     // OSHI Core (required by module-info.java)
-    api("com.github.oshi:oshi-core:$oshiCoreVersion")
+    implementation("com.github.oshi:oshi-core:$oshiCoreVersion")
 
     // Annotations (for module-info.java)
     api("org.jetbrains:annotations:26.0.1")

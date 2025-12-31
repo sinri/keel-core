@@ -39,7 +39,7 @@ public class IntravenouslyCutterOnString extends IntravenouslyCutter<String> {
     }
 
     @Override
-    protected @NotNull List<String> cut() {
+    protected @NotNull List<@NotNull String> cut() {
         List<String> list = new ArrayList<>();
         while (true) {
             String s0 = getBufferRef().get().toString(StandardCharsets.UTF_8);

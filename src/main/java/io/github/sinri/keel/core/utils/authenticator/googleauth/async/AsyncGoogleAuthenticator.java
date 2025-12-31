@@ -301,7 +301,7 @@ public final class AsyncGoogleAuthenticator implements AsyncIGoogleAuthenticator
         } catch (NoSuchAlgorithmException | InvalidKeyException ex) {
             // Logging the exception.
             //LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
-            LOGGER.exception(ex);
+            LOGGER.error(log -> log.exception(ex));
 
             // We're not disclosing internal error details to our clients.
             throw new GoogleAuthenticatorException("The operation cannot be performed now.");

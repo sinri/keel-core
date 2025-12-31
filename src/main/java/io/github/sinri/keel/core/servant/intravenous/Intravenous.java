@@ -73,12 +73,10 @@ public interface Intravenous<D> extends KeelVerticle {
     }
 
     interface SingleDropProcessor<T> {
-        @NotNull
-        Future<Void> process(@Nullable T drop);
+        @NotNull Future<Void> process(@Nullable T drop);
     }
 
     interface MultiDropsProcessor<T> {
-        @NotNull
-        Future<Void> process(@NotNull List<T> drops);
+        @NotNull Future<Void> process(@NotNull List<@Nullable T> drops);
     }
 }

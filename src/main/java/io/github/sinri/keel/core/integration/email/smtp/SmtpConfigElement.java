@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.integration.email.smtp;
 
 import io.github.sinri.keel.base.configuration.ConfigElement;
-import io.github.sinri.keel.base.configuration.ConfigTree;
+import io.github.sinri.keel.base.configuration.NotConfiguredException;
 import io.vertx.ext.mail.MailConfig;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,7 +14,8 @@ import java.util.List;
  *
  * @since 5.0.0
  */
-public class SmtpConfigElement extends ConfigTree {
+public class SmtpConfigElement extends ConfigElement {
+
 
     public SmtpConfigElement(@NotNull ConfigElement another) {
         super(another);

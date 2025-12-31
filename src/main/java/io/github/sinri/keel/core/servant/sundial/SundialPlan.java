@@ -19,15 +19,13 @@ public interface SundialPlan {
      *
      * @return 定时任务计划名称
      */
-    @NotNull
-    String key();
+    @NotNull String key();
 
     /**
      *
      * @return 任务计划 Cron 表达式，精确到分钟
      */
-    @NotNull
-    KeelCronExpression cronExpression();
+    @NotNull KeelCronExpression cronExpression();
 
     /**
      * 任务计划执行逻辑。
@@ -35,11 +33,9 @@ public interface SundialPlan {
      * @param now                   本次定时任务运行对应的触发时间
      * @param sundialSpecificLogger 日晷定时任务特定日志记录器
      */
-    @NotNull
-    Future<Void> execute(@NotNull Keel keel, @NotNull Calendar now, @NotNull SpecificLogger<SundialSpecificLog> sundialSpecificLogger);
+    @NotNull Future<Void> execute(@NotNull Keel keel, @NotNull Calendar now, @NotNull SpecificLogger<SundialSpecificLog> sundialSpecificLogger);
 
-    @NotNull
-    default ThreadingModel threadingModel() {
+    default @NotNull ThreadingModel threadingModel() {
         return ThreadingModel.WORKER;
     }
 }

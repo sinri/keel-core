@@ -60,7 +60,7 @@ public class Funnel extends AbstractKeelVerticle {
         this.sleepTimeRef.set(sleepTime);
     }
 
-    public void add(@NotNull Supplier<Future<Void>> supplier) {
+    public void add(@NotNull Supplier<@NotNull Future<Void>> supplier) {
         queue.add(supplier);
         Promise<Void> currentInterrupt = getCurrentInterrupt();
         if (currentInterrupt != null) {

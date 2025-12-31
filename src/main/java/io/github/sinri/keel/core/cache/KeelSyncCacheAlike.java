@@ -32,8 +32,7 @@ public interface KeelSyncCacheAlike<K, V> {
      * @param fallbackValue 默认值，用于无法找到有效缓存时
      * @return 给定键对应的有效缓存，或给定的默认值
      */
-    @Nullable
-    V read(@NotNull K key, @Nullable V fallbackValue);
+    @Nullable V read(@NotNull K key, @Nullable V fallbackValue);
 
     /**
      * 根据给定的键，尝试获取缓存的值，如果无法找到有效的缓存值，则抛出 {@link NotCached} 异常。
@@ -42,8 +41,7 @@ public interface KeelSyncCacheAlike<K, V> {
      * @return 给定键对应的有效缓存
      * @throws NotCached 无法找到有效缓存时
      */
-    @NotNull
-    default V read(@NotNull K key) throws NotCached {
+    default @NotNull V read(@NotNull K key) throws NotCached {
         var v = read(key, null);
         if (v == null) {
             throw new NotCached(key.toString());

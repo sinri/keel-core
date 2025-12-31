@@ -14,5 +14,5 @@ public interface QueueSignalReader {
     SpecificLogger<QueueManageSpecificLog> getQueueManageLogger();
 
     @NotNull
-    Future<QueueSignal> readSignal();
+    Future<@NotNull QueueSignal> readSignal();
 }

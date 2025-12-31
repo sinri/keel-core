@@ -1,6 +1,7 @@
 package io.github.sinri.keel.core.cutter;
 
 import io.github.sinri.keel.base.Keel;
+import io.github.sinri.keel.base.KeelHolder;
 import io.github.sinri.keel.core.servant.intravenous.Intravenous;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
@@ -25,21 +26,20 @@ import java.util.concurrent.atomic.AtomicReference;
  * @param <T> 组成可处理的流的实体类型
  * @since 5.0.0
  */
-public abstract class IntravenouslyCutter<T> {
-    @NotNull
-    private final AtomicReference<Buffer> bufferRef;
-    @NotNull
-    private final Intravenous<T> intravenous;
-    @NotNull
-    private final AtomicBoolean readStopRef = new AtomicBoolean(false);
-    @NotNull
-    private final AtomicReference<Throwable> stopCause = new AtomicReference<>();
-    @NotNull
-    private final Keel keel;
-    @Nullable
-    private Long timeoutTimer;
+public abstract class IntravenouslyCutter<T> implements KeelHolder {
 
-    public IntravenouslyCutter(@NotNull Keel keel, @NotNull Intravenous.SingleDropProcessor<T> singleDropProcessor, long timeout) {
+    private final @NotNull AtomicReference<Buffer> bufferRef;
+    private final @NotNull Intravenous<T> intravenous;
+    private final @NotNull AtomicBoolean readStopRef = new AtomicBoolean(false);
+    private final @NotNull AtomicReference<Throwable> stopCause = new AtomicReference<>();
+    private final @NotNull Keel keel;
+    private @Nullable Long timeoutTimer;
+
+    public IntravenouslyCutter(
+            @NotNull Keel keel,
+            @NotNull Intravenous.SingleDropProcessor<T> singleDropProcessor,
+            long timeout
+    ) {
         this.keel = keel;
         this.bufferRef = new AtomicReference<>(Buffer.buffer());
         this.intravenous = Intravenous.instant(keel, singleDropProcessor);
@@ -52,8 +52,7 @@ public abstract class IntravenouslyCutter<T> {
         }
     }
 
-    protected @NotNull
-    final Keel getKeel() {
+    public final @NotNull Keel getKeel() {
         return keel;
     }
 
@@ -119,8 +118,7 @@ public abstract class IntravenouslyCutter<T> {
                    });
     }
 
-    @NotNull
-    protected final AtomicReference<Buffer> getBufferRef() {
+    protected final @NotNull AtomicReference<Buffer> getBufferRef() {
         return bufferRef;
     }
 
@@ -132,5 +130,5 @@ public abstract class IntravenouslyCutter<T> {
      * @return 目标切片实体列表
      */
     @NotNull
-    abstract protected List<T> cut();
+    abstract protected List<@NotNull T> cut();
 }

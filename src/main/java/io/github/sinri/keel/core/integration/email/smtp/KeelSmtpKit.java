@@ -13,16 +13,16 @@ import java.util.List;
 import java.util.Objects;
 
 
+
 /**
  * SMTP协议工具。
  *
  * @since 5.0.0
  */
 public class KeelSmtpKit {
-    @NotNull
-    private final MailConfig mailConfig;
-    @NotNull
-    private final MailClient mailClient;
+
+    private final @NotNull MailConfig mailConfig;
+    private final @NotNull MailClient mailClient;
 
 
     public KeelSmtpKit(@NotNull Keel keel, @NotNull MailConfig mailConfig, @Nullable String poolName) {
@@ -44,9 +44,8 @@ public class KeelSmtpKit {
 
     @NotNull
     private static MailConfig buildMailConfig(@NotNull Keel keel, @NotNull String smtpName) {
-        var smtpConfiguration = keel.getConfiguration().extract("email", "smtp", smtpName);
+        var smtpConfiguration = keel.getConfiguration().extract(List.of("email", "smtp", smtpName));
         Objects.requireNonNull(smtpConfiguration);
-
         SmtpConfigElement smtpConfigElement = new SmtpConfigElement(smtpConfiguration);
         return smtpConfigElement.toMailConfig();
     }

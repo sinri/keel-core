@@ -3,6 +3,7 @@ package io.github.sinri.keel.core.servant.intravenous;
 import io.github.sinri.keel.base.Keel;
 import io.vertx.core.Future;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ class IntravenousBatchImpl<D> extends IntravenousBase<D> {
         this.itemsProcessor = itemsProcessor;
     }
 
-    protected @NotNull Future<Void> handleDrops(@NotNull List<D> drops) {
+    protected @NotNull Future<Void> handleDrops(@NotNull List<@Nullable D> drops) {
         return Future.succeededFuture()
                      .compose(v -> this.itemsProcessor.process(drops))
                      .recover(throwable -> {

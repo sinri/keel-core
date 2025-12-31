@@ -23,8 +23,7 @@ public interface KeelAsyncCacheInterface<K, V> extends KeelAsyncCacheAlike<K, V>
      * @param value         值
      * @param lifeInSeconds 存活周期，以秒计
      */
-    @NotNull
-    Future<Void> save(@NotNull K key, V value, long lifeInSeconds);
+    @NotNull Future<Void> save(@NotNull K key, @NotNull V value, long lifeInSeconds);
 
     /**
      * 根据给定的键，尝试获取值；如果无法找到有效的值，则利用给定的逻辑生成一个新值，以给定存活周期存入；返回找到的值或存入的值。
@@ -34,37 +33,32 @@ public interface KeelAsyncCacheInterface<K, V> extends KeelAsyncCacheAlike<K, V>
      * @param lifeInSeconds 存活周期，以秒计
      * @return 异步返回的值
      */
-    @NotNull
-    Future<V> read(@NotNull K key, Function<K, Future<V>> generator, long lifeInSeconds);
+    @NotNull Future<@NotNull V> read(@NotNull K key, @NotNull Function<@NotNull K, @NotNull Future<@NotNull V>> generator, long lifeInSeconds);
 
     /**
      * 从缓存中移除指定键值对。
      *
      * @param key 键
      */
-    @NotNull
-    Future<Void> remove(@NotNull K key);
+    @NotNull Future<Void> remove(@NotNull K key);
 
     /**
      * 从缓存中移除所有键值对。
      */
-    @NotNull
-    Future<Void> removeAll();
+    @NotNull Future<Void> removeAll();
 
     /**
      * 清理缓存中的无效键值对。
      * <p>
      * 本方法需要适时调用以避免内存泄露。
      */
-    @NotNull
-    Future<Void> cleanUp();
+    @NotNull Future<Void> cleanUp();
 
     /**
      * 获取所有缓存中的有效的键的集合。
      *
      * @return 有效的键的集合
      */
-    @NotNull
-    Future<Set<K>> getCachedKeySet();
+    @NotNull Future<@NotNull Set<@NotNull K>> getCachedKeySet();
 
 }

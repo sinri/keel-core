@@ -301,7 +301,7 @@ public final class GoogleAuthenticator implements IGoogleAuthenticator {
         } catch (NoSuchAlgorithmException | InvalidKeyException ex) {
             // Logging the exception.
             // LOGGER.log(Level.SEVERE, ex.getMessage(), ex);
-            LOGGER.exception(ex);
+            LOGGER.error(x -> x.exception(ex));
 
             // We're not disclosing internal error details to our clients.
             throw new GoogleAuthenticatorException("The operation cannot be performed now.");

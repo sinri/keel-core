@@ -15,10 +15,8 @@ import java.util.function.Function;
  * @since 5.0.0
  */
 class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
-    @NotNull
-    private final ConcurrentMap<K, ValueWrapper<V>> map;
-    @NotNull
-    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final @NotNull ConcurrentMap<@NotNull K, @NotNull ValueWrapper<V>> map;
+    private final @NotNull ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private long defaultLifeInSeconds = 1000L;
 
     public KeelCacheImpl() {
@@ -31,8 +29,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    @NotNull
-    public KeelCacheInterface<K, V> setDefaultLifeInSeconds(long lifeInSeconds) {
+    public @NotNull KeelCacheInterface<K, V> setDefaultLifeInSeconds(long lifeInSeconds) {
         defaultLifeInSeconds = lifeInSeconds;
         return this;
     }
@@ -45,8 +42,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
         }
     }
 
-    @Nullable
-    private V readImpl(@NotNull K key) {
+    private @Nullable V readImpl(@NotNull K key) {
         ValueWrapper<V> vValueWrapper = map.get(key);
         if (vValueWrapper == null) {
             return null;
@@ -56,7 +52,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public void save(@NotNull K key, V value, long lifeInSeconds) {
+    public void save(@NotNull K key, @Nullable V value, long lifeInSeconds) {
         lock.writeLock().lock();
         try {
             saveImpl(key, value, lifeInSeconds);
@@ -66,8 +62,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    @Nullable
-    public V read(@NotNull K key, @Nullable V fallbackValue) {
+    public @Nullable V read(@NotNull K key, @Nullable V fallbackValue) {
         lock.readLock().lock();
         try {
             V v = readImpl(key);
@@ -81,7 +76,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public @NotNull V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation, long lifeInSeconds) {
+    public @NotNull V computeIfAbsent(@NotNull K key, @NotNull Function<@NotNull K, @NotNull V> computation, long lifeInSeconds) {
         this.lock.writeLock().lock();
         try {
             V v = readImpl(key);
@@ -142,9 +137,9 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
         }
     }
 
-    @NotNull
+
     @Override
-    public Set<K> getCachedKeySet() {
+    public @NotNull Set<@NotNull K> getCachedKeySet() {
         this.lock.writeLock().lock();
         try {
             cleanUpImpl();

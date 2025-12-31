@@ -2,11 +2,11 @@ package io.github.sinri.keel.core.servant.sundial;
 
 import io.github.sinri.keel.tesuto.KeelJUnit5Test;
 import io.vertx.core.Vertx;
+import io.vertx.junit5.VertxTestContext;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-class SundialTest extends KeelJUnit5Test {
+public class SundialTest extends KeelJUnit5Test {
 
     /**
      * 构造方法。
@@ -19,5 +19,9 @@ class SundialTest extends KeelJUnit5Test {
         super(vertx);
     }
 
+    @Test
+    void test(VertxTestContext testContext) {
+        testContext.completeNow();
+    }
 
 }

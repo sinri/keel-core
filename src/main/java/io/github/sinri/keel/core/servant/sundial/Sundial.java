@@ -25,27 +25,22 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 5.0.0
  */
 public abstract class Sundial extends AbstractKeelVerticle {
-    @NotNull
-    private final Map<String, SundialPlan> planMap = new ConcurrentHashMap<>();
-    @Nullable
-    private Long timerID;
-    @Nullable
-    private SpecificLogger<SundialSpecificLog> logger;
+
+    private final @NotNull Map<@NotNull String, @NotNull SundialPlan> planMap = new ConcurrentHashMap<>();
+    private @Nullable Long timerID;
+    private @Nullable SpecificLogger<SundialSpecificLog> logger;
 
     public Sundial(@NotNull Keel keel) {
         super(keel);
     }
 
-    @NotNull
-    abstract protected LoggerFactory getLoggerFactory();
+    abstract protected @NotNull LoggerFactory getLoggerFactory();
 
-    @NotNull
-    protected SpecificLogger<SundialSpecificLog> buildLogger() {
+    protected @NotNull SpecificLogger<SundialSpecificLog> buildLogger() {
         return getLoggerFactory().createLogger(SundialSpecificLog.TopicSundial, SundialSpecificLog::new);
     }
 
-    @NotNull
-    public final SpecificLogger<SundialSpecificLog> getLogger() {
+    public final @NotNull SpecificLogger<SundialSpecificLog> getLogger() {
         return Objects.requireNonNull(logger);
     }
 
@@ -122,7 +117,7 @@ public abstract class Sundial extends AbstractKeelVerticle {
                                              toDelete.forEach(planMap::remove);
                                          }
                                      }
-                                     return Future.succeededFuture();
+                                     return Future.succeededFuture(null);
                                  })
                  )
                  .onFailure(throwable -> getLogger().error(log -> log
@@ -136,8 +131,7 @@ public abstract class Sundial extends AbstractKeelVerticle {
      *
      * @return 异步返回的定时任务计划集，用于覆盖更新当前的计划快照；如果异步返回了 null，则表示不更新计划快照。
      */
-    @NotNull
-    abstract protected Future<Collection<SundialPlan>> fetchPlans();
+    abstract protected @NotNull Future<@Nullable Collection<@NotNull SundialPlan>> fetchPlans();
 
     @Override
     protected @NotNull Future<Void> stopVerticle() {
@@ -152,8 +146,7 @@ public abstract class Sundial extends AbstractKeelVerticle {
      *
      * @return 部署结果
      */
-    @NotNull
-    public final Future<String> deployMe() {
+    public final @NotNull Future<String> deployMe() {
         return super.deployMe(new DeploymentOptions()
                 .setThreadingModel(ThreadingModel.WORKER));
     }

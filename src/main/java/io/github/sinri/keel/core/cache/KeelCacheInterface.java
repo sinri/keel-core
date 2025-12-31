@@ -22,8 +22,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param <V> 值的类型
      * @return 本接口的默认实现实例
      */
-    @NotNull
-    static <K, V> KeelCacheInterface<K, V> createDefaultInstance() {
+    static <K, V> @NotNull KeelCacheInterface<K, V> createDefaultInstance() {
         return new KeelCacheImpl<>();
     }
 
@@ -34,8 +33,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param <V> 值的类型
      * @return 本接口的伪实现实例
      */
-    @NotNull
-    static <K, V> KeelCacheInterface<K, V> getDummyInstance() {
+    static <K, V> @NotNull KeelCacheInterface<K, V> getDummyInstance() {
         return new KeelCacheDummy<>();
     }
 
@@ -50,8 +48,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param lifeInSeconds 默认的缓存记录存活周期，以秒计
      * @return 本接口实例
      */
-    @NotNull
-    KeelCacheInterface<K, V> setDefaultLifeInSeconds(long lifeInSeconds);
+    @NotNull KeelCacheInterface<K, V> setDefaultLifeInSeconds(long lifeInSeconds);
 
     /**
      * 根据给定的键值对存入一条指定时长内有效的缓存记录。
@@ -60,7 +57,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param value         值
      * @param lifeInSeconds 本条缓存记录的存活周期，以秒计
      */
-    void save(@NotNull K key, V value, long lifeInSeconds);
+    void save(@NotNull K key, @Nullable V value, long lifeInSeconds);
 
     /**
      * 根据给定的键值对存入一条默认时长内有效的缓存记录。
@@ -81,8 +78,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param computation 新值生成逻辑，生成的结果不应为 null
      * @return 找到的值或新建而存入的值
      */
-    @NotNull
-    default V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation) {
+    default @NotNull V computeIfAbsent(@NotNull K key, @NotNull Function<@NotNull K, @NotNull V> computation) {
         return computeIfAbsent(key, computation, getDefaultLifeInSeconds());
     }
 
@@ -94,8 +90,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param lifeInSeconds 存活周期，以秒计
      * @return 找到的值或新建而存入的值
      */
-    @NotNull
-    V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation, long lifeInSeconds);
+    @NotNull V computeIfAbsent(@NotNull K key, @NotNull Function<@NotNull K, @NotNull V> computation, long lifeInSeconds);
 
     /**
      * 从缓存中移除一个记录。
@@ -121,6 +116,5 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      *
      * @return 有效的键的集合
      */
-    @NotNull
-    Set<K> getCachedKeySet();
+    @NotNull Set<@NotNull K> getCachedKeySet();
 }

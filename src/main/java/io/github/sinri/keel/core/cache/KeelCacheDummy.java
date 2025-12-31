@@ -28,18 +28,17 @@ public class KeelCacheDummy<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public void save(@NotNull K key, V value, long lifeInSeconds) {
+    public void save(@NotNull K key, @Nullable V value, long lifeInSeconds) {
 
     }
 
-    @NotNull
     @Override
-    public V read(@NotNull K key) throws NotCached {
+    public @NotNull V read(@NotNull K key) throws NotCached {
         throw new NotCached(key.toString());
     }
 
     @Override
-    public @NotNull V computeIfAbsent(@NotNull K key, @NotNull Function<K, V> computation, long lifeInSeconds) {
+    public @NotNull V computeIfAbsent(@NotNull K key, @NotNull Function<@NotNull K, @NotNull V> computation, long lifeInSeconds) {
         return computation.apply(key);
     }
 
@@ -63,9 +62,8 @@ public class KeelCacheDummy<K, V> implements KeelCacheInterface<K, V> {
 
     }
 
-    @NotNull
     @Override
-    public Set<K> getCachedKeySet() {
+    public @NotNull Set<@NotNull K> getCachedKeySet() {
         return Set.of();
     }
 }

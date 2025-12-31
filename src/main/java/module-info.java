@@ -6,8 +6,8 @@ module io.github.sinri.keel.core {
     requires transitive io.vertx.core;
     requires transitive io.vertx.mail.client;
     requires java.management;
-    requires org.commonmark;
-    requires org.commonmark.ext.gfm.tables;
+    requires transitive org.commonmark;
+    requires transitive org.commonmark.ext.gfm.tables;
     requires transitive org.jetbrains.annotations;
 
     // Exports for public API packages

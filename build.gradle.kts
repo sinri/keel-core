@@ -50,7 +50,7 @@ dependencies {
     api("io.github.sinri:keel-base:$keelBaseVersion")
 
     // Vert.x dependencies (matching pom.xml and module-info.java)
-    api("io.vertx:vertx-core:$vertxVersion")
+//    api("io.vertx:vertx-core:$vertxVersion")
     api("io.vertx:vertx-web-client:$vertxVersion")
     api("io.vertx:vertx-mail-client:$vertxVersion")
     api("io.vertx:vertx-json-schema:$vertxVersion")
@@ -63,22 +63,22 @@ dependencies {
     implementation("com.github.oshi:oshi-core:$oshiCoreVersion")
 
     // Annotations (for module-info.java)
-    api("org.jetbrains:annotations:26.0.1")
+    api("org.jetbrains:annotations:26.0.2")
 
     // Jackson dependencies
-    api("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
-    api("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+//    api("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
+//    api("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
+//    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:$jacksonVersion")
+//    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
 
     // Logging dependencies (from pom.xml properties)
-    implementation("org.slf4j:slf4j-api:$slf4jVersion")
-    implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
-    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
+    //implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    //implementation("org.apache.logging.log4j:log4j-api:$log4jVersion")
+    //implementation("org.apache.logging.log4j:log4j-slf4j2-impl:$log4jVersion")
 
     // Test dependencies
     testImplementation("io.github.sinri:keel-test:$keelTestVersion")
-    testImplementation("io.vertx:vertx-junit5:$vertxVersion")
+    //testImplementation("io.vertx:vertx-junit5:$vertxVersion")
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @since 5.0.0
  */
-class AsyncInputWriteStreamImpl2 implements AsyncInputWriteStream {
+class AsyncInputWriteStreamImpl implements AsyncInputWriteStream {
 
     private final Vertx vertx;
     private final Context context;
@@ -39,7 +39,7 @@ class AsyncInputWriteStreamImpl2 implements AsyncInputWriteStream {
     private Handler<Buffer> dataHandler = __ -> {};
     private Promise<Void> writeOverPromise;
 
-    public AsyncInputWriteStreamImpl2(Vertx vertx) {
+    public AsyncInputWriteStreamImpl(Vertx vertx) {
         this.vertx = vertx;
         this.context = vertx.getOrCreateContext();
     }
@@ -240,7 +240,7 @@ class AsyncInputWriteStreamImpl2 implements AsyncInputWriteStream {
      * @param maxSize Maximum chunk size
      * @return This stream instance
      */
-    public AsyncInputWriteStreamImpl2 setMaxChunkSize(int maxSize) {
+    public AsyncInputWriteStreamImpl setMaxChunkSize(int maxSize) {
         this.maxBufferSize = maxSize;
         return this;
     }
@@ -273,7 +273,7 @@ class AsyncInputWriteStreamImpl2 implements AsyncInputWriteStream {
      * @param handler Data handler
      * @return This stream instance
      */
-    public AsyncInputWriteStreamImpl2 dataHandler(@Nullable Handler<Buffer> handler) {
+    public AsyncInputWriteStreamImpl dataHandler(@Nullable Handler<Buffer> handler) {
         this.dataHandler = handler != null ? handler : __ -> {};
         return this;
     }

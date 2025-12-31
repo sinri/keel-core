@@ -15,14 +15,13 @@ import java.io.OutputStream;
  * @since 5.0.0
  */
 public interface AsyncInputWriteStream extends WriteStream<Buffer> {
-    static AsyncInputWriteStream create(Vertx vertx) {
-        return new AsyncInputWriteStreamImpl2(vertx);
+    static AsyncInputWriteStream create(@NotNull Vertx vertx) {
+        return new AsyncInputWriteStreamImpl(vertx);
     }
 
     void wrap(@NotNull OutputStream os);
 
-    @NotNull
-    Promise<Void> getWriteOverPromise();
+    @NotNull Promise<Void> getWriteOverPromise();
 
     @NotNull
     default Future<Void> writeOver() {

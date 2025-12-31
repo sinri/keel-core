@@ -1,7 +1,6 @@
 package io.github.sinri.keel.core.utils.io;
 
 import io.github.sinri.keel.base.async.KeelAsyncMixin;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -15,7 +14,7 @@ import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
-class AsyncOutputReadStreamImpl2 implements AsyncOutputReadStream, KeelAsyncMixin {
+class AsyncOutputReadStreamImpl implements AsyncOutputReadStream, KeelAsyncMixin {
     private final @NotNull Vertx vertx;
 
     // Flow control state
@@ -33,7 +32,7 @@ class AsyncOutputReadStreamImpl2 implements AsyncOutputReadStream, KeelAsyncMixi
     private Promise<Long> readOverPromise;
     private long totalBytesRead = 0;
 
-    public AsyncOutputReadStreamImpl2(@NotNull Vertx vertx) {
+    public AsyncOutputReadStreamImpl(@NotNull Vertx vertx) {
         this.vertx = vertx;
         // Default handlers
         this.exceptionHandler = t -> {};

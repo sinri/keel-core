@@ -15,8 +15,8 @@ import java.io.InputStream;
  * @since 5.0.0
  */
 public interface AsyncOutputReadStream extends ReadStream<Buffer> {
-    static AsyncOutputReadStream create(Vertx vertx) {
-        return new AsyncOutputReadStreamImpl2(vertx);
+    static AsyncOutputReadStream create(@NotNull Vertx vertx) {
+        return new AsyncOutputReadStreamImpl(vertx);
     }
 
     void wrap(@NotNull InputStream inputStream);

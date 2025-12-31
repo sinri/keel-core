@@ -11,9 +11,7 @@ import org.jetbrains.annotations.Nullable;
  * @since 5.0.0
  */
 public interface ValueEnveloping<R, E> {
-    @Nullable
-    E encrypt(@Nullable R raw);
+    @Nullable E encrypt(@Nullable R raw);
 
-    @Nullable
-    R decrypt(@Nullable E decrypted);
+    @Nullable R decrypt(@Nullable E decrypted);
 }

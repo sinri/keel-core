@@ -1,8 +1,7 @@
 package io.github.sinri.keel.core.utils;
 
 import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
@@ -18,6 +17,7 @@ import java.util.Locale;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class TimeUtils {
     public static final String MYSQL_DATETIME_MS_PATTERN = "yyyy-MM-dd HH:mm:ss.SSS";
     public static final String MYSQL_DATETIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
@@ -53,8 +53,8 @@ public class TimeUtils {
      * @param format for example: yyyy-MM-ddTHH:mm:ss
      */
     public static String getDateExpression(Date date, String format) {
-        if (format == null || format.isEmpty()) {
-            return null;
+        if (format.isEmpty()) {
+            throw new IllegalArgumentException("Format cannot be empty");
         }
         SimpleDateFormat formatter = new SimpleDateFormat(format);
         return formatter.format(date);
@@ -125,7 +125,7 @@ public class TimeUtils {
      * @param formatStr The format pattern. Consider to use provided pattern constants.
      * @return Date instance.
      */
-    public static @Nullable Date parseExpressionToDateInstance(@NotNull String dateStr, @NotNull String formatStr) {
+    public static Date parseExpressionToDateInstance(String dateStr, String formatStr) {
         try {
             SimpleDateFormat format = new SimpleDateFormat(formatStr);
             format.setLenient(false); // 启用严格模式，校验日期是否真实存在
@@ -145,11 +145,11 @@ public class TimeUtils {
         return DateTimeFormatter.ofPattern(pattern).withZone(zoneId).format(instant);
     }
 
-    public static boolean isNowMatchCronExpression(@NotNull String cronExpression) {
+    public static boolean isNowMatchCronExpression(String cronExpression) {
         return new KeelCronExpression(cronExpression).match(Calendar.getInstance());
     }
 
-    public static boolean isNowMatchCronExpression(@NotNull KeelCronExpression cronExpression) {
+    public static boolean isNowMatchCronExpression(KeelCronExpression cronExpression) {
         return cronExpression.match(Calendar.getInstance());
     }
 }

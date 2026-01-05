@@ -8,7 +8,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.ReadStream;
 import io.vertx.core.streams.WriteStream;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,12 +18,13 @@ import java.io.OutputStream;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class IOUtils {
     private IOUtils() {
     }
 
     @TechnicalPreview(since = "5.0.0")
-    public static AsyncOutputReadStream toReadStream(@NotNull Vertx vertx, @NotNull InputStream inputStream, @NotNull Handler<ReadStream<Buffer>> handler) {
+    public static AsyncOutputReadStream toReadStream(Vertx vertx, InputStream inputStream, Handler<ReadStream<Buffer>> handler) {
         var readStream = AsyncOutputReadStream.create(vertx);
         readStream.pause();
         handler.handle(readStream);
@@ -33,7 +34,7 @@ public class IOUtils {
     }
 
     @TechnicalPreview(since = "5.0.0")
-    public static AsyncInputWriteStream toWriteStream(@NotNull Vertx vertx, @NotNull OutputStream outputStream, @NotNull Handler<WriteStream<Buffer>> handler) {
+    public static AsyncInputWriteStream toWriteStream(Vertx vertx, OutputStream outputStream, Handler<WriteStream<Buffer>> handler) {
         var writeStream = AsyncInputWriteStream.create(vertx);
         handler.handle(writeStream);
         writeStream.wrap(outputStream);

@@ -5,7 +5,7 @@ import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
 import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Calendar;
 
@@ -14,18 +14,19 @@ import java.util.Calendar;
  *
  * @since 5.0.0
  */
+@NullMarked
 public interface SundialPlan {
     /**
      *
      * @return 定时任务计划名称
      */
-    @NotNull String key();
+    String key();
 
     /**
      *
      * @return 任务计划 Cron 表达式，精确到分钟
      */
-    @NotNull KeelCronExpression cronExpression();
+    KeelCronExpression cronExpression();
 
     /**
      * 任务计划执行逻辑。
@@ -33,9 +34,9 @@ public interface SundialPlan {
      * @param now                   本次定时任务运行对应的触发时间
      * @param sundialSpecificLogger 日晷定时任务特定日志记录器
      */
-    @NotNull Future<Void> execute(@NotNull Keel keel, @NotNull Calendar now, @NotNull SpecificLogger<SundialSpecificLog> sundialSpecificLogger);
+    Future<Void> execute(Keel keel, Calendar now, SpecificLogger<SundialSpecificLog> sundialSpecificLogger);
 
-    default @NotNull ThreadingModel threadingModel() {
+    default ThreadingModel threadingModel() {
         return ThreadingModel.WORKER;
     }
 }

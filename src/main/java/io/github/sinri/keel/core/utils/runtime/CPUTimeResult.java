@@ -1,7 +1,8 @@
 package io.github.sinri.keel.core.utils.runtime;
 
 import io.vertx.core.json.JsonObject;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.text.DecimalFormat;
 
@@ -38,6 +39,7 @@ import java.text.DecimalFormat;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class CPUTimeResult implements RuntimeStatResult<CPUTimeResult> {
     private final long statTime;
     private long spentInUserState = 0;

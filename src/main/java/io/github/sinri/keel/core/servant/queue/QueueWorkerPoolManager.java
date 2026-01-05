@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.servant.queue;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -9,10 +9,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class QueueWorkerPoolManager {
-    @NotNull
     private final AtomicInteger maxWorkerCountRef;
-    @NotNull
     private final AtomicInteger runningWorkerCounter;
 
     /**

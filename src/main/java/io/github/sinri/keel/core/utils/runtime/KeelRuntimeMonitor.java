@@ -3,25 +3,26 @@ package io.github.sinri.keel.core.utils.runtime;
 import io.github.sinri.keel.core.utils.RuntimeUtils;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.concurrent.atomic.AtomicReference;
-
 
 
 /**
  * @since 5.0.0
  */
+@NullMarked
 public class KeelRuntimeMonitor {
-    private final AtomicReference<GCStatResult> _lastGCRef = new AtomicReference<>();
-    private final AtomicReference<CPUTimeResult> _lastCPUTimeRef = new AtomicReference<>();
+    private final AtomicReference<@Nullable GCStatResult> _lastGCRef = new AtomicReference<>();
+    private final AtomicReference<@Nullable CPUTimeResult> _lastCPUTimeRef = new AtomicReference<>();
     private final Vertx vertx;
 
     public KeelRuntimeMonitor(Vertx vertx) {
         this.vertx = vertx;
     }
 
-    public void startRuntimeMonitor(long interval, @NotNull Handler<MonitorSnapshot> handler) {
+    public void startRuntimeMonitor(long interval, Handler<MonitorSnapshot> handler) {
         // after [interval] waiting, actual snapshots would be taken.
         vertx.setPeriodic(interval, timer -> {
             MonitorSnapshot monitorSnapshot = new MonitorSnapshot();

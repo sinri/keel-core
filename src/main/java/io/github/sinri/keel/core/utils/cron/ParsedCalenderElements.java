@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.utils.cron;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Calendar;
 
@@ -9,6 +9,7 @@ import java.util.Calendar;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class ParsedCalenderElements {
     public final int minute;
     public final int hour;
@@ -65,7 +66,7 @@ public class ParsedCalenderElements {
      *
      * @param currentCalendar 用于提取日期和时间组件的 Calendar 对象，不能为 null
      */
-    public ParsedCalenderElements(@NotNull Calendar currentCalendar) {
+    public ParsedCalenderElements(Calendar currentCalendar) {
         minute = currentCalendar.get(Calendar.MINUTE);
         hour = currentCalendar.get(Calendar.HOUR_OF_DAY);
         day = currentCalendar.get(Calendar.DAY_OF_MONTH);

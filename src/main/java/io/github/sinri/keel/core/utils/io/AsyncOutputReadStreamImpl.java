@@ -6,16 +6,17 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.ReadStream;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
+@NullMarked
 class AsyncOutputReadStreamImpl implements AsyncOutputReadStream, KeelAsyncMixin {
-    private final @NotNull Vertx vertx;
+    private final Vertx vertx;
 
     // Flow control state
     private final AtomicBoolean paused = new AtomicBoolean(true);  // Vert.x ReadStream 默认是暂停状态
@@ -28,20 +29,23 @@ class AsyncOutputReadStreamImpl implements AsyncOutputReadStream, KeelAsyncMixin
     private Handler<Void> endHandler;
 
     // Reading state
-    private InputStream inputStream;
-    private Promise<Long> readOverPromise;
+    private @Nullable InputStream inputStream;
+    private @Nullable Promise<Long> readOverPromise;
     private long totalBytesRead = 0;
 
-    public AsyncOutputReadStreamImpl(@NotNull Vertx vertx) {
+    public AsyncOutputReadStreamImpl(Vertx vertx) {
         this.vertx = vertx;
         // Default handlers
-        this.exceptionHandler = t -> {};
-        this.handler = b -> {};
-        this.endHandler = v -> {};
+        this.exceptionHandler = t -> {
+        };
+        this.handler = b -> {
+        };
+        this.endHandler = v -> {
+        };
     }
 
     @Override
-    public void wrap(@NotNull InputStream inputStream) {
+    public void wrap(InputStream inputStream) {
         if (this.inputStream != null) {
             throw new IllegalStateException("Stream has already been wrapped");
         }
@@ -54,7 +58,7 @@ class AsyncOutputReadStreamImpl implements AsyncOutputReadStream, KeelAsyncMixin
     }
 
     @Override
-    public @NotNull Promise<Long> getReadOverPromise() {
+    public Promise<Long> getReadOverPromise() {
         if (readOverPromise == null) {
             throw new IllegalStateException("Stream has not been wrapped yet");
         }
@@ -128,61 +132,50 @@ class AsyncOutputReadStreamImpl implements AsyncOutputReadStream, KeelAsyncMixin
                 return;
             }
 
-            vertx.runOnContext(v -> {
-                if (result.endOfStream) {
-                    // End of stream reached
-                    if (endHandler != null) {
-                        endHandler.handle(null);
-                    }
-                    if (readOverPromise != null) {
-                        readOverPromise.complete(totalBytesRead);
-                    }
-                } else {
-                    // Data available
-                    totalBytesRead += result.bytesRead;
+            vertx.runOnContext(new Handler<Void>() {
+                @Override
+                public void handle(Void v) {
+                    if (result.endOfStream) {
+                        // End of stream reached
+                        endHandler.handle(v);
+                        if (readOverPromise != null) {
+                            readOverPromise.complete(totalBytesRead);
+                        }
+                    } else {
+                        // Data available
+                        totalBytesRead += result.bytesRead;
 
-                    // Only decrease demand if it's not unlimited
-                    long currentDemand = demand.get();
-                    if (currentDemand != Long.MAX_VALUE) {
-                        demand.addAndGet(-result.bytesRead);
-                    }
+                        // Only decrease demand if it's not unlimited
+                        long currentDemand = demand.get();
+                        if (currentDemand != Long.MAX_VALUE) {
+                            demand.addAndGet(-result.bytesRead);
+                        }
 
-                    Buffer buffer = Buffer.buffer(result.data);
-                    handler.handle(buffer);
+                        byte[] resultData = result.data;
+                        if (resultData != null) {
+                            Buffer buffer = Buffer.buffer(resultData);
+                            handler.handle(buffer);
+                        }
 
-                    // Continue reading if there's still demand and not paused
-                    // For unlimited demand, continue until end of stream
-                    if ((demand.get() > 0 || currentDemand == Long.MAX_VALUE) && !paused.get()) {
-                        readNextChunk();
+                        // Continue reading if there's still demand and not paused
+                        // For unlimited demand, continue until end of stream
+                        if ((demand.get() > 0 || currentDemand == Long.MAX_VALUE) && !paused.get()) {
+                            AsyncOutputReadStreamImpl.this.readNextChunk();
+                        }
                     }
                 }
             });
         });
     }
 
-    /**
-     * Internal class to represent read operation result
-     */
-    private static class ReadResult {
-        final byte[] data;
-        final int bytesRead;
-        final boolean endOfStream;
-
-        ReadResult(byte[] data, int bytesRead, boolean endOfStream) {
-            this.data = data;
-            this.bytesRead = bytesRead;
-            this.endOfStream = endOfStream;
-        }
-    }
-
     @Override
-    public ReadStream<Buffer> exceptionHandler(@Nullable Handler<Throwable> handler) {
+    public ReadStream<Buffer> exceptionHandler(Handler<Throwable> handler) {
         this.exceptionHandler = handler;
         return this;
     }
 
     @Override
-    public ReadStream<Buffer> handler(@Nullable Handler<Buffer> handler) {
+    public ReadStream<Buffer> handler(Handler<Buffer> handler) {
         this.handler = handler;
         return this;
     }
@@ -221,13 +214,29 @@ class AsyncOutputReadStreamImpl implements AsyncOutputReadStream, KeelAsyncMixin
     }
 
     @Override
-    public ReadStream<Buffer> endHandler(@Nullable Handler<Void> endHandler) {
+    public ReadStream<Buffer> endHandler(Handler<Void> endHandler) {
         this.endHandler = endHandler;
         return this;
     }
 
     @Override
-    public @NotNull Vertx getVertx() {
+    public Vertx getVertx() {
         return vertx;
+    }
+
+    /**
+     * Internal class to represent read operation result
+     */
+    @NullMarked
+    private static class ReadResult {
+        final byte @Nullable [] data;
+        final int bytesRead;
+        final boolean endOfStream;
+
+        ReadResult(byte @Nullable [] data, int bytesRead, boolean endOfStream) {
+            this.data = data;
+            this.bytesRead = bytesRead;
+            this.endOfStream = endOfStream;
+        }
     }
 }

@@ -1,10 +1,12 @@
 package io.github.sinri.keel.core.utils.runtime;
 
 import io.vertx.core.json.JsonObject;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * @since 5.0.0
  */
+@NullMarked
 public class JVMMemoryResult implements RuntimeStatResult<JVMMemoryResult> {
     private final long statTime;
 

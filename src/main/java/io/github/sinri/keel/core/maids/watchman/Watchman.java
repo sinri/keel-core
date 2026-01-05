@@ -2,7 +2,7 @@ package io.github.sinri.keel.core.maids.watchman;
 
 import io.github.sinri.keel.base.verticles.KeelVerticle;
 import io.vertx.core.Handler;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * 更夫。
@@ -14,12 +14,12 @@ import org.jetbrains.annotations.NotNull;
  *
  * @since 5.0.0
  */
+@NullMarked
 public interface Watchman extends KeelVerticle {
 
     /**
      * @return 更夫的名称
      */
-    @NotNull
     String watchmanName();
 
     /**
@@ -30,7 +30,6 @@ public interface Watchman extends KeelVerticle {
     /**
      * @return 每个定时任务周期调用的触发器
      */
-    @NotNull
     Handler<Long> regularHandler();
 
 }

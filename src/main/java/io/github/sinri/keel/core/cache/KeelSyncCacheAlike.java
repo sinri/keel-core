@@ -1,8 +1,8 @@
 package io.github.sinri.keel.core.cache;
 
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * 提供同步读写方法的缓存接口。
@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
  * @param <V> 缓存的值的类型
  * @since 5.0.0
  */
+@NullMarked
 public interface KeelSyncCacheAlike<K, V> {
     /**
      * 根据给定的键值对存入一条缓存记录。
@@ -23,7 +24,7 @@ public interface KeelSyncCacheAlike<K, V> {
      * @param key   键
      * @param value 值
      */
-    void save(@NotNull K key, @Nullable V value);
+    void save(K key, @Nullable V value);
 
     /**
      * 根据给定的键，尝试获取缓存的值；如果无法找到有效的缓存值，则返回给定的默认值。
@@ -32,7 +33,7 @@ public interface KeelSyncCacheAlike<K, V> {
      * @param fallbackValue 默认值，用于无法找到有效缓存时
      * @return 给定键对应的有效缓存，或给定的默认值
      */
-    @Nullable V read(@NotNull K key, @Nullable V fallbackValue);
+    @Nullable V read(K key, @Nullable V fallbackValue);
 
     /**
      * 根据给定的键，尝试获取缓存的值，如果无法找到有效的缓存值，则抛出 {@link NotCached} 异常。
@@ -41,8 +42,8 @@ public interface KeelSyncCacheAlike<K, V> {
      * @return 给定键对应的有效缓存
      * @throws NotCached 无法找到有效缓存时
      */
-    default @NotNull V read(@NotNull K key) throws NotCached {
-        var v = read(key, null);
+    default V read(K key) throws NotCached {
+        V v = read(key, null);
         if (v == null) {
             throw new NotCached(key.toString());
         }

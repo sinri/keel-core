@@ -5,8 +5,8 @@ import io.github.sinri.keel.base.async.RepeatedlyCallTask;
 import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,23 +21,20 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @since 5.0.0
  */
-abstract class IntravenousBase<D> extends AbstractKeelVerticle implements Intravenous<D> {
-    @NotNull
+@NullMarked
+abstract class IntravenousBase<D extends @Nullable Object> extends AbstractKeelVerticle implements Intravenous<D> {
     private final Queue<D> queue;
-    @NotNull
-    private final AtomicReference<Promise<Void>> interrupterRef = new AtomicReference<>();
-    @NotNull
+    private final AtomicReference<@Nullable Promise<Void>> interrupterRef = new AtomicReference<>();
     private final AtomicBoolean stoppedRef = new AtomicBoolean(false);
-    @NotNull
     private final AtomicBoolean undeployedRef = new AtomicBoolean(false);
 
-    public IntravenousBase(@NotNull Keel keel) {
+    public IntravenousBase(Keel keel) {
         super(keel);
         this.queue = new ConcurrentLinkedQueue<>();
     }
 
     @Override
-    public void add(@Nullable D drop) {
+    public void add(D drop) {
         if (stoppedRef.get()) {
             throw new IllegalStateException("Can't add drop to a stopped intravenous");
         }
@@ -77,7 +74,7 @@ abstract class IntravenousBase<D> extends AbstractKeelVerticle implements Intrav
     }
 
     @Override
-    protected @NotNull Future<Void> startVerticle() {
+    protected Future<Void> startVerticle() {
         this.interrupterRef.set(null);
         getKeel().asyncCallRepeatedly(this::handleRoutine)
                  .onComplete(ar -> this.undeployMe()
@@ -85,8 +82,7 @@ abstract class IntravenousBase<D> extends AbstractKeelVerticle implements Intrav
         return Future.succeededFuture();
     }
 
-    @NotNull
-    private Future<Void> handleRoutine(@NotNull RepeatedlyCallTask repeatedlyCallTask) {
+    private Future<Void> handleRoutine(RepeatedlyCallTask repeatedlyCallTask) {
         this.interrupterRef.set(Promise.promise());
 
         boolean toStop = this.stoppedRef.get();
@@ -118,15 +114,19 @@ abstract class IntravenousBase<D> extends AbstractKeelVerticle implements Intrav
                              return Future.succeededFuture();
                          } else {
                              // wait for next `add` call, or just sleep 1 second
-                             return Future.any(
-                                                  getKeel().asyncSleep(1000L),
-                                                  this.interrupterRef.get().future()
-                                          )
-                                          .compose(compositeFuture -> Future.succeededFuture());
+                             Promise<Void> promise = this.interrupterRef.get();
+                             if (promise == null) {
+                                 return getKeel().asyncSleep(1000L);
+                             } else {
+                                 return Future.any(
+                                                      getKeel().asyncSleep(1000L),
+                                                      promise.future()
+                                              )
+                                              .compose(compositeFuture -> Future.succeededFuture());
+                             }
                          }
                      });
     }
 
-    @NotNull
-    abstract protected Future<Void> handleDrops(@NotNull List<D> drops);
+    abstract protected Future<Void> handleDrops(List<D> drops);
 }

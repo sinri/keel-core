@@ -3,9 +3,10 @@ package io.github.sinri.keel.core.servant.sundial;
 import io.github.sinri.keel.tesuto.KeelJUnit5Test;
 import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxTestContext;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
 
+@NullMarked
 public class SundialTest extends KeelJUnit5Test {
 
     /**
@@ -15,7 +16,7 @@ public class SundialTest extends KeelJUnit5Test {
      *
      * @param vertx 由 VertxExtension 提供的 Vertx 实例。
      */
-    public SundialTest(@NotNull Vertx vertx) {
+    public SundialTest(Vertx vertx) {
         super(vertx);
     }
 

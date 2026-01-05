@@ -5,8 +5,8 @@ import io.github.sinri.keel.core.utils.authenticator.googleauth.async.AsyncGoogl
 import io.github.sinri.keel.core.utils.authenticator.googleauth.sync.GoogleAuthenticator;
 import io.github.sinri.keel.core.utils.encryption.bcrypt.BCrypt;
 import io.vertx.core.Handler;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 
 /**
@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class AuthenticationUtils {
 
     private AuthenticationUtils() {
@@ -28,8 +29,8 @@ public class AuthenticationUtils {
      * @param password 待哈希的原始密码
      * @return 哈希后的密码字符串
      */
-    @NotNull
-    public static String php_password_hash(@NotNull String password) {
+
+    public static String php_password_hash(String password) {
         return BCrypt.hashpw(password);
     }
 
@@ -38,10 +39,10 @@ public class AuthenticationUtils {
      * <p>此方法类似于 PHP 的 password_verify 函数，使用 BCrypt 算法验证密码。
      *
      * @param password 待验证的原始密码
-     * @param hash 已存储的密码哈希值
+     * @param hash     已存储的密码哈希值
      * @return 如果密码匹配返回 true，否则返回 false
      */
-    public static boolean php_password_verify(@NotNull String password, @NotNull String hash) {
+    public static boolean php_password_verify(String password, String hash) {
         return BCrypt.checkpw(password, hash);
     }
 

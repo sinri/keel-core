@@ -9,7 +9,10 @@ import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.MessageProducer;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
+import java.util.Objects;
 
 
 /**
@@ -19,46 +22,42 @@ import org.jetbrains.annotations.NotNull;
  *         Overload</a>
  * @since 5.0.0
  */
+@NullMarked
 public abstract class Pleiades<T> extends AbstractKeelVerticle {
-    private MessageConsumer<T> consumer;
-    private Logger pleiadesLogger;
+    private @Nullable MessageConsumer<T> consumer;
+    private @Nullable Logger pleiadesLogger;
 
-    public Pleiades(@NotNull Keel keel) {
+    public Pleiades(Keel keel) {
         super(keel);
     }
 
-    @NotNull
-    public static <T> MessageProducer<T> generateMessageProducer(@NotNull Vertx vertx, @NotNull String address) {
+    public static <T> MessageProducer<T> generateMessageProducer(Vertx vertx, String address) {
         return generateMessageProducer(vertx, address, new DeliveryOptions());
     }
 
-    @NotNull
-    public static <T> MessageProducer<T> generateMessageProducer(@NotNull Vertx vertx, @NotNull String address, @NotNull DeliveryOptions deliveryOptions) {
+    public static <T> MessageProducer<T> generateMessageProducer(Vertx vertx, String address, DeliveryOptions deliveryOptions) {
         return vertx.eventBus().sender(address, deliveryOptions);
     }
 
-    @NotNull
     abstract public String getAddress();
 
-    abstract protected void handleMessage(@NotNull Message<T> message);
+    abstract protected void handleMessage(Message<T> message);
 
-    @NotNull
     abstract protected Logger buildPleiadesLogger();
 
-    @NotNull
     public final Logger getPleiadesLogger() {
-        return pleiadesLogger;
+        return Objects.requireNonNull(pleiadesLogger);
     }
 
     @Override
-    protected @NotNull Future<Void> startVerticle() {
+    protected Future<Void> startVerticle() {
         this.pleiadesLogger = buildPleiadesLogger();
         consumer = getVertx().eventBus().consumer(getAddress(), this::handleMessage);
         return Future.succeededFuture();
     }
 
     @Override
-    protected @NotNull Future<Void> stopVerticle() {
+    protected Future<Void> stopVerticle() {
         if (consumer != null) {
             return consumer.unregister();
         }

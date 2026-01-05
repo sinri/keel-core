@@ -3,8 +3,8 @@ package io.github.sinri.keel.core.utils;
 import io.github.sinri.keel.core.utils.encryption.base32.Base32;
 import io.github.sinri.keel.logger.api.LoggingStackSpecification;
 import io.vertx.core.buffer.Buffer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class StringUtils {
     private static final Map<String, String> HttpEntityEscapeDictionary = Map.of(
             "&", "&amp;",
@@ -41,9 +42,9 @@ public class StringUtils {
      * @param <T>       the class of item in array
      * @return the joined string
      */
-    @NotNull
+
     @Deprecated
-    public static <T> String joinStringArray(@Nullable T[] x, @NotNull String separator) {
+    public static <T> String joinStringArray(@Nullable T[] x, String separator) {
         if (x == null) return "";
 
         StringBuilder result = new StringBuilder();
@@ -60,10 +61,10 @@ public class StringUtils {
      * @param x         a list
      * @param separator separator
      * @return the joined string
+     * @deprecated use {@link String#join(CharSequence, Iterable)}
      */
-    @NotNull
-    @Deprecated
-    public static String joinStringArray(@Nullable Iterable<?> x, @NotNull String separator) {
+    @Deprecated(since = "5.0.0")
+    public static String joinStringArray(@Nullable Iterable<?> x, String separator) {
         if (x == null) return "";
 
         StringBuilder result = new StringBuilder();
@@ -85,8 +86,8 @@ public class StringUtils {
      * @param rowSize how many bytes in one row
      * @return the matrix of hex as string
      */
-    @NotNull
-    public static String bufferToHexMatrix(@NotNull Buffer buffer, int rowSize) {
+
+    public static String bufferToHexMatrix(Buffer buffer, int rowSize) {
         StringBuilder matrix = new StringBuilder();
         String s = BinaryUtils.encodeHexWithUpperDigits(buffer);
         for (int i = 0; i < s.length(); i += 2) {
@@ -102,11 +103,7 @@ public class StringUtils {
      * Make `apple_pie` to `ApplePie` or `applePie`.
      *
      */
-    @Nullable
-    public static String fromUnderScoreCaseToCamelCase(@Nullable String underScoreCase, boolean firstCharLower) {
-        if (underScoreCase == null) {
-            return null;
-        }
+    public static String fromUnderScoreCaseToCamelCase(String underScoreCase, boolean firstCharLower) {
         if (underScoreCase.isEmpty()) {
             return "";
         }
@@ -115,7 +112,7 @@ public class StringUtils {
 
         boolean isFirst = true;
         for (var part : parts) {
-            if (part != null && !part.isBlank()) {
+            if (!part.isBlank()) {
                 if (isFirst && firstCharLower) {
                     camel.add(part);
                     isFirst = false;
@@ -132,15 +129,11 @@ public class StringUtils {
      * Make `apple_pie` to `ApplePie`.
      *
      */
-    public static String fromUnderScoreCaseToCamelCase(@Nullable String underScoreCase) {
+    public static String fromUnderScoreCaseToCamelCase(String underScoreCase) {
         return fromUnderScoreCaseToCamelCase(underScoreCase, false);
     }
 
-    @Nullable
-    public static String fromCamelCaseToUserScoreCase(@Nullable String camelCase) {
-        if (camelCase == null) {
-            return null;
-        }
+    public static String fromCamelCaseToUserScoreCase(String camelCase) {
         if (camelCase.isBlank()) {
             return "";
         }
@@ -169,9 +162,10 @@ public class StringUtils {
     }
 
 
-    @NotNull
-    public static String buildStackChainText(@Nullable StackTraceElement[] stackTrace,
-                                             @NotNull Set<String> ignorableStackPackageSet) {
+    public static String buildStackChainText(
+            @Nullable StackTraceElement @Nullable [] stackTrace,
+            Set<String> ignorableStackPackageSet
+    ) {
         StringBuilder sb = new StringBuilder();
         if (stackTrace != null) {
             String ignoringClassPackage = null;
@@ -236,13 +230,13 @@ public class StringUtils {
         return sb.toString();
     }
 
-    @NotNull
-    public static String buildStackChainText(@Nullable StackTraceElement[] stackTrace) {
+
+    public static String buildStackChainText(@Nullable StackTraceElement @Nullable [] stackTrace) {
         return buildStackChainText(stackTrace, Set.of());
     }
 
-    @NotNull
-    public static String renderThrowableChain(@Nullable Throwable throwable, @NotNull Set<String> ignorableStackPackageSet) {
+
+    public static String renderThrowableChain(@Nullable Throwable throwable, Set<String> ignorableStackPackageSet) {
         if (throwable == null) return "";
         Throwable cause = throwable.getCause();
         StringBuilder sb = new StringBuilder();
@@ -270,36 +264,36 @@ public class StringUtils {
         return sb.toString();
     }
 
-    @NotNull
+
     public static String renderThrowableChain(@Nullable Throwable throwable) {
         return renderThrowableChain(throwable, LoggingStackSpecification.IgnorableCallStackPackage);
     }
 
-    public static byte @NotNull [] encodeWithBase64ToBytes(@NotNull String s) {
+    public static byte[] encodeWithBase64ToBytes(String s) {
         return BinaryUtils.encodeWithBase64(s.getBytes());
     }
 
-    @NotNull
-    public static String encodeWithBase64(@NotNull String s) {
+
+    public static String encodeWithBase64(String s) {
         return new String(encodeWithBase64ToBytes(s));
     }
 
-    @NotNull
-    public static byte[] decodeWithBase64ToBytes(@NotNull String s) {
+
+    public static byte[] decodeWithBase64ToBytes(String s) {
         return Base64.getDecoder().decode(s);
     }
 
-    @NotNull
-    public static String encodeWithBase32(@NotNull String s) {
+
+    public static String encodeWithBase32(String s) {
         return Base32.encode(s.getBytes());
     }
 
-    public static byte @NotNull [] decodeWithBase32ToBytes(@NotNull String s) {
+    public static byte[] decodeWithBase32ToBytes(String s) {
         return Base32.decode(s);
     }
 
-    @NotNull
-    public static String decodeWithBase32(@NotNull String s) {
+
+    public static String decodeWithBase32(String s) {
         return new String(decodeWithBase32ToBytes(s));
     }
 
@@ -307,8 +301,8 @@ public class StringUtils {
      * @param flags compile flags, such as `Pattern.DOTALL`.
      * @param group such as 0 for the entire, n for the Nth component.
      */
-    @NotNull
-    public static List<String> regexFindAll(@NotNull String regex, int flags, @NotNull String text, int group) {
+
+    public static List<String> regexFindAll(String regex, int flags, String text, int group) {
         List<String> blankParamGroups = new ArrayList<>();
         Pattern patternForSpacedArgument = Pattern.compile(regex, flags);
         Matcher patternForSpacedArgumentMatcher = patternForSpacedArgument.matcher(text);
@@ -330,7 +324,7 @@ public class StringUtils {
     /**
      * @see <a href="https://github.com/sinri/Keel/pull/21">PR from yhzdys</a>
      */
-    public static String encodeToNyaCode(@NotNull String raw) {
+    public static String encodeToNyaCode(String raw) {
         String encoded = URLEncoder.encode(raw, StandardCharsets.UTF_8);
         int i = 0;
         char[] chars = encoded.toCharArray(), buffer = new char[chars.length << 1];
@@ -344,7 +338,7 @@ public class StringUtils {
     /**
      * @see <a href="https://github.com/sinri/Keel/pull/21">PR from yhzdys</a>
      */
-    public static String decodeFromNyaCode(@NotNull String code) {
+    public static String decodeFromNyaCode(String code) {
         int idx = 0;
         char[] chars = code.toCharArray(), buffer = new char[chars.length >> 1];
         for (int i = 0; i < chars.length; ) {
@@ -360,7 +354,7 @@ public class StringUtils {
      * @param maxLength the maximum length of the string
      * @return the truncated string
      */
-    @NotNull
+
     public static String truncateWithEllipsis(@Nullable String str, int maxLength) {
         if (str == null) return "";
         if (str.length() <= maxLength) return str;
@@ -383,7 +377,7 @@ public class StringUtils {
      * @param str the string to reverse
      * @return the reversed string
      */
-    @NotNull
+
     public static String reverse(@Nullable String str) {
         if (str == null) return "";
         return new StringBuilder(str).reverse().toString();
@@ -407,7 +401,7 @@ public class StringUtils {
      * @param str the string to remove whitespace from
      * @return the string with all whitespace removed
      */
-    @NotNull
+
     public static String removeWhitespace(@Nullable String str) {
         if (str == null) return "";
         return str.replaceAll("\\s+", "");
@@ -448,7 +442,7 @@ public class StringUtils {
      * @param str the string to capitalize
      * @return the capitalized string
      */
-    @NotNull
+
     public static String capitalizeWords(@Nullable String str) {
         if (str == null || str.isEmpty()) return "";
         StringBuilder result = new StringBuilder();
@@ -472,7 +466,7 @@ public class StringUtils {
      * @param str the string to clean
      * @return the cleaned string
      */
-    @NotNull
+
     public static String removeNonAlphanumeric(@Nullable String str) {
         if (str == null) return "";
         return str.replaceAll("[^a-zA-Z0-9]", "");
@@ -497,7 +491,7 @@ public class StringUtils {
      * @param length the length of the random string
      * @return the random string
      */
-    @NotNull
+
     public static String generateRandomString(int length) {
         return generateRandomString(length, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789");
     }
@@ -509,8 +503,8 @@ public class StringUtils {
      * @param charSet the character set to use for generating the random string
      * @return the random string
      */
-    @NotNull
-    public static String generateRandomString(int length, @NotNull String charSet) {
+
+    public static String generateRandomString(int length, String charSet) {
         if (charSet.isEmpty()) {
             throw new IllegalArgumentException("Character set cannot be null or empty");
         }

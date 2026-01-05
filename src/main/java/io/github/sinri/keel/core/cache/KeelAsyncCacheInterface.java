@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.cache;
 
 import io.vertx.core.Future;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Set;
 import java.util.function.Function;
@@ -14,6 +14,7 @@ import java.util.function.Function;
  * @param <V> 值的类型
  * @since 5.0.0
  */
+@NullMarked
 public interface KeelAsyncCacheInterface<K, V> extends KeelAsyncCacheAlike<K, V> {
 
     /**
@@ -23,7 +24,7 @@ public interface KeelAsyncCacheInterface<K, V> extends KeelAsyncCacheAlike<K, V>
      * @param value         值
      * @param lifeInSeconds 存活周期，以秒计
      */
-    @NotNull Future<Void> save(@NotNull K key, @NotNull V value, long lifeInSeconds);
+    Future<Void> save(K key, V value, long lifeInSeconds);
 
     /**
      * 根据给定的键，尝试获取值；如果无法找到有效的值，则利用给定的逻辑生成一个新值，以给定存活周期存入；返回找到的值或存入的值。
@@ -33,32 +34,32 @@ public interface KeelAsyncCacheInterface<K, V> extends KeelAsyncCacheAlike<K, V>
      * @param lifeInSeconds 存活周期，以秒计
      * @return 异步返回的值
      */
-    @NotNull Future<@NotNull V> read(@NotNull K key, @NotNull Function<@NotNull K, @NotNull Future<@NotNull V>> generator, long lifeInSeconds);
+    Future<V> read(K key, Function<K, Future<V>> generator, long lifeInSeconds);
 
     /**
      * 从缓存中移除指定键值对。
      *
      * @param key 键
      */
-    @NotNull Future<Void> remove(@NotNull K key);
+    Future<Void> remove(K key);
 
     /**
      * 从缓存中移除所有键值对。
      */
-    @NotNull Future<Void> removeAll();
+    Future<Void> removeAll();
 
     /**
      * 清理缓存中的无效键值对。
      * <p>
      * 本方法需要适时调用以避免内存泄露。
      */
-    @NotNull Future<Void> cleanUp();
+    Future<Void> cleanUp();
 
     /**
      * 获取所有缓存中的有效的键的集合。
      *
      * @return 有效的键的集合
      */
-    @NotNull Future<@NotNull Set<@NotNull K>> getCachedKeySet();
+    Future<Set<K>> getCachedKeySet();
 
 }

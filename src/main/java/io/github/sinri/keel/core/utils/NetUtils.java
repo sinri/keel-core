@@ -1,8 +1,8 @@
 package io.github.sinri.keel.core.utils;
 
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -10,16 +10,16 @@ import java.util.Objects;
 
 /**
  * 网络工具类
+ *
  * @since 5.0.0
  */
+@NullMarked
 public class NetUtils {
 
     private NetUtils() {
     }
 
-
-    @Nullable
-    public static Long convertIPv4ToNumber(@Nullable String ipv4) {
+    public static @Nullable Long convertIPv4ToNumber(@Nullable String ipv4) {
         //Converts a String that represents an IP to an int.
         try {
             InetAddress i = InetAddress.getByName(ipv4);
@@ -37,8 +37,8 @@ public class NetUtils {
         }
     }
 
-    @Nullable
-    public static String convertNumberToIPv4(long number) {
+
+    public static @Nullable String convertNumberToIPv4(long number) {
         //This converts an int representation of ip back to String
         try {
             InetAddress i = InetAddress.getByName(String.valueOf(number));
@@ -48,7 +48,7 @@ public class NetUtils {
         }
     }
 
-    public static byte @NotNull [] convertIPv4ToAddressBytes(long ipv4AsLong) {
+    public static byte[] convertIPv4ToAddressBytes(long ipv4AsLong) {
         return new byte[]{
                 (byte) (ipv4AsLong >> 24),
                 (byte) ((ipv4AsLong >> 16) & 0xFF),
@@ -57,7 +57,7 @@ public class NetUtils {
         };
     }
 
-    public static byte @NotNull [] convertIPv4ToAddressBytes(@Nullable String ipv4) {
+    public static byte[] convertIPv4ToAddressBytes(@Nullable String ipv4) {
         long x = Objects.requireNonNull(convertIPv4ToNumber(ipv4));
         return convertIPv4ToAddressBytes(x);
     }
@@ -65,8 +65,7 @@ public class NetUtils {
     /**
      * @return like "127.0.0.1"; If the local host name could not be resolved into an address, null.
      */
-    @Nullable
-    public static String getLocalHostAddress() {
+    public static @Nullable String getLocalHostAddress() {
         try {
             InetAddress localHost = InetAddress.getLocalHost();
             return localHost.getHostAddress();
@@ -78,8 +77,7 @@ public class NetUtils {
     /**
      * @return like "SinriMacInLeqee.local"; If the local host name could not be resolved into an address, null.
      */
-    @Nullable
-    public static String getLocalHostName() {
+    public static @Nullable String getLocalHostName() {
         try {
             InetAddress localHost = InetAddress.getLocalHost();
             return localHost.getHostName();
@@ -91,8 +89,8 @@ public class NetUtils {
     /**
      * @return like "localhost"; If the local host name could not be resolved into an address, null.
      */
-    @Nullable
-    public static String getLocalHostCanonicalName() {
+
+    public static @Nullable String getLocalHostCanonicalName() {
         try {
             InetAddress localHost = InetAddress.getLocalHost();
             return localHost.getCanonicalHostName();

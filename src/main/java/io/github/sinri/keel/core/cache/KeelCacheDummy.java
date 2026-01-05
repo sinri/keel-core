@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.cache;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Set;
 import java.util.function.Function;
@@ -15,6 +15,7 @@ import java.util.function.Function;
  * @param <V> 值的类型
  * @since 5.0.0
  */
+@NullMarked
 public class KeelCacheDummy<K, V> implements KeelCacheInterface<K, V> {
 
     @Override
@@ -23,32 +24,32 @@ public class KeelCacheDummy<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public @NotNull KeelCacheInterface<K, V> setDefaultLifeInSeconds(long lifeInSeconds) {
+    public KeelCacheInterface<K, V> setDefaultLifeInSeconds(long lifeInSeconds) {
         return this;
     }
 
     @Override
-    public void save(@NotNull K key, @Nullable V value, long lifeInSeconds) {
+    public void save(K key, @Nullable V value, long lifeInSeconds) {
 
     }
 
     @Override
-    public @NotNull V read(@NotNull K key) throws NotCached {
+    public V read(K key) throws NotCached {
         throw new NotCached(key.toString());
     }
 
     @Override
-    public @NotNull V computeIfAbsent(@NotNull K key, @NotNull Function<@NotNull K, @NotNull V> computation, long lifeInSeconds) {
+    public V computeIfAbsent(K key, Function<K, V> computation, long lifeInSeconds) {
         return computation.apply(key);
     }
 
     @Override
-    public V read(@NotNull K key, @Nullable V fallbackValue) {
+    public V read(K key, @Nullable V fallbackValue) {
         return fallbackValue;
     }
 
     @Override
-    public void remove(@NotNull K key) {
+    public void remove(K key) {
 
     }
 
@@ -63,7 +64,7 @@ public class KeelCacheDummy<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public @NotNull Set<@NotNull K> getCachedKeySet() {
+    public Set<K> getCachedKeySet() {
         return Set.of();
     }
 }

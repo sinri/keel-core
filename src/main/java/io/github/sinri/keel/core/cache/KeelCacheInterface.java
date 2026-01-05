@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.cache;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Set;
 import java.util.function.Function;
@@ -14,6 +14,7 @@ import java.util.function.Function;
  * @param <V> 值的类型
  * @since 5.0.0
  */
+@NullMarked
 public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
     /**
      * 获取一个默认实现实例
@@ -22,7 +23,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param <V> 值的类型
      * @return 本接口的默认实现实例
      */
-    static <K, V> @NotNull KeelCacheInterface<K, V> createDefaultInstance() {
+    static <K, V> KeelCacheInterface<K, V> createDefaultInstance() {
         return new KeelCacheImpl<>();
     }
 
@@ -33,7 +34,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param <V> 值的类型
      * @return 本接口的伪实现实例
      */
-    static <K, V> @NotNull KeelCacheInterface<K, V> getDummyInstance() {
+    static <K, V> KeelCacheInterface<K, V> getDummyInstance() {
         return new KeelCacheDummy<>();
     }
 
@@ -48,7 +49,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param lifeInSeconds 默认的缓存记录存活周期，以秒计
      * @return 本接口实例
      */
-    @NotNull KeelCacheInterface<K, V> setDefaultLifeInSeconds(long lifeInSeconds);
+    KeelCacheInterface<K, V> setDefaultLifeInSeconds(long lifeInSeconds);
 
     /**
      * 根据给定的键值对存入一条指定时长内有效的缓存记录。
@@ -57,7 +58,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param value         值
      * @param lifeInSeconds 本条缓存记录的存活周期，以秒计
      */
-    void save(@NotNull K key, @Nullable V value, long lifeInSeconds);
+    void save(K key, @Nullable V value, long lifeInSeconds);
 
     /**
      * 根据给定的键值对存入一条默认时长内有效的缓存记录。
@@ -66,7 +67,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param value 值
      */
     @Override
-    default void save(@NotNull K key, @Nullable V value) {
+    default void save(K key, @Nullable V value) {
         save(key, value, getDefaultLifeInSeconds());
     }
 
@@ -78,7 +79,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param computation 新值生成逻辑，生成的结果不应为 null
      * @return 找到的值或新建而存入的值
      */
-    default @NotNull V computeIfAbsent(@NotNull K key, @NotNull Function<@NotNull K, @NotNull V> computation) {
+    default V computeIfAbsent(K key, Function<K, V> computation) {
         return computeIfAbsent(key, computation, getDefaultLifeInSeconds());
     }
 
@@ -90,14 +91,14 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param lifeInSeconds 存活周期，以秒计
      * @return 找到的值或新建而存入的值
      */
-    @NotNull V computeIfAbsent(@NotNull K key, @NotNull Function<@NotNull K, @NotNull V> computation, long lifeInSeconds);
+    V computeIfAbsent(K key, Function<K, V> computation, long lifeInSeconds);
 
     /**
      * 从缓存中移除一个记录。
      *
      * @param key 键
      */
-    void remove(@NotNull K key);
+    void remove(K key);
 
     /**
      * 从缓存中移除所有记录。
@@ -116,5 +117,5 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      *
      * @return 有效的键的集合
      */
-    @NotNull Set<@NotNull K> getCachedKeySet();
+    Set<K> getCachedKeySet();
 }

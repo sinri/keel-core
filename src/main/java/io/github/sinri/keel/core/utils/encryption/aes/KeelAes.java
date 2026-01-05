@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.utils.encryption.aes;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -13,6 +13,7 @@ import java.util.Objects;
 /**
  * @since 5.0.0
  */
+@NullMarked
 public interface KeelAes {
     /**
      * 密钥算法
@@ -23,8 +24,7 @@ public interface KeelAes {
      */
     Charset ENCODING = StandardCharsets.UTF_8;
 
-    @NotNull
-    static KeelAes create(@NotNull SupportedCipherAlgorithm cipherAlgorithm, @NotNull String key) {
+    static KeelAes create(SupportedCipherAlgorithm cipherAlgorithm, String key) {
         Objects.requireNonNull(cipherAlgorithm);
         Objects.requireNonNull(key);
         return switch (cipherAlgorithm) {
@@ -36,9 +36,6 @@ public interface KeelAes {
         };
     }
 
-    /**
-     * @since 3.0.11 be static.
-     */
     static SecretKey generateSecretKeyWithKeySize(int keySize) throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM);
         //keyGenerator.init(256);
@@ -46,23 +43,14 @@ public interface KeelAes {
         return keyGenerator.generateKey();
     }
 
-    /**
-     * @since 3.0.11 be static.
-     */
     static String generate128BitsSecretKey() throws NoSuchAlgorithmException {
         return Base64.getEncoder().encodeToString(generateSecretKeyWithKeySize(128).getEncoded());
     }
 
-    /**
-     * @since 3.0.11 be static.
-     */
     static String generate192BitsSecretKey() throws NoSuchAlgorithmException {
         return Base64.getEncoder().encodeToString(generateSecretKeyWithKeySize(192).getEncoded());
     }
 
-    /**
-     * @since 3.0.11 be static.
-     */
     static String generate256BitsSecretKey() throws NoSuchAlgorithmException {
         return Base64.getEncoder().encodeToString(generateSecretKeyWithKeySize(256).getEncoded());
     }

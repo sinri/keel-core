@@ -1,5 +1,7 @@
 package io.github.sinri.keel.core.utils.encryption.aes;
 
+import org.jspecify.annotations.NullMarked;
+
 import java.lang.reflect.InvocationTargetException;
 import java.security.Provider;
 import java.security.Security;
@@ -24,6 +26,7 @@ import java.security.Security;
  *
  * @since 5.0.0
  */
+@NullMarked
 abstract public class KeelAesUsingPkcs7Padding extends KeelAesBase {
 //    static {
 //        //如果是PKCS7Padding填充方式，则必须加上下面这行

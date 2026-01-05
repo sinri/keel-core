@@ -3,8 +3,8 @@ package io.github.sinri.keel.core.utils.io;
 import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.WriteStream;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @since 5.0.0
  */
+@NullMarked
 class AsyncInputWriteStreamImpl implements AsyncInputWriteStream {
 
     private final Vertx vertx;
@@ -33,11 +34,14 @@ class AsyncInputWriteStreamImpl implements AsyncInputWriteStream {
 
     private volatile int maxSize = 1000;
     private volatile int maxBufferSize = Integer.MAX_VALUE;
-    private volatile OutputStream wrappedOutputStream;
-    private Handler<Void> drainHandler = __ -> {};
-    private Handler<Throwable> exceptionHandler = __ -> {};
-    private Handler<Buffer> dataHandler = __ -> {};
-    private Promise<Void> writeOverPromise;
+    private volatile @Nullable OutputStream wrappedOutputStream;
+    private Handler<Void> drainHandler = __ -> {
+    };
+    private Handler<Throwable> exceptionHandler = __ -> {
+    };
+    private Handler<Buffer> dataHandler = __ -> {
+    };
+    private @Nullable Promise<Void> writeOverPromise;
 
     public AsyncInputWriteStreamImpl(Vertx vertx) {
         this.vertx = vertx;
@@ -51,24 +55,24 @@ class AsyncInputWriteStreamImpl implements AsyncInputWriteStream {
      * @param os OutputStream to transfer data to
      */
     @Override
-    public void wrap(@NotNull OutputStream os) {
+    public void wrap(OutputStream os) {
         this.wrappedOutputStream = os;
         this.writeOverPromise = Promise.promise();
 
         // Transfer any existing buffered data
         if (!buffer.isEmpty()) {
             context.executeBlocking(() -> {
-                try {
-                    transferBufferedData(os);
-                    return null;
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to transfer buffered data", e);
-                }
-            })
-            .onFailure(t -> {
-                exceptionHandler.handle(t);
-                // Don't fail the promise yet, future writes might still succeed
-            });
+                       try {
+                           transferBufferedData(os);
+                           return null;
+                       } catch (Exception e) {
+                           throw new RuntimeException("Failed to transfer buffered data", e);
+                       }
+                   })
+                   .onFailure(t -> {
+                       exceptionHandler.handle(t);
+                       // Don't fail the promise yet, future writes might still succeed
+                   });
         }
     }
 
@@ -93,7 +97,7 @@ class AsyncInputWriteStreamImpl implements AsyncInputWriteStream {
      * @return Promise that completes on write completion
      */
     @Override
-    public @NotNull Promise<Void> getWriteOverPromise() {
+    public Promise<Void> getWriteOverPromise() {
         if (writeOverPromise == null) {
             writeOverPromise = Promise.promise();
         }
@@ -108,7 +112,8 @@ class AsyncInputWriteStreamImpl implements AsyncInputWriteStream {
      */
     @Override
     public WriteStream<Buffer> exceptionHandler(@Nullable Handler<Throwable> handler) {
-        this.exceptionHandler = handler != null ? handler : __ -> {};
+        this.exceptionHandler = handler != null ? handler : __ -> {
+        };
         return this;
     }
 
@@ -120,58 +125,59 @@ class AsyncInputWriteStreamImpl implements AsyncInputWriteStream {
      * @return Future that completes when the data is processed
      */
     @Override
-    public Future<Void> write(Buffer data) {
+    public Future<Void> write(@Nullable Buffer data) {
         if (closed.get() && data != null) {
             return Future.succeededFuture(); // Discard data if closed, but allow end-of-stream marker
         }
 
         Promise<Void> promise = Promise.promise();
 
-        if (wrappedOutputStream != null) {
+        OutputStream localWrappedOutputStream = this.wrappedOutputStream;
+        if (localWrappedOutputStream != null) {
             // Write directly to wrapped OutputStream in blocking context
             context.executeBlocking(() -> {
-                try {
-                    if (data == null) {
-                        // End of stream - close the output stream
-                        wrappedOutputStream.close();
-                    } else {
-                        // Split large buffers if needed
-                        for (int start = 0; start < data.length(); ) {
-                            int chunkSize = Math.min(maxBufferSize, data.length() - start);
-                            Buffer chunk = data.getBuffer(start, start + chunkSize);
-                            start += chunkSize;
+                       try {
+                           if (data == null) {
+                               // End of stream - close the output stream
+                               localWrappedOutputStream.close();
+                           } else {
+                               // Split large buffers if needed
+                               for (int start = 0; start < data.length(); ) {
+                                   int chunkSize = Math.min(maxBufferSize, data.length() - start);
+                                   Buffer chunk = data.getBuffer(start, start + chunkSize);
+                                   start += chunkSize;
 
-                            byte[] bytes = chunk.getBytes();
-                            wrappedOutputStream.write(bytes);
-                            wrappedOutputStream.flush();
+                                   byte[] bytes = chunk.getBytes();
+                                   localWrappedOutputStream.write(bytes);
+                                   localWrappedOutputStream.flush();
 
-                            // Notify data handler
-                            final Buffer chunkToHandle = chunk;
-                            context.runOnContext(new Handler<Void>() {
-                                @Override
-                                public void handle(Void event) {
-                                    dataHandler.handle(chunkToHandle);
-                                }
-                            });
-                        }
-                    }
-                    return null;
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to write data to OutputStream", e);
-                }
-            })
-            .onFailure(t -> {
-                exceptionHandler.handle(t);
-                promise.fail(t);
-            })
-            .onSuccess(__ -> {
-                // Complete the write promise
-                promise.complete();
-                // For end-of-stream, also complete the writeOver promise
-                if (data == null && writeOverPromise != null) {
-                    writeOverPromise.complete();
-                }
-            });
+                                   // Notify data handler
+                                   final Buffer chunkToHandle = chunk;
+                                   context.runOnContext(new Handler<Void>() {
+                                       @Override
+                                       public void handle(Void event) {
+                                           dataHandler.handle(chunkToHandle);
+                                       }
+                                   });
+                               }
+                           }
+                           return null;
+                       } catch (Exception e) {
+                           throw new RuntimeException("Failed to write data to OutputStream", e);
+                       }
+                   })
+                   .onFailure(t -> {
+                       exceptionHandler.handle(t);
+                       promise.fail(t);
+                   })
+                   .onSuccess(__ -> {
+                       // Complete the write promise
+                       promise.complete();
+                       // For end-of-stream, also complete the writeOver promise
+                       if (data == null && writeOverPromise != null) {
+                           writeOverPromise.complete();
+                       }
+                   });
         } else {
             // Buffer the data
             if (data == null) {
@@ -263,7 +269,8 @@ class AsyncInputWriteStreamImpl implements AsyncInputWriteStream {
      */
     @Override
     public WriteStream<Buffer> drainHandler(@Nullable Handler<Void> handler) {
-        this.drainHandler = handler != null ? handler : __ -> {};
+        this.drainHandler = handler != null ? handler : __ -> {
+        };
         return this;
     }
 
@@ -274,7 +281,8 @@ class AsyncInputWriteStreamImpl implements AsyncInputWriteStream {
      * @return This stream instance
      */
     public AsyncInputWriteStreamImpl dataHandler(@Nullable Handler<Buffer> handler) {
-        this.dataHandler = handler != null ? handler : __ -> {};
+        this.dataHandler = handler != null ? handler : __ -> {
+        };
         return this;
     }
 
@@ -307,7 +315,7 @@ class AsyncInputWriteStreamImpl implements AsyncInputWriteStream {
             context.runOnContext(new Handler<Void>() {
                 @Override
                 public void handle(Void event) {
-                    drainHandler.handle(null);
+                    drainHandler.handle(event);
                 }
             });
         }
@@ -316,11 +324,12 @@ class AsyncInputWriteStreamImpl implements AsyncInputWriteStream {
     /**
      * Represents a pending write operation.
      */
+    @NullMarked
     private static class PendingWrite {
-        final Buffer data;
+        final @Nullable Buffer data;
         final Promise<Void> completion;
 
-        PendingWrite(Buffer data, Promise<Void> completion) {
+        PendingWrite(@Nullable Buffer data, Promise<Void> completion) {
             this.data = data;
             this.completion = completion;
         }

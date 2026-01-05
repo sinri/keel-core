@@ -1,8 +1,11 @@
 package io.github.sinri.keel.core.utils.encryption.aes;
 
+import org.jspecify.annotations.NullMarked;
+
 /**
  * @since 5.0.0
  */
+@NullMarked
 abstract public class KeelAesBase implements KeelAes {
     /**
      * 密钥

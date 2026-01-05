@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.cache;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,9 +14,10 @@ import java.util.function.Function;
  *
  * @since 5.0.0
  */
+@NullMarked
 class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
-    private final @NotNull ConcurrentMap<@NotNull K, @NotNull ValueWrapper<V>> map;
-    private final @NotNull ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final ConcurrentMap<K, ValueWrapper<V>> map;
+    private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     private long defaultLifeInSeconds = 1000L;
 
     public KeelCacheImpl() {
@@ -29,12 +30,12 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public @NotNull KeelCacheInterface<K, V> setDefaultLifeInSeconds(long lifeInSeconds) {
+    public KeelCacheInterface<K, V> setDefaultLifeInSeconds(long lifeInSeconds) {
         defaultLifeInSeconds = lifeInSeconds;
         return this;
     }
 
-    private void saveImpl(@NotNull K key, @Nullable V value, long lifeInSeconds) {
+    private void saveImpl(K key, @Nullable V value, long lifeInSeconds) {
         if (value == null) {
             map.remove(key);
         } else {
@@ -42,7 +43,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
         }
     }
 
-    private @Nullable V readImpl(@NotNull K key) {
+    private @Nullable V readImpl(K key) {
         ValueWrapper<V> vValueWrapper = map.get(key);
         if (vValueWrapper == null) {
             return null;
@@ -52,7 +53,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public void save(@NotNull K key, @Nullable V value, long lifeInSeconds) {
+    public void save(K key, @Nullable V value, long lifeInSeconds) {
         lock.writeLock().lock();
         try {
             saveImpl(key, value, lifeInSeconds);
@@ -62,7 +63,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public @Nullable V read(@NotNull K key, @Nullable V fallbackValue) {
+    public @Nullable V read(K key, @Nullable V fallbackValue) {
         lock.readLock().lock();
         try {
             V v = readImpl(key);
@@ -76,7 +77,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public @NotNull V computeIfAbsent(@NotNull K key, @NotNull Function<@NotNull K, @NotNull V> computation, long lifeInSeconds) {
+    public V computeIfAbsent(K key, Function<K, V> computation, long lifeInSeconds) {
         this.lock.writeLock().lock();
         try {
             V v = readImpl(key);
@@ -90,7 +91,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
         }
     }
 
-    private void removeImpl(@NotNull K key) {
+    private void removeImpl(K key) {
         map.remove(key);
     }
 
@@ -99,7 +100,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public void remove(@NotNull K key) {
+    public void remove(K key) {
         this.lock.writeLock().lock();
         try {
             removeImpl(key);
@@ -120,7 +121,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
 
     private void cleanUpImpl() {
         this.map.keySet().forEach(key -> {
-            var cached = readImpl(key);
+            V cached = readImpl(key);
             if (cached == null) {
                 removeImpl(key);
             }
@@ -139,7 +140,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
 
 
     @Override
-    public @NotNull Set<@NotNull K> getCachedKeySet() {
+    public Set<K> getCachedKeySet() {
         this.lock.writeLock().lock();
         try {
             cleanUpImpl();

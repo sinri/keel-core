@@ -8,13 +8,14 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.shareddata.Counter;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 
 /**
@@ -24,43 +25,37 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @since 5.0.0
  */
+@NullMarked
 abstract public class Gatling extends AbstractKeelVerticle {
-    @NotNull
     private final GatlingOptions options;
-    @NotNull
     private final AtomicInteger barrelUsed = new AtomicInteger(0);
-    @Nullable
-    private Logger gatlingLogger;
+    private @Nullable Logger gatlingLogger;
 
-    private Gatling(@NotNull Keel keel, @NotNull GatlingOptions options) {
+    private Gatling(Keel keel, GatlingOptions options) {
         super(keel);
         this.options = options;
     }
 
-    @NotNull
     protected Future<Void> rest() {
         long actualRestInterval = new Random().nextLong(Math.toIntExact(options.getAverageRestInterval() / 2));
         actualRestInterval += options.getAverageRestInterval();
         return getKeel().asyncSleep(actualRestInterval);
     }
 
-    @NotNull
     abstract protected Logger buildGatlingLogger();
 
-    @NotNull
     public Logger getGatlingLogger() {
         return Objects.requireNonNull(gatlingLogger);
     }
 
     @Override
-    protected @NotNull Future<Void> startVerticle() {
+    protected Future<Void> startVerticle() {
         this.gatlingLogger = buildGatlingLogger();
         barrelUsed.set(0);
         getKeel().asyncCallRepeatedly(routineResult -> fireOnce());
         return Future.succeededFuture();
     }
 
-    @NotNull
     private Future<Void> fireOnce() {
         if (barrelUsed.get() >= options.getBarrels()) {
             getGatlingLogger().debug(r -> r.message("BARREL FULL"));
@@ -98,62 +93,63 @@ abstract public class Gatling extends AbstractKeelVerticle {
      *
      * @return 异步找到的可执行任务；为 null 时表示当前没有可执行的任务
      */
-    @NotNull
-    private Future<Bullet> loadOneBullet() {
+    private Future<@Nullable Bullet> loadOneBullet() {
         return getVertx().sharedData()
-                   .getLock("KeelGatling-%s-Load".formatted(this.options.getGatlingName()))
-                   .compose(lock -> this.options.getBulletLoader().get().
-                                                andThen(ar -> lock.release()));
+                         .getLock("KeelGatling-%s-Load".formatted(this.options.getGatlingName()))
+                         .compose(lock -> {
+                             Supplier<Future<@Nullable Bullet>> bulletLoader = this.options.getBulletLoader();
+                             return bulletLoader.get()
+                                                .andThen(ar -> lock.release())
+                                                .compose(Future::succeededFuture);
+                         });
     }
 
-    @NotNull
-    protected Future<Void> requireExclusiveLocksOfBullet(@NotNull Bullet bullet) {
+    protected Future<Void> requireExclusiveLocksOfBullet(Bullet bullet) {
         if (!bullet.exclusiveLockSet().isEmpty()) {
             AtomicBoolean blocked = new AtomicBoolean(false);
             return getKeel().asyncCallIteratively(
-                               bullet.exclusiveLockSet(),
-                               (exclusiveLock, task) -> {
-                                   String exclusiveLockName = "KeelGatling-Bullet-Exclusive-Lock-" + exclusiveLock;
-                                   return getVertx().sharedData()
-                                              .getCounter(exclusiveLockName)
-                                              .compose(Counter::incrementAndGet)
-                                              .compose(increased -> {
-                                                  if (increased > 1) {
-                                                      blocked.set(true);
-                                                  }
-                                                  return Future.succeededFuture();
-                                              });
-                               }
-                       )
-                       .compose(v -> {
-                           if (blocked.get()) {
-                               return releaseExclusiveLocksOfBullet(bullet)
-                                       .eventually(() -> Future.failedFuture(new Exception("This bullet met Exclusive" +
-                                               " Lock Block.")));
-                           }
-                           return Future.succeededFuture();
-                       });
+                                    bullet.exclusiveLockSet(),
+                                    (exclusiveLock, task) -> {
+                                        String exclusiveLockName = "KeelGatling-Bullet-Exclusive-Lock-" + exclusiveLock;
+                                        return getVertx().sharedData()
+                                                         .getCounter(exclusiveLockName)
+                                                         .compose(Counter::incrementAndGet)
+                                                         .compose(increased -> {
+                                                             if (increased > 1) {
+                                                                 blocked.set(true);
+                                                             }
+                                                             return Future.succeededFuture();
+                                                         });
+                                    }
+                            )
+                            .compose(v -> {
+                                if (blocked.get()) {
+                                    return releaseExclusiveLocksOfBullet(bullet)
+                                            .eventually(() -> Future.failedFuture(new Exception("This bullet met Exclusive" +
+                                                    " Lock Block.")));
+                                }
+                                return Future.succeededFuture();
+                            });
         } else {
             return Future.succeededFuture();
         }
     }
 
-    @NotNull
-    protected Future<Void> releaseExclusiveLocksOfBullet(@NotNull Bullet bullet) {
+    protected Future<Void> releaseExclusiveLocksOfBullet(Bullet bullet) {
         bullet.exclusiveLockSet();
         if (!bullet.exclusiveLockSet().isEmpty()) {
             return getKeel().asyncCallIteratively(bullet.exclusiveLockSet(), (exclusiveLock, task) -> {
                 String exclusiveLockName = "KeelGatling-Bullet-Exclusive-Lock-" + exclusiveLock;
                 return getVertx().sharedData().getCounter(exclusiveLockName)
-                           .compose(counter -> counter.decrementAndGet()
-                                                      .compose(x -> Future.succeededFuture()));
+                                 .compose(counter -> counter.decrementAndGet()
+                                                            .compose(x -> Future.succeededFuture()));
             });
         } else {
             return Future.succeededFuture();
         }
     }
 
-    private void fireBullet(@NotNull Bullet bullet, @NotNull Handler<AsyncResult<Void>> handler) {
+    private void fireBullet(Bullet bullet, Handler<AsyncResult<Void>> handler) {
         Promise<Void> promise = Promise.promise();
         Future.succeededFuture()
               .compose(v -> requireExclusiveLocksOfBullet(bullet)

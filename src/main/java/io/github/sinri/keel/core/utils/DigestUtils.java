@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.utils;
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
@@ -22,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class DigestUtils {
     public static final String DIGEST_ALGO_SHA_512 = "SHA-512";
     public static final String DIGEST_ALGO_MD5 = "MD5";
@@ -32,7 +33,7 @@ public class DigestUtils {
 
     }
 
-    public static MessageDigest getMessageDigest(@NotNull String algorithm) {
+    public static MessageDigest getMessageDigest(String algorithm) {
         return Objects.requireNonNull(messageDigestCache.computeIfAbsent(algorithm, key -> {
             synchronized (messageDigestCache) {
                 try {
@@ -50,8 +51,8 @@ public class DigestUtils {
      * @param raw 原始字符串
      * @return MD5 摘要值，使用小写字母和数字的十六进制表示
      */
-    @NotNull
-    public static String md5(@NotNull String raw) {
+
+    public static String md5(String raw) {
         return md5(raw.getBytes());
     }
 
@@ -61,7 +62,7 @@ public class DigestUtils {
      * @param raw 原始字节数组
      * @return MD5 摘要值，使用小写字母和数字的十六进制表示
      */
-    public static String md5(byte @NotNull [] raw) {
+    public static String md5(byte[] raw) {
         MessageDigest digest = getMessageDigest(DIGEST_ALGO_MD5);
         byte[] digested = digest.digest(raw);
         return BinaryUtils.encodeHexWithLowerDigits(digested);
@@ -73,8 +74,8 @@ public class DigestUtils {
      * @param raw 原始字符串
      * @return MD5 摘要值，使用大写字母和数字的十六进制表示
      */
-    @NotNull
-    public static String MD5(@NotNull String raw) {
+
+    public static String MD5(String raw) {
         return MD5(raw.getBytes());
     }
 
@@ -84,7 +85,7 @@ public class DigestUtils {
      * @param raw 原始字节数组
      * @return MD5 摘要值，使用大写字母和数字的十六进制表示
      */
-    public static String MD5(byte @NotNull [] raw) {
+    public static String MD5(byte[] raw) {
         MessageDigest digest = getMessageDigest(DIGEST_ALGO_MD5);
         byte[] digested = digest.digest(raw);
         return BinaryUtils.encodeHexWithUpperDigits(digested);
@@ -98,7 +99,7 @@ public class DigestUtils {
      * @return 摘要值，使用小写字母和数字的十六进制表示
      * @throws NoSuchAlgorithmException 如果指定的算法不可用
      */
-    public static String digestToLower(@NotNull String algorithm, byte @NotNull [] raw) throws NoSuchAlgorithmException {
+    public static String digestToLower(String algorithm, byte[] raw) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance(algorithm);
         md.update(raw);
         return BinaryUtils.encodeHexWithLowerDigits(md.digest());
@@ -112,7 +113,7 @@ public class DigestUtils {
      * @return 摘要值，使用小写字母和数字的十六进制表示
      * @throws NoSuchAlgorithmException 如果指定的算法不可用
      */
-    public static String digestToLower(@NotNull String algorithm, @NotNull String raw) throws NoSuchAlgorithmException {
+    public static String digestToLower(String algorithm, String raw) throws NoSuchAlgorithmException {
         return digestToLower(algorithm, raw.getBytes());
     }
 
@@ -124,7 +125,7 @@ public class DigestUtils {
      * @return 摘要值，使用大写字母和数字的十六进制表示
      * @throws NoSuchAlgorithmException 如果指定的算法不可用
      */
-    public static String digestToUpper(@NotNull String algorithm, byte @NotNull [] raw) throws NoSuchAlgorithmException {
+    public static String digestToUpper(String algorithm, byte[] raw) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance(algorithm);
         md.update(raw);
         return BinaryUtils.encodeHexWithUpperDigits(md.digest());
@@ -138,7 +139,7 @@ public class DigestUtils {
      * @return 摘要值，使用大写字母和数字的十六进制表示
      * @throws NoSuchAlgorithmException 如果指定的算法不可用
      */
-    public static String digestToUpper(@NotNull String algorithm, @NotNull String raw) throws NoSuchAlgorithmException {
+    public static String digestToUpper(String algorithm, String raw) throws NoSuchAlgorithmException {
         return digestToUpper(algorithm, raw.getBytes());
     }
 
@@ -149,8 +150,8 @@ public class DigestUtils {
      * @return SHA-512 摘要值，使用大写字母和数字的十六进制表示
      * @throws RuntimeException 如果 SHA-512 算法不可用
      */
-    @NotNull
-    public static String SHA512(@NotNull String raw) {
+
+    public static String SHA512(String raw) {
         try {
             return digestToUpper(DIGEST_ALGO_SHA_512, raw);
         } catch (NoSuchAlgorithmException e) {
@@ -165,8 +166,8 @@ public class DigestUtils {
      * @return SHA-512 摘要值，使用小写字母和数字的十六进制表示
      * @throws RuntimeException 如果 SHA-512 算法不可用
      */
-    @NotNull
-    public static String sha512(@NotNull String raw) {
+
+    public static String sha512(String raw) {
         try {
             return digestToLower(DIGEST_ALGO_SHA_512, raw);
         } catch (NoSuchAlgorithmException e) {
@@ -181,8 +182,8 @@ public class DigestUtils {
      * @return SHA-1 摘要值，使用大写字母和数字的十六进制表示
      * @throws RuntimeException 如果 SHA-1 算法不可用
      */
-    @NotNull
-    public static String SHA1(@NotNull String raw) {
+
+    public static String SHA1(String raw) {
         try {
             return digestToUpper(DIGEST_ALGO_SHA_1, raw);
         } catch (NoSuchAlgorithmException e) {
@@ -197,8 +198,8 @@ public class DigestUtils {
      * @return SHA-1 摘要值，使用小写字母和数字的十六进制表示
      * @throws RuntimeException 如果 SHA-1 算法不可用
      */
-    @NotNull
-    public static String sha1(@NotNull String raw) {
+
+    public static String sha1(String raw) {
         try {
             return digestToLower(DIGEST_ALGO_SHA_1, raw);
         } catch (NoSuchAlgorithmException e) {
@@ -218,7 +219,7 @@ public class DigestUtils {
      * @throws NoSuchAlgorithmException     如果 HMAC-SHA1 算法不可用
      * @throws InvalidKeyException          如果密钥无效
      */
-    private static byte @NotNull [] compute_hmac_sha1(@NotNull String raw, @NotNull String key) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException {
+    private static byte[] compute_hmac_sha1(String raw, String key) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException {
         String MAC_NAME = "HmacSHA1";
         String ENCODING = "UTF-8";
 
@@ -243,8 +244,8 @@ public class DigestUtils {
      * @return HMAC-SHA1 摘要值，使用 Base64 编码
      * @throws RuntimeException 如果计算过程中发生异常
      */
-    @NotNull
-    public static String hmac_sha1_base64(@NotNull String raw, @NotNull String key) {
+
+    public static String hmac_sha1_base64(String raw, String key) {
         byte[] bytes;
         try {
             bytes = compute_hmac_sha1(raw, key);
@@ -262,8 +263,8 @@ public class DigestUtils {
      * @return HMAC-SHA1 摘要值，使用小写字母和数字的十六进制表示
      * @throws RuntimeException 如果计算过程中发生异常
      */
-    @NotNull
-    public static String hmac_sha1_hex(@NotNull String raw, @NotNull String key) {
+
+    public static String hmac_sha1_hex(String raw, String key) {
         byte[] bytes;
         try {
             bytes = compute_hmac_sha1(raw, key);
@@ -281,7 +282,7 @@ public class DigestUtils {
      * @return HMAC-SHA1 摘要值，使用大写字母和数字的十六进制表示
      * @throws RuntimeException 如果计算过程中发生异常
      */
-    public static @NotNull String HMAC_SHA1_HEX(@NotNull String raw, @NotNull String key) {
+    public static String HMAC_SHA1_HEX(String raw, String key) {
         byte[] bytes;
         try {
             bytes = compute_hmac_sha1(raw, key);

@@ -1,5 +1,7 @@
 package io.github.sinri.keel.core.utils.encryption.aes;
 
+import org.jspecify.annotations.NullMarked;
+
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
@@ -9,6 +11,7 @@ import java.util.Base64;
 /**
  * @since 5.0.0
  */
+@NullMarked
 public class KeelAesEcbPkcs5Padding extends KeelAesUsingPkcs5Padding {
 
     /**

@@ -6,7 +6,7 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.ThreadingModel;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 
 /**
@@ -16,25 +16,24 @@ import org.jetbrains.annotations.NotNull;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class PureWatchman extends WatchmanImpl {
 
-    @NotNull
     private final Options options;
-    @NotNull
     private final LoggerFactory loggerFactory;
 
-    protected PureWatchman(@NotNull Keel keel, @NotNull String watchmanName, @NotNull Options options, @NotNull LoggerFactory loggerFactory) {
+    protected PureWatchman(Keel keel, String watchmanName, Options options, LoggerFactory loggerFactory) {
         super(keel, watchmanName);
         this.options = options;
         this.loggerFactory = loggerFactory;
     }
 
-    @NotNull
+
     public static Future<String> deploy(
-            @NotNull Keel keel,
-            @NotNull String watchmanName,
-            @NotNull Handler<Options> optionsHandler,
-            @NotNull LoggerFactory loggerFactory
+            Keel keel,
+            String watchmanName,
+            Handler<Options> optionsHandler,
+            LoggerFactory loggerFactory
     ) {
         Options options = new Options();
         optionsHandler.handle(options);
@@ -45,12 +44,12 @@ public class PureWatchman extends WatchmanImpl {
     }
 
     @Override
-    @NotNull
+
     protected final LoggerFactory getLoggerFactory() {
         return loggerFactory;
     }
 
-    @NotNull
+
     public WatchmanEventHandler regularHandler() {
         return options.getHandler();
     }
@@ -60,8 +59,9 @@ public class PureWatchman extends WatchmanImpl {
         return options.getInterval();
     }
 
+    @NullMarked
     public static class Options {
-        @NotNull
+
         private WatchmanEventHandler handler;
         private long interval = 60_000L;
 
@@ -70,13 +70,13 @@ public class PureWatchman extends WatchmanImpl {
             };
         }
 
-        @NotNull
+
         public WatchmanEventHandler getHandler() {
             return handler;
         }
 
-        @NotNull
-        public Options setHandler(@NotNull WatchmanEventHandler handler) {
+
+        public Options setHandler(WatchmanEventHandler handler) {
             this.handler = handler;
             return this;
         }
@@ -85,7 +85,7 @@ public class PureWatchman extends WatchmanImpl {
             return interval;
         }
 
-        @NotNull
+
         public Options setInterval(long interval) {
             this.interval = interval;
             return this;

@@ -2,7 +2,7 @@ package io.github.sinri.keel.core.maids.gatling;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Set;
 
@@ -11,16 +11,13 @@ import java.util.Set;
  *
  * @since 5.0.0
  */
+@NullMarked
 abstract public class Bullet {
-    @NotNull
     abstract public String bulletID();
 
-    @NotNull
     abstract protected Set<String> exclusiveLockSet();
 
-    @NotNull
     abstract protected Future<Object> fire();
 
-    @NotNull
     abstract protected Future<Void> ejectShell(AsyncResult<Object> fired);
 }

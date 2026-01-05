@@ -4,6 +4,8 @@ package io.github.sinri.keel.core.utils.encryption.rsa;
 import io.github.sinri.keel.core.utils.BinaryUtils;
 import io.github.sinri.keel.core.utils.FileUtils;
 import io.github.sinri.keel.core.utils.StringUtils;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -14,13 +16,15 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Objects;
 
 /**
  * @since 5.0.0
  */
+@NullMarked
 public class KeelRSAKeyPair {
-    private RSAPublicKey publicKey;
-    private RSAPrivateKey privateKey;
+    private @Nullable RSAPublicKey publicKey;
+    private @Nullable RSAPrivateKey privateKey;
 
     public KeelRSAKeyPair() {
         this.privateKey = null;
@@ -118,8 +122,8 @@ public class KeelRSAKeyPair {
         return this;
     }
 
-    public RSAPrivateKey getPrivateKey() {
-        return privateKey;
+    public RSAPrivateKey getPrivateKey() throws NullPointerException {
+        return Objects.requireNonNull(privateKey);
     }
 
     public KeelRSAKeyPair setPrivateKey(RSAPrivateKey privateKey) {
@@ -127,8 +131,8 @@ public class KeelRSAKeyPair {
         return this;
     }
 
-    public RSAPublicKey getPublicKey() {
-        return publicKey;
+    public RSAPublicKey getPublicKey() throws NullPointerException {
+        return Objects.requireNonNull(publicKey);
     }
 
     public KeelRSAKeyPair setPublicKey(RSAPublicKey publicKey) {

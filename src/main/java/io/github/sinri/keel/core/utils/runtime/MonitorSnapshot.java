@@ -1,14 +1,18 @@
 package io.github.sinri.keel.core.utils.runtime;
 
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
 /**
  * @since 5.0.0
  */
+@NullMarked
 public class MonitorSnapshot {
-    private GCStatResult GCStat;
-    private CPUTimeResult CPUTime;
-    private JVMMemoryResult jvmMemoryResult;
+    private @Nullable GCStatResult GCStat;
+    private @Nullable CPUTimeResult CPUTime;
+    private @Nullable JVMMemoryResult jvmMemoryResult;
 
-    public CPUTimeResult getCPUTime() {
+    public @Nullable CPUTimeResult getCPUTime() {
         return CPUTime;
     }
 
@@ -17,7 +21,7 @@ public class MonitorSnapshot {
         return this;
     }
 
-    public GCStatResult getGCStat() {
+    public @Nullable GCStatResult getGCStat() {
         return GCStat;
     }
 
@@ -27,7 +31,7 @@ public class MonitorSnapshot {
     }
 
 
-    public JVMMemoryResult getJvmMemoryResult() {
+    public @Nullable JVMMemoryResult getJvmMemoryResult() {
         return jvmMemoryResult;
     }
 

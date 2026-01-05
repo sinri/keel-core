@@ -75,11 +75,10 @@ import java.util.*;
  *
  * @author Enrico M. Crisostomo
  * @author Warren Strange
- * @version 1.1.4
  * @see <a href="http://thegreyblog.blogspot.com/2011/12/google-authenticator-using-it-in-your.html"></a>
  * @see <a href="http://code.google.com/p/google-authenticator"></a>
  * @see <a href="http://tools.ietf.org/id/draft-mraihi-totp-timebased-06.txt"></a>
- * @since 0.3.0
+ * @since 5.0.0
  */
 public final class GoogleAuthenticator implements IGoogleAuthenticator {
 

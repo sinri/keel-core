@@ -1,12 +1,14 @@
 package io.github.sinri.keel.core.utils.runtime;
 
 import io.vertx.core.json.JsonObject;
+import org.jspecify.annotations.NullMarked;
 
 import java.text.DecimalFormat;
 
 /**
  * @since 5.0.0
  */
+@NullMarked
 public class MemoryResult implements RuntimeStatResult<MemoryResult> {
     private final long statTime;
     private long totalByte;

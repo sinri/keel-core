@@ -2,7 +2,7 @@ package io.github.sinri.keel.core.servant.sundial;
 
 import io.github.sinri.keel.core.utils.cron.ParsedCalenderElements;
 import io.github.sinri.keel.logger.api.log.SpecificLog;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Calendar;
 import java.util.List;
@@ -12,8 +12,8 @@ import java.util.List;
  *
  * @since 5.0.0
  */
+@NullMarked
 public final class SundialSpecificLog extends SpecificLog<SundialSpecificLog> {
-    @NotNull
     public static final String TopicSundial = "Sundial";
 
     public SundialSpecificLog() {
@@ -22,9 +22,9 @@ public final class SundialSpecificLog extends SpecificLog<SundialSpecificLog> {
     }
 
     public SundialSpecificLog(
-            @NotNull SundialPlan sundialPlan,
-            @NotNull Calendar now,
-            @NotNull String deploymentId
+            SundialPlan sundialPlan,
+            Calendar now,
+            String deploymentId
     ) {
         super();
         this.classification(List.of("Plan"));

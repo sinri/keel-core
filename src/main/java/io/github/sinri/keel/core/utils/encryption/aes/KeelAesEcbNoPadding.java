@@ -3,6 +3,7 @@ package io.github.sinri.keel.core.utils.encryption.aes;
 
 import io.github.sinri.keel.core.utils.BinaryUtils;
 import io.github.sinri.keel.core.utils.StringUtils;
+import org.jspecify.annotations.NullMarked;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -15,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 /**
  * @since 5.0.0
  */
+@NullMarked
 public class KeelAesEcbNoPadding extends KeelAesBase {
     /**
      * @param key AES要求密钥长度为128位或192位或256位，java默认限制AES密钥长度最多128位
@@ -69,9 +71,8 @@ public class KeelAesEcbNoPadding extends KeelAesBase {
 //            System.out.println("encrypted bytes: " + KeelHelpers.binaryHelper().encodeHexWithUpperDigits(encryptedBytes));
             var decryptedBytes = cipher.doFinal(encryptedBytes);
 //            System.out.println("decrypted bytes: " + KeelHelpers.binaryHelper().encodeHexWithUpperDigits(decryptedBytes));
-            var s = new String(decryptedBytes, ENCODING);
-//            System.out.println("decrypted text: " + s);
-            return s;
+            //            System.out.println("decrypted text: " + s);
+            return new String(decryptedBytes, ENCODING);
         } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException |
                  InvalidKeyException e) {
             throw new RuntimeException(e);

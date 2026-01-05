@@ -2,8 +2,8 @@ package io.github.sinri.keel.core.servant.intravenous;
 
 import io.github.sinri.keel.base.Keel;
 import io.vertx.core.Future;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -13,15 +13,16 @@ import java.util.List;
  *
  * @since 5.0.0
  */
-class IntravenousSingleImpl<D> extends IntravenousBase<D> {
-    private final @NotNull SingleDropProcessor<D> itemProcessor;
+@NullMarked
+class IntravenousSingleImpl<D extends @Nullable Object> extends IntravenousBase<D> {
+    private final SingleDropProcessor<D> itemProcessor;
 
-    public IntravenousSingleImpl(@NotNull Keel keel, @NotNull SingleDropProcessor<D> itemProcessor) {
+    public IntravenousSingleImpl(Keel keel, SingleDropProcessor<D> itemProcessor) {
         super(keel);
         this.itemProcessor = itemProcessor;
     }
 
-    protected @NotNull Future<Void> handleDrops(@NotNull List<@Nullable D> drops) {
+    protected Future<Void> handleDrops(List<D> drops) {
         return getKeel().asyncCallIteratively(
                 drops,
                 drop -> Future.succeededFuture()

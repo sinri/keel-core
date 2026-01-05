@@ -8,7 +8,7 @@ module io.github.sinri.keel.core {
     requires java.management;
     requires transitive org.commonmark;
     requires transitive org.commonmark.ext.gfm.tables;
-    requires transitive org.jetbrains.annotations;
+    requires static org.jspecify;
 
     // Exports for public API packages
 

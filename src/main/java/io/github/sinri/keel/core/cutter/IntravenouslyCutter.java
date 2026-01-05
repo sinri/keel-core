@@ -7,8 +7,8 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
 import io.vertx.core.buffer.Buffer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -26,18 +26,19 @@ import java.util.concurrent.atomic.AtomicReference;
  * @param <T> 组成可处理的流的实体类型
  * @since 5.0.0
  */
+@NullMarked
 public abstract class IntravenouslyCutter<T> implements KeelHolder {
 
-    private final @NotNull AtomicReference<Buffer> bufferRef;
-    private final @NotNull Intravenous<T> intravenous;
-    private final @NotNull AtomicBoolean readStopRef = new AtomicBoolean(false);
-    private final @NotNull AtomicReference<Throwable> stopCause = new AtomicReference<>();
-    private final @NotNull Keel keel;
+    private final AtomicReference<Buffer> bufferRef;
+    private final Intravenous<T> intravenous;
+    private final AtomicBoolean readStopRef = new AtomicBoolean(false);
+    private final AtomicReference<@Nullable Throwable> stopCause = new AtomicReference<>();
+    private final Keel keel;
     private @Nullable Long timeoutTimer;
 
     public IntravenouslyCutter(
-            @NotNull Keel keel,
-            @NotNull Intravenous.SingleDropProcessor<T> singleDropProcessor,
+            Keel keel,
+            Intravenous.SingleDropProcessor<T> singleDropProcessor,
             long timeout
     ) {
         this.keel = keel;
@@ -52,11 +53,11 @@ public abstract class IntravenouslyCutter<T> implements KeelHolder {
         }
     }
 
-    public final @NotNull Keel getKeel() {
+    public final Keel getKeel() {
         return keel;
     }
 
-    public final void acceptFromStream(@NotNull Buffer incomingBuffer) {
+    public final void acceptFromStream(Buffer incomingBuffer) {
         synchronized (this.bufferRef) {
             this.bufferRef.get().appendBuffer(incomingBuffer);
 
@@ -93,7 +94,6 @@ public abstract class IntravenouslyCutter<T> implements KeelHolder {
         }
     }
 
-    @NotNull
     public final Future<Void> waitForAllHandled() {
         return keel.asyncCallRepeatedly(repeatedlyCallTask -> {
                        if (!this.readStopRef.get()) {
@@ -118,7 +118,7 @@ public abstract class IntravenouslyCutter<T> implements KeelHolder {
                    });
     }
 
-    protected final @NotNull AtomicReference<Buffer> getBufferRef() {
+    protected final AtomicReference<Buffer> getBufferRef() {
         return bufferRef;
     }
 
@@ -129,6 +129,5 @@ public abstract class IntravenouslyCutter<T> implements KeelHolder {
      *
      * @return 目标切片实体列表
      */
-    @NotNull
-    abstract protected List<@NotNull T> cut();
+    abstract protected List<T> cut();
 }

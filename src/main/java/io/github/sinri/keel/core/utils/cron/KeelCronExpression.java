@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.utils.cron;
 
 
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -13,13 +13,13 @@ import java.util.regex.Pattern;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class KeelCronExpression {
     final Set<Integer> minuteOptions = new HashSet<>();
     final Set<Integer> hourOptions = new HashSet<>();
     final Set<Integer> dayOptions = new HashSet<>();
     final Set<Integer> monthOptions = new HashSet<>();
     final Set<Integer> weekdayOptions = new HashSet<>();
-    @NotNull
     private final String rawCronExpression;
 
     /**
@@ -40,7 +40,7 @@ public class KeelCronExpression {
      *                          values)
      * @see <a href="https://man7.org/linux/man-pages/man5/crontab.5.html">...</a>
      */
-    public KeelCronExpression(@NotNull String rawCronExpression) {
+    public KeelCronExpression(String rawCronExpression) {
         this.rawCronExpression = rawCronExpression;
 
         String[] parts = rawCronExpression.trim().split("\\s+");
@@ -70,7 +70,7 @@ public class KeelCronExpression {
      * @param currentCalendar 要解析的 Calendar 对象，不能为 null
      * @return 包含解析后的日期和时间组件的 ParsedCalenderElements 实例
      */
-    public static ParsedCalenderElements parseCalenderToElements(@NotNull Calendar currentCalendar) {
+    public static ParsedCalenderElements parseCalenderToElements(Calendar currentCalendar) {
         return new ParsedCalenderElements(currentCalendar);
     }
 
@@ -83,7 +83,7 @@ public class KeelCronExpression {
      * @param currentCalendar 要与 CRON 表达式进行匹配的 Calendar 对象，不能为 null
      * @return 如果 Calendar 对象匹配 CRON 表达式则返回 true，否则返回 false
      */
-    public boolean match(@NotNull Calendar currentCalendar) {
+    public boolean match(Calendar currentCalendar) {
         ParsedCalenderElements parsedCalenderElements = new ParsedCalenderElements(currentCalendar);
         return match(parsedCalenderElements);
     }
@@ -97,7 +97,7 @@ public class KeelCronExpression {
      * @param parsedCalenderElements 要与 CRON 表达式进行匹配的 ParsedCalenderElements 实例，不能为 null
      * @return 如果 ParsedCalenderElements 匹配 CRON 表达式则返回 true，否则返回 false
      */
-    public boolean match(@NotNull ParsedCalenderElements parsedCalenderElements) {
+    public boolean match(ParsedCalenderElements parsedCalenderElements) {
         return minuteOptions.contains(parsedCalenderElements.minute)
                 && hourOptions.contains(parsedCalenderElements.hour)
                 && dayOptions.contains(parsedCalenderElements.day)
@@ -124,7 +124,7 @@ public class KeelCronExpression {
      * @param max          该组件允许的最大值
      * @throws IllegalArgumentException 如果原始组件无效或包含超出范围的值
      */
-    private void parseField(@NotNull String rawComponent, @NotNull Set<Integer> optionSet, int min, int max) {
+    private void parseField(String rawComponent, Set<Integer> optionSet, int min, int max) {
         if (rawComponent.equals("*")) {
             for (int i = min; i <= max; i++) {
                 optionSet.add(i);
@@ -208,7 +208,6 @@ public class KeelCronExpression {
      *
      * @return 原始 CRON 表达式，非 null 字符串
      */
-    @NotNull
     public String getRawCronExpression() {
         return rawCronExpression;
     }

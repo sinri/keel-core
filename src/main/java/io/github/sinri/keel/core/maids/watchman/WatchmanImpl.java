@@ -8,8 +8,8 @@ import io.vertx.core.Future;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.shareddata.Lock;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -19,32 +19,28 @@ import java.util.Objects;
  *
  * @since 5.0.0
  */
+@NullMarked
 abstract class WatchmanImpl extends AbstractKeelVerticle implements Watchman {
-    @NotNull
     private final String watchmanName;
-    @Nullable
-    private MessageConsumer<Long> consumer;
-    @Nullable
-    private Logger watchmanLogger;
+    private @Nullable MessageConsumer<Long> consumer;
+    private @Nullable Logger watchmanLogger;
 
-    public WatchmanImpl(@NotNull Keel keel, @NotNull String watchmanName) {
+    public WatchmanImpl(Keel keel, String watchmanName) {
         super(keel);
         this.watchmanName = watchmanName;
     }
 
     @Override
-    @NotNull
     public String watchmanName() {
         return this.watchmanName;
     }
 
-    @NotNull
     protected String eventBusAddress() {
         return "%s:%s".formatted(this.getClass().getName(), watchmanName());
     }
 
     @Override
-    protected @NotNull Future<Void> startVerticle() {
+    protected Future<Void> startVerticle() {
         this.watchmanLogger = this.buildWatchmanLogger();
 
         this.consumer = getVertx().eventBus().consumer(eventBusAddress());
@@ -71,44 +67,41 @@ abstract class WatchmanImpl extends AbstractKeelVerticle implements Watchman {
         return Future.succeededFuture();
     }
 
-    protected void consumeHandleMassage(@NotNull Message<Long> message) {
+    protected void consumeHandleMassage(Message<Long> message) {
         Long timestamp = message.body();
         getWatchmanLogger().debug(r -> r.message(watchmanName() + " TRIGGERED FOR " + timestamp));
 
         long x = timestamp / interval();
         getVertx().sharedData().getLockWithTimeout(eventBusAddress() + "@" + x, Math.min(3_000L, interval() - 1))
-            .onComplete(lockAR -> {
-                if (lockAR.failed()) {
-                    getWatchmanLogger().warning(r -> r.message("LOCK ACQUIRE FAILED FOR " + timestamp + " i.e. " + x));
-                } else {
-                    Lock lock = lockAR.result();
-                    getWatchmanLogger().info(r -> r.message("LOCK ACQUIRED FOR " + timestamp + " i.e. " + x));
-                    regularHandler().handle(timestamp);
-                    getVertx().setTimer(interval(), timerID -> {
-                        lock.release();
-                        getWatchmanLogger().info(r -> r.message("LOCK RELEASED FOR " + timestamp + " i.e. " + x));
-                    });
-                }
-            });
+                  .onComplete(lockAR -> {
+                      if (lockAR.failed()) {
+                          getWatchmanLogger().warning(r -> r.message("LOCK ACQUIRE FAILED FOR " + timestamp + " i.e. " + x));
+                      } else {
+                          Lock lock = lockAR.result();
+                          getWatchmanLogger().info(r -> r.message("LOCK ACQUIRED FOR " + timestamp + " i.e. " + x));
+                          regularHandler().handle(timestamp);
+                          getVertx().setTimer(interval(), timerID -> {
+                              lock.release();
+                              getWatchmanLogger().info(r -> r.message("LOCK RELEASED FOR " + timestamp + " i.e. " + x));
+                          });
+                      }
+                  });
     }
 
     @Override
-    protected @NotNull Future<Void> stopVerticle() {
+    protected Future<Void> stopVerticle() {
         if (consumer != null) {
             consumer.unregister();
         }
         return Future.succeededFuture();
     }
 
-    @NotNull
     protected abstract LoggerFactory getLoggerFactory();
 
-    @NotNull
     protected Logger buildWatchmanLogger() {
         return getLoggerFactory().createLogger("Watchman");
     }
 
-    @NotNull
     public final Logger getWatchmanLogger() {
         return Objects.requireNonNull(watchmanLogger);
     }

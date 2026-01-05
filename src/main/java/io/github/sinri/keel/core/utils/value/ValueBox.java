@@ -1,7 +1,10 @@
 package io.github.sinri.keel.core.utils.value;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
+
+import java.util.function.Supplier;
 
 /**
  * 三态存值器。
@@ -16,7 +19,8 @@ import org.jetbrains.annotations.Nullable;
  * @param <T> 值类型
  * @since 5.0.0
  */
-public class ValueBox<T> {
+@NullMarked
+public class ValueBox<T extends @Nullable Object> {
     private volatile T value;
     private volatile boolean valueAlreadySet;
     /**
@@ -60,14 +64,11 @@ public class ValueBox<T> {
      * 清空 ValueBox 的内部状态。
      * <p>
      * 将值设置为 null，标记为未设置状态，并清除过期时间。
-     *
-     * @return 当前 ValueBox 实例，用于方法链式调用
      */
-    public synchronized ValueBox<T> clear() {
+    public synchronized void clear() {
         this.value = null;
         this.valueAlreadySet = false;
         this.expire = 0;
-        return this;
     }
 
     /**
@@ -97,8 +98,7 @@ public class ValueBox<T> {
      * @return 类型为 T 的值，如果已设置且未过期；否则抛出 {@link IllegalStateException}
      * @throws IllegalStateException 如果值未设置或已过期
      */
-    @Nullable
-    public synchronized T getValue() {
+    public synchronized @Nullable T getValue() {
         if (isValueAlreadySet())
             return value;
         else
@@ -125,7 +125,6 @@ public class ValueBox<T> {
      * @throws NullPointerException  如果值已设置但为 null
      * @since 4.1.0
      */
-    @NotNull
     public synchronized T getNonNullValue() {
         T t = getValue();
         if (t == null) {
@@ -143,12 +142,20 @@ public class ValueBox<T> {
      * @return 如果值已设置且未过期则返回该值，否则返回后备值
      * @since 3.1.0
      */
-    @Nullable
-    public synchronized T getValueOrElse(@Nullable T fallbackForInvalid) {
+    public synchronized @Nullable T getValueOrElse(@Nullable T fallbackForInvalid) {
         if (isValueAlreadySet())
             return value;
         else
             return fallbackForInvalid;
+    }
+
+    public synchronized T ensureNonNullValue(Supplier<EnsuredValueWithExpire<@NonNull T>> supplier) {
+        if (isValueSetAndNotNull())
+            return value;
+        EnsuredValueWithExpire<@NonNull T> pair = supplier.get();
+        value = pair.value;
+        expire = pair.expire;
+        return value;
     }
 
     /**
@@ -186,5 +193,9 @@ public class ValueBox<T> {
      */
     public synchronized boolean isValueSetAndNotNull() {
         return this.isValueAlreadySet() && this.getValue() != null;
+    }
+
+    @NullMarked
+    public record EnsuredValueWithExpire<E>(E value, long expire) {
     }
 }

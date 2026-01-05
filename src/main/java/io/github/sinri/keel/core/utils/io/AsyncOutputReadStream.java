@@ -5,7 +5,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.ReadStream;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.io.InputStream;
 
@@ -14,25 +14,24 @@ import java.io.InputStream;
  *
  * @since 5.0.0
  */
+@NullMarked
 public interface AsyncOutputReadStream extends ReadStream<Buffer> {
-    static AsyncOutputReadStream create(@NotNull Vertx vertx) {
+    static AsyncOutputReadStream create(Vertx vertx) {
         return new AsyncOutputReadStreamImpl(vertx);
     }
 
-    void wrap(@NotNull InputStream inputStream);
+    void wrap(InputStream inputStream);
 
     /**
      *
      * @return a promise of the number of bytes transferred
      */
-    @NotNull
     Promise<Long> getReadOverPromise();
 
     /**
      *
      * @return a future of the number of bytes transferred
      */
-    @NotNull
     default Future<Long> readOver() {
         return getReadOverPromise().future();
     }

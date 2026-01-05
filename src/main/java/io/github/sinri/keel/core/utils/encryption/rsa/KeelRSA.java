@@ -3,6 +3,7 @@ package io.github.sinri.keel.core.utils.encryption.rsa;
 
 import io.github.sinri.keel.core.utils.BinaryUtils;
 import io.github.sinri.keel.core.utils.StringUtils;
+import org.jspecify.annotations.NullMarked;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -17,6 +18,7 @@ import java.util.Objects;
 /**
  * @since 5.0.0
  */
+@NullMarked
 public class KeelRSA extends KeelRSAKeyPair {
     public static final String SIGN_ALGORITHMS = "SHA1WithRSA";
 

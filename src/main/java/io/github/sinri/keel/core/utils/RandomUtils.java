@@ -1,15 +1,16 @@
 package io.github.sinri.keel.core.utils;
 
 
+import io.github.sinri.keel.core.utils.value.ValueBox;
 import io.vertx.core.Vertx;
 import io.vertx.ext.auth.prng.VertxContextPRNG;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 
 /**
@@ -17,8 +18,9 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class RandomUtils {
-    private static final AtomicReference<VertxContextPRNG> prngRef = new AtomicReference<>();
+    private static final ValueBox<VertxContextPRNG> prngBox = new ValueBox<>();
 
     private RandomUtils() {
     }
@@ -77,7 +79,7 @@ public class RandomUtils {
      * @return 随机选择的元素
      */
     public static <T> T getRandomElement(Vertx vertx, List<T> list) {
-        if (list == null || list.isEmpty()) {
+        if (list.isEmpty()) {
             throw new IllegalArgumentException("List cannot be null or empty");
         }
 
@@ -94,8 +96,8 @@ public class RandomUtils {
      * @return 打乱后的新列表
      */
     public static <T> List<T> shuffleList(Vertx vertx, List<T> list) {
-        if (list == null) {
-            throw new IllegalArgumentException("List cannot be null");
+        if (list.isEmpty()) {
+            return list;
         }
 
         List<T> shuffled = new ArrayList<>(list);
@@ -157,17 +159,16 @@ public class RandomUtils {
      * @return 伪随机数生成器实例，永不为 null
      * @throws IllegalStateException 如果无法创建伪随机数生成器
      */
-    @NotNull
-    public static VertxContextPRNG getPRNG(@NotNull Vertx vertx) {
-        return prngRef.updateAndGet(existing -> {
-            if (existing != null) {
-                return existing;
-            }
-
-            try {
-                return VertxContextPRNG.current(vertx);
-            } catch (Exception e) {
-                throw new IllegalStateException("Failed to create VertxContextPRNG instance", e);
+    public static VertxContextPRNG getPRNG(Vertx vertx) {
+        return prngBox.ensureNonNullValue(new Supplier<ValueBox.EnsuredValueWithExpire<VertxContextPRNG>>() {
+            @Override
+            public ValueBox.EnsuredValueWithExpire<VertxContextPRNG> get() {
+                try {
+                    VertxContextPRNG prng1 = VertxContextPRNG.current(vertx);
+                    return new ValueBox.EnsuredValueWithExpire<>(prng1, 0);
+                } catch (Exception e) {
+                    throw new IllegalStateException("Failed to create VertxContextPRNG instance", e);
+                }
             }
         });
     }

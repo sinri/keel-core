@@ -2,7 +2,7 @@ package io.github.sinri.keel.core.utils;
 
 import io.github.sinri.keel.core.utils.encryption.base32.Base32;
 import io.vertx.core.buffer.Buffer;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.Base64;
 
@@ -11,6 +11,7 @@ import java.util.Base64;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class BinaryUtils {
     final static char[] HEX_DIGITS_LOWER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
     final static char[] HEX_DIGITS_UPPER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
@@ -18,7 +19,7 @@ public class BinaryUtils {
     private BinaryUtils() {
     }
 
-    private static @NotNull String encodeHexWithDigits(final char[] HEX_DIGITS, @NotNull Buffer buffer, int since, int length) {
+    private static String encodeHexWithDigits(final char[] HEX_DIGITS, Buffer buffer, int since, int length) {
         StringBuilder hex = new StringBuilder();
         for (int i = since; i < since + length; i++) {
             hex
@@ -36,7 +37,7 @@ public class BinaryUtils {
      * @param data 待编码的字节数组
      * @return 十六进制字符串（小写）
      */
-    public static String encodeHexWithLowerDigits(final byte @NotNull [] data) {
+    public static String encodeHexWithLowerDigits(final byte[] data) {
         return encodeHexWithLowerDigits(Buffer.buffer(data));
     }
 
@@ -47,7 +48,7 @@ public class BinaryUtils {
      * @param buffer Vert.x 的 Buffer 实例
      * @return 十六进制字符串（小写）
      */
-    public static @NotNull String encodeHexWithLowerDigits(@NotNull Buffer buffer) {
+    public static String encodeHexWithLowerDigits(Buffer buffer) {
         return encodeHexWithLowerDigits(buffer, 0, buffer.length());
     }
 
@@ -60,7 +61,7 @@ public class BinaryUtils {
      * @param length 要编码的字节长度
      * @return 十六进制字符串（小写）
      */
-    public static @NotNull String encodeHexWithLowerDigits(@NotNull Buffer buffer, int since, int length) {
+    public static String encodeHexWithLowerDigits(Buffer buffer, int since, int length) {
         return encodeHexWithDigits(HEX_DIGITS_LOWER, buffer, since, length);
     }
 
@@ -71,7 +72,7 @@ public class BinaryUtils {
      * @param data 待编码的字节数组
      * @return 十六进制字符串（大写）
      */
-    public static @NotNull String encodeHexWithUpperDigits(final byte @NotNull [] data) {
+    public static String encodeHexWithUpperDigits(final byte[] data) {
         return encodeHexWithUpperDigits(Buffer.buffer(data));
     }
 
@@ -82,7 +83,7 @@ public class BinaryUtils {
      * @param buffer Vert.x 的 Buffer 实例
      * @return 十六进制字符串（大写）
      */
-    public static @NotNull String encodeHexWithUpperDigits(@NotNull Buffer buffer) {
+    public static String encodeHexWithUpperDigits(Buffer buffer) {
         return encodeHexWithUpperDigits(buffer, 0, buffer.length());
     }
 
@@ -95,7 +96,7 @@ public class BinaryUtils {
      * @param length 要编码的字节长度
      * @return 十六进制字符串（大写）
      */
-    public static @NotNull String encodeHexWithUpperDigits(@NotNull Buffer buffer, int since, int length) {
+    public static String encodeHexWithUpperDigits(Buffer buffer, int since, int length) {
         return encodeHexWithDigits(HEX_DIGITS_UPPER, buffer, since, length);
     }
 
@@ -106,7 +107,7 @@ public class BinaryUtils {
      * @param bytes Base64 编码的字节数组
      * @return 解码后的字节数组
      */
-    public static byte @NotNull [] decodeWithBase64(byte @NotNull [] bytes) {
+    public static byte[] decodeWithBase64(byte[] bytes) {
         return Base64.getDecoder().decode(bytes);
     }
 
@@ -117,7 +118,7 @@ public class BinaryUtils {
      * @param bytes 待编码的字节数组
      * @return Base64 编码后的字节数组
      */
-    public static byte @NotNull [] encodeWithBase64(byte @NotNull [] bytes) {
+    public static byte[] encodeWithBase64(byte[] bytes) {
         return Base64.getEncoder().encode(bytes);
     }
 
@@ -128,8 +129,8 @@ public class BinaryUtils {
      * @param bytes 待编码的字节数组
      * @return Base64 编码后的字符串
      */
-    @NotNull
-    public static String encodeWithBase64ToString(byte @NotNull [] bytes) {
+
+    public static String encodeWithBase64ToString(byte[] bytes) {
         return new String(encodeWithBase64(bytes));
     }
 
@@ -140,7 +141,7 @@ public class BinaryUtils {
      * @param bytes 待编码的字节数组
      * @return Base32 编码后的字节数组
      */
-    public static byte @NotNull [] encodeWithBase32(byte @NotNull [] bytes) {
+    public static byte[] encodeWithBase32(byte[] bytes) {
         return encodeWithBase32ToString(bytes).getBytes();
     }
 
@@ -151,8 +152,8 @@ public class BinaryUtils {
      * @param bytes 待编码的字节数组
      * @return Base32 编码后的字符串
      */
-    @NotNull
-    public static String encodeWithBase32ToString(byte @NotNull [] bytes) {
+
+    public static String encodeWithBase32ToString(byte[] bytes) {
         return Base32.encode(bytes);
     }
 
@@ -163,7 +164,7 @@ public class BinaryUtils {
      * @param bytes Base32 编码的字节数组
      * @return 解码后的字节数组
      */
-    public static byte @NotNull [] decodeWithBase32(byte @NotNull [] bytes) {
+    public static byte[] decodeWithBase32(byte[] bytes) {
         return Base32.decode(new String(bytes));
     }
 
@@ -174,7 +175,7 @@ public class BinaryUtils {
      * @param bytes Base32 编码的字节数组
      * @return 解码后的字符串
      */
-    public static @NotNull String decodeWithBase32ToString(byte @NotNull [] bytes) {
+    public static String decodeWithBase32ToString(byte[] bytes) {
         return new String(decodeWithBase32(bytes));
     }
 }

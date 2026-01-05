@@ -1,5 +1,7 @@
 package io.github.sinri.keel.core.utils.encryption.aes;
 
+import org.jspecify.annotations.NullMarked;
+
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -11,6 +13,7 @@ import java.util.Base64;
 /**
  * @since 5.0.0
  */
+@NullMarked
 public class KeelAesCbcPkcs5Padding extends KeelAesUsingPkcs5Padding {
     /**
      * @param key AES要求密钥长度为128位或192位或256位，java默认限制AES密钥长度最多128位

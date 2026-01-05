@@ -1,8 +1,8 @@
 package io.github.sinri.keel.core.cache;
 
 import io.vertx.core.Future;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -17,6 +17,7 @@ import java.util.Objects;
  * @param <V> 缓存的值的类型
  * @since 5.0.0
  */
+@NullMarked
 public interface KeelAsyncCacheAlike<K, V> {
     /**
      * 根据给定的键值对异步存入一条缓存记录。
@@ -27,7 +28,7 @@ public interface KeelAsyncCacheAlike<K, V> {
      * @param v 值
      * @return 异步执行结果
      */
-    @NotNull Future<Void> save(@NotNull K k, @Nullable V v);
+    Future<Void> save(K k, @Nullable V v);
 
     /**
      * 根据给定的键，尝试异步获取缓存的值；如果无法找到有效的缓存值，则返回给定的默认值。
@@ -36,7 +37,7 @@ public interface KeelAsyncCacheAlike<K, V> {
      * @param v 默认值，用于无法找到有效缓存时
      * @return 异步返回的给定键对应的有效缓存或给定的默认值
      */
-    @NotNull Future<@Nullable V> read(@NotNull K k, @Nullable V v);
+    Future<@Nullable V> read(K k, @Nullable V v);
 
     /**
      * 根据给定的键，尝试异步获取缓存的值，如果无法找到有效的缓存值，则抛出 {@link NotCached} 异常。
@@ -44,7 +45,7 @@ public interface KeelAsyncCacheAlike<K, V> {
      * @param k 键
      * @return 异步返回的给定键对应的有效缓存，或失败时给出{@link NotCached}异常。
      */
-    default @NotNull Future<@NotNull V> read(@NotNull K k) {
+    default Future<V> read(K k) {
         return read(k, null)
                 .compose(v -> {
                     try {

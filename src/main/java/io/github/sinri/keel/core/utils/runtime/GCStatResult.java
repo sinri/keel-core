@@ -3,8 +3,8 @@ package io.github.sinri.keel.core.utils.runtime;
 import io.github.sinri.keel.base.logger.factory.StdoutLoggerFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.json.JsonObject;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.management.GarbageCollectorMXBean;
 import java.util.HashSet;
@@ -15,6 +15,7 @@ import java.util.Set;
 /**
  * @since 5.0.0
  */
+@NullMarked
 public class GCStatResult implements RuntimeStatResult<GCStatResult> {
     private static final Set<String> minorGCNames;
     private static final Set<String> majorGCNames;
@@ -54,10 +55,9 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
     private long minorGCTime = 0;
     private long majorGCCount = 0;
     private long majorGCTime = 0;
-    @Nullable
-    private String majorGCType;
-    @Nullable
-    private String minorGCType;
+
+    private @Nullable String majorGCType;
+    private @Nullable String minorGCType;
 
     public GCStatResult() {
         this.statTime = System.currentTimeMillis();
@@ -67,19 +67,19 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
         this.statTime = statTime;
     }
 
-    public static void handleMajorGCNames(@NotNull Handler<Set<String>> handler) {
+    public static void handleMajorGCNames(Handler<Set<String>> handler) {
         handler.handle(majorGCNames);
     }
 
-    public static void handleMinorGCNames(@NotNull Handler<Set<String>> handler) {
+    public static void handleMinorGCNames(Handler<Set<String>> handler) {
         handler.handle(minorGCNames);
     }
 
-    public static void handleIgnoreGCNames(@NotNull Handler<Set<String>> handler) {
+    public static void handleIgnoreGCNames(Handler<Set<String>> handler) {
         handler.handle(ignoreGCNames);
     }
 
-    public static GCStatResult parseGarbageCollectorMXBeans(@NotNull List<GarbageCollectorMXBean> gcList) {
+    public static GCStatResult parseGarbageCollectorMXBeans(List<@Nullable GarbageCollectorMXBean> gcList) {
         GCStatResult gcStatResult = new GCStatResult();
         for (GarbageCollectorMXBean gc : gcList) {
             if (gc == null) {
@@ -148,7 +148,7 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
                 );
     }
 
-    private void refreshWithGC(@NotNull GarbageCollectorMXBean gc) {
+    private void refreshWithGC(GarbageCollectorMXBean gc) {
         if (minorGCNames.contains(gc.getName())) {
             this.minorGCCount = gc.getCollectionCount();
             if (gc.getCollectionTime() >= 0) {

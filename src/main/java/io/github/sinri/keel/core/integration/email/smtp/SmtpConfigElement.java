@@ -3,8 +3,7 @@ package io.github.sinri.keel.core.integration.email.smtp;
 import io.github.sinri.keel.base.configuration.ConfigElement;
 import io.github.sinri.keel.base.configuration.NotConfiguredException;
 import io.vertx.ext.mail.MailConfig;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.List;
 
@@ -14,15 +13,15 @@ import java.util.List;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class SmtpConfigElement extends ConfigElement {
 
 
-    public SmtpConfigElement(@NotNull ConfigElement another) {
+    public SmtpConfigElement(ConfigElement another) {
         super(another);
     }
 
-    @NotNull
-    public MailConfig toMailConfig() {
+    public MailConfig toMailConfig() throws NotConfiguredException {
         var mailConfig = new MailConfig();
         mailConfig.setHostname(getHostname());
         mailConfig.setPort(getPort());
@@ -33,13 +32,8 @@ public class SmtpConfigElement extends ConfigElement {
         return mailConfig;
     }
 
-    @Nullable
-    public String getHostname() {
-        try {
-            return readString(List.of("hostname"));
-        } catch (NotConfiguredException e) {
-            return null;
-        }
+    public String getHostname() throws NotConfiguredException {
+        return readString(List.of("hostname"));
     }
 
     public int getPort() {
@@ -50,22 +44,12 @@ public class SmtpConfigElement extends ConfigElement {
         }
     }
 
-    @Nullable
-    public String getUsername() {
-        try {
-            return readString(List.of("username"));
-        } catch (NotConfiguredException e) {
-            return null;
-        }
+    public String getUsername() throws NotConfiguredException {
+        return readString(List.of("username"));
     }
 
-    @Nullable
-    public String getPassword() {
-        try {
-            return readString(List.of("password"));
-        } catch (NotConfiguredException e) {
-            return null;
-        }
+    public String getPassword() throws NotConfiguredException {
+        return readString(List.of("password"));
     }
 
     public boolean isSSL() {

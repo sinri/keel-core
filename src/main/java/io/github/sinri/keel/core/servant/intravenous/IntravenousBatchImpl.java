@@ -2,8 +2,8 @@ package io.github.sinri.keel.core.servant.intravenous;
 
 import io.github.sinri.keel.base.Keel;
 import io.vertx.core.Future;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -12,16 +12,17 @@ import java.util.List;
  *
  * @since 5.0.0
  */
-class IntravenousBatchImpl<D> extends IntravenousBase<D> {
+@NullMarked
+class IntravenousBatchImpl<D extends @Nullable Object> extends IntravenousBase<D> {
 
-    private final @NotNull MultiDropsProcessor<D> itemsProcessor;
+    private final MultiDropsProcessor<D> itemsProcessor;
 
-    public IntravenousBatchImpl(@NotNull Keel keel, @NotNull MultiDropsProcessor<D> itemsProcessor) {
+    public IntravenousBatchImpl(Keel keel, MultiDropsProcessor<D> itemsProcessor) {
         super(keel);
         this.itemsProcessor = itemsProcessor;
     }
 
-    protected @NotNull Future<Void> handleDrops(@NotNull List<@Nullable D> drops) {
+    protected Future<Void> handleDrops(List<D> drops) {
         return Future.succeededFuture()
                      .compose(v -> this.itemsProcessor.process(drops))
                      .recover(throwable -> {

@@ -1,6 +1,7 @@
 package io.github.sinri.keel.core.utils.runtime;
 
 import io.vertx.core.json.JsonObject;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * Represents an interface for tracking runtime statistical results, allowing custom implementations
@@ -9,6 +10,7 @@ import io.vertx.core.json.JsonObject;
  * @param <T> the type of the implementing class, used for comparison and data transformation.
  * @since 5.0.0
  */
+@NullMarked
 public interface RuntimeStatResult<T> {
     long getStatTime();
 

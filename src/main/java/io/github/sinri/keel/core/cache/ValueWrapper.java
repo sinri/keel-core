@@ -1,6 +1,7 @@
 package io.github.sinri.keel.core.cache;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.ref.SoftReference;
 import java.util.Objects;
@@ -12,6 +13,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @since 5.0.0
  */
+@NullMarked
 class ValueWrapper<P> {
     private final SoftReference<P> value;
     private final long death;
@@ -71,6 +73,7 @@ class ValueWrapper<P> {
     /**
      * @return the value read
      */
+    @Nullable
     private P readWithReadLock() {
         lock.readLock().lock();
         try {

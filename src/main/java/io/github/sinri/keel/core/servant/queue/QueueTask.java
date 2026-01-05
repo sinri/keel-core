@@ -7,8 +7,8 @@ import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -18,37 +18,37 @@ import java.util.Objects;
  *
  * @since 5.0.0
  */
+@NullMarked
 public abstract class QueueTask extends AbstractKeelVerticle {
     @Nullable
     private QueueWorkerPoolManager queueWorkerPoolManager;
     @Nullable
     private SpecificLogger<QueueTaskSpecificLog> queueTaskLogger;
 
-    public QueueTask(@NotNull Keel keel) {
+    public QueueTask(Keel keel) {
         super(keel);
     }
 
-    @NotNull
     protected final QueueWorkerPoolManager getQueueWorkerPoolManager() {
         return Objects.requireNonNull(queueWorkerPoolManager);
     }
 
-    final void setQueueWorkerPoolManager(@NotNull QueueWorkerPoolManager queueWorkerPoolManager) {
+    final void setQueueWorkerPoolManager(QueueWorkerPoolManager queueWorkerPoolManager) {
         this.queueWorkerPoolManager = queueWorkerPoolManager;
     }
 
-    @NotNull
+
     abstract public String getTaskReference();
 
-    @NotNull
+
     abstract public String getTaskCategory();
 
-    @NotNull
-    protected LoggerFactory getLoggerFactory(){
+
+    protected LoggerFactory getLoggerFactory() {
         return getKeel().getLoggerFactory();
     }
 
-    @NotNull
+
     protected final SpecificLogger<QueueTaskSpecificLog> buildQueueTaskLogger() {
         return getLoggerFactory().createLogger(
                 QueueTaskSpecificLog.TopicQueue,
@@ -56,7 +56,7 @@ public abstract class QueueTask extends AbstractKeelVerticle {
         );
     }
 
-    @NotNull
+
     protected final SpecificLogger<QueueTaskSpecificLog> getQueueTaskLogger() {
         return Objects.requireNonNull(queueTaskLogger);
     }
@@ -66,7 +66,7 @@ public abstract class QueueTask extends AbstractKeelVerticle {
      * otherwise, the threading model is set to VIRTUAL_THREAD if possible.
      */
     @Override
-    protected @NotNull Future<Void> startVerticle() {
+    protected Future<Void> startVerticle() {
         this.queueTaskLogger = buildQueueTaskLogger();
 
         this.getQueueWorkerPoolManager().whenOneWorkerStarts();
@@ -93,7 +93,7 @@ public abstract class QueueTask extends AbstractKeelVerticle {
         return Future.succeededFuture();
     }
 
-    @NotNull
+
     abstract protected Future<Void> run();
 
     protected void notifyAfterDeployed() {
@@ -107,14 +107,14 @@ public abstract class QueueTask extends AbstractKeelVerticle {
     /**
      * @return 部署结果
      */
-    @NotNull
+
     public Future<String> deployMe() {
         var deploymentOptions = new DeploymentOptions();
         deploymentOptions.setThreadingModel(threadingModel());
         return super.deployMe(deploymentOptions);
     }
 
-    @NotNull
+
     protected ThreadingModel threadingModel() {
         return ThreadingModel.WORKER;
     }

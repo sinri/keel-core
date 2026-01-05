@@ -5,7 +5,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.WriteStream;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.io.OutputStream;
 
@@ -14,16 +14,16 @@ import java.io.OutputStream;
  *
  * @since 5.0.0
  */
+@NullMarked
 public interface AsyncInputWriteStream extends WriteStream<Buffer> {
-    static AsyncInputWriteStream create(@NotNull Vertx vertx) {
+    static AsyncInputWriteStream create(Vertx vertx) {
         return new AsyncInputWriteStreamImpl(vertx);
     }
 
-    void wrap(@NotNull OutputStream os);
+    void wrap(OutputStream os);
 
-    @NotNull Promise<Void> getWriteOverPromise();
+    Promise<Void> getWriteOverPromise();
 
-    @NotNull
     default Future<Void> writeOver() {
         return getWriteOverPromise().future();
     }

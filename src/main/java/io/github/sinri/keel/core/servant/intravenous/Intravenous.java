@@ -4,8 +4,8 @@ import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.verticles.KeelVerticle;
 import io.github.sinri.keel.base.verticles.KeelVerticleRunningStateEnum;
 import io.vertx.core.Future;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -18,25 +18,26 @@ import java.util.List;
  * @param <D> 处理对象的类型
  * @since 5.0.0
  */
-public interface Intravenous<D> extends KeelVerticle {
-    @NotNull
-    static <T> Intravenous<T> instant(@NotNull Keel keel, @NotNull SingleDropProcessor<T> itemProcessor) {
+@NullMarked
+public interface Intravenous<D extends @Nullable Object> extends KeelVerticle {
+
+    static <T extends @Nullable Object> Intravenous<T> instant(Keel keel, SingleDropProcessor<T> itemProcessor) {
         return new IntravenousSingleImpl<>(keel, itemProcessor);
     }
 
-    @NotNull
-    static <T> Intravenous<T> instantBatch(@NotNull Keel keel, @NotNull MultiDropsProcessor<T> itemsProcessor) {
+
+    static <T extends @Nullable Object> Intravenous<T> instantBatch(Keel keel, MultiDropsProcessor<T> itemsProcessor) {
         return new IntravenousBatchImpl<>(keel, itemsProcessor);
     }
 
-    void add(@Nullable D drop);
+    void add(D drop);
 
     /**
      * 处理对象过程中发生异常时的回调。
      * <p>
      * 默认实现为无视异常。
      */
-    default void handleAllergy(@NotNull Throwable throwable) {
+    default void handleAllergy(Throwable throwable) {
         // do nothing by default for the thrown exception
     }
 
@@ -52,7 +53,7 @@ public interface Intravenous<D> extends KeelVerticle {
      */
     void shutdown();
 
-    @NotNull
+
     default Future<Void> shutdownAndAwait() {
         shutdown();
         return getKeel().asyncCallRepeatedly(repeatedlyCallTask -> {
@@ -72,11 +73,13 @@ public interface Intravenous<D> extends KeelVerticle {
         return this.getRunningState() == KeelVerticleRunningStateEnum.AFTER_RUNNING;
     }
 
-    interface SingleDropProcessor<T> {
-        @NotNull Future<Void> process(@Nullable T drop);
+    @NullMarked
+    interface SingleDropProcessor<T extends @Nullable Object> {
+        Future<Void> process(T drop);
     }
 
-    interface MultiDropsProcessor<T> {
-        @NotNull Future<Void> process(@NotNull List<@Nullable T> drops);
+    @NullMarked
+    interface MultiDropsProcessor<T extends @Nullable Object> {
+        Future<Void> process(List<T> drops);
     }
 }

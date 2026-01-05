@@ -2,8 +2,8 @@ package io.github.sinri.keel.core.utils;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -14,27 +14,24 @@ import java.util.function.Consumer;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class JsonUtils {
     private JsonUtils() {
     }
 
-    @NotNull
-    private static JsonArray getSortedJsonArray(@NotNull JsonArray array) {
+
+    private static JsonArray getSortedJsonArray(JsonArray array) {
         List<Object> list = new ArrayList<>();
         array.forEach(list::add);
         list.sort(Comparator.comparing(Object::toString));
         return new JsonArray(list);
     }
 
-
-    @NotNull
-    public static String getJsonForArrayWhoseItemsSorted(@NotNull JsonArray array) {
+    public static String getJsonForArrayWhoseItemsSorted(JsonArray array) {
         return getSortedJsonArray(array).toString();
     }
 
-
-    @NotNull
-    private static JsonObject getSortedJsonObject(@NotNull JsonObject object) {
+    private static JsonObject getSortedJsonObject(JsonObject object) {
         JsonObject result = new JsonObject();
         List<String> keyList = new ArrayList<>(object.getMap().keySet());
         keyList.sort(Comparator.naturalOrder());
@@ -52,16 +49,15 @@ public class JsonUtils {
     }
 
 
-    @NotNull
-    public static String getJsonForObjectWhoseItemKeysSorted(@NotNull JsonObject object) {
+    public static String getJsonForObjectWhoseItemKeysSorted(JsonObject object) {
         return getSortedJsonObject(object).toString();
     }
 
     public static void filterStackTrace(
-            @Nullable StackTraceElement[] stackTrace,
-            @NotNull Set<String> ignorableStackPackageSet,
-            @NotNull BiConsumer<String, Integer> ignoredStackTraceItemsConsumer,
-            @NotNull Consumer<StackTraceElement> stackTraceItemConsumer
+            @Nullable StackTraceElement @Nullable [] stackTrace,
+            Set<String> ignorableStackPackageSet,
+            BiConsumer<String, Integer> ignoredStackTraceItemsConsumer,
+            Consumer<StackTraceElement> stackTraceItemConsumer
     ) {
         if (stackTrace != null) {
             String ignoringClassPackage = null;
@@ -106,7 +102,6 @@ public class JsonUtils {
     }
 
 
-    @NotNull
     public static String renderJsonToStringBlock(@Nullable String name, @Nullable Object object) {
         if (object == null) {
             return "null";
@@ -119,7 +114,6 @@ public class JsonUtils {
      * @param object Value of entry amongst the entries, or the item amongst the array.
      * @return rendered string block ended with NEW_LINE.
      */
-    @NotNull
     private static String renderJsonItem(@Nullable String key, @Nullable Object object, int indentation, @Nullable String typeMark) {
         StringBuilder subBlock = new StringBuilder();
         if (indentation > 1) {

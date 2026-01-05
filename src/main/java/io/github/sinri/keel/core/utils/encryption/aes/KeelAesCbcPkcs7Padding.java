@@ -1,5 +1,7 @@
 package io.github.sinri.keel.core.utils.encryption.aes;
 
+import org.jspecify.annotations.NullMarked;
+
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -12,6 +14,7 @@ import java.util.Base64;
 /**
  * @since 5.0.0
  */
+@NullMarked
 public class KeelAesCbcPkcs7Padding extends KeelAesUsingPkcs7Padding {
 
     /**

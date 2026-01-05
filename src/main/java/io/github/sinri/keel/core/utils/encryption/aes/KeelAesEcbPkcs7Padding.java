@@ -1,5 +1,7 @@
 package io.github.sinri.keel.core.utils.encryption.aes;
 
+import org.jspecify.annotations.NullMarked;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -13,6 +15,7 @@ import java.util.Base64;
 /**
  * @since 5.0.0
  */
+@NullMarked
 public class KeelAesEcbPkcs7Padding extends KeelAesUsingPkcs7Padding {
 
     /**

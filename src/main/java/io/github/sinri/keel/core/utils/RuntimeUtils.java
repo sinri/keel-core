@@ -3,7 +3,7 @@ package io.github.sinri.keel.core.utils;
 import io.github.sinri.keel.core.utils.runtime.CPUTimeResult;
 import io.github.sinri.keel.core.utils.runtime.GCStatResult;
 import io.github.sinri.keel.core.utils.runtime.JVMMemoryResult;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.GlobalMemory;
@@ -20,6 +20,7 @@ import java.lang.management.OperatingSystemMXBean;
  *
  * @since 5.0.0
  */
+@NullMarked
 public class RuntimeUtils {
 
     private static final SystemInfo systemInfo = new SystemInfo();
@@ -40,12 +41,12 @@ public class RuntimeUtils {
         return Runtime.getRuntime();
     }
 
-    @NotNull
+
     public static GCStatResult getGCSnapshot() {
         return GCStatResult.parseGarbageCollectorMXBeans(ManagementFactory.getGarbageCollectorMXBeans());
     }
 
-    @NotNull
+
     public static CPUTimeResult getCPUTimeSnapshot() {
         CentralProcessor processor = systemInfo.getHardware().getProcessor();
         long[] systemCpuLoadTicks = processor.getSystemCpuLoadTicks();

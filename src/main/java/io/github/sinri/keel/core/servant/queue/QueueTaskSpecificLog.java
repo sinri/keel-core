@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.servant.queue;
 
 import io.github.sinri.keel.logger.api.log.SpecificLog;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NullMarked;
 
 import java.util.List;
 
@@ -10,11 +10,11 @@ import java.util.List;
  *
  * @since 5.0.0
  */
+@NullMarked
 public final class QueueTaskSpecificLog extends SpecificLog<QueueTaskSpecificLog> {
-    @NotNull
     public static final String TopicQueue = "Queue";
 
-    public QueueTaskSpecificLog(@NotNull String taskReference, @NotNull String taskCategory) {
+    public QueueTaskSpecificLog(String taskReference, String taskCategory) {
         super();
         this.classification(List.of("task", "reference:" + taskReference, "category:" + taskCategory));
     }

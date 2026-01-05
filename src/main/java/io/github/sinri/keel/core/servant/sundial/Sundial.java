@@ -10,8 +10,8 @@ import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,28 +24,29 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @since 5.0.0
  */
+@NullMarked
 public abstract class Sundial extends AbstractKeelVerticle {
 
-    private final @NotNull Map<@NotNull String, @NotNull SundialPlan> planMap = new ConcurrentHashMap<>();
+    private final Map<String, SundialPlan> planMap = new ConcurrentHashMap<>();
     private @Nullable Long timerID;
     private @Nullable SpecificLogger<SundialSpecificLog> logger;
 
-    public Sundial(@NotNull Keel keel) {
+    public Sundial(Keel keel) {
         super(keel);
     }
 
-    abstract protected @NotNull LoggerFactory getLoggerFactory();
+    abstract protected LoggerFactory getLoggerFactory();
 
-    protected @NotNull SpecificLogger<SundialSpecificLog> buildLogger() {
+    protected SpecificLogger<SundialSpecificLog> buildLogger() {
         return getLoggerFactory().createLogger(SundialSpecificLog.TopicSundial, SundialSpecificLog::new);
     }
 
-    public final @NotNull SpecificLogger<SundialSpecificLog> getLogger() {
+    public final SpecificLogger<SundialSpecificLog> getLogger() {
         return Objects.requireNonNull(logger);
     }
 
     @Override
-    protected @NotNull Future<Void> startVerticle() {
+    protected Future<Void> startVerticle() {
         this.logger = buildLogger();
         int delaySeconds = 61 - KeelCronExpression.parseCalenderToElements(Calendar.getInstance()).second;
         this.timerID = getVertx().setPeriodic(delaySeconds * 1000L, 60_000L, timerID -> {
@@ -55,7 +56,7 @@ public abstract class Sundial extends AbstractKeelVerticle {
         return Future.succeededFuture();
     }
 
-    private void handleEveryMinute(@NotNull Calendar now) {
+    private void handleEveryMinute(Calendar now) {
         ParsedCalenderElements parsedCalenderElements = new ParsedCalenderElements(now);
         planMap.forEach((key, plan) -> {
             if (plan.cronExpression().match(parsedCalenderElements)) {
@@ -131,12 +132,13 @@ public abstract class Sundial extends AbstractKeelVerticle {
      *
      * @return 异步返回的定时任务计划集，用于覆盖更新当前的计划快照；如果异步返回了 null，则表示不更新计划快照。
      */
-    abstract protected @NotNull Future<@Nullable Collection<@NotNull SundialPlan>> fetchPlans();
+    abstract protected Future<@Nullable Collection<SundialPlan>> fetchPlans();
 
     @Override
-    protected @NotNull Future<Void> stopVerticle() {
+    protected Future<Void> stopVerticle() {
         if (this.timerID != null) {
-            getVertx().cancelTimer(this.timerID);
+            long x = timerID;
+            getVertx().cancelTimer(x);
         }
         return Future.succeededFuture();
     }
@@ -146,7 +148,7 @@ public abstract class Sundial extends AbstractKeelVerticle {
      *
      * @return 部署结果
      */
-    public final @NotNull Future<String> deployMe() {
+    public final Future<String> deployMe() {
         return super.deployMe(new DeploymentOptions()
                 .setThreadingModel(ThreadingModel.WORKER));
     }

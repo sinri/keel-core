@@ -266,7 +266,7 @@ public class StringUtils {
 
 
     public static String renderThrowableChain(@Nullable Throwable throwable) {
-        return renderThrowableChain(throwable, LoggingStackSpecification.IgnorableCallStackPackage);
+        return renderThrowableChain(throwable, LoggingStackSpecification.IgnorableCallStackPackageSet);
     }
 
     public static byte[] encodeWithBase64ToBytes(String s) {

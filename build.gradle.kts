@@ -68,9 +68,6 @@ dependencies {
     compileOnly("org.jspecify:jspecify:$jspecifyVersion")
     testCompileOnly("org.jspecify:jspecify:$jspecifyVersion")
 
-    // Note: NullAway/ErrorProne dependencies will be added after migration completes
-// Currently skipping to simplify migration process
-
     // Test dependencies
     testImplementation("io.github.sinri:keel-test:$keelTestVersion")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

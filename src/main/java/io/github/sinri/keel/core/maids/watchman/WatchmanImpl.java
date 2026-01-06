@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.maids.watchman;
 
-import io.github.sinri.keel.base.Keel;
-import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
+import io.github.sinri.keel.base.verticles.KeelVerticleBase;
+import io.github.sinri.keel.logger.api.LateObject;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.Future;
@@ -9,9 +9,6 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.shareddata.Lock;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-
-import java.util.Objects;
 
 
 /**
@@ -20,13 +17,13 @@ import java.util.Objects;
  * @since 5.0.0
  */
 @NullMarked
-abstract class WatchmanImpl extends AbstractKeelVerticle implements Watchman {
+abstract class WatchmanImpl extends KeelVerticleBase implements Watchman {
     private final String watchmanName;
-    private @Nullable MessageConsumer<Long> consumer;
-    private @Nullable Logger watchmanLogger;
+    private final LateObject<Logger> lateWatchmanLogger = new LateObject<>();
+    private final LateObject<MessageConsumer<Long>> lateConsumer = new LateObject<>();
 
-    public WatchmanImpl(Keel keel, String watchmanName) {
-        super(keel);
+    public WatchmanImpl(String watchmanName) {
+        super();
         this.watchmanName = watchmanName;
     }
 
@@ -41,13 +38,13 @@ abstract class WatchmanImpl extends AbstractKeelVerticle implements Watchman {
 
     @Override
     protected Future<Void> startVerticle() {
-        this.watchmanLogger = this.buildWatchmanLogger();
+        this.lateWatchmanLogger.set(this.buildWatchmanLogger());
 
-        this.consumer = getVertx().eventBus().consumer(eventBusAddress());
-        this.consumer.handler(this::consumeHandleMassage);
-        this.consumer.exceptionHandler(throwable -> getWatchmanLogger()
-                .error(log -> log.message(watchmanName() + " ERROR").exception(throwable))
-        );
+        this.lateConsumer.ensure(() -> getVertx().eventBus().consumer(eventBusAddress()))
+                         .handler(this::consumeHandleMassage)
+                         .exceptionHandler(throwable -> getWatchmanLogger()
+                                 .error(log -> log.message(watchmanName() + " ERROR").exception(throwable))
+                         );
 
         try {
             // 强行拟合HH:MM:SS.000-200
@@ -90,8 +87,8 @@ abstract class WatchmanImpl extends AbstractKeelVerticle implements Watchman {
 
     @Override
     protected Future<Void> stopVerticle() {
-        if (consumer != null) {
-            consumer.unregister();
+        if (lateConsumer.isInitialized()) {
+            lateConsumer.get().unregister();
         }
         return Future.succeededFuture();
     }
@@ -103,6 +100,6 @@ abstract class WatchmanImpl extends AbstractKeelVerticle implements Watchman {
     }
 
     public final Logger getWatchmanLogger() {
-        return Objects.requireNonNull(watchmanLogger);
+        return lateWatchmanLogger.get();
     }
 }

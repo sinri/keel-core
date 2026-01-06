@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.servant.intravenous;
 
-import io.github.sinri.keel.base.Keel;
 import io.vertx.core.Future;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -17,8 +16,8 @@ class IntravenousBatchImpl<D extends @Nullable Object> extends IntravenousBase<D
 
     private final MultiDropsProcessor<D> itemsProcessor;
 
-    public IntravenousBatchImpl(Keel keel, MultiDropsProcessor<D> itemsProcessor) {
-        super(keel);
+    public IntravenousBatchImpl(MultiDropsProcessor<D> itemsProcessor) {
+        super();
         this.itemsProcessor = itemsProcessor;
     }
 

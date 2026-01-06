@@ -1,8 +1,6 @@
 package io.github.sinri.keel.core.servant.intravenous;
 
-import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.base.async.RepeatedlyCallTask;
-import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import org.jspecify.annotations.NullMarked;
@@ -22,14 +20,14 @@ import java.util.concurrent.atomic.AtomicReference;
  * @since 5.0.0
  */
 @NullMarked
-abstract class IntravenousBase<D extends @Nullable Object> extends AbstractKeelVerticle implements Intravenous<D> {
+abstract class IntravenousBase<D extends @Nullable Object> extends Intravenous<D> {
     private final Queue<D> queue;
     private final AtomicReference<@Nullable Promise<Void>> interrupterRef = new AtomicReference<>();
     private final AtomicBoolean stoppedRef = new AtomicBoolean(false);
-    private final AtomicBoolean undeployedRef = new AtomicBoolean(false);
+    //private final AtomicBoolean undeployedRef = new AtomicBoolean(false);
 
-    public IntravenousBase(Keel keel) {
-        super(keel);
+    public IntravenousBase() {
+        super();
         this.queue = new ConcurrentLinkedQueue<>();
     }
 
@@ -68,17 +66,18 @@ abstract class IntravenousBase<D extends @Nullable Object> extends AbstractKeelV
         return stoppedRef.get();
     }
 
-    @Override
-    public boolean isUndeployed() {
-        return undeployedRef.get();
-    }
+    //    @Override
+    //    public boolean isUndeployed() {
+    //        return undeployedRef.get();
+    //    }
 
     @Override
     protected Future<Void> startVerticle() {
         this.interrupterRef.set(null);
         getKeel().asyncCallRepeatedly(this::handleRoutine)
                  .onComplete(ar -> this.undeployMe()
-                                       .onSuccess(v -> undeployedRef.set(true)));
+                         //                      .onSuccess(v -> undeployedRef.set(true))
+                 );
         return Future.succeededFuture();
     }
 

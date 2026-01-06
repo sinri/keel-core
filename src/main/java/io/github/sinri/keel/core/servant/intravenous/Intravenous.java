@@ -1,7 +1,6 @@
 package io.github.sinri.keel.core.servant.intravenous;
 
-import io.github.sinri.keel.base.Keel;
-import io.github.sinri.keel.base.verticles.KeelVerticle;
+import io.github.sinri.keel.base.verticles.KeelVerticleBase;
 import io.github.sinri.keel.base.verticles.KeelVerticleRunningStateEnum;
 import io.vertx.core.Future;
 import org.jspecify.annotations.NullMarked;
@@ -19,42 +18,42 @@ import java.util.List;
  * @since 5.0.0
  */
 @NullMarked
-public interface Intravenous<D extends @Nullable Object> extends KeelVerticle {
+public abstract class Intravenous<D extends @Nullable Object> extends KeelVerticleBase {
 
-    static <T extends @Nullable Object> Intravenous<T> instant(Keel keel, SingleDropProcessor<T> itemProcessor) {
-        return new IntravenousSingleImpl<>(keel, itemProcessor);
+    public static <T extends @Nullable Object> Intravenous<T> instant(SingleDropProcessor<T> itemProcessor) {
+        return new IntravenousSingleImpl<>(itemProcessor);
     }
 
 
-    static <T extends @Nullable Object> Intravenous<T> instantBatch(Keel keel, MultiDropsProcessor<T> itemsProcessor) {
-        return new IntravenousBatchImpl<>(keel, itemsProcessor);
+    public static <T extends @Nullable Object> Intravenous<T> instantBatch(MultiDropsProcessor<T> itemsProcessor) {
+        return new IntravenousBatchImpl<>(itemsProcessor);
     }
 
-    void add(D drop);
+    abstract public void add(D drop);
 
     /**
      * 处理对象过程中发生异常时的回调。
      * <p>
      * 默认实现为无视异常。
      */
-    default void handleAllergy(Throwable throwable) {
+    protected void handleAllergy(Throwable throwable) {
         // do nothing by default for the thrown exception
     }
 
-    boolean isNoDropsLeft();
+    public abstract boolean isNoDropsLeft();
 
     /**
      * @return 是否已停止接收待处理对象。
      */
-    boolean isStopped();
+    public abstract boolean isStopped();
 
     /**
      * 通知本接口的实现立即停止接收待处理对象。
      */
-    void shutdown();
+    public abstract void shutdown();
 
 
-    default Future<Void> shutdownAndAwait() {
+    public Future<Void> shutdownAndAwait() {
         shutdown();
         return getKeel().asyncCallRepeatedly(repeatedlyCallTask -> {
             if (isUndeployed()) {
@@ -69,17 +68,17 @@ public interface Intravenous<D extends @Nullable Object> extends KeelVerticle {
     /**
      * @return Whether the verticle is undeployed.
      */
-    default boolean isUndeployed() {
+    public final boolean isUndeployed() {
         return this.getRunningState() == KeelVerticleRunningStateEnum.AFTER_RUNNING;
     }
 
     @NullMarked
-    interface SingleDropProcessor<T extends @Nullable Object> {
+    public interface SingleDropProcessor<T extends @Nullable Object> {
         Future<Void> process(T drop);
     }
 
     @NullMarked
-    interface MultiDropsProcessor<T extends @Nullable Object> {
+    public interface MultiDropsProcessor<T extends @Nullable Object> {
         Future<Void> process(List<T> drops);
     }
 }

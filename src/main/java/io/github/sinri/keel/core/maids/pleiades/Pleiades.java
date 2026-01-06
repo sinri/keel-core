@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.maids.pleiades;
 
-import io.github.sinri.keel.base.Keel;
-import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
+import io.github.sinri.keel.base.verticles.KeelVerticleBase;
+import io.github.sinri.keel.logger.api.LateObject;
 import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -10,9 +10,6 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.eventbus.MessageConsumer;
 import io.vertx.core.eventbus.MessageProducer;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-
-import java.util.Objects;
 
 
 /**
@@ -23,12 +20,12 @@ import java.util.Objects;
  * @since 5.0.0
  */
 @NullMarked
-public abstract class Pleiades<T> extends AbstractKeelVerticle {
-    private @Nullable MessageConsumer<T> consumer;
-    private @Nullable Logger pleiadesLogger;
+public abstract class Pleiades<T> extends KeelVerticleBase {
+    private final LateObject<Logger> latePleiadesLogger = new LateObject<>();
+    private final LateObject<MessageConsumer<T>> lateConsumer = new LateObject<>();
 
-    public Pleiades(Keel keel) {
-        super(keel);
+    public Pleiades() {
+        super();
     }
 
     public static <T> MessageProducer<T> generateMessageProducer(Vertx vertx, String address) {
@@ -46,20 +43,21 @@ public abstract class Pleiades<T> extends AbstractKeelVerticle {
     abstract protected Logger buildPleiadesLogger();
 
     public final Logger getPleiadesLogger() {
-        return Objects.requireNonNull(pleiadesLogger);
+        //return Objects.requireNonNull(pleiadesLogger);
+        return latePleiadesLogger.get();
     }
 
     @Override
     protected Future<Void> startVerticle() {
-        this.pleiadesLogger = buildPleiadesLogger();
-        consumer = getVertx().eventBus().consumer(getAddress(), this::handleMessage);
+        this.latePleiadesLogger.set(buildPleiadesLogger());
+        lateConsumer.set(getVertx().eventBus().consumer(getAddress(), this::handleMessage));
         return Future.succeededFuture();
     }
 
     @Override
     protected Future<Void> stopVerticle() {
-        if (consumer != null) {
-            return consumer.unregister();
+        if (lateConsumer.isInitialized()) {
+            return lateConsumer.get().unregister();
         }
         return Future.succeededFuture();
     }

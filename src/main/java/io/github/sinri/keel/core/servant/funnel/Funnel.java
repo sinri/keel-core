@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.servant.funnel;
 
-import io.github.sinri.keel.base.Keel;
-import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
+import io.github.sinri.keel.base.verticles.KeelVerticleBase;
+import io.github.sinri.keel.logger.api.LateObject;
 import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -23,7 +23,7 @@ import java.util.function.Supplier;
  * @since 5.0.0
  */
 @NullMarked
-public class Funnel extends AbstractKeelVerticle {
+public class Funnel extends KeelVerticleBase {
     /**
      * 休眠中出现新任务时，使用此内寄存的 Promise 唤醒。
      */
@@ -33,14 +33,13 @@ public class Funnel extends AbstractKeelVerticle {
 
     private final AtomicLong sleepTimeRef;
 
-    private final Logger funnelLogger;
+    private final LateObject<Logger> lateFunnelLogger = new LateObject<>();
 
-    public Funnel(Keel keel) {
-        super(keel);
+    public Funnel() {
+        super();
         this.sleepTimeRef = new AtomicLong(1_000L);
         this.queue = new ConcurrentLinkedQueue<>();
         this.interruptRef = new AtomicReference<>();
-        this.funnelLogger = buildFunnelLogger();
     }
 
 
@@ -50,7 +49,7 @@ public class Funnel extends AbstractKeelVerticle {
 
 
     protected final Logger getFunnelLogger() {
-        return funnelLogger;
+        return lateFunnelLogger.get();
     }
 
     public void setSleepTime(long sleepTime) {
@@ -76,6 +75,7 @@ public class Funnel extends AbstractKeelVerticle {
 
     @Override
     protected Future<Void> startVerticle() {
+        lateFunnelLogger.set(buildFunnelLogger());
         getKeel().asyncCallEndlessly(this::executeCircle);
         return Future.succeededFuture();
     }
@@ -83,7 +83,7 @@ public class Funnel extends AbstractKeelVerticle {
 
     private Future<Void> executeCircle() {
         this.interruptRef.set(null);
-        funnelLogger.debug("funnel one circle start");
+        getFunnelLogger().debug("funnel one circle start");
         return getKeel().asyncCallRepeatedly(routineResult -> {
                             // got one job to do, no matter if done
                             return Future.succeededFuture()
@@ -101,7 +101,7 @@ public class Funnel extends AbstractKeelVerticle {
                                          .compose(Supplier::get);
                         })
                         .recover(throwable -> {
-                            funnelLogger.error(log -> log.exception(throwable));
+                            getFunnelLogger().error(log -> log.exception(throwable));
                             return Future.succeededFuture();
                         })
                         .eventually(() -> {

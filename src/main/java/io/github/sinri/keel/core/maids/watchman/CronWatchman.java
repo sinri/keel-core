@@ -7,6 +7,7 @@ import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.AsyncMap;
@@ -31,12 +32,11 @@ public class CronWatchman extends WatchmanImpl {
     private final LoggerFactory loggerFactory;
 
     protected CronWatchman(
-            Keel keel,
             String watchmanName,
             Function<String, Future<Void>> cronTabUpdateStartup,
             LoggerFactory loggerFactory
     ) {
-        super(keel, watchmanName);
+        super(watchmanName);
         this.loggerFactory = loggerFactory;
         this.handler = now -> {
             Calendar calendar = new Calendar
@@ -44,7 +44,7 @@ public class CronWatchman extends WatchmanImpl {
                     .setInstant(now)
                     .build();
 
-            readAsyncMapForEventHandlers(keel, calendar)
+            readAsyncMapForEventHandlers(calendar)
                     .onSuccess(list -> list.forEach(x -> x.handle(now)))
                     .onFailure(throwable -> getWatchmanLogger().error(x -> x.exception(throwable)));
         };
@@ -52,14 +52,13 @@ public class CronWatchman extends WatchmanImpl {
     }
 
     public static Future<String> deploy(
-            Keel keel,
+            Vertx vertx,
             String watchmanName,
             Function<String, Future<Void>> cronTabUpdateStartup,
             LoggerFactory loggerFactory
     ) {
-        CronWatchman keelCronWatchman = new CronWatchman(keel, watchmanName, cronTabUpdateStartup, loggerFactory);
-        return keel.getVertx()
-                   .deployVerticle(keelCronWatchman, new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));
+        CronWatchman keelCronWatchman = new CronWatchman(watchmanName, cronTabUpdateStartup, loggerFactory);
+        return vertx.deployVerticle(keelCronWatchman, new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));
     }
 
 
@@ -202,41 +201,41 @@ public class CronWatchman extends WatchmanImpl {
 
 
     public static Future<List<WatchmanEventHandler>> readAsyncMapForEventHandlers(
-            Keel keel,
+            Vertx vertx,
             String asyncMapName,
             Calendar calendar
     ) {
         List<WatchmanEventHandler> list = new ArrayList<>();
-        return keel.getVertx().sharedData().getAsyncMap(asyncMapName)
-                   .compose(AsyncMap::entries)
-                   .compose(entries -> {
-                       entries.forEach((k, v) -> {
-                           String cronExpression = String.valueOf(k);
-                           if (new KeelCronExpression(cronExpression).match(calendar)) {
-                               JsonArray eventHandlerClassNameArray = new JsonArray(String.valueOf(v));
-                               eventHandlerClassNameArray.forEach(eventHandlerClassName -> {
-                                   try {
-                                       Class<?> aClass = Class.forName(String.valueOf(eventHandlerClassName));
-                                       if (WatchmanEventHandler.class.isAssignableFrom(aClass)) {
-                                           WatchmanEventHandler eventHandler =
-                                                   (WatchmanEventHandler) aClass.getConstructor()
-                                                                                .newInstance();
-                                           list.add(eventHandler);
-                                       }
-                                   } catch (Throwable e) {
-                                       //Keel.outputLogger().exception(e);
-                                       System.out.println("EXCEPTION: " + e);
-                                   }
-                               });
-                           }
-                       });
-                       return Future.succeededFuture(list);
-                   });
+        return vertx.sharedData().getAsyncMap(asyncMapName)
+                    .compose(AsyncMap::entries)
+                    .compose(entries -> {
+                        entries.forEach((k, v) -> {
+                            String cronExpression = String.valueOf(k);
+                            if (new KeelCronExpression(cronExpression).match(calendar)) {
+                                JsonArray eventHandlerClassNameArray = new JsonArray(String.valueOf(v));
+                                eventHandlerClassNameArray.forEach(eventHandlerClassName -> {
+                                    try {
+                                        Class<?> aClass = Class.forName(String.valueOf(eventHandlerClassName));
+                                        if (WatchmanEventHandler.class.isAssignableFrom(aClass)) {
+                                            WatchmanEventHandler eventHandler =
+                                                    (WatchmanEventHandler) aClass.getConstructor()
+                                                                                 .newInstance();
+                                            list.add(eventHandler);
+                                        }
+                                    } catch (Throwable e) {
+                                        //Keel.outputLogger().exception(e);
+                                        System.out.println("EXCEPTION: " + e);
+                                    }
+                                });
+                            }
+                        });
+                        return Future.succeededFuture(list);
+                    });
     }
 
 
-    private Future<List<WatchmanEventHandler>> readAsyncMapForEventHandlers(Keel keel, Calendar calendar) {
-        return readAsyncMapForEventHandlers(keel, eventBusAddress(), calendar);
+    private Future<List<WatchmanEventHandler>> readAsyncMapForEventHandlers(Calendar calendar) {
+        return readAsyncMapForEventHandlers(getVertx(), eventBusAddress(), calendar);
     }
 
     @Override

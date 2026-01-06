@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.servant.sundial;
 
-import io.github.sinri.keel.base.Keel;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.vertx.core.Future;
 import org.jspecify.annotations.NullMarked;
@@ -12,8 +11,8 @@ import java.util.List;
 public class TestSundial extends Sundial {
     private static final TestSundialPlan testSundialPlan = new TestSundialPlan();
 
-    public TestSundial(Keel keel) {
-        super(keel);
+    public TestSundial() {
+        super();
     }
 
     @Override

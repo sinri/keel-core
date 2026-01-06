@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.servant.sundial;
 
-import io.github.sinri.keel.base.Keel;
+import io.github.sinri.keel.base.verticles.KeelVerticleBase;
 import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
 import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.Future;
@@ -22,16 +22,16 @@ public class TestSundialPlan implements SundialPlan {
     }
 
     @Override
-    public Future<Void> execute(Keel keel, Calendar now, SpecificLogger<SundialSpecificLog> sundialSpecificLogger) {
+    public Future<Void> execute(KeelVerticleBase verticleBase, Calendar now, SpecificLogger<SundialSpecificLog> sundialSpecificLogger) {
         for (int i = 0; i < 10; i++) {
-            keel.asyncSleep(1000).await();
+            verticleBase.asyncSleep(1000).await();
             sundialSpecificLogger.info("SundialPlan " + key() + " executed [" + i + "] at " + now.getTime());
         }
         return Future.succeededFuture();
     }
 
     @Override
-    public ThreadingModel threadingModel() {
+    public ThreadingModel expectedThreadingModel() {
         return ThreadingModel.VIRTUAL_THREAD;
     }
 }

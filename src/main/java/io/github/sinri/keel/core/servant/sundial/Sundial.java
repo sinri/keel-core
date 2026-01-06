@@ -1,8 +1,6 @@
 package io.github.sinri.keel.core.servant.sundial;
 
-import io.github.sinri.keel.base.Keel;
-import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
-import io.github.sinri.keel.base.verticles.KeelVerticle;
+import io.github.sinri.keel.base.verticles.KeelVerticleBase;
 import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
 import io.github.sinri.keel.core.utils.cron.ParsedCalenderElements;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
@@ -10,11 +8,13 @@ import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
+import io.vertx.core.Vertx;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 
 /**
@@ -25,14 +25,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 5.0.0
  */
 @NullMarked
-public abstract class Sundial extends AbstractKeelVerticle {
+public abstract class Sundial extends KeelVerticleBase {
 
     private final Map<String, SundialPlan> planMap = new ConcurrentHashMap<>();
     private @Nullable Long timerID;
     private @Nullable SpecificLogger<SundialSpecificLog> logger;
 
-    public Sundial(Keel keel) {
-        super(keel);
+    public Sundial() {
+        super();
     }
 
     abstract protected LoggerFactory getLoggerFactory();
@@ -67,29 +67,31 @@ public abstract class Sundial extends AbstractKeelVerticle {
                         .context("now", parsedCalenderElements.toString())
                 );
 
-                KeelVerticle.instant(
-                                    getKeel(),
-                                    keelVerticle -> plan.execute(
-                                            keelVerticle.getKeel(),
-                                            now,
-                                            getLogger()
-                                    )
-                            )
-                            .deployMe(new DeploymentOptions()
-                                    .setThreadingModel(plan.threadingModel())
-                            )
-                            .onComplete(ar -> {
-                                if (ar.failed()) {
-                                    getLogger().error(log -> log
-                                            .exception(ar.cause())
-                                            .message("Failed to deploy verticle for " + plan.key())
-                                    );
-                                } else {
-                                    getLogger().info(log -> log
-                                            .message("Deployed verticle for " + plan.key() + " as " + ar.result())
-                                    );
-                                }
-                            });
+                KeelVerticleBase.wrap(new Function<KeelVerticleBase, Future<?>>() {
+                                    @Override
+                                    public Future<?> apply(KeelVerticleBase keelVerticleBase) {
+                                        return plan.execute(
+                                                keelVerticleBase,
+                                                now,
+                                                getLogger()
+                                        );
+                                    }
+                                })
+                                .deployMe(getVertx(), new DeploymentOptions()
+                                        .setThreadingModel(plan.expectedThreadingModel())
+                                )
+                                .onComplete(ar -> {
+                                    if (ar.failed()) {
+                                        getLogger().error(log -> log
+                                                .exception(ar.cause())
+                                                .message("Failed to deploy verticle for " + plan.key())
+                                        );
+                                    } else {
+                                        getLogger().info(log -> log
+                                                .message("Deployed verticle for " + plan.key() + " as " + ar.result())
+                                        );
+                                    }
+                                });
             } else {
                 getLogger().debug(x -> x
                         .message("Sundial Plan Not Match")
@@ -148,8 +150,8 @@ public abstract class Sundial extends AbstractKeelVerticle {
      *
      * @return 部署结果
      */
-    public final Future<String> deployMe() {
-        return super.deployMe(new DeploymentOptions()
+    public final Future<String> deployMe(Vertx vertx) {
+        return super.deployMe(vertx, new DeploymentOptions()
                 .setThreadingModel(ThreadingModel.WORKER));
     }
 }

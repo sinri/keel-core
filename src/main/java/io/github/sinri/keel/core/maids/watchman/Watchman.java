@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.maids.watchman;
 
-import io.github.sinri.keel.base.verticles.KeelVerticle;
+import io.vertx.core.Deployable;
 import io.vertx.core.Handler;
 import org.jspecify.annotations.NullMarked;
 
@@ -15,7 +15,7 @@ import org.jspecify.annotations.NullMarked;
  * @since 5.0.0
  */
 @NullMarked
-public interface Watchman extends KeelVerticle {
+public interface Watchman extends Deployable {
 
     /**
      * @return 更夫的名称

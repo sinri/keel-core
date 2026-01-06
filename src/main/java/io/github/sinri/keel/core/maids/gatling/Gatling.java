@@ -1,7 +1,7 @@
 package io.github.sinri.keel.core.maids.gatling;
 
-import io.github.sinri.keel.base.Keel;
-import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
+import io.github.sinri.keel.base.verticles.KeelVerticleBase;
+import io.github.sinri.keel.logger.api.LateObject;
 import io.github.sinri.keel.logger.api.logger.Logger;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -11,7 +11,6 @@ import io.vertx.core.shareddata.Counter;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,13 +25,13 @@ import java.util.function.Supplier;
  * @since 5.0.0
  */
 @NullMarked
-abstract public class Gatling extends AbstractKeelVerticle {
+abstract public class Gatling extends KeelVerticleBase {
     private final GatlingOptions options;
     private final AtomicInteger barrelUsed = new AtomicInteger(0);
-    private @Nullable Logger gatlingLogger;
+    private final LateObject<Logger> lateGatlingLogger = new LateObject<>();
 
-    private Gatling(Keel keel, GatlingOptions options) {
-        super(keel);
+    private Gatling(GatlingOptions options) {
+        super();
         this.options = options;
     }
 
@@ -45,12 +44,12 @@ abstract public class Gatling extends AbstractKeelVerticle {
     abstract protected Logger buildGatlingLogger();
 
     public Logger getGatlingLogger() {
-        return Objects.requireNonNull(gatlingLogger);
+        return lateGatlingLogger.get();
     }
 
     @Override
     protected Future<Void> startVerticle() {
-        this.gatlingLogger = buildGatlingLogger();
+        this.lateGatlingLogger.set(buildGatlingLogger());
         barrelUsed.set(0);
         getKeel().asyncCallRepeatedly(routineResult -> fireOnce());
         return Future.succeededFuture();

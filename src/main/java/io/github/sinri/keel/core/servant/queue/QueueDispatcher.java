@@ -1,16 +1,14 @@
 package io.github.sinri.keel.core.servant.queue;
 
-import io.github.sinri.keel.base.Keel;
-import io.github.sinri.keel.base.verticles.AbstractKeelVerticle;
+import io.github.sinri.keel.base.verticles.KeelVerticleBase;
+import io.github.sinri.keel.logger.api.LateObject;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
+import io.vertx.core.Vertx;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
-
-import java.util.Objects;
 
 
 /**
@@ -21,15 +19,15 @@ import java.util.Objects;
  * @since 5.0.0
  */
 @NullMarked
-public abstract class QueueDispatcher extends AbstractKeelVerticle
+public abstract class QueueDispatcher extends KeelVerticleBase
         implements NextQueueTaskSeeker, QueueSignalReader {
 
-    private @Nullable QueueWorkerPoolManager queueWorkerPoolManager;
+    private final LateObject<SpecificLogger<QueueManageSpecificLog>> lateQueueManageLogger = new LateObject<>();
+    private final LateObject<QueueWorkerPoolManager> lateQueueWorkerPoolManager = new LateObject<>();
     private QueueStatus queueStatus = QueueStatus.INIT;
-    private @Nullable SpecificLogger<QueueManageSpecificLog> queueManageLogger;
 
-    public QueueDispatcher(Keel keel) {
-        super(keel);
+    public QueueDispatcher() {
+        super();
     }
 
     protected abstract LoggerFactory getLoggerFactory();
@@ -42,7 +40,7 @@ public abstract class QueueDispatcher extends AbstractKeelVerticle
     }
 
     public final SpecificLogger<QueueManageSpecificLog> getQueueManageLogger() {
-        return Objects.requireNonNull(queueManageLogger);
+        return lateQueueManageLogger.get();
     }
 
     public final QueueStatus getQueueStatus() {
@@ -64,7 +62,7 @@ public abstract class QueueDispatcher extends AbstractKeelVerticle
     }
 
     public QueueWorkerPoolManager getQueueWorkerPoolManager() {
-        return Objects.requireNonNull(queueWorkerPoolManager);
+        return lateQueueWorkerPoolManager.get();
     }
 
     /**
@@ -77,8 +75,8 @@ public abstract class QueueDispatcher extends AbstractKeelVerticle
 
     @Override
     protected Future<Void> startVerticle() {
-        queueManageLogger = this.buildQueueManageLogger();
-        this.queueWorkerPoolManager = buildQueueWorkerPoolManager();
+        this.lateQueueManageLogger.set(this.buildQueueManageLogger());
+        this.lateQueueWorkerPoolManager.set(buildQueueWorkerPoolManager());
         this.queueStatus = QueueStatus.RUNNING;
         return beforeQueueStart()
                 .compose(v -> {
@@ -158,7 +156,7 @@ public abstract class QueueDispatcher extends AbstractKeelVerticle
 
                                              return Future.succeededFuture()
                                                           .compose(v -> {
-                                                              return task.deployMe();
+                                                              return task.deployMe(getVertx());
                                                           })
                                                           .compose(
                                                                   deploymentID -> {
@@ -197,7 +195,7 @@ public abstract class QueueDispatcher extends AbstractKeelVerticle
     /**
      * 将本队列实例以 WORKER 线程模型部署。
      */
-    public final Future<String> deployMe() {
-        return super.deployMe(new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));
+    public final Future<String> deployMe(Vertx vertx) {
+        return super.deployMe(vertx, new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));
     }
 }

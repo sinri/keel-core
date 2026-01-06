@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.servant.intravenous;
 
-import io.github.sinri.keel.base.Keel;
 import io.vertx.core.Future;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
@@ -17,8 +16,8 @@ import java.util.List;
 class IntravenousSingleImpl<D extends @Nullable Object> extends IntravenousBase<D> {
     private final SingleDropProcessor<D> itemProcessor;
 
-    public IntravenousSingleImpl(Keel keel, SingleDropProcessor<D> itemProcessor) {
-        super(keel);
+    public IntravenousSingleImpl(SingleDropProcessor<D> itemProcessor) {
+        super();
         this.itemProcessor = itemProcessor;
     }
 

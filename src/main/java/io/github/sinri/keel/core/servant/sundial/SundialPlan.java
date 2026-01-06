@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.servant.sundial;
 
-import io.github.sinri.keel.base.Keel;
+import io.github.sinri.keel.base.verticles.KeelVerticleBase;
 import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
 import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.Future;
@@ -31,12 +31,13 @@ public interface SundialPlan {
     /**
      * 任务计划执行逻辑。
      *
+     * @param verticle              定时任务运行的 Verticle 实例
      * @param now                   本次定时任务运行对应的触发时间
      * @param sundialSpecificLogger 日晷定时任务特定日志记录器
      */
-    Future<Void> execute(Keel keel, Calendar now, SpecificLogger<SundialSpecificLog> sundialSpecificLogger);
+    Future<Void> execute(KeelVerticleBase verticle, Calendar now, SpecificLogger<SundialSpecificLog> sundialSpecificLogger);
 
-    default ThreadingModel threadingModel() {
+    default ThreadingModel expectedThreadingModel() {
         return ThreadingModel.WORKER;
     }
 }

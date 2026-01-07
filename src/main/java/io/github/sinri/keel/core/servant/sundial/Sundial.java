@@ -104,29 +104,29 @@ public abstract class Sundial extends KeelVerticleBase {
     }
 
     private void refreshPlans() {
-        getKeel().asyncCallExclusively(
-                         "io.github.sinri.keel.servant.sundial.KeelSundial.refreshPlans",
-                         1000L,
-                         () -> fetchPlans()
-                                 .compose(plans -> {
-                                     // treat null as NOT MODIFIED
-                                     if (plans != null) {
-                                         Set<String> toDelete = new HashSet<>(planMap.keySet());
-                                         plans.forEach(plan -> {
-                                             toDelete.remove(plan.key());
-                                             planMap.put(plan.key(), plan);
-                                         });
-                                         if (!toDelete.isEmpty()) {
-                                             toDelete.forEach(planMap::remove);
-                                         }
-                                     }
-                                     return Future.succeededFuture(null);
-                                 })
-                 )
-                 .onFailure(throwable -> getLogger().error(log -> log
-                         .exception(throwable)
-                         .message("io.github.sinri.keel.core.servant.sundial.KeelSundial.refreshPlans exception"))
-                 );
+        asyncCallExclusively(
+                "io.github.sinri.keel.servant.sundial.KeelSundial.refreshPlans",
+                1000L,
+                () -> fetchPlans()
+                        .compose(plans -> {
+                            // treat null as NOT MODIFIED
+                            if (plans != null) {
+                                Set<String> toDelete = new HashSet<>(planMap.keySet());
+                                plans.forEach(plan -> {
+                                    toDelete.remove(plan.key());
+                                    planMap.put(plan.key(), plan);
+                                });
+                                if (!toDelete.isEmpty()) {
+                                    toDelete.forEach(planMap::remove);
+                                }
+                            }
+                            return Future.succeededFuture(null);
+                        })
+        )
+                .onFailure(throwable -> getLogger().error(log -> log
+                        .exception(throwable)
+                        .message("io.github.sinri.keel.core.servant.sundial.KeelSundial.refreshPlans exception"))
+                );
     }
 
     /**

@@ -55,12 +55,12 @@ public abstract class Intravenous<D extends @Nullable Object> extends KeelVertic
 
     public Future<Void> shutdownAndAwait() {
         shutdown();
-        return getKeel().asyncCallRepeatedly(repeatedlyCallTask -> {
+        return asyncCallRepeatedly(repeatedlyCallTask -> {
             if (isUndeployed()) {
                 repeatedlyCallTask.stop();
                 return Future.succeededFuture();
             } else {
-                return getKeel().asyncSleep(1000L);
+                return asyncSleep(1000L);
             }
         });
     }

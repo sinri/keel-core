@@ -7,8 +7,8 @@ import org.jspecify.annotations.Nullable;
 import java.text.DecimalFormat;
 
 /**
+ * Represents System-wide CPU Load tick counters.
  * <p>
- * Get System-wide CPU Load tick counters.
  * Contains eight items to represent milliseconds spent in
  * User (0),
  * Nice (1),
@@ -18,13 +18,13 @@ import java.text.DecimalFormat;
  * Hardware interrupts (IRQ) (5),
  * Software interrupts/DPC (SoftIRQ) (6),
  * or Steal (7) states.
- * </p><p>
+ * <p>
  * By measuring the difference between ticks across a time interval,
  * CPU load over that interval may be calculated.
- * </p><p>
+ * <p>
  * On some operating systems with variable numbers of logical processors,
  * the size of this array could change and may not align with other per-processor methods.
- * </p><p>
+ * <p>
  * Note that while tick counters are in units of milliseconds,
  * they may advance in larger increments along with (platform dependent) clock ticks.
  * For example, by default Windows clock ticks are 1/64 of a second (about 15 or 16 milliseconds)
@@ -35,125 +35,57 @@ import java.text.DecimalFormat;
  * include both Idle and IOWait ticks.
  * Similarly, IRQ, SoftIRQ, and Steal ticks should be added to the System value to get the total.
  * System ticks also include time executing other virtual hosts (steal).
- * </p>
  *
+ * @param statTime           the timestamp when this statistics was captured (milliseconds since epoch)
+ * @param spentInUserState   time spent in User state (milliseconds)
+ * @param spentInNiceState   time spent in Nice state (milliseconds)
+ * @param spentInSystemState time spent in System state (milliseconds)
+ * @param spentInIdleState   time spent in Idle state (milliseconds)
+ * @param spentInIOWaitState time spent in IOWait state (milliseconds)
+ * @param spentInIRQState    time spent in Hardware interrupts (IRQ) state (milliseconds)
+ * @param spentInSoftIRQState time spent in Software interrupts/DPC (SoftIRQ) state (milliseconds)
+ * @param spentInStealState  time spent in Steal state (milliseconds)
  * @since 5.0.0
  */
 @NullMarked
-public class CPUTimeResult implements RuntimeStatResult<CPUTimeResult> {
-    private final long statTime;
-    private long spentInUserState = 0;
-    private long spentInNiceState = 0;
-    private long spentInSystemState = 0;
-    private long spentInIdleState = 0;
-    private long spentInIOWaitState = 0;
-    /**
-     * Hardware interrupts (IRQ)
-     */
-    private long spentInIRQState = 0;
-    /**
-     * Software interrupts/DPC (SoftIRQ)
-     */
-    private long spentInSoftIRQState = 0;
-    private long spentInStealState = 0;
+public record CPUTimeResult(
+        long statTime,
+        long spentInUserState,
+        long spentInNiceState,
+        long spentInSystemState,
+        long spentInIdleState,
+        long spentInIOWaitState,
+        long spentInIRQState,
+        long spentInSoftIRQState,
+        long spentInStealState
+) implements RuntimeStatResult<CPUTimeResult> {
 
-    public CPUTimeResult() {
-        statTime = System.currentTimeMillis();
-    }
-
-    private CPUTimeResult(long statTime) {
-        this.statTime = statTime;
-    }
-
-    public long getSpentInUserState() {
-        return spentInUserState;
-    }
-
-    public CPUTimeResult setSpentInUserState(long spentInUserState) {
-        this.spentInUserState = spentInUserState;
-        return this;
-    }
-
-    public long getSpentInNiceState() {
-        return spentInNiceState;
-    }
-
-    public CPUTimeResult setSpentInNiceState(long spentInNiceState) {
-        this.spentInNiceState = spentInNiceState;
-        return this;
-    }
-
-    public long getSpentInSystemState() {
-        return spentInSystemState;
-    }
-
-    public CPUTimeResult setSpentInSystemState(long spentInSystemState) {
-        this.spentInSystemState = spentInSystemState;
-        return this;
-    }
-
-    public long getSpentInIdleState() {
-        return spentInIdleState;
-    }
-
-    public CPUTimeResult setSpentInIdleState(long spentInIdleState) {
-        this.spentInIdleState = spentInIdleState;
-        return this;
-    }
-
-    public long getSpentInIOWaitState() {
-        return spentInIOWaitState;
-    }
-
-    public CPUTimeResult setSpentInIOWaitState(long spentInIOWaitState) {
-        this.spentInIOWaitState = spentInIOWaitState;
-        return this;
-    }
-
-    public long getSpentInIRQState() {
-        return spentInIRQState;
-    }
-
-    public CPUTimeResult setSpentInIRQState(long spentInIRQState) {
-        this.spentInIRQState = spentInIRQState;
-        return this;
-    }
-
-    public long getSpentInSoftIRQState() {
-        return spentInSoftIRQState;
-    }
-
-    public CPUTimeResult setSpentInSoftIRQState(long spentInSoftIRQState) {
-        this.spentInSoftIRQState = spentInSoftIRQState;
-        return this;
-    }
-
-    public long getSpentInStealState() {
-        return spentInStealState;
-    }
-
-    public CPUTimeResult setSpentInStealState(long spentInStealState) {
-        this.spentInStealState = spentInStealState;
-        return this;
-    }
+    //    @Override
+    //    public long statTime() {
+    //        return statTime;
+    //    }
 
     @Override
-    public long getStatTime() {
-        return statTime;
+    public CPUTimeResult since(CPUTimeResult start) {
+        return new CPUTimeResult(
+                statTime(),
+                spentInUserState() - start.spentInUserState(),
+                spentInNiceState() - start.spentInNiceState(),
+                spentInSystemState() - start.spentInSystemState(),
+                spentInIdleState() - start.spentInIdleState(),
+                spentInIOWaitState() - start.spentInIOWaitState(),
+                spentInIRQState() - start.spentInIRQState(),
+                spentInSoftIRQState() - start.spentInSoftIRQState(),
+                spentInStealState() - start.spentInStealState()
+        );
     }
 
-    public CPUTimeResult since(CPUTimeResult startResult) {
-        return new CPUTimeResult(getStatTime())
-                .setSpentInUserState(this.getSpentInUserState() - startResult.getSpentInUserState())
-                .setSpentInNiceState(this.getSpentInNiceState() - startResult.getSpentInNiceState())
-                .setSpentInSystemState(this.getSpentInSystemState() - startResult.getSpentInSystemState())
-                .setSpentInIdleState(this.getSpentInIdleState() - startResult.getSpentInIdleState())
-                .setSpentInIRQState(this.getSpentInIRQState() - startResult.getSpentInIRQState())
-                .setSpentInSoftIRQState(this.getSpentInSoftIRQState() - startResult.getSpentInSoftIRQState())
-                .setSpentInStealState(this.getSpentInStealState() - startResult.getSpentInStealState());
-    }
-
-    public double getCpuUsage() {
+    /**
+     * Calculates the CPU usage ratio based on idle time versus total time.
+     *
+     * @return the CPU usage as a value between 0.0 and 1.0
+     */
+    public double cpuUsage() {
         long total = this.spentInUserState
                 + this.spentInNiceState
                 + this.spentInSystemState
@@ -167,20 +99,23 @@ public class CPUTimeResult implements RuntimeStatResult<CPUTimeResult> {
     }
 
     /**
-     * @return 使用率。如果使用率不是一个有效的数值，返回null。
+     * Gets the CPU usage as a formatted percentage string.
+     *
+     * @return the CPU usage percentage (e.g., "75.32"), or null if the value is invalid (infinite or NaN)
      */
     @Nullable
-    public String getCpuUsagePercent() {
-        double cpuUsage = getCpuUsage();
+    public String cpuUsagePercent() {
+        double cpuUsage = cpuUsage();
         if (Double.isInfinite(cpuUsage) || Double.isNaN(cpuUsage)) {
             return null;
         }
         return new DecimalFormat("#.##").format(cpuUsage * 100);
     }
 
+    @Override
     public JsonObject toJsonObject() {
         return new JsonObject()
-                .put("stat_time", getStatTime())
+                .put("stat_time", statTime())
                 .put("User", this.spentInUserState)
                 .put("Nice", this.spentInNiceState)
                 .put("Idle", this.spentInIdleState)
@@ -188,6 +123,6 @@ public class CPUTimeResult implements RuntimeStatResult<CPUTimeResult> {
                 .put("IRQ", this.spentInIRQState)
                 .put("SoftIRQ", this.spentInSoftIRQState)
                 .put("Steal", this.spentInStealState)
-                .put("usage", this.getCpuUsagePercent());
+                .put("usage", this.cpuUsagePercent());
     }
 }

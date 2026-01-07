@@ -6,64 +6,57 @@ import org.jspecify.annotations.NullMarked;
 import java.text.DecimalFormat;
 
 /**
+ * Represents memory statistics at a specific point in time.
+ * <p>
+ * This record provides information about total and available memory in bytes,
+ * along with calculated usage metrics.
+ *
+ * @param statTime      the timestamp when this statistics was captured (milliseconds since epoch)
+ * @param totalByte     the total memory in bytes
+ * @param availableByte the available memory in bytes
  * @since 5.0.0
  */
 @NullMarked
-public class MemoryResult implements RuntimeStatResult<MemoryResult> {
-    private final long statTime;
-    private long totalByte;
-    private long availableByte;
+public record MemoryResult(
+        long statTime,
+        long totalByte,
+        long availableByte
+) implements RuntimeStatResult<MemoryResult> {
 
-    public MemoryResult() {
-        statTime = System.currentTimeMillis();
-    }
-
-    public MemoryResult(long statTime) {
-        this.statTime = statTime;
-    }
-
-    public long getAvailableByte() {
-        return availableByte;
-    }
-
-    public MemoryResult setAvailableByte(long availableByte) {
-        this.availableByte = availableByte;
-        return this;
-    }
-
-    public long getTotalByte() {
-        return totalByte;
-    }
-
-    public MemoryResult setTotalByte(long totalByte) {
-        this.totalByte = totalByte;
-        return this;
-    }
-
-    @Override
-    public long getStatTime() {
-        return statTime;
-    }
+    //    @Override
+    //    public long statTime() {
+    //        return statTime;
+    //    }
 
     @Override
     public MemoryResult since(MemoryResult start) {
         throw new UnsupportedOperationException("Meaningless operation");
     }
 
-    public double getMemoryUsage() {
-        return 1.0 - 1.0 * getAvailableByte() / getTotalByte();
+    /**
+     * Calculates the memory usage ratio.
+     *
+     * @return the memory usage as a value between 0.0 and 1.0
+     */
+    public double memoryUsage() {
+        return 1.0 - 1.0 * availableByte() / totalByte();
     }
 
-    public String getMemoryUsagePercent() {
-        return new DecimalFormat("#.##").format(getMemoryUsage() * 100);
+    /**
+     * Gets the memory usage as a formatted percentage string.
+     *
+     * @return the memory usage percentage (e.g., "75.32")
+     */
+    public String memoryUsagePercent() {
+        return new DecimalFormat("#.##").format(memoryUsage() * 100);
     }
 
     @Override
     public JsonObject toJsonObject() {
         return new JsonObject()
-                .put("stat_time", getStatTime())
-                .put("total_bytes", getTotalByte())
-                .put("available_bytes", getAvailableByte())
-                .put("usage", getMemoryUsagePercent());
+                .put("stat_time", statTime())
+                .put("total_bytes", totalByte())
+                .put("available_bytes", availableByte())
+                .put("usage", memoryUsagePercent());
     }
 }

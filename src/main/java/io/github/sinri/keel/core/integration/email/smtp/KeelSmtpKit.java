@@ -1,8 +1,9 @@
 package io.github.sinri.keel.core.integration.email.smtp;
 
-import io.github.sinri.keel.base.Keel;
+import io.github.sinri.keel.base.configuration.ConfigElement;
 import io.github.sinri.keel.base.configuration.NotConfiguredException;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.ext.mail.MailClient;
 import io.vertx.ext.mail.MailConfig;
 import io.vertx.ext.mail.MailMessage;
@@ -28,25 +29,25 @@ public class KeelSmtpKit {
     private final MailClient mailClient;
 
 
-    public KeelSmtpKit(Keel keel, MailConfig mailConfig, @Nullable String poolName) {
+    public KeelSmtpKit(Vertx vertx, MailConfig mailConfig, @Nullable String poolName) {
         this.mailConfig = mailConfig;
         if (poolName != null) {
-            this.mailClient = MailClient.createShared(keel.getVertx(), this.mailConfig, poolName);
+            this.mailClient = MailClient.createShared(vertx, this.mailConfig, poolName);
         } else {
-            this.mailClient = MailClient.create(keel.getVertx(), this.mailConfig);
+            this.mailClient = MailClient.create(vertx, this.mailConfig);
         }
     }
 
-    public KeelSmtpKit(Keel keel, String smtpName, boolean shared) throws NotConfiguredException {
-        this(keel, buildMailConfig(keel, smtpName), shared ? Objects.requireNonNull(smtpName) : null);
+    public KeelSmtpKit(Vertx vertx, String smtpName, boolean shared) throws NotConfiguredException {
+        this(vertx, buildMailConfig(smtpName), shared ? Objects.requireNonNull(smtpName) : null);
     }
 
-    public KeelSmtpKit(Keel keel, String smtpName) throws NotConfiguredException {
-        this(keel, smtpName, true);
+    public KeelSmtpKit(Vertx vertx, String smtpName) throws NotConfiguredException {
+        this(vertx, smtpName, true);
     }
 
-    private static MailConfig buildMailConfig(Keel keel, String smtpName) throws NotConfiguredException {
-        var smtpConfiguration = keel.getConfiguration().extract(List.of("email", "smtp", smtpName));
+    private static MailConfig buildMailConfig(String smtpName) throws NotConfiguredException {
+        var smtpConfiguration = ConfigElement.root().extract(List.of("email", "smtp", smtpName));
         Objects.requireNonNull(smtpConfiguration);
         SmtpConfigElement smtpConfigElement = new SmtpConfigElement(smtpConfiguration);
         return smtpConfigElement.toMailConfig();

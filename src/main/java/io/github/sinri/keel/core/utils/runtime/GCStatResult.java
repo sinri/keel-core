@@ -13,10 +13,32 @@ import java.util.Set;
 
 
 /**
+ * Represents garbage collection statistics at a specific point in time.
+ * <p>
+ * This record provides information about major and minor GC counts, times, and types.
+ * It maintains static registries of known GC implementations for various collectors
+ * (Serial, Parallel, CMS, G1, ZGC, Shenandoah).
+ *
+ * @param statTime      the timestamp when this statistics was captured (milliseconds since epoch)
+ * @param minorGCCount  the number of minor (young generation) garbage collections
+ * @param minorGCTime   the time spent in minor garbage collections (milliseconds)
+ * @param majorGCCount  the number of major (old generation) garbage collections
+ * @param majorGCTime   the time spent in major garbage collections (milliseconds)
+ * @param minorGCType   the name of the minor GC collector being used, or null if not determined
+ * @param majorGCType   the name of the major GC collector being used, or null if not determined
  * @since 5.0.0
  */
 @NullMarked
-public class GCStatResult implements RuntimeStatResult<GCStatResult> {
+public record GCStatResult(
+        long statTime,
+        long minorGCCount,
+        long minorGCTime,
+        long majorGCCount,
+        long majorGCTime,
+        @Nullable String minorGCType,
+        @Nullable String majorGCType
+) implements RuntimeStatResult<GCStatResult> {
+
     private static final Set<String> minorGCNames;
     private static final Set<String> majorGCNames;
     private static final Set<String> ignoreGCNames;
@@ -50,23 +72,6 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
         minorGCNames.add("Shenandoah Pauses");
     }
 
-    private final long statTime;
-    private long minorGCCount = 0;
-    private long minorGCTime = 0;
-    private long majorGCCount = 0;
-    private long majorGCTime = 0;
-
-    private @Nullable String majorGCType;
-    private @Nullable String minorGCType;
-
-    public GCStatResult() {
-        this.statTime = System.currentTimeMillis();
-    }
-
-    private GCStatResult(long statTime) {
-        this.statTime = statTime;
-    }
-
     public static void handleMajorGCNames(Handler<Set<String>> handler) {
         handler.handle(majorGCNames);
     }
@@ -79,100 +84,90 @@ public class GCStatResult implements RuntimeStatResult<GCStatResult> {
         handler.handle(ignoreGCNames);
     }
 
+    /**
+     * Parses garbage collector MXBeans and aggregates their statistics.
+     * <p>
+     * This factory method examines the list of GarbageCollectorMXBeans and
+     * classifies them into minor and major GC categories based on their names.
+     *
+     * @param gcList the list of GarbageCollectorMXBean instances to parse
+     * @return a GCStatResult containing aggregated statistics
+     */
     public static GCStatResult parseGarbageCollectorMXBeans(List<@Nullable GarbageCollectorMXBean> gcList) {
-        GCStatResult gcStatResult = new GCStatResult();
+        long statTime = System.currentTimeMillis();
+        long minorGCCount = 0;
+        long minorGCTime = 0;
+        long majorGCCount = 0;
+        long majorGCTime = 0;
+        String minorGCType = null;
+        String majorGCType = null;
+
         for (GarbageCollectorMXBean gc : gcList) {
             if (gc == null) {
                 continue;
             }
-            gcStatResult.refreshWithGC(gc);
+
+            if (minorGCNames.contains(gc.getName())) {
+                minorGCCount = gc.getCollectionCount();
+                if (gc.getCollectionTime() >= 0) {
+                    minorGCTime = gc.getCollectionTime();
+                }
+                minorGCType = gc.getName();
+            } else if (majorGCNames.contains(gc.getName())) {
+                majorGCCount = gc.getCollectionCount();
+                if (gc.getCollectionTime() >= 0) {
+                    majorGCTime = gc.getCollectionTime();
+                }
+                majorGCType = gc.getName();
+            } else if (!ignoreGCNames.contains(gc.getName())) {
+                StdoutLoggerFactory.getInstance().createLogger(GCStatResult.class.getName()).error(log -> log
+                        .message("Found Unknown GarbageCollectorMXBean Name")
+                        .context(ctx -> ctx
+                                .put("class", gc.getClass().getName())
+                                .put("name", gc.getName())
+                                .put("memoryPoolNames", String.join(",", gc.getMemoryPoolNames()))
+                                .put("objectName", gc.getObjectName())
+                                .put("collectionCount", gc.getCollectionCount())
+                                .put("collectionTime", gc.getCollectionTime())
+                        )
+                );
+            }
         }
-        return gcStatResult;
+
+        return new GCStatResult(statTime, minorGCCount, minorGCTime, majorGCCount, majorGCTime, minorGCType, majorGCType);
     }
 
-    public long getMinorGCCount() {
-        return minorGCCount;
-    }
-
-    public long getMinorGCTime() {
-        return minorGCTime;
-    }
-
-    public long getMajorGCCount() {
-        return majorGCCount;
-    }
-
-    public long getMajorGCTime() {
-        return majorGCTime;
-    }
-
-    @Nullable
-    public String getMajorGCType() {
-        return majorGCType;
-    }
-
-    @Nullable
-    public String getMinorGCType() {
-        return minorGCType;
-    }
-
-    public long getStatTime() {
-        return statTime;
-    }
+    //    @Override
+    //    public long statTime() {
+    //        return statTime;
+    //    }
 
     @Override
     public GCStatResult since(GCStatResult start) {
-        GCStatResult x = new GCStatResult(getStatTime());
-        x.majorGCCount = getMajorGCCount() - start.getMajorGCCount();
-        x.minorGCCount = getMinorGCCount() - start.getMinorGCCount();
-        x.majorGCTime = getMajorGCTime() - start.getMajorGCTime();
-        x.minorGCTime = getMinorGCTime() - start.getMinorGCTime();
-        x.majorGCType = this.majorGCType;
-        x.minorGCType = this.minorGCType;
-        return x;
+        return new GCStatResult(
+                statTime(),
+                minorGCCount() - start.minorGCCount(),
+                minorGCTime() - start.minorGCTime(),
+                majorGCCount() - start.majorGCCount(),
+                majorGCTime() - start.majorGCTime(),
+                minorGCType(),
+                majorGCType()
+        );
     }
 
     @Override
     public JsonObject toJsonObject() {
         return new JsonObject()
-                .put("stat_time", getStatTime())
+                .put("stat_time", statTime())
                 .put("major", new JsonObject()
-                        .put("count", getMajorGCCount())
-                        .put("time", getMajorGCTime())
-                        .put("type", getMajorGCType())
+                        .put("count", majorGCCount())
+                        .put("time", majorGCTime())
+                        .put("type", majorGCType())
                 )
                 .put("minor", new JsonObject()
-                        .put("count", getMinorGCCount())
-                        .put("time", getMinorGCTime())
-                        .put("type", getMinorGCType())
+                        .put("count", minorGCCount())
+                        .put("time", minorGCTime())
+                        .put("type", minorGCType())
                 );
-    }
-
-    private void refreshWithGC(GarbageCollectorMXBean gc) {
-        if (minorGCNames.contains(gc.getName())) {
-            this.minorGCCount = gc.getCollectionCount();
-            if (gc.getCollectionTime() >= 0) {
-                this.minorGCTime = gc.getCollectionTime();
-            }
-            this.minorGCType = gc.getName();
-        } else if (majorGCNames.contains(gc.getName())) {
-            this.majorGCCount = gc.getCollectionCount();
-            if (gc.getCollectionTime() >= 0) {
-                this.majorGCTime = gc.getCollectionTime();
-            }
-            this.majorGCType = gc.getName();
-        } else if (!ignoreGCNames.contains(gc.getName())) {
-            StdoutLoggerFactory.getInstance().createLogger(getClass().getName()).error(log -> log
-                    .message("Found Unknown GarbageCollectorMXBean Name")
-                    .context(ctx -> ctx
-                            .put("class", gc.getClass().getName())
-                            .put("name", gc.getName())
-                            .put("memoryPoolNames", String.join(",", gc.getMemoryPoolNames()))
-                            .put("objectName", gc.getObjectName())
-                            .put("collectionCount", gc.getCollectionCount())
-                            .put("collectionTime", gc.getCollectionTime())
-                    )
-            );
-        }
     }
 }

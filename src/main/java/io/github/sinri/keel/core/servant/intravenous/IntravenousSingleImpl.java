@@ -22,7 +22,7 @@ class IntravenousSingleImpl<D extends @Nullable Object> extends IntravenousBase<
     }
 
     protected Future<Void> handleDrops(List<D> drops) {
-        return getKeel().asyncCallIteratively(
+        return asyncCallIteratively(
                 drops,
                 drop -> Future.succeededFuture()
                               .compose(v -> this.itemProcessor.process(drop))

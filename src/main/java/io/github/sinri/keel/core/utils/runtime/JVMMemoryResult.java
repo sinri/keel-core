@@ -4,95 +4,41 @@ import io.vertx.core.json.JsonObject;
 import org.jspecify.annotations.NullMarked;
 
 /**
+ * Represents JVM memory statistics at a specific point in time.
+ * <p>
+ * This record provides comprehensive memory information including physical memory,
+ * runtime heap memory, and MXBean-based memory metrics.
+ *
+ * @param statTime                   the timestamp when this statistics was captured (milliseconds since epoch)
+ * @param physicalMaxBytes           the maximum physical memory available to the system in bytes
+ * @param physicalUsedBytes          the physical memory currently in use by the system in bytes
+ * @param runtimeHeapMaxBytes        the maximum heap memory the JVM will attempt to use (e.g., -Xmx)
+ * @param runtimeHeapAllocatedBytes  the total heap memory currently allocated by the JVM
+ * @param runtimeHeapUsedBytes       the heap memory currently in use (allocated minus free)
+ * @param mxHeapUsedBytes            the heap memory used as reported by MemoryMXBean
+ * @param mxNonHeapUsedBytes         the non-heap memory used as reported by MemoryMXBean
  * @since 5.0.0
  */
 @NullMarked
-public class JVMMemoryResult implements RuntimeStatResult<JVMMemoryResult> {
-    private final long statTime;
+public record JVMMemoryResult(
+        long statTime,
+        long physicalMaxBytes,
+        long physicalUsedBytes,
+        long runtimeHeapMaxBytes,
+        long runtimeHeapAllocatedBytes,
+        long runtimeHeapUsedBytes,
+        long mxHeapUsedBytes,
+        long mxNonHeapUsedBytes
+) implements RuntimeStatResult<JVMMemoryResult> {
 
-    private long physicalMaxBytes;
-    private long physicalUsedBytes;
-    private long runtimeHeapMaxBytes;
-    private long runtimeHeapAllocatedBytes;
-    private long runtimeHeapUsedBytes;
-    private long mxHeapUsedBytes;
-    private long mxNonHeapUsedBytes;
-
-    public JVMMemoryResult() {
-        this.statTime = System.currentTimeMillis();
-    }
-
-    @Override
-    public long getStatTime() {
-        return statTime;
-    }
+    //    @Override
+    //    public long statTime() {
+    //        return statTime;
+    //    }
 
     @Override
     public JVMMemoryResult since(JVMMemoryResult start) {
         throw new UnsupportedOperationException("Meaningless operation");
-    }
-
-    public long getRuntimeHeapAllocatedBytes() {
-        return runtimeHeapAllocatedBytes;
-    }
-
-    public JVMMemoryResult setRuntimeHeapAllocatedBytes(long runtimeHeapAllocatedBytes) {
-        this.runtimeHeapAllocatedBytes = runtimeHeapAllocatedBytes;
-        return this;
-    }
-
-    public long getRuntimeHeapMaxBytes() {
-        return runtimeHeapMaxBytes;
-    }
-
-    public JVMMemoryResult setRuntimeHeapMaxBytes(long runtimeHeapMaxBytes) {
-        this.runtimeHeapMaxBytes = runtimeHeapMaxBytes;
-        return this;
-    }
-
-    public long getRuntimeHeapUsedBytes() {
-        return runtimeHeapUsedBytes;
-    }
-
-    public JVMMemoryResult setRuntimeHeapUsedBytes(long runtimeHeapUsedBytes) {
-        this.runtimeHeapUsedBytes = runtimeHeapUsedBytes;
-        return this;
-    }
-
-    public long getMxHeapUsedBytes() {
-        return mxHeapUsedBytes;
-    }
-
-    public JVMMemoryResult setMxHeapUsedBytes(long mxHeapUsedBytes) {
-        this.mxHeapUsedBytes = mxHeapUsedBytes;
-        return this;
-    }
-
-    public long getMxNonHeapUsedBytes() {
-        return mxNonHeapUsedBytes;
-    }
-
-    public JVMMemoryResult setMxNonHeapUsedBytes(long mxNonHeapUsedBytes) {
-        this.mxNonHeapUsedBytes = mxNonHeapUsedBytes;
-        return this;
-    }
-
-    public long getPhysicalMaxBytes() {
-        return physicalMaxBytes;
-    }
-
-    public JVMMemoryResult setPhysicalMaxBytes(long physicalMaxBytes) {
-        this.physicalMaxBytes = physicalMaxBytes;
-        return this;
-    }
-
-    public long getPhysicalUsedBytes() {
-        return physicalUsedBytes;
-    }
-
-    public JVMMemoryResult setPhysicalUsedBytes(long physicalUsedBytes) {
-        this.physicalUsedBytes = physicalUsedBytes;
-        return this;
     }
 
     @Override

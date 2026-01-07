@@ -12,8 +12,14 @@ import org.jspecify.annotations.NullMarked;
  */
 @NullMarked
 public interface RuntimeStatResult<T> {
-    long getStatTime();
+    long statTime();
 
+    /**
+     * 获得与早先时间统计结果的对比结果
+     *
+     * @param start 早先时间统计的结果
+     * @return 对比
+     */
     T since(T start);
 
     JsonObject toJsonObject();

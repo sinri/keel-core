@@ -129,61 +129,61 @@ public abstract class QueueDispatcher extends KeelVerticleBase
     private Future<Void> whenSignalRunCame() {
         this.queueStatus = QueueStatus.RUNNING;
 
-        return getKeel().asyncCallRepeatedly(routineResult -> {
-                            if (this.getQueueWorkerPoolManager().isBusy()) {
-                                return getKeel().asyncSleep(1_000L);
-                            }
+        return asyncCallRepeatedly(routineResult -> {
+            if (this.getQueueWorkerPoolManager().isBusy()) {
+                return asyncSleep(1_000L);
+            }
 
-                            return Future.succeededFuture()
-                                         .compose(v -> this.seekNextTask())
-                                         .compose(task -> {
-                                             if (task == null) {
-                                                 // 队列里已经空了，不必再找
-                                                 this.getQueueManageLogger().debug(r -> r
-                                                         .message("No more task todo"));
-                                                 // 通知 FutureUntil 结束
-                                                 routineResult.stop();
-                                                 return Future.succeededFuture();
-                                             }
+            return Future.succeededFuture()
+                         .compose(v -> this.seekNextTask())
+                         .compose(task -> {
+                             if (task == null) {
+                                 // 队列里已经空了，不必再找
+                                 this.getQueueManageLogger().debug(r -> r
+                                         .message("No more task todo"));
+                                 // 通知 FutureUntil 结束
+                                 routineResult.stop();
+                                 return Future.succeededFuture();
+                             }
 
-                                             // 队列里找出来一个task, deploy it (至于能不能跑起来有没有锁就不管了)
-                                             this.getQueueManageLogger().info(r -> r
-                                                     .message("To run task: " + task.getTaskReference()));
-                                             this.getQueueManageLogger().info(r -> r
-                                                     .message("Trusted that task  is already locked by seeker: " + task.getTaskReference()));
+                             // 队列里找出来一个task, deploy it (至于能不能跑起来有没有锁就不管了)
+                             this.getQueueManageLogger().info(r -> r
+                                     .message("To run task: " + task.getTaskReference()));
+                             this.getQueueManageLogger().info(r -> r
+                                     .message("Trusted that task  is already locked by seeker: " + task.getTaskReference()));
 
-                                             task.setQueueWorkerPoolManager(this.getQueueWorkerPoolManager());
+                             task.setQueueWorkerPoolManager(this.getQueueWorkerPoolManager());
 
-                                             return Future.succeededFuture()
-                                                          .compose(v -> {
-                                                              return task.deployMe(getVertx());
-                                                          })
-                                                          .compose(
-                                                                  deploymentID -> {
-                                                                      this.getQueueManageLogger().info(r -> r.message(
-                                                                              "TASK [" + task.getTaskReference() + "] " +
-                                                                                      "VERTICLE DEPLOYED: " + deploymentID));
-                                                                      // 通知 FutureUntil 继续下一轮
-                                                                      return Future.succeededFuture();
-                                                                  },
-                                                                  throwable -> {
-                                                                      this.getQueueManageLogger().error(log -> log
-                                                                              .exception(throwable)
-                                                                              .message("CANNOT DEPLOY TASK [%s] VERTICLE".formatted(task.getTaskReference()))
-                                                                      );
-                                                                      // 通知 FutureUntil 继续下一轮
-                                                                      return Future.succeededFuture();
-                                                                  }
-                                                          );
-                                         });
-                        })
-                        .recover(throwable -> {
-                            this.getQueueManageLogger().error(log -> log
-                                    .exception(throwable)
-                                    .message("KeelQueue 递归找活干里出现了奇怪的故障")
-                            );
-                            return Future.succeededFuture();
-                        });
+                             return Future.succeededFuture()
+                                          .compose(v -> {
+                                              return task.deployMe(getVertx());
+                                          })
+                                          .compose(
+                                                  deploymentID -> {
+                                                      this.getQueueManageLogger().info(r -> r.message(
+                                                              "TASK [" + task.getTaskReference() + "] " +
+                                                                      "VERTICLE DEPLOYED: " + deploymentID));
+                                                      // 通知 FutureUntil 继续下一轮
+                                                      return Future.succeededFuture();
+                                                  },
+                                                  throwable -> {
+                                                      this.getQueueManageLogger().error(log -> log
+                                                              .exception(throwable)
+                                                              .message("CANNOT DEPLOY TASK [%s] VERTICLE".formatted(task.getTaskReference()))
+                                                      );
+                                                      // 通知 FutureUntil 继续下一轮
+                                                      return Future.succeededFuture();
+                                                  }
+                                          );
+                         });
+        })
+                .recover(throwable -> {
+                    this.getQueueManageLogger().error(log -> log
+                            .exception(throwable)
+                            .message("KeelQueue 递归找活干里出现了奇怪的故障")
+                    );
+                    return Future.succeededFuture();
+                });
     }
 
     @Override

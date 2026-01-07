@@ -4,39 +4,20 @@ import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
 /**
+ * A snapshot of runtime monitoring data containing GC statistics, CPU time information,
+ * and JVM memory metrics.
+ * <p>
+ * This record provides an immutable view of the runtime state at a specific point in time.
+ *
+ * @param GCStat          the garbage collection statistics, or null if not available
+ * @param CPUTime         the CPU time statistics, or null if not available
+ * @param jvmMemoryResult the JVM memory statistics, or null if not available
  * @since 5.0.0
  */
 @NullMarked
-public class MonitorSnapshot {
-    private @Nullable GCStatResult GCStat;
-    private @Nullable CPUTimeResult CPUTime;
-    private @Nullable JVMMemoryResult jvmMemoryResult;
-
-    public @Nullable CPUTimeResult getCPUTime() {
-        return CPUTime;
-    }
-
-    public MonitorSnapshot setCPUTime(CPUTimeResult CPUTime) {
-        this.CPUTime = CPUTime;
-        return this;
-    }
-
-    public @Nullable GCStatResult getGCStat() {
-        return GCStat;
-    }
-
-    public MonitorSnapshot setGCStat(GCStatResult GCStat) {
-        this.GCStat = GCStat;
-        return this;
-    }
-
-
-    public @Nullable JVMMemoryResult getJvmMemoryResult() {
-        return jvmMemoryResult;
-    }
-
-    public MonitorSnapshot setJvmMemoryResult(JVMMemoryResult jvmMemoryResult) {
-        this.jvmMemoryResult = jvmMemoryResult;
-        return this;
-    }
+public record MonitorSnapshot(
+        @Nullable GCStatResult GCStat,
+        @Nullable CPUTimeResult CPUTime,
+        @Nullable JVMMemoryResult jvmMemoryResult
+) {
 }

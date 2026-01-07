@@ -41,7 +41,7 @@ public abstract class QueueTask extends KeelVerticleBase {
 
 
     protected LoggerFactory getLoggerFactory() {
-        return getKeel().getLoggerFactory();
+        return LoggerFactory.getShared();
     }
 
 

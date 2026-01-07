@@ -51,15 +51,17 @@ public class RuntimeUtils {
         CentralProcessor processor = systemInfo.getHardware().getProcessor();
         long[] systemCpuLoadTicks = processor.getSystemCpuLoadTicks();
 
-        return new CPUTimeResult()
-                .setSpentInUserState(systemCpuLoadTicks[CentralProcessor.TickType.USER.getIndex()])
-                .setSpentInNiceState(systemCpuLoadTicks[CentralProcessor.TickType.NICE.getIndex()])
-                .setSpentInSystemState(systemCpuLoadTicks[CentralProcessor.TickType.SYSTEM.getIndex()])
-                .setSpentInIdleState(systemCpuLoadTicks[CentralProcessor.TickType.IDLE.getIndex()])
-                .setSpentInIOWaitState(systemCpuLoadTicks[CentralProcessor.TickType.IOWAIT.getIndex()])
-                .setSpentInIRQState(systemCpuLoadTicks[CentralProcessor.TickType.IRQ.getIndex()])
-                .setSpentInSoftIRQState(systemCpuLoadTicks[CentralProcessor.TickType.SOFTIRQ.getIndex()])
-                .setSpentInStealState(systemCpuLoadTicks[CentralProcessor.TickType.STEAL.getIndex()]);
+        return new CPUTimeResult(
+                System.currentTimeMillis(),
+                systemCpuLoadTicks[CentralProcessor.TickType.USER.getIndex()],
+                systemCpuLoadTicks[CentralProcessor.TickType.NICE.getIndex()],
+                systemCpuLoadTicks[CentralProcessor.TickType.SYSTEM.getIndex()],
+                systemCpuLoadTicks[CentralProcessor.TickType.IDLE.getIndex()],
+                systemCpuLoadTicks[CentralProcessor.TickType.IOWAIT.getIndex()],
+                systemCpuLoadTicks[CentralProcessor.TickType.IRQ.getIndex()],
+                systemCpuLoadTicks[CentralProcessor.TickType.SOFTIRQ.getIndex()],
+                systemCpuLoadTicks[CentralProcessor.TickType.STEAL.getIndex()]
+        );
     }
 
     public static JVMMemoryResult makeJVMMemorySnapshot() {
@@ -71,15 +73,16 @@ public class RuntimeUtils {
         GlobalMemory memory = systemInfo.getHardware().getMemory();
 
         // freeMemory + maxMemory - totalMemory
-        return new JVMMemoryResult()
-                .setPhysicalMaxBytes(memory.getTotal())
-                .setPhysicalUsedBytes(memory.getTotal() - memory.getAvailable())
-                .setRuntimeHeapMaxBytes(maxMemory)
-                .setRuntimeHeapAllocatedBytes(totalMemory)
-                .setRuntimeHeapUsedBytes(totalMemory - freeMemory)
-                .setMxHeapUsedBytes(getHeapMemoryUsage().getUsed())
-                .setMxNonHeapUsedBytes(getNonHeapMemoryUsage().getUsed()) // 独立的
-                ;
+        return new JVMMemoryResult(
+                System.currentTimeMillis(),
+                memory.getTotal(),
+                memory.getTotal() - memory.getAvailable(),
+                maxMemory,
+                totalMemory,
+                totalMemory - freeMemory,
+                getHeapMemoryUsage().getUsed(),
+                getNonHeapMemoryUsage().getUsed() // 独立的
+        );
     }
 
     /**

@@ -60,11 +60,6 @@ public record CPUTimeResult(
         long spentInStealState
 ) implements RuntimeStatResult<CPUTimeResult> {
 
-    //    @Override
-    //    public long statTime() {
-    //        return statTime;
-    //    }
-
     @Override
     public CPUTimeResult since(CPUTimeResult start) {
         return new CPUTimeResult(

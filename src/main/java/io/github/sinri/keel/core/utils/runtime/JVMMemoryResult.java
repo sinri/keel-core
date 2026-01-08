@@ -31,11 +31,6 @@ public record JVMMemoryResult(
         long mxNonHeapUsedBytes
 ) implements RuntimeStatResult<JVMMemoryResult> {
 
-    //    @Override
-    //    public long statTime() {
-    //        return statTime;
-    //    }
-
     @Override
     public JVMMemoryResult since(JVMMemoryResult start) {
         throw new UnsupportedOperationException("Meaningless operation");

@@ -137,11 +137,6 @@ public record GCStatResult(
         return new GCStatResult(statTime, minorGCCount, minorGCTime, majorGCCount, majorGCTime, minorGCType, majorGCType);
     }
 
-    //    @Override
-    //    public long statTime() {
-    //        return statTime;
-    //    }
-
     @Override
     public GCStatResult since(GCStatResult start) {
         return new GCStatResult(

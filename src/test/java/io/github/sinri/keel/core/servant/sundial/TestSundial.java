@@ -9,7 +9,7 @@ import java.util.List;
 
 @NullMarked
 public class TestSundial extends Sundial {
-    private static final TestSundialPlan testSundialPlan = new TestSundialPlan();
+    private static final TestVirtualThreadSundialPlan testSundialPlan = new TestVirtualThreadSundialPlan();
 
     public TestSundial() {
         super();
@@ -17,7 +17,7 @@ public class TestSundial extends Sundial {
 
     @Override
     protected LoggerFactory getLoggerFactory() {
-        return getKeel().getLoggerFactory();
+        return LoggerFactory.getShared();
     }
 
     @Override

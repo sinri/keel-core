@@ -1,10 +1,14 @@
 package io.github.sinri.keel.core.servant.sundial;
 
+import io.github.sinri.keel.base.async.KeelAsyncMixin;
 import io.github.sinri.keel.base.verticles.KeelVerticleBase;
 import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
+import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.github.sinri.keel.logger.api.logger.SpecificLogger;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
+import io.vertx.core.Vertx;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.Calendar;
@@ -15,7 +19,39 @@ import java.util.Calendar;
  * @since 5.0.0
  */
 @NullMarked
-public interface SundialPlan {
+public interface SundialPlan extends KeelAsyncMixin {
+    static Future<Void> executeAndAwait(Vertx vertx, SundialPlan plan, Calendar now, SpecificLogger<SundialSpecificLog> sundialSpecificLogger) {
+        KeelVerticleBase keelVerticleBase = KeelVerticleBase.wrap(
+                verticleBase -> {
+                    verticleBase.asyncSleep(1)
+                                .compose(v -> {
+                                    return plan.execute(vertx, now, sundialSpecificLogger);
+                                })
+                                .compose(v -> {
+                                    return verticleBase.undeployMe();
+                                });
+
+                    return Future.succeededFuture();
+                }
+        );
+        return keelVerticleBase.deployMe(
+                                       vertx,
+                                       new DeploymentOptions()
+                                               .setThreadingModel(plan.expectedThreadingModel())
+                               )
+                               .compose(deploymentId -> {
+                                   return keelVerticleBase.undeployed();
+                               });
+    }
+
+    static Future<Void> executeAndAwait(Vertx vertx, SundialPlan plan) {
+        return executeAndAwait(
+                vertx,
+                plan, Calendar.getInstance(), LoggerFactory.getShared()
+                                                           .createLogger(plan.getClass()
+                                                                             .getName(), SundialSpecificLog::new));
+    }
+
     /**
      *
      * @return 定时任务计划名称
@@ -31,11 +67,11 @@ public interface SundialPlan {
     /**
      * 任务计划执行逻辑。
      *
-     * @param verticle              定时任务运行的 Verticle 实例
+     * @param vertx                 定时任务运行的 Vertx 实例
      * @param now                   本次定时任务运行对应的触发时间
      * @param sundialSpecificLogger 日晷定时任务特定日志记录器
      */
-    Future<Void> execute(KeelVerticleBase verticle, Calendar now, SpecificLogger<SundialSpecificLog> sundialSpecificLogger);
+    Future<Void> execute(Vertx vertx, Calendar now, SpecificLogger<SundialSpecificLog> sundialSpecificLogger);
 
     default ThreadingModel expectedThreadingModel() {
         return ThreadingModel.WORKER;

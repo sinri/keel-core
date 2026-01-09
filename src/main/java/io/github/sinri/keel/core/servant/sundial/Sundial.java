@@ -71,7 +71,7 @@ public abstract class Sundial extends KeelVerticleBase {
                                     @Override
                                     public Future<?> apply(KeelVerticleBase keelVerticleBase) {
                                         return plan.execute(
-                                                keelVerticleBase,
+                                                keelVerticleBase.getVertx(),
                                                 now,
                                                 getLogger()
                                         );

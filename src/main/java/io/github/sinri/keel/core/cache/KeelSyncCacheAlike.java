@@ -19,12 +19,12 @@ public interface KeelSyncCacheAlike<K, V> {
     /**
      * 根据给定的键值对存入一条缓存记录。
      * <p>
-     * 如果值为null，将移除键对应的缓存记录，因为null不是有效的缓存值。
+     * 值不应为 null。如果值为null，应移除键对应的缓存记录，因为null不是有效的缓存值。
      *
      * @param key   键
      * @param value 值
      */
-    void save(K key, @Nullable V value);
+    void save(K key, V value);
 
     /**
      * 根据给定的键，尝试获取缓存的值；如果无法找到有效的缓存值，则返回给定的默认值。

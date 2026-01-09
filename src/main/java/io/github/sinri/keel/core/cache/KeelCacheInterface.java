@@ -1,7 +1,6 @@
 package io.github.sinri.keel.core.cache;
 
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 import java.util.Set;
 import java.util.function.Function;
@@ -58,7 +57,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param value         值
      * @param lifeInSeconds 本条缓存记录的存活周期，以秒计
      */
-    void save(K key, @Nullable V value, long lifeInSeconds);
+    void save(K key, V value, long lifeInSeconds);
 
     /**
      * 根据给定的键值对存入一条默认时长内有效的缓存记录。
@@ -67,7 +66,7 @@ public interface KeelCacheInterface<K, V> extends KeelSyncCacheAlike<K, V> {
      * @param value 值
      */
     @Override
-    default void save(K key, @Nullable V value) {
+    default void save(K key, V value) {
         save(key, value, getDefaultLifeInSeconds());
     }
 

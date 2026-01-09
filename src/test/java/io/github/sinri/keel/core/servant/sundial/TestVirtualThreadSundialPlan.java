@@ -1,16 +1,19 @@
 package io.github.sinri.keel.core.servant.sundial;
 
-import io.github.sinri.keel.base.verticles.KeelVerticleBase;
 import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
+import io.github.sinri.keel.logger.api.LateObject;
 import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
+import io.vertx.core.Vertx;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.Calendar;
 
 @NullMarked
-public class TestSundialPlan implements SundialPlan {
+public class TestVirtualThreadSundialPlan implements SundialPlan {
+    private final LateObject<Vertx> lateVertx = new LateObject<>();
+
     @Override
     public String key() {
         return getClass().getName();
@@ -22,9 +25,10 @@ public class TestSundialPlan implements SundialPlan {
     }
 
     @Override
-    public Future<Void> execute(KeelVerticleBase verticleBase, Calendar now, SpecificLogger<SundialSpecificLog> sundialSpecificLogger) {
+    public Future<Void> execute(Vertx vertx, Calendar now, SpecificLogger<SundialSpecificLog> sundialSpecificLogger) {
+        lateVertx.set(vertx);
         for (int i = 0; i < 10; i++) {
-            verticleBase.asyncSleep(1000).await();
+            asyncSleep(1000).await();
             sundialSpecificLogger.info("SundialPlan " + key() + " executed [" + i + "] at " + now.getTime());
         }
         return Future.succeededFuture();
@@ -33,5 +37,10 @@ public class TestSundialPlan implements SundialPlan {
     @Override
     public ThreadingModel expectedThreadingModel() {
         return ThreadingModel.VIRTUAL_THREAD;
+    }
+
+    @Override
+    public Vertx getVertx() {
+        return lateVertx.get();
     }
 }

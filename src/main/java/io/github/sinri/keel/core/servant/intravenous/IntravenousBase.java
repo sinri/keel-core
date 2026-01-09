@@ -1,17 +1,16 @@
 package io.github.sinri.keel.core.servant.intravenous;
 
 import io.github.sinri.keel.base.async.RepeatedlyCallTask;
+import io.github.sinri.keel.core.utils.value.ValueBox;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 
 /**
@@ -20,11 +19,10 @@ import java.util.concurrent.atomic.AtomicReference;
  * @since 5.0.0
  */
 @NullMarked
-abstract class IntravenousBase<D extends @Nullable Object> extends Intravenous<D> {
+abstract class IntravenousBase<D> extends Intravenous<D> {
     private final Queue<D> queue;
-    private final AtomicReference<@Nullable Promise<Void>> interrupterRef = new AtomicReference<>();
+    private final ValueBox<Promise<Void>> interrupterBox = new ValueBox<>();
     private final AtomicBoolean stoppedRef = new AtomicBoolean(false);
-    //private final AtomicBoolean undeployedRef = new AtomicBoolean(false);
 
     public IntravenousBase() {
         super();
@@ -39,7 +37,7 @@ abstract class IntravenousBase<D extends @Nullable Object> extends Intravenous<D
         synchronized (queue) {
             queue.add(drop);
         }
-        Promise<Void> interrupter = interrupterRef.get();
+        Promise<Void> interrupter = interrupterBox.getValue();
         if (interrupter != null) {
             interrupter.tryComplete();
         }
@@ -50,39 +48,26 @@ abstract class IntravenousBase<D extends @Nullable Object> extends Intravenous<D
         stoppedRef.set(true);
     }
 
-    /**
-     * @since 4.0.11
-     */
     @Override
     public boolean isNoDropsLeft() {
         return queue.isEmpty();
     }
 
-    /**
-     * @since 4.0.11
-     */
     @Override
     public boolean isStopped() {
         return stoppedRef.get();
     }
 
-    //    @Override
-    //    public boolean isUndeployed() {
-    //        return undeployedRef.get();
-    //    }
-
     @Override
     protected Future<Void> startVerticle() {
-        this.interrupterRef.set(null);
+        this.interrupterBox.setValue(null);
         asyncCallRepeatedly(this::handleRoutine)
-                .onComplete(ar -> this.undeployMe()
-                        //                      .onSuccess(v -> undeployedRef.set(true))
-                );
+                .onComplete(ar -> this.undeployMe());
         return Future.succeededFuture();
     }
 
     private Future<Void> handleRoutine(RepeatedlyCallTask repeatedlyCallTask) {
-        this.interrupterRef.set(Promise.promise());
+        this.interrupterBox.setValue(Promise.promise());
 
         boolean toStop = this.stoppedRef.get();
 
@@ -113,7 +98,7 @@ abstract class IntravenousBase<D extends @Nullable Object> extends Intravenous<D
                              return Future.succeededFuture();
                          } else {
                              // wait for next `add` call, or just sleep 1 second
-                             Promise<Void> promise = this.interrupterRef.get();
+                             Promise<Void> promise = this.interrupterBox.getNonNullValue();
                              if (promise == null) {
                                  return asyncSleep(1000L);
                              } else {

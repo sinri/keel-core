@@ -22,13 +22,13 @@ public interface KeelAsyncCacheAlike<K, V> {
     /**
      * 根据给定的键值对异步存入一条缓存记录。
      * <p>
-     * 如果值为null，将移除键对应的缓存记录，因为null不是有效的缓存值。
+     * 值不应为 null。如果值为null，应移除键对应的缓存记录，因为null不是有效的缓存值。
      *
      * @param k 键
      * @param v 值
      * @return 异步执行结果
      */
-    Future<Void> save(K k, @Nullable V v);
+    Future<Void> save(K k, V v);
 
     /**
      * 根据给定的键，尝试异步获取缓存的值；如果无法找到有效的缓存值，则返回给定的默认值。

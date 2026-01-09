@@ -4,7 +4,6 @@ import io.github.sinri.keel.base.verticles.KeelVerticleBase;
 import io.github.sinri.keel.base.verticles.KeelVerticleRunningStateEnum;
 import io.vertx.core.Future;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -18,14 +17,14 @@ import java.util.List;
  * @since 5.0.0
  */
 @NullMarked
-public abstract class Intravenous<D extends @Nullable Object> extends KeelVerticleBase {
+public abstract class Intravenous<D> extends KeelVerticleBase {
 
-    public static <T extends @Nullable Object> Intravenous<T> instant(SingleDropProcessor<T> itemProcessor) {
+    public static <T> Intravenous<T> instant(SingleDropProcessor<T> itemProcessor) {
         return new IntravenousSingleImpl<>(itemProcessor);
     }
 
 
-    public static <T extends @Nullable Object> Intravenous<T> instantBatch(MultiDropsProcessor<T> itemsProcessor) {
+    public static <T> Intravenous<T> instantBatch(MultiDropsProcessor<T> itemsProcessor) {
         return new IntravenousBatchImpl<>(itemsProcessor);
     }
 
@@ -73,12 +72,12 @@ public abstract class Intravenous<D extends @Nullable Object> extends KeelVertic
     }
 
     @NullMarked
-    public interface SingleDropProcessor<T extends @Nullable Object> {
+    public interface SingleDropProcessor<T> {
         Future<Void> process(T drop);
     }
 
     @NullMarked
-    public interface MultiDropsProcessor<T extends @Nullable Object> {
+    public interface MultiDropsProcessor<T> {
         Future<Void> process(List<T> drops);
     }
 }

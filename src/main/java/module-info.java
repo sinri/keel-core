@@ -9,6 +9,7 @@ module io.github.sinri.keel.core {
     requires transitive org.commonmark;
     requires transitive org.commonmark.ext.gfm.tables;
     requires static org.jspecify;
+    requires io.netty.handler;
 
     // Exports for public API packages
 

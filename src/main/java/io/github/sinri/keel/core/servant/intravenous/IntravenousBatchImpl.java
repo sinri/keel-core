@@ -2,7 +2,6 @@ package io.github.sinri.keel.core.servant.intravenous;
 
 import io.vertx.core.Future;
 import org.jspecify.annotations.NullMarked;
-import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 
@@ -12,7 +11,7 @@ import java.util.List;
  * @since 5.0.0
  */
 @NullMarked
-class IntravenousBatchImpl<D extends @Nullable Object> extends IntravenousBase<D> {
+class IntravenousBatchImpl<D> extends IntravenousBase<D> {
 
     private final MultiDropsProcessor<D> itemsProcessor;
 

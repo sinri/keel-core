@@ -53,7 +53,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
     }
 
     @Override
-    public void save(K key, @Nullable V value, long lifeInSeconds) {
+    public void save(K key, V value, long lifeInSeconds) {
         lock.writeLock().lock();
         try {
             saveImpl(key, value, lifeInSeconds);

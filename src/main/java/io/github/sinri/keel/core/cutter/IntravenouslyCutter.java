@@ -2,6 +2,7 @@ package io.github.sinri.keel.core.cutter;
 
 import io.github.sinri.keel.base.verticles.KeelVerticleBase;
 import io.github.sinri.keel.core.servant.intravenous.Intravenous;
+import io.github.sinri.keel.logger.api.LateObject;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
@@ -31,9 +32,8 @@ public abstract class IntravenouslyCutter<T> extends KeelVerticleBase {
     private final AtomicReference<Buffer> bufferRef;
     private final Intravenous<T> intravenous;
     private final AtomicBoolean readStopRef = new AtomicBoolean(false);
-    private final AtomicReference<@Nullable Throwable> stopCause = new AtomicReference<>();
-    //    private final Keel keel;
-    //    private final Vertx vertx;
+    private final LateObject<Throwable> lateStopCause = new LateObject<>();
+    // private final AtomicReference<@Nullable Throwable> stopCause = new AtomicReference<>();
     private final long timeout;
     private @Nullable Long timeoutTimer;
 
@@ -95,7 +95,9 @@ public abstract class IntravenouslyCutter<T> extends KeelVerticleBase {
                 getVertx().cancelTimer(x);
                 timeoutTimer = null;
             }
-            stopCause.set(throwable);
+            if (throwable != null) {
+                lateStopCause.set(throwable);
+            }
             readStopRef.set(true);
         }
     }
@@ -116,9 +118,8 @@ public abstract class IntravenouslyCutter<T> extends KeelVerticleBase {
             return Future.succeededFuture();
         })
                 .compose(v -> {
-                    Throwable throwable = stopCause.get();
-                    if (throwable != null) {
-                        return Future.failedFuture(throwable);
+                    if (lateStopCause.isInitialized()) {
+                        return Future.failedFuture(lateStopCause.get());
                     }
                     return Future.succeededFuture();
                 });

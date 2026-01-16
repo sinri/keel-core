@@ -2,13 +2,12 @@ package io.github.sinri.keel.core.servant.sundial;
 
 import io.github.sinri.keel.tesuto.KeelJUnit5Test;
 import io.vertx.core.Future;
-import io.vertx.core.Vertx;
 import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.Test;
 
 public class InstantRunTest extends KeelJUnit5Test {
-    public InstantRunTest(Vertx vertx) {
-        super(vertx);
+    public InstantRunTest() {
+        super();
     }
 
     @Test

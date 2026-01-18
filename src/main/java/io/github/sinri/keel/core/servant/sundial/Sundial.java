@@ -35,10 +35,8 @@ public abstract class Sundial extends KeelVerticleBase {
         super();
     }
 
-    abstract protected LoggerFactory getLoggerFactory();
-
     protected SpecificLogger<SundialSpecificLog> buildLogger() {
-        return getLoggerFactory().createLogger(SundialSpecificLog.TopicSundial, SundialSpecificLog::new);
+        return LoggerFactory.getShared().createLogger(SundialSpecificLog.TopicSundial, SundialSpecificLog::new);
     }
 
     public final SpecificLogger<SundialSpecificLog> getLogger() {

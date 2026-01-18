@@ -30,10 +30,8 @@ public abstract class QueueDispatcher extends KeelVerticleBase
         super();
     }
 
-    protected abstract LoggerFactory getLoggerFactory();
-
     private SpecificLogger<QueueManageSpecificLog> buildQueueManageLogger() {
-        return getLoggerFactory().createLogger(
+        return LoggerFactory.getShared().createLogger(
                 QueueManageSpecificLog.TopicQueue,
                 QueueManageSpecificLog::new
         );

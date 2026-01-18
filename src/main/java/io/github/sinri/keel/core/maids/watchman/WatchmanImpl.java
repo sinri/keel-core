@@ -93,10 +93,8 @@ abstract class WatchmanImpl extends KeelVerticleBase implements Watchman {
         return Future.succeededFuture();
     }
 
-    protected abstract LoggerFactory getLoggerFactory();
-
     protected Logger buildWatchmanLogger() {
-        return getLoggerFactory().createLogger("Watchman");
+        return LoggerFactory.getShared().createLogger("Watchman");
     }
 
     public final Logger getWatchmanLogger() {

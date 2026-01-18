@@ -39,14 +39,8 @@ public abstract class QueueTask extends KeelVerticleBase {
 
     abstract public String getTaskCategory();
 
-
-    protected LoggerFactory getLoggerFactory() {
-        return LoggerFactory.getShared();
-    }
-
-
     protected final SpecificLogger<QueueTaskSpecificLog> buildQueueTaskLogger() {
-        return getLoggerFactory().createLogger(
+        return LoggerFactory.getShared().createLogger(
                 QueueTaskSpecificLog.TopicQueue,
                 () -> new QueueTaskSpecificLog(getTaskReference(), getTaskCategory())
         );

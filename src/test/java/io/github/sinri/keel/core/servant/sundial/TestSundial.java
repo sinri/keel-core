@@ -16,11 +16,6 @@ public class TestSundial extends Sundial {
     }
 
     @Override
-    protected LoggerFactory getLoggerFactory() {
-        return LoggerFactory.getShared();
-    }
-
-    @Override
     protected Future<Collection<SundialPlan>> fetchPlans() {
         return Future.succeededFuture(List.of(testSundialPlan));
     }

@@ -3,7 +3,6 @@ package io.github.sinri.keel.core.maids.watchman;
 import io.github.sinri.keel.base.async.KeelAsyncMixin;
 import io.github.sinri.keel.core.servant.sundial.Sundial;
 import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
-import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
@@ -29,15 +28,12 @@ import java.util.function.Supplier;
 public class CronWatchman extends WatchmanImpl {
     private final WatchmanEventHandler handler;
     private final Function<String, Future<Void>> cronTabUpdateStartup;
-    private final LoggerFactory loggerFactory;
 
     protected CronWatchman(
             String watchmanName,
-            Function<String, Future<Void>> cronTabUpdateStartup,
-            LoggerFactory loggerFactory
+            Function<String, Future<Void>> cronTabUpdateStartup
     ) {
         super(watchmanName);
-        this.loggerFactory = loggerFactory;
         this.handler = now -> {
             Calendar calendar = new Calendar
                     .Builder()
@@ -54,10 +50,9 @@ public class CronWatchman extends WatchmanImpl {
     public static Future<String> deploy(
             Vertx vertx,
             String watchmanName,
-            Function<String, Future<Void>> cronTabUpdateStartup,
-            LoggerFactory loggerFactory
+            Function<String, Future<Void>> cronTabUpdateStartup
     ) {
-        CronWatchman keelCronWatchman = new CronWatchman(watchmanName, cronTabUpdateStartup, loggerFactory);
+        CronWatchman keelCronWatchman = new CronWatchman(watchmanName, cronTabUpdateStartup);
         return vertx.deployVerticle(keelCronWatchman, new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER));
     }
 
@@ -261,8 +256,4 @@ public class CronWatchman extends WatchmanImpl {
         return Future.succeededFuture();
     }
 
-    @Override
-    protected LoggerFactory getLoggerFactory() {
-        return loggerFactory;
-    }
 }

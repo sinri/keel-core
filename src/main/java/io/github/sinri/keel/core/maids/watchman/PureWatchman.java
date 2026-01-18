@@ -1,6 +1,5 @@
 package io.github.sinri.keel.core.maids.watchman;
 
-import io.github.sinri.keel.logger.api.factory.LoggerFactory;
 import io.vertx.core.*;
 import org.jspecify.annotations.NullMarked;
 
@@ -16,35 +15,25 @@ import org.jspecify.annotations.NullMarked;
 public class PureWatchman extends WatchmanImpl {
 
     private final Options options;
-    private final LoggerFactory loggerFactory;
 
-    protected PureWatchman(String watchmanName, Options options, LoggerFactory loggerFactory) {
+    protected PureWatchman(String watchmanName, Options options) {
         super(watchmanName);
         this.options = options;
-        this.loggerFactory = loggerFactory;
     }
 
 
     public static Future<String> deploy(
             Vertx vertx,
             String watchmanName,
-            Handler<Options> optionsHandler,
-            LoggerFactory loggerFactory
+            Handler<Options> optionsHandler
     ) {
         Options options = new Options();
         optionsHandler.handle(options);
-        PureWatchman keelPureWatchman = new PureWatchman(watchmanName, options, loggerFactory);
+        PureWatchman keelPureWatchman = new PureWatchman(watchmanName, options);
         return vertx.deployVerticle(keelPureWatchman, new DeploymentOptions()
                 .setThreadingModel(ThreadingModel.WORKER)
         );
     }
-
-    @Override
-
-    protected final LoggerFactory getLoggerFactory() {
-        return loggerFactory;
-    }
-
 
     public WatchmanEventHandler regularHandler() {
         return options.getHandler();

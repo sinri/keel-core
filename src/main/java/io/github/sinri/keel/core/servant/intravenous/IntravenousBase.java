@@ -61,8 +61,8 @@ abstract class IntravenousBase<D> extends Intravenous<D> {
     @Override
     protected Future<Void> startVerticle() {
         this.interrupterBox.setValue(null);
-        asyncCallRepeatedly(this::handleRoutine)
-                .onComplete(ar -> this.undeployMe());
+        getKeel().asyncCallRepeatedly(this::handleRoutine)
+                 .onComplete(ar -> this.undeployMe());
         return Future.succeededFuture();
     }
 
@@ -98,12 +98,12 @@ abstract class IntravenousBase<D> extends Intravenous<D> {
                              return Future.succeededFuture();
                          } else {
                              // wait for next `add` call, or just sleep 1 second
-                             Promise<Void> promise = this.interrupterBox.getNonNullValue();
+                             Promise<Void> promise = this.interrupterBox.getValue();
                              if (promise == null) {
-                                 return asyncSleep(1000L);
+                                 return getKeel().asyncSleep(1000L);
                              } else {
                                  return Future.any(
-                                                      asyncSleep(1000L),
+                                                      getKeel().asyncSleep(1000L),
                                                       promise.future()
                                               )
                                               .compose(compositeFuture -> Future.succeededFuture());

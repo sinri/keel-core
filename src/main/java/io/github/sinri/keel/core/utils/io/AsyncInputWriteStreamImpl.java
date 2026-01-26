@@ -1,6 +1,10 @@
 package io.github.sinri.keel.core.utils.io;
 
-import io.vertx.core.*;
+import io.github.sinri.keel.base.async.Keel;
+import io.vertx.core.Context;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.Promise;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.WriteStream;
 import org.jspecify.annotations.NullMarked;
@@ -27,7 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @NullMarked
 class AsyncInputWriteStreamImpl implements AsyncInputWriteStream {
 
-    private final Vertx vertx;
+    private final Keel keel;
     private final Context context;
     private final ConcurrentLinkedQueue<PendingWrite> buffer = new ConcurrentLinkedQueue<>();
     private final AtomicBoolean closed = new AtomicBoolean(false);
@@ -43,9 +47,9 @@ class AsyncInputWriteStreamImpl implements AsyncInputWriteStream {
     };
     private @Nullable Promise<Void> writeOverPromise;
 
-    public AsyncInputWriteStreamImpl(Vertx vertx) {
-        this.vertx = vertx;
-        this.context = vertx.getOrCreateContext();
+    public AsyncInputWriteStreamImpl(Keel keel) {
+        this.keel = keel;
+        this.context = keel.getOrCreateContext();
     }
 
     /**

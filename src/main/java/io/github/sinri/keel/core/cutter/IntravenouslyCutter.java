@@ -48,13 +48,11 @@ public abstract class IntravenouslyCutter<T> extends KeelVerticleBase {
 
     @Override
     protected Future<?> startVerticle() {
-        return this.intravenous.deployMe(
-                           getVertx(),
-                           new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER)
-                   )
+        DeploymentOptions deploymentOptions = new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER);
+        return this.intravenous.deployMe(getKeel(), deploymentOptions)
                                .andThen(ar -> {
                                    if (timeout > 0) {
-                                       timeoutTimer = vertx.setTimer(timeout, timer -> {
+                                       timeoutTimer = getKeel().setTimer(timeout, timer -> {
                                            this.timeoutTimer = timer;
                                            this.stopHere(new CutterTimeout());
                                        });
@@ -92,7 +90,7 @@ public abstract class IntravenouslyCutter<T> extends KeelVerticleBase {
 
             if (timeoutTimer != null) {
                 long x = timeoutTimer;
-                getVertx().cancelTimer(x);
+                getKeel().cancelTimer(x);
                 timeoutTimer = null;
             }
             if (throwable != null) {
@@ -103,26 +101,26 @@ public abstract class IntravenouslyCutter<T> extends KeelVerticleBase {
     }
 
     public final Future<Void> waitForAllHandled() {
-        return asyncCallRepeatedly(repeatedlyCallTask -> {
-            if (!this.readStopRef.get()) {
-                return asyncSleep(200L);
-            }
-            if (!intravenous.isNoDropsLeft()) {
-                return asyncSleep(100L);
-            }
-            intravenous.shutdown();
-            if (!intravenous.isUndeployed()) {
-                return asyncSleep(100L);
-            }
-            repeatedlyCallTask.stop();
-            return Future.succeededFuture();
-        })
-                .compose(v -> {
-                    if (lateStopCause.isInitialized()) {
-                        return Future.failedFuture(lateStopCause.get());
-                    }
-                    return Future.succeededFuture();
-                });
+        return getKeel().asyncCallRepeatedly(repeatedlyCallTask -> {
+                            if (!this.readStopRef.get()) {
+                                return getKeel().asyncSleep(200L);
+                            }
+                            if (!intravenous.isNoDropsLeft()) {
+                                return getKeel().asyncSleep(100L);
+                            }
+                            intravenous.shutdown();
+                            if (!intravenous.isUndeployed()) {
+                                return getKeel().asyncSleep(100L);
+                            }
+                            repeatedlyCallTask.stop();
+                            return Future.succeededFuture();
+                        })
+                        .compose(v -> {
+                            if (lateStopCause.isInitialized()) {
+                                return Future.failedFuture(lateStopCause.get());
+                            }
+                            return Future.succeededFuture();
+                        });
     }
 
     protected final AtomicReference<Buffer> getBufferRef() {

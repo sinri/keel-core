@@ -1,6 +1,10 @@
 package io.github.sinri.keel.core.maids.watchman;
 
-import io.vertx.core.*;
+import io.github.sinri.keel.base.async.Keel;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Future;
+import io.vertx.core.Handler;
+import io.vertx.core.ThreadingModel;
 import org.jspecify.annotations.NullMarked;
 
 
@@ -23,14 +27,14 @@ public class PureWatchman extends WatchmanImpl {
 
 
     public static Future<String> deploy(
-            Vertx vertx,
+            Keel keel,
             String watchmanName,
             Handler<Options> optionsHandler
     ) {
         Options options = new Options();
         optionsHandler.handle(options);
         PureWatchman keelPureWatchman = new PureWatchman(watchmanName, options);
-        return vertx.deployVerticle(keelPureWatchman, new DeploymentOptions()
+        return keel.deployVerticle(keelPureWatchman, new DeploymentOptions()
                 .setThreadingModel(ThreadingModel.WORKER)
         );
     }

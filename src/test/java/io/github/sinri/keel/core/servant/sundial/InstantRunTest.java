@@ -13,7 +13,7 @@ public class InstantRunTest extends KeelJUnit5Test {
     @Test
     void test(VertxTestContext testContext) {
         TestWorkerSundialPlan plan = new TestWorkerSundialPlan();
-        SundialPlan.executeAndAwait(getVertx(), plan)
+        SundialPlan.executeAndAwait(getKeel(), plan)
                    .compose(over -> {
                        getUnitTestLogger().info("WorkerSundialPlan over");
                        return Future.succeededFuture();

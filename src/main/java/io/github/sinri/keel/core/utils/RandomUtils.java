@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 
 
 /**
@@ -160,15 +159,12 @@ public class RandomUtils {
      * @throws IllegalStateException 如果无法创建伪随机数生成器
      */
     public static VertxContextPRNG getPRNG(Vertx vertx) {
-        return prngBox.ensureNonNullValue(new Supplier<ValueBox.EnsuredValueWithExpire<VertxContextPRNG>>() {
-            @Override
-            public ValueBox.EnsuredValueWithExpire<VertxContextPRNG> get() {
-                try {
-                    VertxContextPRNG prng1 = VertxContextPRNG.current(vertx);
-                    return new ValueBox.EnsuredValueWithExpire<>(prng1, 0);
-                } catch (Exception e) {
-                    throw new IllegalStateException("Failed to create VertxContextPRNG instance", e);
-                }
+        return prngBox.ensureNonNullValue(() -> {
+            try {
+                VertxContextPRNG prng1 = VertxContextPRNG.current(vertx);
+                return new ValueBox.EnsuredValueWithExpire<>(prng1, 0);
+            } catch (Exception e) {
+                throw new IllegalStateException("Failed to create VertxContextPRNG instance", e);
             }
         });
     }

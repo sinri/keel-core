@@ -13,7 +13,7 @@ public class Usage extends KeelInstantRunner {
     protected Future<Void> beforeRun() {
         lateSundial.set(new TestSundial());
         return this.lateSundial.get()
-                               .deployMe(getVertx())
+                               .deployMe(getKeel())
                                .compose(id -> {
                                    getLogger().info("sundial deployed: " + id);
                                    return Future.succeededFuture();
@@ -22,7 +22,7 @@ public class Usage extends KeelInstantRunner {
 
     @Override
     protected Future<Void> run() throws Exception {
-        return asyncSleep(3 * 60_000L)
+        return getKeel().asyncSleep(3 * 60_000L)
                 .compose(v -> {
                     getLogger().info("time up");
                     return Future.succeededFuture();

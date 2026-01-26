@@ -40,7 +40,7 @@ abstract class WatchmanImpl extends KeelVerticleBase implements Watchman {
     protected Future<Void> startVerticle() {
         this.lateWatchmanLogger.set(this.buildWatchmanLogger());
 
-        this.lateConsumer.ensure(() -> getVertx().eventBus().consumer(eventBusAddress()))
+        this.lateConsumer.ensure(() -> getKeel().eventBus().consumer(eventBusAddress()))
                          .handler(this::consumeHandleMassage)
                          .exceptionHandler(throwable -> getWatchmanLogger()
                                  .error(log -> log.message(watchmanName() + " ERROR").exception(throwable))
@@ -55,10 +55,10 @@ abstract class WatchmanImpl extends KeelVerticleBase implements Watchman {
         } catch (Exception ignore) {
             // 拟合不了拉倒
         }
-        getVertx().setPeriodic(
+        getKeel().setPeriodic(
                 interval(),
-                timerID -> getVertx().eventBus()
-                                     .send(eventBusAddress(), System.currentTimeMillis())
+                timerID -> getKeel().eventBus()
+                                    .send(eventBusAddress(), System.currentTimeMillis())
         );
 
         return Future.succeededFuture();
@@ -69,20 +69,20 @@ abstract class WatchmanImpl extends KeelVerticleBase implements Watchman {
         getWatchmanLogger().debug(r -> r.message(watchmanName() + " TRIGGERED FOR " + timestamp));
 
         long x = timestamp / interval();
-        getVertx().sharedData().getLockWithTimeout(eventBusAddress() + "@" + x, Math.min(3_000L, interval() - 1))
-                  .onComplete(lockAR -> {
-                      if (lockAR.failed()) {
-                          getWatchmanLogger().warning(r -> r.message("LOCK ACQUIRE FAILED FOR " + timestamp + " i.e. " + x));
-                      } else {
-                          Lock lock = lockAR.result();
-                          getWatchmanLogger().info(r -> r.message("LOCK ACQUIRED FOR " + timestamp + " i.e. " + x));
-                          regularHandler().handle(timestamp);
-                          getVertx().setTimer(interval(), timerID -> {
-                              lock.release();
-                              getWatchmanLogger().info(r -> r.message("LOCK RELEASED FOR " + timestamp + " i.e. " + x));
-                          });
-                      }
-                  });
+        getKeel().sharedData().getLockWithTimeout(eventBusAddress() + "@" + x, Math.min(3_000L, interval() - 1))
+                 .onComplete(lockAR -> {
+                     if (lockAR.failed()) {
+                         getWatchmanLogger().warning(r -> r.message("LOCK ACQUIRE FAILED FOR " + timestamp + " i.e. " + x));
+                     } else {
+                         Lock lock = lockAR.result();
+                         getWatchmanLogger().info(r -> r.message("LOCK ACQUIRED FOR " + timestamp + " i.e. " + x));
+                         regularHandler().handle(timestamp);
+                         getKeel().setTimer(interval(), timerID -> {
+                             lock.release();
+                             getWatchmanLogger().info(r -> r.message("LOCK RELEASED FOR " + timestamp + " i.e. " + x));
+                         });
+                     }
+                 });
     }
 
     @Override

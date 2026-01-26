@@ -54,12 +54,12 @@ public abstract class Intravenous<D> extends KeelVerticleBase {
 
     public Future<Void> shutdownAndAwait() {
         shutdown();
-        return asyncCallRepeatedly(repeatedlyCallTask -> {
+        return getKeel().asyncCallRepeatedly(repeatedlyCallTask -> {
             if (isUndeployed()) {
                 repeatedlyCallTask.stop();
                 return Future.succeededFuture();
             } else {
-                return asyncSleep(1000L);
+                return getKeel().asyncSleep(1000L);
             }
         });
     }

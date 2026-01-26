@@ -1,9 +1,8 @@
 package io.github.sinri.keel.core.utils.io;
 
-import io.github.sinri.keel.base.async.KeelAsyncMixin;
+import io.github.sinri.keel.base.async.Keel;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.ReadStream;
 import org.jspecify.annotations.NullMarked;
@@ -15,8 +14,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 @NullMarked
-class AsyncOutputReadStreamImpl implements AsyncOutputReadStream, KeelAsyncMixin {
-    private final Vertx vertx;
+class AsyncOutputReadStreamImpl implements AsyncOutputReadStream {
+    private final Keel keel;
 
     // Flow control state
     private final AtomicBoolean paused = new AtomicBoolean(true);  // Vert.x ReadStream 默认是暂停状态
@@ -33,8 +32,8 @@ class AsyncOutputReadStreamImpl implements AsyncOutputReadStream, KeelAsyncMixin
     private @Nullable Promise<Long> readOverPromise;
     private long totalBytesRead = 0;
 
-    public AsyncOutputReadStreamImpl(Vertx vertx) {
-        this.vertx = vertx;
+    public AsyncOutputReadStreamImpl(Keel keel) {
+        this.keel = keel;
         // Default handlers
         this.exceptionHandler = t -> {
         };
@@ -85,7 +84,7 @@ class AsyncOutputReadStreamImpl implements AsyncOutputReadStream, KeelAsyncMixin
         }
 
         // Use executeBlocking for the actual IO operation
-        vertx.executeBlocking(() -> {
+        keel.executeBlocking(() -> {
             try {
                 // Read up to 8KB chunks
                 // If demand is unlimited (Long.MAX_VALUE), read 8KB chunks
@@ -118,7 +117,7 @@ class AsyncOutputReadStreamImpl implements AsyncOutputReadStream, KeelAsyncMixin
             if (ar.failed()) {
                 // Handle error
                 Throwable cause = ar.cause();
-                vertx.runOnContext(v -> exceptionHandler.handle(cause));
+                keel.runOnContext(v -> exceptionHandler.handle(cause));
                 if (readOverPromise != null) {
                     readOverPromise.fail(cause);
                 }
@@ -132,7 +131,7 @@ class AsyncOutputReadStreamImpl implements AsyncOutputReadStream, KeelAsyncMixin
                 return;
             }
 
-            vertx.runOnContext(new Handler<Void>() {
+            keel.runOnContext(new Handler<Void>() {
                 @Override
                 public void handle(Void v) {
                     if (result.endOfStream) {
@@ -217,11 +216,6 @@ class AsyncOutputReadStreamImpl implements AsyncOutputReadStream, KeelAsyncMixin
     public ReadStream<Buffer> endHandler(Handler<Void> endHandler) {
         this.endHandler = endHandler;
         return this;
-    }
-
-    @Override
-    public Vertx getVertx() {
-        return vertx;
     }
 
     /**

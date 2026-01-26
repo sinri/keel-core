@@ -50,7 +50,7 @@ public abstract class Pleiades<T> extends KeelVerticleBase {
     @Override
     protected Future<Void> startVerticle() {
         this.latePleiadesLogger.set(buildPleiadesLogger());
-        lateConsumer.set(getVertx().eventBus().consumer(getAddress(), this::handleMessage));
+        lateConsumer.set(getKeel().eventBus().consumer(getAddress(), this::handleMessage));
         return Future.succeededFuture();
     }
 

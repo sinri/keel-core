@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.servant.sundial;
 
+import io.github.sinri.keel.base.async.Keel;
 import io.github.sinri.keel.base.verticles.KeelVerticleBase;
 import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
 import io.github.sinri.keel.core.utils.cron.ParsedCalenderElements;
@@ -8,7 +9,6 @@ import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
-import io.vertx.core.Vertx;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -47,7 +47,7 @@ public abstract class Sundial extends KeelVerticleBase {
     protected Future<Void> startVerticle() {
         this.logger = buildLogger();
         int delaySeconds = 61 - KeelCronExpression.parseCalenderToElements(Calendar.getInstance()).second;
-        this.timerID = getVertx().setPeriodic(delaySeconds * 1000L, 60_000L, timerID -> {
+        this.timerID = getKeel().setPeriodic(delaySeconds * 1000L, 60_000L, timerID -> {
             handleEveryMinute(Calendar.getInstance());
             refreshPlans();
         });
@@ -69,13 +69,13 @@ public abstract class Sundial extends KeelVerticleBase {
                                     @Override
                                     public Future<?> apply(KeelVerticleBase keelVerticleBase) {
                                         return plan.execute(
-                                                keelVerticleBase.getVertx(),
+                                                keelVerticleBase.getKeel(),
                                                 now,
                                                 getLogger()
                                         );
                                     }
                                 })
-                                .deployMe(getVertx(), new DeploymentOptions()
+                                .deployMe(getKeel(), new DeploymentOptions()
                                         .setThreadingModel(plan.expectedThreadingModel())
                                 )
                                 .onComplete(ar -> {
@@ -102,29 +102,29 @@ public abstract class Sundial extends KeelVerticleBase {
     }
 
     private void refreshPlans() {
-        asyncCallExclusively(
-                "io.github.sinri.keel.servant.sundial.KeelSundial.refreshPlans",
-                1000L,
-                () -> fetchPlans()
-                        .compose(plans -> {
-                            // treat null as NOT MODIFIED
-                            if (plans != null) {
-                                Set<String> toDelete = new HashSet<>(planMap.keySet());
-                                plans.forEach(plan -> {
-                                    toDelete.remove(plan.key());
-                                    planMap.put(plan.key(), plan);
-                                });
-                                if (!toDelete.isEmpty()) {
-                                    toDelete.forEach(planMap::remove);
-                                }
-                            }
-                            return Future.succeededFuture(null);
-                        })
-        )
-                .onFailure(throwable -> getLogger().error(log -> log
-                        .exception(throwable)
-                        .message("io.github.sinri.keel.core.servant.sundial.KeelSundial.refreshPlans exception"))
-                );
+        getKeel().asyncCallExclusively(
+                         "io.github.sinri.keel.servant.sundial.KeelSundial.refreshPlans",
+                         1000L,
+                         () -> fetchPlans()
+                                 .compose(plans -> {
+                                     // treat null as NOT MODIFIED
+                                     if (plans != null) {
+                                         Set<String> toDelete = new HashSet<>(planMap.keySet());
+                                         plans.forEach(plan -> {
+                                             toDelete.remove(plan.key());
+                                             planMap.put(plan.key(), plan);
+                                         });
+                                         if (!toDelete.isEmpty()) {
+                                             toDelete.forEach(planMap::remove);
+                                         }
+                                     }
+                                     return Future.succeededFuture(null);
+                                 })
+                 )
+                 .onFailure(throwable -> getLogger().error(log -> log
+                         .exception(throwable)
+                         .message("io.github.sinri.keel.core.servant.sundial.KeelSundial.refreshPlans exception"))
+                 );
     }
 
     /**
@@ -138,7 +138,7 @@ public abstract class Sundial extends KeelVerticleBase {
     protected Future<Void> stopVerticle() {
         if (this.timerID != null) {
             long x = timerID;
-            getVertx().cancelTimer(x);
+            getKeel().cancelTimer(x);
         }
         return Future.succeededFuture();
     }
@@ -148,8 +148,8 @@ public abstract class Sundial extends KeelVerticleBase {
      *
      * @return 部署结果
      */
-    public final Future<String> deployMe(Vertx vertx) {
-        return super.deployMe(vertx, new DeploymentOptions()
+    public final Future<String> deployMe(Keel keel) {
+        return super.deployMe(keel, new DeploymentOptions()
                 .setThreadingModel(ThreadingModel.WORKER));
     }
 }

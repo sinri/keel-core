@@ -38,7 +38,7 @@ abstract public class Gatling extends KeelVerticleBase {
     protected Future<Void> rest() {
         long actualRestInterval = new Random().nextLong(Math.toIntExact(options.getAverageRestInterval() / 2));
         actualRestInterval += options.getAverageRestInterval();
-        return asyncSleep(actualRestInterval);
+        return getKeel().asyncSleep(actualRestInterval);
     }
 
     abstract protected Logger buildGatlingLogger();
@@ -51,7 +51,7 @@ abstract public class Gatling extends KeelVerticleBase {
     protected Future<Void> startVerticle() {
         this.lateGatlingLogger.set(buildGatlingLogger());
         barrelUsed.set(0);
-        asyncCallRepeatedly(routineResult -> fireOnce());
+        getKeel().asyncCallRepeatedly(routineResult -> fireOnce());
         return Future.succeededFuture();
     }
 
@@ -79,7 +79,7 @@ abstract public class Gatling extends KeelVerticleBase {
                              barrelUsed.decrementAndGet();
                          });
 
-                         return asyncSleep(10L);
+                         return getKeel().asyncSleep(10L);
                      })
                      .recover(throwable -> {
                          getGatlingLogger().error(log -> log.exception(throwable).message("FAILED TO LOAD BULLET"));
@@ -93,7 +93,7 @@ abstract public class Gatling extends KeelVerticleBase {
      * @return 异步找到的可执行任务；为 null 时表示当前没有可执行的任务
      */
     private Future<@Nullable Bullet> loadOneBullet() {
-        return getVertx().sharedData()
+        return getKeel().sharedData()
                          .getLock("KeelGatling-%s-Load".formatted(this.options.getGatlingName()))
                          .compose(lock -> {
                              Supplier<Future<@Nullable Bullet>> bulletLoader = this.options.getBulletLoader();
@@ -106,11 +106,11 @@ abstract public class Gatling extends KeelVerticleBase {
     protected Future<Void> requireExclusiveLocksOfBullet(Bullet bullet) {
         if (!bullet.exclusiveLockSet().isEmpty()) {
             AtomicBoolean blocked = new AtomicBoolean(false);
-            return asyncCallIteratively(
+            return getKeel().asyncCallIteratively(
                     bullet.exclusiveLockSet(),
                     (exclusiveLock, task) -> {
                         String exclusiveLockName = "KeelGatling-Bullet-Exclusive-Lock-" + exclusiveLock;
-                        return getVertx().sharedData()
+                        return getKeel().sharedData()
                                          .getCounter(exclusiveLockName)
                                          .compose(Counter::incrementAndGet)
                                          .compose(increased -> {
@@ -137,9 +137,9 @@ abstract public class Gatling extends KeelVerticleBase {
     protected Future<Void> releaseExclusiveLocksOfBullet(Bullet bullet) {
         bullet.exclusiveLockSet();
         if (!bullet.exclusiveLockSet().isEmpty()) {
-            return asyncCallIteratively(bullet.exclusiveLockSet(), (exclusiveLock, task) -> {
+            return getKeel().asyncCallIteratively(bullet.exclusiveLockSet(), (exclusiveLock, task) -> {
                 String exclusiveLockName = "KeelGatling-Bullet-Exclusive-Lock-" + exclusiveLock;
-                return getVertx().sharedData().getCounter(exclusiveLockName)
+                return getKeel().sharedData().getCounter(exclusiveLockName)
                                  .compose(counter -> counter.decrementAndGet()
                                                             .compose(x -> Future.succeededFuture()));
             });

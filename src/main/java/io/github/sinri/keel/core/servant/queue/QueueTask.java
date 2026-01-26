@@ -1,5 +1,6 @@
 package io.github.sinri.keel.core.servant.queue;
 
+import io.github.sinri.keel.base.async.Keel;
 import io.github.sinri.keel.base.verticles.KeelVerticleBase;
 import io.github.sinri.keel.logger.api.LateObject;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
@@ -7,7 +8,6 @@ import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
-import io.vertx.core.Vertx;
 import org.jspecify.annotations.NullMarked;
 
 
@@ -98,10 +98,10 @@ public abstract class QueueTask extends KeelVerticleBase {
      * @return 部署结果
      */
 
-    public Future<String> deployMe(Vertx vertx) {
+    public Future<String> deployMe(Keel keel) {
         var deploymentOptions = new DeploymentOptions();
         deploymentOptions.setThreadingModel(expectedThreadingModel());
-        return super.deployMe(vertx, deploymentOptions);
+        return super.deployMe(keel, deploymentOptions);
     }
 
 

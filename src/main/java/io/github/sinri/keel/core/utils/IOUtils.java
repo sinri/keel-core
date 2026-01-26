@@ -1,10 +1,10 @@
 package io.github.sinri.keel.core.utils;
 
 import io.github.sinri.keel.base.annotations.TechnicalPreview;
+import io.github.sinri.keel.base.async.Keel;
 import io.github.sinri.keel.core.utils.io.AsyncInputWriteStream;
 import io.github.sinri.keel.core.utils.io.AsyncOutputReadStream;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.ReadStream;
 import io.vertx.core.streams.WriteStream;
@@ -24,8 +24,8 @@ public class IOUtils {
     }
 
     @TechnicalPreview(since = "5.0.0")
-    public static AsyncOutputReadStream toReadStream(Vertx vertx, InputStream inputStream, Handler<ReadStream<Buffer>> handler) {
-        var readStream = AsyncOutputReadStream.create(vertx);
+    public static AsyncOutputReadStream toReadStream(Keel keel, InputStream inputStream, Handler<ReadStream<Buffer>> handler) {
+        var readStream = AsyncOutputReadStream.create(keel);
         readStream.pause();
         handler.handle(readStream);
         readStream.resume();
@@ -34,8 +34,8 @@ public class IOUtils {
     }
 
     @TechnicalPreview(since = "5.0.0")
-    public static AsyncInputWriteStream toWriteStream(Vertx vertx, OutputStream outputStream, Handler<WriteStream<Buffer>> handler) {
-        var writeStream = AsyncInputWriteStream.create(vertx);
+    public static AsyncInputWriteStream toWriteStream(Keel keel, OutputStream outputStream, Handler<WriteStream<Buffer>> handler) {
+        var writeStream = AsyncInputWriteStream.create(keel);
         handler.handle(writeStream);
         writeStream.wrap(outputStream);
         return writeStream;

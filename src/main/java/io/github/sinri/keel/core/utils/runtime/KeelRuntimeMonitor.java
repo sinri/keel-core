@@ -1,8 +1,9 @@
 package io.github.sinri.keel.core.utils.runtime;
 
+import io.github.sinri.keel.base.verticles.KeelVerticleBase;
 import io.github.sinri.keel.core.utils.RuntimeUtils;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
@@ -17,13 +18,34 @@ import java.util.concurrent.atomic.AtomicReference;
  * @since 5.0.0
  */
 @NullMarked
-public class KeelRuntimeMonitor {
+public class KeelRuntimeMonitor extends KeelVerticleBase {
     private final AtomicReference<@Nullable GCStatResult> _lastGCRef = new AtomicReference<>();
     private final AtomicReference<@Nullable CPUTimeResult> _lastCPUTimeRef = new AtomicReference<>();
-    private final Vertx vertx;
+    private final long interval;
+    private final Handler<MonitorSnapshot> handler;
 
-    public KeelRuntimeMonitor(Vertx vertx) {
-        this.vertx = vertx;
+    public KeelRuntimeMonitor() {
+        this(1000L, snapshot -> {
+            // do nothing
+        });
+    }
+
+    /**
+     *
+     * @param interval the monitoring interval in milliseconds
+     * @param handler  the handler to receive each monitoring snapshot
+     */
+    public KeelRuntimeMonitor(long interval, Handler<MonitorSnapshot> handler) {
+        this.interval = interval;
+        this.handler = handler;
+    }
+
+    protected long getInterval() {
+        return interval;
+    }
+
+    protected Handler<MonitorSnapshot> getHandler() {
+        return handler;
     }
 
     /**
@@ -32,12 +54,10 @@ public class KeelRuntimeMonitor {
      * After the specified interval, actual snapshots will be taken and the handler will be invoked
      * with delta statistics calculated from the previous snapshot.
      *
-     * @param interval the monitoring interval in milliseconds
-     * @param handler  the handler to receive monitoring snapshots
      */
-    public void startRuntimeMonitor(long interval, Handler<MonitorSnapshot> handler) {
+    private void startRuntimeMonitor() {
         // after [interval] waiting, actual snapshots would be taken.
-        vertx.setPeriodic(interval, timer -> {
+        getKeel().setPeriodic(getInterval(), timer -> {
             GCStatResult gcSnapshot = RuntimeUtils.getGCSnapshot();
             CPUTimeResult cpuTimeSnapshot = RuntimeUtils.getCPUTimeSnapshot();
             JVMMemoryResult jvmMemoryResultSnapshot = RuntimeUtils.makeJVMMemorySnapshot();
@@ -65,7 +85,13 @@ public class KeelRuntimeMonitor {
 
             MonitorSnapshot monitorSnapshot = new MonitorSnapshot(gcDiff, cpuTimeDiff, jvmMemoryResultSnapshot);
 
-            handler.handle(monitorSnapshot);
+            getHandler().handle(monitorSnapshot);
         });
+    }
+
+    @Override
+    protected Future<?> startVerticle() {
+        startRuntimeMonitor();
+        return Future.succeededFuture();
     }
 }

@@ -1,6 +1,6 @@
 package io.github.sinri.keel.core.servant.sundial;
 
-import io.github.sinri.keel.base.async.KeelAsyncMixin;
+import io.github.sinri.keel.base.async.Keel;
 import io.github.sinri.keel.base.verticles.KeelVerticleBase;
 import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
 import io.github.sinri.keel.logger.api.factory.LoggerFactory;
@@ -8,7 +8,6 @@ import io.github.sinri.keel.logger.api.logger.SpecificLogger;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
-import io.vertx.core.Vertx;
 import org.jspecify.annotations.NullMarked;
 
 import java.util.Calendar;
@@ -19,13 +18,13 @@ import java.util.Calendar;
  * @since 5.0.0
  */
 @NullMarked
-public interface SundialPlan extends KeelAsyncMixin {
-    static Future<Void> executeAndAwait(Vertx vertx, SundialPlan plan, Calendar now, SpecificLogger<SundialSpecificLog> sundialSpecificLogger) {
+public interface SundialPlan {
+    static Future<Void> executeAndAwait(Keel keel, SundialPlan plan, Calendar now, SpecificLogger<SundialSpecificLog> sundialSpecificLogger) {
         KeelVerticleBase keelVerticleBase = KeelVerticleBase.wrap(
                 verticleBase -> {
-                    verticleBase.asyncSleep(1)
+                    verticleBase.getKeel().asyncSleep(1)
                                 .compose(v -> {
-                                    return plan.execute(vertx, now, sundialSpecificLogger);
+                                    return plan.execute(keel, now, sundialSpecificLogger);
                                 })
                                 .compose(v -> {
                                     return verticleBase.undeployMe();
@@ -35,7 +34,7 @@ public interface SundialPlan extends KeelAsyncMixin {
                 }
         );
         return keelVerticleBase.deployMe(
-                                       vertx,
+                                       keel,
                                        new DeploymentOptions()
                                                .setThreadingModel(plan.expectedThreadingModel())
                                )
@@ -44,9 +43,9 @@ public interface SundialPlan extends KeelAsyncMixin {
                                });
     }
 
-    static Future<Void> executeAndAwait(Vertx vertx, SundialPlan plan) {
+    static Future<Void> executeAndAwait(Keel keel, SundialPlan plan) {
         return executeAndAwait(
-                vertx,
+                keel,
                 plan, Calendar.getInstance(), LoggerFactory.getShared()
                                                            .createLogger(plan.getClass()
                                                                              .getName(), SundialSpecificLog::new));
@@ -67,11 +66,11 @@ public interface SundialPlan extends KeelAsyncMixin {
     /**
      * 任务计划执行逻辑。
      *
-     * @param vertx                 定时任务运行的 Vertx 实例
+     * @param keel                  定时任务运行的 Vertx 实例
      * @param now                   本次定时任务运行对应的触发时间
      * @param sundialSpecificLogger 日晷定时任务特定日志记录器
      */
-    Future<Void> execute(Vertx vertx, Calendar now, SpecificLogger<SundialSpecificLog> sundialSpecificLogger);
+    Future<Void> execute(Keel keel, Calendar now, SpecificLogger<SundialSpecificLog> sundialSpecificLogger);
 
     default ThreadingModel expectedThreadingModel() {
         return ThreadingModel.WORKER;

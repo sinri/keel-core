@@ -1,4 +1,24 @@
 # Jekyll 站点源目录：仓库根下 docs/（含 _config.yml，主题 jekyll-theme-merlot）
+#
+# -----------------------------------------------------------------------------
+# 首次运行前必须完成（否则 actions/configure-pages 会报 Not Found / Get Pages site failed）：
+#
+# 1. 打开仓库 Settings → Pages
+# 2. 在「Build and deployment」中，将 Source 选为「GitHub Actions」（不要选 Deploy from a branch）
+# 3. 保存后再重新运行本 workflow
+#
+# 说明：https://docs.github.com/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site
+#
+# 若希望通过 workflow 自动启用 Pages，可将下方 enablement 设为 true，并配置可使用
+# 仓库 administration/pages 权限的 token（不能使用默认 GITHUB_TOKEN），例如：
+#   - name: Setup Pages
+#     uses: actions/configure-pages@v5
+#     with:
+#       enablement: true
+#       token: ${{ secrets.PAGES_SETUP_TOKEN }}
+# 详见 configure-pages 的 action.yml 中 enablement 说明。
+# -----------------------------------------------------------------------------
+
 name: Deploy Jekyll with GitHub Pages dependencies preinstalled
 
 on:
@@ -29,6 +49,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      # 依赖仓库已启用 Pages 且 Source = GitHub Actions；见本文件顶部说明
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Build with Jekyll

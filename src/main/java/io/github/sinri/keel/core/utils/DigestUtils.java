@@ -6,6 +6,7 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -46,14 +47,13 @@ public class DigestUtils {
     }
 
     /**
-     * 计算字符串的 MD5 摘要值（小写十六进制）。
+     * 计算以UTF-8编码的字符串的 MD5 摘要值（小写十六进制）。
      *
      * @param raw 原始字符串
      * @return MD5 摘要值，使用小写字母和数字的十六进制表示
      */
-
     public static String md5(String raw) {
-        return md5(raw.getBytes());
+        return md5(raw.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -69,14 +69,14 @@ public class DigestUtils {
     }
 
     /**
-     * 计算字符串的 MD5 摘要值（大写十六进制）。
+     * 计算以UTF-8编码的字符串的 MD5 摘要值（大写十六进制）。
      *
      * @param raw 原始字符串
      * @return MD5 摘要值，使用大写字母和数字的十六进制表示
      */
 
     public static String MD5(String raw) {
-        return MD5(raw.getBytes());
+        return MD5(raw.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -106,7 +106,7 @@ public class DigestUtils {
     }
 
     /**
-     * 使用指定算法计算字符串的摘要值（小写十六进制）。
+     * 使用指定算法计算以UTF-8编码的字符串的摘要值（小写十六进制）。
      *
      * @param algorithm 摘要算法名称（如 "SHA-256", "SHA-512" 等）
      * @param raw       原始字符串
@@ -114,7 +114,7 @@ public class DigestUtils {
      * @throws NoSuchAlgorithmException 如果指定的算法不可用
      */
     public static String digestToLower(String algorithm, String raw) throws NoSuchAlgorithmException {
-        return digestToLower(algorithm, raw.getBytes());
+        return digestToLower(algorithm, raw.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -132,7 +132,7 @@ public class DigestUtils {
     }
 
     /**
-     * 使用指定算法计算字符串的摘要值（大写十六进制）。
+     * 使用指定算法计算以UTF-8编码的字符串的摘要值（大写十六进制）。
      *
      * @param algorithm 摘要算法名称（如 "SHA-256", "SHA-512" 等）
      * @param raw       原始字符串
@@ -140,11 +140,11 @@ public class DigestUtils {
      * @throws NoSuchAlgorithmException 如果指定的算法不可用
      */
     public static String digestToUpper(String algorithm, String raw) throws NoSuchAlgorithmException {
-        return digestToUpper(algorithm, raw.getBytes());
+        return digestToUpper(algorithm, raw.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
-     * 计算字符串的 SHA-512 摘要值（大写十六进制）。
+     * 计算以UTF-8编码的字符串的 SHA-512 摘要值（大写十六进制）。
      *
      * @param raw 原始字符串
      * @return SHA-512 摘要值，使用大写字母和数字的十六进制表示
@@ -160,7 +160,7 @@ public class DigestUtils {
     }
 
     /**
-     * 计算字符串的 SHA-512 摘要值（小写十六进制）。
+     * 计算以UTF-8编码的字符串的 SHA-512 摘要值（小写十六进制）。
      *
      * @param raw 原始字符串
      * @return SHA-512 摘要值，使用小写字母和数字的十六进制表示
@@ -176,7 +176,7 @@ public class DigestUtils {
     }
 
     /**
-     * 计算字符串的 SHA-1 摘要值（大写十六进制）。
+     * 计算以UTF-8编码的字符串的 SHA-1 摘要值（大写十六进制）。
      *
      * @param raw 原始字符串
      * @return SHA-1 摘要值，使用大写字母和数字的十六进制表示
@@ -192,7 +192,7 @@ public class DigestUtils {
     }
 
     /**
-     * 计算字符串的 SHA-1 摘要值（小写十六进制）。
+     * 计算以UTF-8编码的字符串的 SHA-1 摘要值（小写十六进制）。
      *
      * @param raw 原始字符串
      * @return SHA-1 摘要值，使用小写字母和数字的十六进制表示
@@ -221,9 +221,8 @@ public class DigestUtils {
      */
     private static byte[] compute_hmac_sha1(String raw, String key) throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException {
         String MAC_NAME = "HmacSHA1";
-        String ENCODING = "UTF-8";
 
-        byte[] data = key.getBytes(ENCODING);
+        byte[] data = key.getBytes(StandardCharsets.UTF_8);
         //根据给定的字节数组构造一个密钥,第二个参数指定一个密钥算法的名称
         SecretKey secretKey = new SecretKeySpec(data, MAC_NAME);
         //生成一个指定 Mac 算法 的 Mac 对象
@@ -231,7 +230,7 @@ public class DigestUtils {
         //用给定密钥初始化 Mac 对象
         mac.init(secretKey);
 
-        byte[] text = raw.getBytes(ENCODING);
+        byte[] text = raw.getBytes(StandardCharsets.UTF_8);
         //完成 Mac 操作
         return mac.doFinal(text);
     }
@@ -256,7 +255,7 @@ public class DigestUtils {
     }
 
     /**
-     * 计算字符串的 HMAC-SHA1 摘要值（小写十六进制）。
+     * 计算字符串的 HMAC-SHA1 摘要值（小写十六进制）。以UTF-8编码处理。
      *
      * @param raw 原始字符串
      * @param key 密钥字符串
@@ -275,7 +274,7 @@ public class DigestUtils {
     }
 
     /**
-     * 计算字符串的 HMAC-SHA1 摘要值（大写十六进制）。
+     * 计算字符串的 HMAC-SHA1 摘要值（大写十六进制）。以UTF-8编码处理。
      *
      * @param raw 原始字符串
      * @param key 密钥字符串

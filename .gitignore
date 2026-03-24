@@ -115,3 +115,9 @@ pom-shade.xml
 /.cursor/
 /.vscode/
 CLAUDE.md
+
+### Jekyll（docs/ 作为 GitHub Pages 源）###
+docs/_site/
+docs/.jekyll-cache/
+docs/.sass-cache/
+docs/vendor/bundle/

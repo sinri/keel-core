@@ -17,7 +17,9 @@ import java.util.concurrent.atomic.AtomicLong;
 class AsyncOutputReadStreamImpl implements AsyncOutputReadStream {
     private final Keel keel;
 
-    // Flow control state
+    private static final int CHUNK_SIZE = 8192;
+
+    // Flow control state (demand counts chunks, not bytes, per Vert.x ReadStream contract)
     private final AtomicBoolean paused = new AtomicBoolean(true);  // Vert.x ReadStream 默认是暂停状态
     private final AtomicLong demand = new AtomicLong(0);
     private final AtomicBoolean reading = new AtomicBoolean(false);
@@ -84,19 +86,11 @@ class AsyncOutputReadStreamImpl implements AsyncOutputReadStream {
         }
 
         // Use executeBlocking for the actual IO operation
+        // Wrap with timeout to prevent indefinite blocking (e.g., when waiting for System.in input)
+        Promise<ReadResult> resultPromise = Promise.promise();
         keel.executeBlocking(() -> {
             try {
-                // Read up to 8KB chunks
-                // If demand is unlimited (Long.MAX_VALUE), read 8KB chunks
-                // Otherwise read up to the remaining demand
-                long currentDemand = demand.get();
-                int chunkSize = (currentDemand == Long.MAX_VALUE) ? 8192 : (int) Math.min(8192, currentDemand);
-                if (chunkSize <= 0) {
-                    //System.out.println("readNextChunk demand is zero or less");
-                    return null; // No demand
-                }
-
-                byte[] buffer = new byte[chunkSize];
+                byte[] buffer = new byte[CHUNK_SIZE];
                 int bytesRead = inputStream.read(buffer);
 
                 if (bytesRead == -1) {
@@ -111,12 +105,39 @@ class AsyncOutputReadStreamImpl implements AsyncOutputReadStream {
             } catch (IOException e) {
                 throw new RuntimeException("IO error while reading", e);
             }
-        }, false).onComplete(ar -> {
+        }, false).onComplete(resultPromise);
+
+        // Set timeout - if operation takes too long, it will be retried
+        long timeoutId = keel.setTimer(60000, timerId -> {
+            // Timeout - fail the promise and trigger retry
+            if (!resultPromise.future().isComplete()) {
+                resultPromise.fail(new java.util.concurrent.TimeoutException("Read operation timed out after 60 seconds"));
+            }
+        });
+
+        resultPromise.future().onComplete(ar -> {
+            // Cancel the timeout timer
+            keel.cancelTimer(timeoutId);
             reading.set(false); // Clear reading flag
 
             if (ar.failed()) {
-                // Handle error
+                // Check if it's a timeout
                 Throwable cause = ar.cause();
+                boolean isTimeout = cause instanceof java.util.concurrent.TimeoutException
+                        || (cause != null && cause.getMessage() != null && cause.getMessage().contains("timeout"));
+
+                if (isTimeout) {
+                    // Timeout - retry later (non-blocking)
+                    // This prevents the worker thread from being blocked indefinitely
+                    keel.setTimer(100, timerId -> {
+                        if (!paused.get() && demand.get() > 0) {
+                            readNextChunk();
+                        }
+                    });
+                    return;
+                }
+
+                // Handle other errors
                 keel.runOnContext(v -> exceptionHandler.handle(cause));
                 if (readOverPromise != null) {
                     readOverPromise.fail(cause);
@@ -144,10 +165,10 @@ class AsyncOutputReadStreamImpl implements AsyncOutputReadStream {
                         // Data available
                         totalBytesRead += result.bytesRead;
 
-                        // Only decrease demand if it's not unlimited
+                        // Decrease demand by 1 chunk (not by bytes), unless unlimited
                         long currentDemand = demand.get();
                         if (currentDemand != Long.MAX_VALUE) {
-                            demand.addAndGet(-result.bytesRead);
+                            demand.decrementAndGet();
                         }
 
                         byte[] resultData = result.data;
@@ -157,8 +178,7 @@ class AsyncOutputReadStreamImpl implements AsyncOutputReadStream {
                         }
 
                         // Continue reading if there's still demand and not paused
-                        // For unlimited demand, continue until end of stream
-                        if ((demand.get() > 0 || currentDemand == Long.MAX_VALUE) && !paused.get()) {
+                        if (demand.get() > 0 && !paused.get()) {
                             AsyncOutputReadStreamImpl.this.readNextChunk();
                         }
                     }

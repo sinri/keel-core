@@ -2,7 +2,7 @@ plugins {
     `java-library`
     `maven-publish`
     signing
-    id("org.jreleaser") version "1.22.0"
+    id("org.jreleaser") version "1.23.0"
 }
 
 // Project metadata from gradle.properties
@@ -20,8 +20,12 @@ val developerEmail: String by project
 val developerOrganization: String by project
 val developerOrganizationUrl: String by project
 
-val sonatypeUsername: String by project
-val sonatypePassword: String by project
+// 仅发布到 Maven Central 时需要；可放在 ~/.gradle/gradle.properties（勿提交仓库）
+// 未配置时仍可 publish 到 build/staging-deploy，且不会执行 jreleaserDeploy
+val sonatypeUsername: String? = findProperty("sonatypeUsername")?.toString()
+val sonatypePassword: String? = findProperty("sonatypePassword")?.toString()
+val sonatypeCredentialsPresent =
+    !sonatypeUsername.isNullOrBlank() && !sonatypePassword.isNullOrBlank()
 
 // Dependency versions
 val jspecifyVersion: String by project
@@ -188,15 +192,24 @@ publishing {
 
 // 在 publishing 配置块之后添加
 tasks.named("publish") {
-    // 仅当版本是正式版本时，自动触发 jreleaserDeploy
+    // 仅当版本是正式版本且配置了 Central 凭据时，自动触发 jreleaserDeploy
     if (!version.toString().endsWith("SNAPSHOT") &&
         !version.toString().contains(Regex("-[A-Za-z]+"))
     ) {
         doFirst {
             logger.lifecycle(">>> Publishing release version $version")
-            logger.lifecycle(">>> Will automatically deploy to Maven Central after staging")
+            if (sonatypeCredentialsPresent) {
+                logger.lifecycle(">>> Will automatically deploy to Maven Central after staging")
+            } else {
+                logger.lifecycle(
+                    ">>> sonatypeUsername / sonatypePassword 未配置 — 跳过 jreleaserDeploy；" +
+                            "制品输出目录: build/staging-deploy。发布 Maven Central 时在 gradle.properties 或 ~/.gradle/gradle.properties 配置二者。"
+                )
+            }
         }
-        finalizedBy("jreleaserDeploy")
+        if (sonatypeCredentialsPresent) {
+            finalizedBy("jreleaserDeploy")
+        }
     }
 }
 
@@ -232,10 +245,10 @@ jreleaser {
                     stagingRepository("build/staging-deploy")
 
                     // 认证信息通常通过环境变量提供，或在这里显式设置
-                    username.set(sonatypeUsername)
-                    password.set(sonatypePassword)
+                    username.set(sonatypeUsername ?: "")
+                    password.set(sonatypePassword ?: "")
 
-                    enabled.set(true)
+                    enabled.set(sonatypeCredentialsPresent)
                 }
             }
         }

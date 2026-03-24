@@ -28,8 +28,8 @@ public class IOUtils {
         var readStream = AsyncOutputReadStream.create(keel);
         readStream.pause();
         handler.handle(readStream);
-        readStream.resume();
         readStream.wrap(inputStream);
+        readStream.resume();
         return readStream;
     }
 

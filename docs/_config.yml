@@ -1,0 +1,25 @@
+# GitHub Pages（Jekyll）— Merlot 主题
+# 构建源目录为本仓库的 docs/，见 .github/workflows/jekyll-gh-pages.yml
+# 本地预览：在 docs/ 下执行 bundle install && bundle exec jekyll serve
+
+title: Keel Core
+description: Keel Framework Core Layer — 用户文档与模块说明
+lang: zh-CN
+
+theme: jekyll-theme-merlot
+show_downloads: false
+
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Project Pages 必填：仓库为 https://github.com/sinri/keel-core 时站点根路径为 /keel-core
+# 若改为 User/Organization 站点（username.github.io），请将 baseurl 改为 "" 并调整 url
+baseurl: "/keel-core"
+url: "https://sinri.github.io"
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - vendor

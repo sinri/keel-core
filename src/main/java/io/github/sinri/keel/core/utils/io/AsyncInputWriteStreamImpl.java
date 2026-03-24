@@ -35,6 +35,7 @@ class AsyncInputWriteStreamImpl implements AsyncInputWriteStream {
     private final Context context;
     private final ConcurrentLinkedQueue<PendingWrite> buffer = new ConcurrentLinkedQueue<>();
     private final AtomicBoolean closed = new AtomicBoolean(false);
+    private final AtomicBoolean previouslyFull = new AtomicBoolean(false);
 
     private volatile int maxSize = 1000;
     private volatile int maxBufferSize = Integer.MAX_VALUE;
@@ -291,31 +292,13 @@ class AsyncInputWriteStreamImpl implements AsyncInputWriteStream {
     }
 
     /**
-     * Transfers all buffered data to the given OutputStream.
-     * This method should be called from a blocking execution context.
-     *
-     * @param os OutputStream to write to
-     * @throws IOException if an I/O error occurs
-     */
-    private void transferTo(OutputStream os) throws IOException {
-        PendingWrite write;
-        while ((write = buffer.poll()) != null) {
-            if (write.data != null) {
-                // Write buffer data
-                byte[] bytes = write.data.getBytes();
-                os.write(bytes);
-                os.flush();
-            }
-            // Complete the write promise
-            write.completion.tryComplete();
-        }
-    }
-
-    /**
      * Checks if the drain handler should be triggered.
+     * Only fires when the queue transitions from full to not-full.
      */
     private void checkDrain() {
-        if (!writeQueueFull()) {
+        if (writeQueueFull()) {
+            previouslyFull.set(true);
+        } else if (previouslyFull.compareAndSet(true, false)) {
             context.runOnContext(new Handler<Void>() {
                 @Override
                 public void handle(Void event) {

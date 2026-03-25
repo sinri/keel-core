@@ -10,7 +10,6 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,12 +20,6 @@ import java.util.regex.Pattern;
  */
 @NullMarked
 public class StringUtils {
-    private static final Map<String, String> HttpEntityEscapeDictionary = Map.of(
-            "&", "&amp;",
-            "@", "&commat;",
-            "<", "&lt;",
-            ">", "&gt;"
-    );
     private static final String NyaCodeDict = "-ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz.";
     private static final char[] NyaCodeDictChars = NyaCodeDict.toCharArray();
 
@@ -313,12 +306,19 @@ public class StringUtils {
     }
 
     /**
+     * Escapes special characters for safe inclusion in HTML content.
+     * The {@code &} character is replaced first to avoid double-escaping.
+     *
      * @see <a href="https://www.freeformatter.com/html-entities.html">HTTP Entities</a>
      */
     public static String escapeForHttpEntity(String raw) {
-        AtomicReference<String> x = new AtomicReference<>(raw);
-        HttpEntityEscapeDictionary.forEach((k, v) -> x.set(x.get().replace(k, v)));
-        return x.get();
+        // & must be replaced first to avoid double-escaping
+        String result = raw.replace("&", "&amp;");
+        result = result.replace("<", "&lt;");
+        result = result.replace(">", "&gt;");
+        result = result.replace("\"", "&quot;");
+        result = result.replace("'", "&#39;");
+        return result;
     }
 
     /**

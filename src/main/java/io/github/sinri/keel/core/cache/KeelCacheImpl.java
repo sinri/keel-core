@@ -31,6 +31,7 @@ class KeelCacheImpl<K, V> implements KeelCacheInterface<K, V> {
 
     @Override
     public KeelCacheInterface<K, V> setDefaultLifeInSeconds(long lifeInSeconds) {
+        ValueWrapper.computeDeath(System.currentTimeMillis(), lifeInSeconds);
         defaultLifeInSeconds = lifeInSeconds;
         return this;
     }

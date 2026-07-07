@@ -29,7 +29,19 @@ class ValueWrapper<P> {
     public ValueWrapper(P value, long lifeInSeconds) {
         this.value = new SoftReference<>(value);
         this.birth = System.currentTimeMillis();
-        this.death = this.birth + lifeInSeconds * 1000L;
+        this.death = computeDeath(this.birth, lifeInSeconds);
+    }
+
+    static long computeDeath(long birth, long lifeInSeconds) {
+        if (lifeInSeconds <= 0) {
+            throw new IllegalArgumentException("lifeInSeconds must be greater than 0");
+        }
+        try {
+            long lifeInMillis = Math.multiplyExact(lifeInSeconds, 1000L);
+            return Math.addExact(birth, lifeInMillis);
+        } catch (ArithmeticException e) {
+            throw new IllegalArgumentException("lifeInSeconds is too large", e);
+        }
     }
 
     /**

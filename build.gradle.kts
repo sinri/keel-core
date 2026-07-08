@@ -30,11 +30,11 @@ val sonatypeCredentialsPresent =
 // Dependency versions
 val jspecifyVersion: String by project
 val vertxVersion: String by project
-val jacksonVersion: String by project
+//val jacksonVersion: String by project
 val commonmarkVersion: String by project
 val oshiCoreVersion: String by project
-val slf4jVersion: String by project
-val log4jVersion: String by project
+//val slf4jVersion: String by project
+//val log4jVersion: String by project
 val keelBaseVersion: String by project
 val keelTestVersion: String by project
 

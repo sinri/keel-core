@@ -11,7 +11,7 @@ import io.vertx.core.shareddata.Counter;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -36,7 +36,8 @@ abstract public class Gatling extends KeelVerticleBase {
     }
 
     protected Future<Void> rest() {
-        long actualRestInterval = new Random().nextLong(Math.toIntExact(options.getAverageRestInterval() / 2));
+        long actualRestInterval = ThreadLocalRandom.current()
+                                                     .nextLong(Math.toIntExact(options.getAverageRestInterval() / 2));
         actualRestInterval += options.getAverageRestInterval();
         return getKeel().asyncSleep(actualRestInterval);
     }

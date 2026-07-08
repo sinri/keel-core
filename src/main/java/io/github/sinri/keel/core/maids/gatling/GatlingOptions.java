@@ -14,6 +14,8 @@ import java.util.function.Supplier;
  */
 @NullMarked
 public class GatlingOptions {
+    public static final long MAX_AVERAGE_REST_INTERVAL = Integer.MAX_VALUE * 2L;
+
     private final String gatlingName;
     private int barrels;
     private long averageRestInterval;
@@ -41,9 +43,12 @@ public class GatlingOptions {
     }
 
     /**
-     * @param barrels 枪管数量（并发任务数）
+     * @param barrels 枪管数量（并发任务数），至少为 1
      */
     public GatlingOptions setBarrels(int barrels) {
+        if (barrels < 1) {
+            throw new IllegalArgumentException("barrels must be at least 1");
+        }
         this.barrels = barrels;
         return this;
     }
@@ -56,9 +61,18 @@ public class GatlingOptions {
     }
 
     /**
-     * @param averageRestInterval 弹带更换平均等待时长（没有新任务时的休眠期，单位毫秒）
+     * @param averageRestInterval 弹带更换平均等待时长（没有新任务时的休眠期，单位毫秒），范围为
+     *                            [2, MAX_AVERAGE_REST_INTERVAL]
      */
     public GatlingOptions setAverageRestInterval(long averageRestInterval) {
+        if (averageRestInterval < 2) {
+            throw new IllegalArgumentException("averageRestInterval must be at least 2");
+        }
+        if (averageRestInterval > MAX_AVERAGE_REST_INTERVAL) {
+            throw new IllegalArgumentException(
+                    "averageRestInterval must be no greater than " + MAX_AVERAGE_REST_INTERVAL
+            );
+        }
         this.averageRestInterval = averageRestInterval;
         return this;
     }

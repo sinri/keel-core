@@ -6,7 +6,6 @@ import io.github.sinri.keel.core.utils.cron.KeelCronExpression;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
 import io.vertx.core.ThreadingModel;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.shareddata.AsyncMap;
 import org.jspecify.annotations.NullMarked;
@@ -205,23 +204,25 @@ public class CronWatchman extends WatchmanImpl {
                    .compose(AsyncMap::entries)
                    .compose(entries -> {
                        entries.forEach((k, v) -> {
-                           String cronExpression = String.valueOf(k);
-                           if (new KeelCronExpression(cronExpression).match(calendar)) {
-                               JsonArray eventHandlerClassNameArray = new JsonArray(String.valueOf(v));
-                               eventHandlerClassNameArray.forEach(eventHandlerClassName -> {
-                                   try {
-                                       Class<?> aClass = Class.forName(String.valueOf(eventHandlerClassName));
-                                       if (WatchmanEventHandler.class.isAssignableFrom(aClass)) {
-                                           WatchmanEventHandler eventHandler =
-                                                   (WatchmanEventHandler) aClass.getConstructor()
-                                                                                .newInstance();
-                                           list.add(eventHandler);
-                                       }
-                                   } catch (Throwable e) {
-                                       //Keel.outputLogger().exception(e);
-                                       System.out.println("EXCEPTION: " + e);
+                           try {
+                               JsonObject jsonObject = (JsonObject) v;
+                               String cronExpression = jsonObject.getString("cron");
+                               String eventHandlerClassName = jsonObject.getString("handler");
+
+                               if (cronExpression != null
+                                       && eventHandlerClassName != null
+                                       && new KeelCronExpression(cronExpression).match(calendar)) {
+                                   Class<?> aClass = Class.forName(eventHandlerClassName);
+                                   if (WatchmanEventHandler.class.isAssignableFrom(aClass)) {
+                                       WatchmanEventHandler eventHandler =
+                                               (WatchmanEventHandler) aClass.getConstructor()
+                                                                            .newInstance();
+                                       list.add(eventHandler);
                                    }
-                               });
+                               }
+                           } catch (Throwable e) {
+                               //Keel.outputLogger().exception(e);
+                               System.out.println("EXCEPTION: " + e);
                            }
                        });
                        return Future.succeededFuture(list);

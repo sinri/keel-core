@@ -1,8 +1,11 @@
 package io.github.sinri.keel.core.maids.watchman;
 
 import io.github.sinri.keel.tesuto.KeelJUnit5Test;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
+import io.vertx.core.ThreadingModel;
 import io.vertx.core.json.JsonObject;
+import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxTestContext;
 import org.junit.jupiter.api.Test;
 
@@ -10,11 +13,16 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class CronWatchmanTest extends KeelJUnit5Test {
+    private static final AtomicLong LAST_CRON_WATCHMAN_EVENT = new AtomicLong(-1L);
+
     @Test
     void addCronJobToAsyncMapCanBeReadBack(VertxTestContext testContext) {
         String asyncMapName = "CronWatchmanTest-" + UUID.randomUUID();
@@ -99,6 +107,33 @@ public class CronWatchmanTest extends KeelJUnit5Test {
                  }));
     }
 
+    @Test
+    @Timeout(value = 90, timeUnit = TimeUnit.SECONDS)
+    void deployedCronWatchmanRunsScheduledCronJob(VertxTestContext testContext) {
+        LAST_CRON_WATCHMAN_EVENT.set(-1L);
+        String watchmanName = "CronWatchmanTest-" + UUID.randomUUID();
+
+        CronWatchman cronWatchman = new CronWatchman(
+                watchmanName,
+                asyncMapName -> CronWatchman.addCronJobToAsyncMap(
+                        getKeel(),
+                        asyncMapName,
+                        "* * * * *",
+                        TriggeredTestHandler.class.getName()
+                )
+        );
+
+        getKeel().deployVerticle(cronWatchman, new DeploymentOptions().setThreadingModel(ThreadingModel.WORKER))
+                 .compose(deploymentId -> {
+                     return waitUntilCronWatchmanEventHandled(130)
+                             .eventually(() -> getKeel().undeploy(deploymentId));
+                 })
+                 .onComplete(testContext.succeeding(v -> {
+                     testContext.verify(() -> assertNotEquals(-1L, LAST_CRON_WATCHMAN_EVENT.get()));
+                     testContext.completeNow();
+                 }));
+    }
+
     public static class FirstTestHandler implements WatchmanEventHandler {
         @Override
         public void handle(Long event) {
@@ -109,5 +144,23 @@ public class CronWatchmanTest extends KeelJUnit5Test {
         @Override
         public void handle(Long event) {
         }
+    }
+
+    public static class TriggeredTestHandler implements WatchmanEventHandler {
+        @Override
+        public void handle(Long event) {
+            LAST_CRON_WATCHMAN_EVENT.set(event);
+        }
+    }
+
+    private Future<Void> waitUntilCronWatchmanEventHandled(int attempts) {
+        if (LAST_CRON_WATCHMAN_EVENT.get() != -1L) {
+            return Future.succeededFuture();
+        }
+        if (attempts <= 0) {
+            return Future.failedFuture("CronWatchman did not run the scheduled cron job");
+        }
+        return getKeel().asyncSleep(500L)
+                        .compose(v -> waitUntilCronWatchmanEventHandled(attempts - 1));
     }
 }

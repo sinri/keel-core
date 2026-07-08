@@ -246,13 +246,10 @@ public class CronWatchman extends WatchmanImpl {
 
     @Override
     protected Future<Void> startVerticle() {
-        Future.succeededFuture()
-              .compose(v -> cronTabUpdateStartup.apply(eventBusAddress()))
-              .onFailure(throwable -> {
-                  getWatchmanLogger().error(log -> log.exception(throwable));
-                  undeployMe();
-              });
-        return Future.succeededFuture();
+        return Future.succeededFuture()
+                     .compose(v -> cronTabUpdateStartup.apply(eventBusAddress()))
+                     .compose(v -> super.startVerticle())
+                     .onFailure(throwable -> buildWatchmanLogger().error(log -> log.exception(throwable)));
     }
 
 }

@@ -32,6 +32,19 @@ class ValueWrapper<P> {
         this.death = computeDeath(this.birth, lifeInSeconds);
     }
 
+    /**
+     * Computes the expiration timestamp from a birth timestamp and a positive lifetime in seconds.
+     * <p>
+     * The lifetime must be greater than zero. The calculation is checked in both steps: converting seconds to
+     * milliseconds and adding the result to the birth timestamp. If either step would overflow a {@code long}, this
+     * method rejects the lifetime instead of returning an invalid expiration timestamp.
+     *
+     * @param birth         the birth timestamp in milliseconds
+     * @param lifeInSeconds the positive lifetime in seconds
+     * @return the expiration timestamp in milliseconds
+     * @throws IllegalArgumentException when {@code lifeInSeconds} is not positive, or when the computed expiration
+     *                                  timestamp would overflow
+     */
     static long computeDeath(long birth, long lifeInSeconds) {
         if (lifeInSeconds <= 0) {
             throw new IllegalArgumentException("lifeInSeconds must be greater than 0");

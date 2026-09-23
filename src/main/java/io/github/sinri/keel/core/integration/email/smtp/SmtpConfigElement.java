@@ -2,6 +2,7 @@ package io.github.sinri.keel.core.integration.email.smtp;
 
 import io.github.sinri.keel.base.configuration.ConfigElement;
 import io.github.sinri.keel.base.configuration.NotConfiguredException;
+import io.github.sinri.keel.base.configuration.NotConfiguredRuntimeException;
 import io.vertx.ext.mail.MailConfig;
 import org.jspecify.annotations.NullMarked;
 
@@ -39,7 +40,7 @@ public class SmtpConfigElement extends ConfigElement {
     public int getPort() {
         try {
             return readInteger(List.of("port"));
-        } catch (NotConfiguredException e) {
+        } catch (NotConfiguredRuntimeException e) {
             return 25;
         }
     }
@@ -55,7 +56,7 @@ public class SmtpConfigElement extends ConfigElement {
     public boolean isSSL() {
         try {
             return readBoolean(List.of("ssl"));
-        } catch (NotConfiguredException e) {
+        } catch (NotConfiguredRuntimeException e) {
             return false;
         }
     }

@@ -34,6 +34,7 @@ public abstract class IntravenouslyCutter<T> extends KeelVerticleBase {
     private final AtomicBoolean readStopRef = new AtomicBoolean(false);
     private final LateObject<Throwable> lateStopCause = new LateObject<>();
     // private final AtomicReference<@Nullable Throwable> stopCause = new AtomicReference<>();
+    private final AtomicReference<Throwable> processingFailure = new AtomicReference<>();
     private final long timeout;
     private @Nullable Long timeoutTimer;
 
@@ -43,7 +44,9 @@ public abstract class IntravenouslyCutter<T> extends KeelVerticleBase {
     ) {
         this.bufferRef = new AtomicReference<>(Buffer.buffer());
         this.timeout = timeout;
-        this.intravenous = Intravenous.instant(singleDropProcessor);
+        this.intravenous = Intravenous.instant(drop -> Future.succeededFuture()
+                .compose(v -> singleDropProcessor.process(drop))
+                .onFailure(cause -> processingFailure.compareAndSet(null, cause)));
     }
 
     @Override
@@ -100,6 +103,11 @@ public abstract class IntravenouslyCutter<T> extends KeelVerticleBase {
         }
     }
 
+    /**
+     * 等待所有已切分片段依次处理完毕。处理失败不会阻止后续片段处理。
+     * <p>
+     * 若停止时指定了异常（包括超时），优先返回该异常；否则返回首个处理异常。
+     */
     public final Future<Void> waitForAllHandled() {
         return getKeel().asyncCallRepeatedly(repeatedlyCallTask -> {
                             if (!this.readStopRef.get()) {
@@ -119,7 +127,8 @@ public abstract class IntravenouslyCutter<T> extends KeelVerticleBase {
                             if (lateStopCause.isInitialized()) {
                                 return Future.failedFuture(lateStopCause.get());
                             }
-                            return Future.succeededFuture();
+                            Throwable failure = processingFailure.get();
+                            return failure == null ? Future.succeededFuture() : Future.failedFuture(failure);
                         });
     }
 
